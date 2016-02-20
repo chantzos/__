@@ -1,0 +1,55 @@
+class Assoc
+  def new (dtype, keys, values)
+    variable def = qualifier ("default");
+    variable a = NULL == def ? Assoc_Type[dtype] : Assoc_Type[dtype, def];
+
+    if (NULL == keys)
+      return a;
+
+    variable dtps = Array.map (DataType_Type, &typeof, {keys, values});
+    variable len = 0;
+    variable llen;
+    variable i;
+
+    _for i (0, length (dtps) - 1)
+      if (any ([Array_Type, List_Type] == dtps[i]))
+        ifnot (len)
+          len = length ({keys, values}[i]);
+        else
+          {
+          llen = length (values);
+
+          ifnot (llen == len)
+            throw ClassError, "AssocNewInvalidParmError::keys and values are of different length";
+
+          len = llen;
+          }
+
+    ifnot (any ([Array_Type, List_Type] == dtps[0]))
+      if (any ([Array_Type, List_Type] == dtps[1]))
+        if (len > 1)
+          throw ClassError, "AssocNewInvalidParmError::keys and values are of different length";
+
+    variable v;
+
+    do
+      {
+      v = (any ([Array_Type, List_Type] == dtps[1])) ? values[len - 1] : values;
+
+      ifnot (typeof (v) == dtype)
+        ifnot (Any_Type == dtype)
+          throw ClassError, "InvalidParmError::expecting " + string (dtype) + ", got " +
+            string (typeof (v));
+
+      if (any ([Array_Type, List_Type] == dtps[0]))
+        a[keys[len - 1]] = v;
+      else
+        a[keys] = v;
+
+      len--;
+      }
+    while (len);
+
+    a;
+  end
+end

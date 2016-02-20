@@ -1,0 +1,38 @@
+class Exc
+  def isnot (exc)
+    NULL == exc || Struct_Type != typeof (exc) ||
+    NULL == wherefirst (get_struct_field_names (exc) == "object") ||
+    8 != length (get_struct_field_names (exc));
+  end
+
+  def print (exc)
+    if (0 == self.isnot (exc) ||
+       (0 == (exc = __get_exception_info, self.isnot (exc))))
+     IO.tostderr (self.fmt (exc));
+
+    while (self.isnot (exc) == 0 == self.isnot (exc.object))
+      {
+      IO.tostderr (self.fmt (exc.object));
+      exc = exc.object;
+      }
+  end
+
+  def fmt (exc)
+    if (NULL == exc)
+      exc = __get_exception_info;
+
+    if (self.isnot (exc))
+      exc = struct {error = 0, description = "", file = "", line = 0, function = "", object, message = "",
+      Exception = "No exception in the stack"};
+
+    strchop (sprintf ("Exception: %s\n\
+Message:     %s\n\
+Object:      %S\n\
+Function:    %s\n\
+Line:        %d\n\
+File:        %s\n\
+Description: %s\n\
+Error:       %d",
+    _push_struct_field_values (exc)), '\n', 0);
+  end
+end

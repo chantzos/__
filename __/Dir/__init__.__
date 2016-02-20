@@ -1,0 +1,14 @@
+class Dir
+  def isdirectory (dir)
+    if (-1 == access (dir, F_OK))
+    return 0;
+
+    Path.istype ("dir", dir);
+  end
+
+  fun __isdirectory (dir, st)
+  end
+
+  fun make (dir, perm)
+  end
+end
