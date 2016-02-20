@@ -55,7 +55,7 @@ static variable
   ESC_esc = 0x1001a,
   ESC_q = 0x10070;
 
-ifnot (strncmp ("st-", var->get ("TERM"), 3))
+ifnot (strncmp ("st-", Env->TERM, 3))
   {
   END = 0x10c;
   NPAGE = 0x10d;

@@ -268,7 +268,7 @@ private define parse_arg (arg)
   arg, value;
 }
 
-define cmdopt_process (opts, argv, istart)
+private define cmdopt_process (opts, argv, istart)
 {
   variable iend = length (argv);
   variable i = istart;

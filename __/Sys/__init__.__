@@ -1,27 +1,31 @@
 class Sys
   let MACHINE = uname.machine;
   let OS = uname.sysname;
- 
-  fun checkperm (mode, perm)
+
+  def checkperm (mode, perm)
+    Sys.modetoint (mode) == perm ? 0 : -1;
   end
 
-  fun setperm (file, perm)
+  def setperm (file, perm)
+    if (-1 == chmod (file, perm))
+      {
+      IO.tostderr ("couldn't set permissions,", errno_string (errno));
+      return -1;
+      }
+    0;
   end
 
-  fun modetoint (mode)
-  end
+  def modetoint (mode)
+    variable
+      S_ISUID = 04000,    % Set user ID on execution
+      S_ISGID = 02000,    % Set group ID on execution
+      S_ISVTX = 01000,    % Save swapped text after use (sticky)
+      CHMOD_MODE_BITS =  (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
 
-  fun getgrname (gid)
+    atoi (sprintf ("%d", mode & CHMOD_MODE_BITS));
   end
-
-  fun getpwname (uid)
-  end
-
-  fun getpwuidgid (user)
-  end
-
   def which (exec)
-    variable ar, path = Path.vget ("OS");
+    variable ar, path = Path->OS;
 
     if (NULL == path)
       return NULL;
@@ -37,4 +41,13 @@ class Sys
     else
       NULL;
    end
+
+  fun getgrname (gid)
+  end
+
+  fun getpwname (uid)
+  end
+
+  fun getpwuidgid (user)
+  end
 end
