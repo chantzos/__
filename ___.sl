@@ -9,7 +9,7 @@ private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
 private variable
   CC = "gcc";
 private variable
-  MODULES = ["I", "getkey", "slsmg", "socket", "fork", "pcre", "rand"];
+  MODULES = ["__", "getkey", "slsmg", "socket", "fork", "pcre", "rand"];
 private variable
   FLAGS = ["-lm -lpam", "", "", "", "", "-lpcre", ""];
 private variable
@@ -20,15 +20,24 @@ private variable
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
 
+private variable THESE = Assoc_Type[String_Type];
+
+THESE["__me__"] = `public variable This = Progr_Init ("__INSTALL__";` +
+    `shell = 0, smg = 0, ved = 0, err_handler = NULL, at_exit = NULL, exit = NULL);`;
+THESE["__"] = `public variable This = Progr_Init ("__");`;
+THESE["__COMMAND__"] = `public variable This = Progr_Init ("__COMMAND__";` +
+    `shell = 0, smg = 0, ved = 0);`;
+THESE["__APP__"] = `public variable This = Progr_Init ("__APP__");`;
+
 private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
 private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
 private variable DEBUG = any ("--debug" == __argv);
 
-public variable Input, Smg, This, io;
+public variable This, io;
 
 private define exit_me (self, msg, code)
 {
-  This.at_exit ();
+  self.at_exit ();
 
   ifnot (NULL == msg)
     (@(code ? io.tostderr : io.tostdout)) (io, msg);
@@ -38,31 +47,12 @@ private define exit_me (self, msg, code)
 
 private define at_exit (self)
 {
-  if (__is_initialized (&Input))
-    Input.at_exit ();
-
-  if (__is_initialized (&Smg))
-    Smg.at_exit ();
 }
 
 private define err_handler (self, s)
 {
-  This.exit (NULL, 1);
+  self.exit (NULL, 1);
 }
-
-public variable This = struct
-  {
-  isatty = isatty (_fileno (stdin)),
-  smg = 0,
-  err_handler = &err_handler,
-  stderr_fn,
-  stderr_fd,
-  stdout_fn,
-  stdout_fd,
-  at_exit = &at_exit,
-  exit = &exit_me,
-  rootdir
-  };
 
 public define __use_namespace (ns)
 {
@@ -244,11 +234,11 @@ private define __build_module__ (i)
 }
 
 if (VERBOSE)
-  io.tostdout ("compiling " + SRC_C_PATH + "/I-module.c");
+  io.tostdout ("compiling " + SRC_C_PATH + "/__-module.c");
 
 __build_module__ (0);
 
-import (SRC_TMP_PATH + "/I", "Global");
+import (SRC_TMP_PATH + "/__", "Global");
 
 SRC_PATH       = realpath (SRC_PATH);
 SRC_TMP_PATH   = realpath (SRC_TMP_PATH);
@@ -264,15 +254,20 @@ private variable USER_DATA_PATH = ROOT_PATH + "/usr/data";
 private variable LIB_SLANG_PATH = LIB_PATH + "/__";
 private variable LIB_C_PATH     = LIB_PATH + "/C";
 private variable LIB_DATA_PATH  = LIB_PATH + "/data";
+private variable LIB_APP_PATH   = LIB_PATH + "/app";
+private variable LIB_COM_PATH   = LIB_PATH + "/com";
 
 private variable SRC_PROTO_PATH = SRC_PATH + "/_";
 private variable SRC_SLANG_PATH = SRC_PATH + "/__";
 private variable SRC_C_PATH     = SRC_PATH + "/C";
+private variable SRC_APP_PATH   = SRC_PATH + "/app";
+private variable SRC_COM_PATH   = SRC_PATH + "/com";
 
 private variable INST_PATHS = [
   ROOT_PATH, LIB_PATH, TMP_PATH, BIN_PATH,
   USER_PATH, USER_DATA_PATH,
-  LIB_SLANG_PATH, LIB_C_PATH, LIB_DATA_PATH];
+  LIB_SLANG_PATH, LIB_C_PATH, LIB_DATA_PATH,
+  LIB_APP_PATH, LIB_COM_PATH];
 
 private define __eval__ (__buf__)
 {
@@ -311,7 +306,7 @@ private define __bytecompile__ (__sl__)
     }
 }
 
-private define __read___ ()
+private define __read___ (this)
 {
   variable __buf__ =
 `private variable CLASSPATH = realpath (
@@ -325,29 +320,35 @@ private define __read___ ()
   __buf__ += readfile (SRC_PROTO_PATH + "/__slang.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__alfa.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__vita.sl");
+  __buf__ += this + "\n\n";
   __buf__ += readfile (SRC_PROTO_PATH + "/__.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__gama.sl");
   __buf__;
 }
 
-private define __ ()
+private define __me__ ()
 {
-  variable __buf__ = __read___;
-
-  writefile (SRC_TMP_PATH + "/__.sl", __buf__);
-
-  __bytecompile__ (SRC_TMP_PATH + "/__.sl");
-
+  variable __buf__ = __read___ (THESE["__me__"]);
   () = chdir (SRC_SLANG_PATH);
   __eval__  (__buf__);
   () = chdir (SRC_PATH);
 }
 
+private define __ ()
+{
+  variable __buf__ = __read___ (THESE["__"]);
+  __buf__ += `Class.load ("Input");`;
+
+  writefile (SRC_TMP_PATH + "/__.sl", __buf__);
+
+  __bytecompile__ (SRC_TMP_PATH + "/__.sl");
+}
+
 private define __read_com__ ()
 {
   variable __buf__ =  "";
-  __buf__ += readfile (SRC_PROTO_PATH + "/__com_alfa.sl");
-  __buf__ += __read___;
+  __buf__ += __read___ (THESE["__COMMAND__"]);
+  __buf__ += `Class.load ("Input");` + "\n";
   __buf__ += readfile (SRC_PROTO_PATH + "/__com.sl");
   __buf__;
 }
@@ -361,22 +362,48 @@ private define __com__ ()
   __bytecompile__ (SRC_TMP_PATH + "/__com.sl");
 }
 
+private define __read_app__ ()
+{
+  variable __buf__ =  "";
+  __buf__ += __read___ (THESE["__APP__"]);
+  __buf__ += `Class.init ("Input");` + "\n" +
+   `Class.init ("Smg");` + "\n";
+  __buf__ += readfile (SRC_PROTO_PATH + "/__app.sl");
+  __buf__;
+}
+
+private define __app__ ()
+{
+  variable __buf__ =  __read_app__;
+
+  writefile (SRC_TMP_PATH + "/__app.sl", __buf__);
+
+  __bytecompile__ (SRC_TMP_PATH + "/__app.sl");
+}
+
 private variable LIBS = Assoc_Type[Ref_Type];
 
+LIBS["__me__"] = &__me__;
 LIBS["__"] = &__;
 LIBS["__com__"] = &__com__;
+LIBS["__app__"] = &__app__;
 
-private variable BYTECOMPILED = ["__", "__com"];
+private variable BYTECOMPILED = ["__", "__com", "__app"];
 
 private define __build__ (l)
 {
   (@LIBS[l]);
 }
 
-if (VERBOSE)
-  io.tostdout ("bytecompiling __");
+__use_namespace ("Smg");
+static define COLOR ();
 
-__build__ ("__");
+__use_namespace ("Install");
+__build__ ("__me__");
+
+This.exit = &exit_me;
+This.err_handler = &err_handler;
+This.at_exit = &at_exit;
 
 private define __build_app__ ();
 private define __build_root__ ();
@@ -417,14 +444,14 @@ private define __install_bytecompiled__ ()
 }
 
 private variable exclude_dirs = [".git", "dev", "C"];
-private variable exclude_files = ["__.sl", "README.md", "COPYING", "install.sl"];
+private variable exclude_files = ["README.md", "___.sl"];
 
-private define lib_dir_callback (dir, st)
+private define lib_dir_callback (dir, st, src_path, dest_path)
 {
   if (any (exclude_dirs == path_basename (dir)))
     return 0;
 
-  if (-1 == Dir.make (strreplace (dir, SRC_SLANG_PATH, LIB_SLANG_PATH), 0755))
+  if (-1 == Dir.make (strreplace (dir, src_path, dest_path), 0755))
     This.exit ("can't make directory", 1);
 
   1;
@@ -432,7 +459,7 @@ private define lib_dir_callback (dir, st)
 
 private variable BYTECOMPILED_LIBS = [""];
 
-private define file_callback_libs (file, st)
+private define file_callback_libs (file, st, src_path, dest_path)
 {
   if (any (exclude_files == path_basename (file)))
     return 1;
@@ -440,7 +467,7 @@ private define file_callback_libs (file, st)
   if (any (BYTECOMPILED_LIBS == path_basename_sans_extname (file)))
     {
     variable bytecompiled = file + "c";
-    variable dest = strreplace (bytecompiled, SRC_SLANG_PATH, LIB_SLANG_PATH);
+    variable dest = strreplace (bytecompiled, src_path, dest_path);
 
     __bytecompile__ (file);
 
@@ -451,11 +478,59 @@ private define file_callback_libs (file, st)
     return 1;
     }
 
-  dest = strreplace (file, SRC_SLANG_PATH, LIB_SLANG_PATH);
+  dest = strreplace (file, src_path, dest_path);
 
   File.copy (file, dest);
 
   1;
+}
+
+private define __scripts_dir_callback__ (dir, st)
+{
+  variable com = path_basename (dir);
+
+  ifnot (strlen (com))
+    return 1;
+
+  if (-1 == symlink ("__com.sl", "__" + com))
+    if (EEXIST == errno && readlink ("__" + com) == "__com.sl")
+      return 1;
+    else
+      This.exit ("Couldn't create symbolic link " +  errno_string (errno), 1);
+
+  1;
+}
+
+private define __install_scripts__ ()
+{
+  () = chdir (BIN_PATH);
+  variable scr = `#!` + BIN_PATH + "/__slsh\n\n" +
+    `if ("__com.sl" == path_basename (__argv[0]))
+  {
+  () = fprintf (stderr, "you cannot call directly this script\n");
+  exit (1);
+  }` + "\n\n" +
+  `variable ROOTPATH = (ROOTPATH = path_concat (getcwd (), path_dirname (__FILE__)),
+  ROOTPATH[[-2:]] == "/."
+  ? substr (ROOTPATH, 1, strlen (ROOTPATH) - 2)
+  : ROOTPATH);
+
+ROOTPATH = realpath (ROOTPATH + "/..");
+
+() = evalfile (ROOTPATH + "/lib/__/__com");`;
+
+  variable fp = fopen (BIN_PATH + "/__com.sl", "w");
+  () = fprintf (fp, "%s\n", scr);
+  () = fflush (fp);
+  () = fclose (fp);
+
+  if (-1 == chmod (BIN_PATH + "/__com.sl", 0755))
+    This.exit ("cannot change mode to " + BIN_PATH + "/__com.sl " +
+      errno_string (errno), 1);
+
+  Path.walk (SRC_COM_PATH + "/", &__scripts_dir_callback__, NULL);
+
+  () = chdir (SRC_PATH);
 }
 
 private define __main__ ()
@@ -466,9 +541,19 @@ private define __main__ ()
     Dir.make (INST_PATHS[i], File->PERM["_PUBLIC"]);
 
   if (VERBOSE)
+    io.tostdout ("bytecompiling __");
+
+  __build__ ("__");
+
+  if (VERBOSE)
     io.tostdout ("bytecompiling __com");
 
   __build__ ("__com__");
+
+  if (VERBOSE)
+    io.tostdout ("bytecompiling __app");
+
+  __build__ ("__app__");
 
   if (VERBOSE)
     io.tostdout ("compiling " + SRC_C_PATH + "/__slsh.c");
@@ -500,7 +585,18 @@ private define __main__ ()
   if (VERBOSE)
     io.tostdout ("installing libraries");
 
-  Path.walk (SRC_SLANG_PATH, &lib_dir_callback, &file_callback_libs);
+  Path.walk (SRC_SLANG_PATH, &lib_dir_callback, &file_callback_libs;
+    dargs = {SRC_SLANG_PATH, LIB_SLANG_PATH},
+    fargs = {SRC_SLANG_PATH, LIB_SLANG_PATH});
+
+  if (VERBOSE)
+    io.tostdout ("installing commands");
+
+  Path.walk (SRC_COM_PATH, &lib_dir_callback, &file_callback_libs;
+    dargs = {SRC_COM_PATH, LIB_COM_PATH},
+    fargs = {SRC_COM_PATH, LIB_COM_PATH});
+
+  __install_scripts__;
 
   This.exit ("installation completed", 0);
 }

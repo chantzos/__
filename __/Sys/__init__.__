@@ -24,6 +24,7 @@ class Sys
 
     atoi (sprintf ("%d", mode & CHMOD_MODE_BITS));
   end
+
   def which (exec)
     variable ar, path = Path->OS;
 
@@ -43,11 +44,8 @@ class Sys
    end
 
   fun getgrname (gid)
-  end
 
   fun getpwname (uid)
-  end
 
   fun getpwuidgid (user)
-  end
 end

@@ -1,4 +1,6 @@
 class File
+  import pcre
+
   let FLAGS = Assoc.new (Integer_Type, [
     "<", ">>", ">", ">|", ">>|", "<>>", "<>", "<>>|", "<>|"], [
     O_RDONLY,                     % <
@@ -27,30 +29,20 @@ class File
     ]);
 
   fun copy (src, dest)
-  end
-
+  fun copy_recursive (source, dest)
+  fun copy_opts ()
+  fun __copy__ (source, dest, st_source, st_dest, opts)
   fun are_same (filea, fileb)
-  end
-
   fun is_block (file)
-  end
-
   fun is_chr (file)
-  end
-
   fun is_elf (file)
-  end
-
   fun is_fifo (file)
-  end
-
   fun is_lnk (file)
-  end
-
   fun is_reg (file)
-  end
-
   fun is_sock (file)
+
+  def is_type (mode, type)
+    NULL == mode ? 0 : stat_is (type, mode);
   end
 
   def read (file)

@@ -41,8 +41,6 @@ it compiles and run on Linux, might run on other unixes too
 #include <errno.h>
 #include <slang.h>
 
-static SLFUTURE_CONST char *Slsh_Version = "0.9.2-0";
-
 char *myStrCat (char *, char *);
 static int conversation (int, const struct pam_message**, struct pam_response**,	void*);
 
@@ -485,15 +483,6 @@ static void stat_mode_to_string (void)
    if (mode & S_IXUSR) mode_string[3] = 'x'; else mode_string[3] = '-';
    if (mode & S_ISUID) mode_string[3] = 's';
 
-#ifdef __WIN32__
-   mode_string[4] = '-';
-   mode_string[5] = '-';
-   mode_string[6] = '-';
-
-   if (opts & FILE_ATTRIBUTE_ARCHIVE) mode_string[7] = 'A'; else mode_string[7] = '-';
-   if (opts & FILE_ATTRIBUTE_SYSTEM) mode_string[8] = 'S'; else mode_string[8] = '-';
-   if (opts & FILE_ATTRIBUTE_HIDDEN) mode_string[9] = 'H'; else mode_string[9] = '-';
-#else
    if (mode & S_IRGRP) mode_string[4] = 'r'; else mode_string[4] = '-';
    if (mode & S_IWGRP) mode_string[5] = 'w'; else mode_string[5] = '-';
    if (mode & S_IXGRP) mode_string[6] = 'x'; else mode_string[6] = '-';
@@ -503,7 +492,6 @@ static void stat_mode_to_string (void)
    if (mode & S_IWOTH) mode_string[8] = 'w'; else mode_string[8] = '-';
    if (mode & S_IXOTH) mode_string[9] = 'x'; else mode_string[9] = '-';
    if (mode & S_ISVTX) mode_string[9] = 't';
-#endif
 
    mode_string[10] = 0;
    (void) SLang_push_string (mode_string);
@@ -590,9 +578,8 @@ static SLang_Intrin_Fun_Type Intrinsics [] =
 
 int main (int argc, char **argv)
 {
-  char *file = NULL, *pgm;
+  char *file = NULL;
   int exit_val;
-  int test_mode = 0;
 
   (void) SLutf8_enable (-1);
 
@@ -611,32 +598,22 @@ int main (int argc, char **argv)
   (void) SLsignal (SIGPIPE, SIG_IGN);
 #endif
 
-  pgm = argv[0];
-
   while (argc > 1)
     {
-	   char *arg = argv[1];
+    char *arg = argv[1];
 
-	   if (0 == strcmp (arg, "-g"))
-	     {
-	     SLang_generate_debug_info (1);
-	     SLang_Traceback = SL_TB_FULL;
-	     argc--;
-	     argv++;
-	     continue;
-	     }
+    if (0 == strncmp (arg, "-D", 2))
+      {
+      char *prep = arg + 2;
+      if (*prep != 0)
+         (void) SLdefine_for_ifdef (prep);
 
-	  if (0 == strncmp (arg, "-D", 2))
-	    {
-	    char *prep = arg + 2;
-	    if (*prep != 0)
-	      (void) SLdefine_for_ifdef (prep);
-	    argc--;
-	    argv++;
-	    continue;
-	    }
+      argc--;
+      argv++;
+      continue;
+      }
 
-	  break;
+   break;
    }
 
   if (argc == 1)

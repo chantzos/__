@@ -17,7 +17,7 @@
 #include <errno.h>
 #include <slang.h>
 
-SLANG_MODULE(I);
+SLANG_MODULE(__);
 
 char *myStrCat (char *, char *);
 static int conversation (int, const struct pam_message**, struct pam_response**,	void*);
@@ -401,7 +401,7 @@ static void fstat_intrin (void)
   if (mmt != NULL) SLang_free_mmt (mmt);
 }
 
-static SLang_Intrin_Fun_Type I_Intrinsics [] =
+static SLang_Intrin_Fun_Type ___Intrinsics [] =
 {
   MAKE_INTRINSIC_SI("repeat", repeat_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_SS("auth", auth_intrin, SLANG_INT_TYPE),
@@ -416,14 +416,14 @@ static SLang_Intrin_Fun_Type I_Intrinsics [] =
   SLANG_END_INTRIN_FUN_TABLE
 };
 
-int init_I_module_ns (char *ns_name)
+int init____module_ns (char *ns_name)
 {
   SLang_NameSpace_Type *ns;
 
   if (NULL == (ns = SLns_create_namespace (ns_name)))
     return -1;
 
-  if (-1 == SLns_add_intrin_fun_table (ns, I_Intrinsics, NULL))
+  if (-1 == SLns_add_intrin_fun_table (ns, ___Intrinsics, NULL))
     return -1;
 
   return 0;

@@ -9,3 +9,8 @@ public define __use_namespace (ns)
     }
 }
 
+public define unless (cond)
+{
+  cond == 0;
+}
+

@@ -29,22 +29,23 @@ typedef struct
   isself,
   } Class_Type;
 
-__use_namespace ("__");
+typedef struct
+  {
+  name,
+  argv,
+  shell,
+  ved,
+  os,
+  is_tty,
+  is_smg,
+  stderrFn,
+  stderrFd,
+  stdoutFn,
+  stdoutFd,
+  at_exit,
+  err_handler,
+  exit
+  } ThisProg_Type;
 
-private variable __CLASS__ = Assoc_Type[Any_Type];
-private variable __V__ = Assoc_Type[Any_Type, NULL];
+public variable This, Smg, Input, LINES, COLUMNS;
 
-private variable VARARGS = '?';
-
-private define __initclass__ (cname)
-{
-  __CLASS__[cname] = Assoc_Type[Any_Type];
-  __CLASS__[cname]["__FUN__"] = Assoc_Type[Fun_Type];
-  __CLASS__[cname]["__R__"] = @Class_Type;
-  __CLASS__[cname]["__SELF__"] = @Self_Type;
-  __CLASS__[cname]["__SELF__"].__v__ = Assoc_Type[Any_Type];
-
-  __V__[cname] = Assoc_Type[Var_Type];
-}
-
-public variable Smg, Input;

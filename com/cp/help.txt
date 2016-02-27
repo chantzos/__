@@ -1,0 +1,31 @@
+ SYNOPSIS
+  cp file[s]
+
+ USAGE
+  usage cp [options] file[s]
+
+ DESCRIPTION
+  cp file[s] or directories recursively
+
+ OPTIONS
+
+  --all             Preserve permissions
+  --backup          Make backups
+  --force           If destination is not writable, remove it and try again
+  --suffix          Overrides the default backup suffix (~)
+  --dereference     No dereference (preserve) symbolic links
+  --ask             Prompt before overwrite
+  --no-clobber      Do not overwrite an existing file (overrides a previus --ask option)
+  --update          Copy only if source file is newer than destination
+  -r,--recursive    Copy directories recursively
+  --maxdepth        Descend at most `levels' of directories (turns on recursive)
+  --parents         Use full source file under destination (create dirs if neccecary)
+  --ignoredir       Ignore director[y,ies] (can be repeated)
+  --ignore          Ignore files that match pcre pattern
+  --match           Copy only files that match pcre pattern
+  --nothidden       Do not copy hidden files (yes by default)
+  -v,--verbose      Be verbose
+  --help            Show help
+ 
+  NOTES
+    Special files (block, fifo, character, socket) are not copied

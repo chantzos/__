@@ -9,4 +9,23 @@ class Env
   let SLSH_LIB_DIR = get_slang_load_path ();
   let SLANG_MODULE_PATH = get_import_module_path ();
   let IS_SU_PROC = getuid == 0;
+  let ROOT_PATH      = __tmp (&$0);
+  let SRC_PATH       = ROOT_PATH + "/__";
+  let LIB_PATH       = ROOT_PATH + "/lib";
+  let TMP_PATH       = ROOT_PATH + "/tmp";
+  let BIN_PATH       = ROOT_PATH + "/bin";
+  let USER_PATH      = ROOT_PATH + "/usr";
+  let USER_DATA_PATH = ROOT_PATH + "/usr/data";
+
+  let APP_PATH       = LIB_PATH + "/app";
+  let COM_PATH       = LIB_PATH + "/com";
+  let LIB_SLANG_PATH = LIB_PATH + "/__";
+  let LIB_C_PATH     = LIB_PATH + "/C";
+  let LIB_DATA_PATH  = LIB_PATH + "/data";
+
+  let SRC_PROTO_PATH = SRC_PATH + "/_";
+  let SRC_SLANG_PATH = SRC_PATH + "/__";
+  let SRC_C_PATH     = SRC_PATH + "/C";
+  let SRC_APP_PATH   = SRC_PATH + "/app";
+  let SRC_COM_PATH   = SRC_PATH + "/com";
 end

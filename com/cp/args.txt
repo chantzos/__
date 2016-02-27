@@ -1,0 +1,18 @@
+--all         void         Preserve permissions
+--backup      void         Make backups
+--force       void         If destination is not writable, remove it and try again
+--suffix=     string       Overrides the default backup suffix (~)
+--dereference void         No dereference (preserve) symbolic links
+--interactive void         Prompt before overwrite
+--no-clobber  void         Do not overwrite an existing file (overrides a previus --ask option)
+--update      void         Copy only if source file is newer than destination
+--recursive   void         Copy directories recursively
+--maxdepth=   int          Descend at most `levels' of directories (turns on recursive)
+--parents     void         Use full source file under destination (create dirs if neccecary)
+--ignoredir=  string       Ignore director[y,ies] (can be repeated)
+--ignore=     pcrepattern  Ignore files that match pattern
+--match=      pcrepattern  Copy only files that match pattern
+--nothidden   void         Do not copy hidden files (yes by default)
+--verbose     void         Be verbose
+--help        void         Show help
+--info        void         Show information about the application

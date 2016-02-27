@@ -1,0 +1,37 @@
+class Load
+  var IMPORTED = Assoc_Type[Integer_Type, 0];
+
+  def module (?)
+  variable ns = NULL, module;
+
+  switch (_NARGS)
+    {
+    case 3: ns = (); module = (); pop ();
+    }
+
+    {
+    case 2: module = (); pop ();
+    }
+
+    {
+    loop (_NARGS) pop ();
+    throw ClassError, "Load::__import_module__::NumArgsError, it should be 2 or 3";
+    }
+
+  if (NULL == ns)
+    ns = "Global";
+
+  if (String_Type != typeof (module) || String_Type != typeof (ns))
+    throw ClassError, "Load::__import_module__::ArgsTypeError, it should be String_Type";
+
+  if (IMPORTED[ns + "->" + module])
+    return;
+
+  try
+    import (module, ns);
+  catch ImportError:
+    throw ClassError, "Load::__import_module__::ImportError", __get_exception_info;
+
+  IMPORTED[ns + "->" + module] = 1;
+  end
+end

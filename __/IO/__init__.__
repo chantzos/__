@@ -1,13 +1,9 @@
 class IO
   fun ask (quest_ar, ar)
-  end
 
   fun tostderr (?) muttable
-  end
 
   fun tostdout (?) muttable
-  end
 
   fun open_fn (fname)
-  end
 end

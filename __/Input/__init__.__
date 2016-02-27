@@ -1,0 +1,258 @@
+class Input
+  import getkey Input
+
+  let BSLASH = 0x2f;
+  let QMARK = 0x3f;
+  let UP = 0x101;
+  let DOWN = 0x102;
+  let LEFT = 0x103;
+  let RIGHT = 0x104;
+  let REDO = 0x10E;
+  let UNDO = 0x10F;
+  let BACKSPACE = 0x110;
+  let IC = 0x112;
+  let DELETE = 0x113;
+  let F1 = 0x201;
+  let F2 = 0x202;
+  let F3 = 0x203;
+  let F4 = 0x204;
+  let F5 = 0x205;
+  let F6 = 0x206;
+  let F7 = 0x207;
+  let F8 = 0x208;
+  let F9 = 0x209;
+  let F10 = 0x20a;
+  let F11 = 0x20b;
+  let F12 = 0x20c;
+  let CTRL_a = 0x1;
+  let CTRL_b = 0x2;
+  let CTRL_d = 0x4;
+  let CTRL_e = 0x5;
+  let CTRL_f = 0x6;
+  let CTRL_h = 0x8;
+  let CTRL_j = 0xa;
+  let CTRL_k = 0xb;
+  let CTRL_l = 0xc;
+  let CTRL_n = 0xe;
+  let CTRL_o = 0xf;
+  let CTRL_p = 0x10;
+  let CTRL_r = 0x12;
+  let CTRL_t = 0x14;
+  let CTRL_u = 0x15;
+  let CTRL_v = 0x16;
+  let CTRL_w = 0x17;
+  let CTRL_x = 0x18;
+  let CTRL_y = 0x19;
+  let CTRL_z = 0x1a;
+  let CTRL_BSLASH = 0x1c;
+  let CTRL_BRACKETRIGHT = 0x1d;
+  let ESC_esc = 0x1001a;
+  let ESC_q = 0x10070;
+
+  let PPAGE = strncmp ("st-", Env->TERM, 3) ? 0x105 : 0x10a;
+  let NPAGE = strncmp ("st-", Env->TERM, 3) ? 0x106 : 0x10d;
+  let HOME = strncmp ("st-", Env->TERM, 3) ? 0x107 : 0x109;
+  let END = strncmp ("st-", Env->TERM, 3) ? 0x108 : 0x10c;
+
+  let rmap = struct
+    {
+    osappnew = [F2, 0x10065], % Esc_f
+    osapprec = [F1, 0x1006f], % Esc_p
+    windmenu = [F3, 0x10076], % Esc_w
+    battery = [F9, 0x10061],  % Esc_b
+    changelang = [F10, 0x1006b], % Esc_l
+    home = [HOME, CTRL_a],
+    end = [END, CTRL_e],
+    left = [LEFT, CTRL_b],
+    right = [RIGHT, CTRL_f],
+    backspace = [BACKSPACE, CTRL_h, 0x07F],
+    delete = [DELETE],
+    delword = [CTRL_w],
+    deltoend = [CTRL_u],
+    % last components in previous commands
+    lastcmp = [0xae, 0x1f], % ALT + . (not supported from all terms), CTRL + _
+    % keep the command line, execute another and re-enter the keep'ed command
+    lastcur = [ESC_q],
+    histup = [CTRL_r, UP],
+    histdown = [DOWN],
+    };
+
+  var esc_pend = 2;
+  var curlang = 0;
+  var getchar_lang;
+  var maps = Ref_Type[2];
+  var TTY_INITED = 0;
+
+  def el_getch () proc
+    variable
+      esc_key = qualifier ("esc_key", 033),
+      chr,
+      index,
+      vowel,
+      el =  [[913:929:1], [931:937:1],[945:969:1],';',':'],
+      eng = [
+      'A','B','G','D','E','Z','H','U','I','K','L','M','N','J','O','P','R','S','T','Y',
+      'F','X','C','V',
+      'a','b','g','d','e','z','h','u','i','k','l','m','n','j','o','p','r','w', 's','t',
+      'y','f','x','c','v','q','Q'],
+      accent_vowels = ['ά','έ','ή','ί','ό','ύ','ώ','΄','Ά','Έ','Ό','Ί','Ώ','Ύ','Ή'],
+      vowels_in_eng = ['a','e','h','i','o','y','v',';','A','E','O','I','V','Y','H'],
+      ais = ['ϊ', 'ΐ', '¨'],
+      ais_eng = ['i', ';', ':'];
+
+    while (0 == input_pending (1));
+
+    chr = getkey ();
+
+    if (chr == esc_key)
+      if (0 == input_pending (esc_pend))
+  	    return esc_key;
+      else
+        chr = getkey () + 65535;
+
+    if (';' == chr)
+      {
+      while (0 == input_pending (1));
+      vowel = getkey ();
+      index = wherefirst_eq (vowels_in_eng, vowel);
+      if (NULL == index)
+        return -1;
+      else
+        chr = accent_vowels[index];
+      }
+    else if (':' == chr)
+      {
+      while (0 == input_pending (1));
+      vowel = getkey ();
+      index = wherefirst_eq (ais_eng, vowel);
+      if (NULL == index)
+        return -1;
+      else
+        chr = ais[index];
+      }
+    else
+      {
+      index = wherefirst_eq (eng, chr);
+      ifnot (NULL == index)
+        chr = el[index];
+      }
+
+    chr;
+  end
+
+  def en_getch () proc
+    variable
+      esc_key = qualifier ("esc_key", 033),
+      chr;
+
+    while (0 == input_pending (1))
+      continue;
+
+    chr = getkey ();
+
+    if (chr == esc_key)
+      if (0 == input_pending (esc_pend))
+  	    return esc_key;
+      else
+        chr = getkey () + 65535;
+
+    chr;
+  end
+
+  def toggle_map () proc
+    curlang = curlang == length (maps) - 1 ? 0 : curlang + 1;
+    maps[curlang];
+  end
+
+  def is_tty_inited ()
+    TTY_INITED;
+  end
+
+  def __getch () proc
+    ifnot (TTY_INITED)
+      {
+      init_tty (-1, 0, 0);
+      TTY_INITED = @(__get_reference ("Input->TTY_Inited"));
+      }
+
+    esc_pend = qualifier ("esc_pend", 2);
+
+    variable chr = (@getchar_lang) (;;__qualifiers ());
+    while (any ([-1, 0] == chr))
+      chr = (@getchar_lang) (;;__qualifiers ());
+
+    if (any (rmap.changelang == chr))
+      if (qualifier_exists ("disable_langchange"))
+        chr;
+      else
+        {
+        getchar_lang = toggle_map ();
+
+        variable callbackf = qualifier ("on_lang");
+        variable args = qualifier ("on_lang_args");
+
+        ifnot (NULL == callbackf)
+          ifnot (NULL == args)
+            (@callbackf) (__push_list (args));
+          else
+            (@callbackf);
+
+        Input.getch ();
+        }
+    else
+      chr;
+  end
+
+  def __tty_getch () proc
+    variable ch;
+    () = system ("stty raw");
+    () = fread_bytes (&ch, 1, stdin);
+    () = system ("stty sane");
+    ch[0];
+  end
+
+  def getch ()
+    (@[&__tty_getch, &__getch][TTY_INITED]) ();
+  end
+
+  def get_en_lang ()
+    &en_getch;
+  end
+
+  def get_el_lang ()
+    &el_getch;
+  end
+
+  def getmapname ()
+    strup (substr (string (maps[curlang]), 2, 2));
+  end
+
+  def getlang ()
+    maps[curlang];
+  end
+
+  def setlang (lang)
+    variable m = array_map (String_Type, &string, maps);
+    m = array_map (String_Type, &substr, m, 2, 2);
+    variable i = where (m == lang);
+
+    if (NULL == i)
+      return;
+
+    getchar_lang = maps[i[0]];
+    curlang = i[0];
+  end
+
+  def at_exit ()
+    if (TTY_INITED)
+      reset_tty ();
+
+    TTY_INITED = @(__get_reference ("Input->TTY_Inited"));
+  end
+
+  do
+    maps[0] = get_en_lang (NULL);
+    maps[1] = get_el_lang (NULL);
+    getchar_lang = maps[0];
+  end
+end

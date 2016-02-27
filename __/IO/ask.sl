@@ -26,7 +26,7 @@ private define ask_smg (self, quest_ar, ar)
 
 private define ask (self, quest_ar, ar)
 {
-  ifnot (This.smg)
+  ifnot (This.is_smg ())
     ask_tty (self, quest_ar, ar;;__qualifiers);
   else
     ask_smg (self, quest_ar, ar;;__qualifiers);
