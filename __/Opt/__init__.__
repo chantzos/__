@@ -344,4 +344,9 @@ class Opt
   	   process = &cmdopt_process
       };
   end
+
+  def is_arg (arg, argv)
+    variable index = wherenot (strncmp (argv, arg, strlen (arg)));
+    length (index) ? index[0] : NULL;
+  end
 end

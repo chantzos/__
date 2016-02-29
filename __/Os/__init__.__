@@ -1,0 +1,75 @@
+class Os
+  let HASHEDDATA = NULL;
+
+  def getpasswd ()
+    variable passwd = "";
+    variable prompt = "password:";
+    variable chr;
+
+    Smg.atrcaddnstrdr (prompt, 0, MSGROW, 0, MSGROW, strlen (prompt), COLUMNS);
+
+    while (chr = Input.getch (), chr != '\r')
+      {
+      if (any (Input->rmap.backspace == chr) && strlen (passwd))
+        passwd = substr (passwd, 1, strlen (passwd) - 1);
+      else
+        passwd += char (chr);
+      }
+
+    %send_msg (" ", 0);
+
+    passwd;
+  end
+
+  def encryptpasswd (passwd)
+    passwd = NULL == passwd ? self.getpasswd () : passwd;
+
+   variable data = Rand.getstr ('0', 'z', 40);
+
+    Crypt.encrypt (data, passwd);
+  end
+
+  def confirmpasswd (data, passwd)
+    @passwd = self.getpasswd ();
+
+    Crypt.decrypt (data, @passwd);
+  end
+
+  def authenticate (user, passwd)
+    return auth (user, passwd);
+  end
+
+  def __getpasswd ()
+    variable passwd, retval;
+
+    ifnot (NULL == HASHEDDATA)
+      {
+      retval = self.confirmpasswd (HASHEDDATA, &passwd);
+      if (NULL == retval)
+        {
+        passwd = NULL;
+        Smg.send_msg_dr ("Authentication error", 1, NULL, NULL);
+        }
+      else
+        passwd+= "\n";
+      }
+    else
+      {
+      passwd = self.getpasswd ();
+
+      if (-1 == self.authenticate (Env->USER, passwd))
+        {
+        Smg.send_msg_dr ("Authentication error", 1, NULL, NULL);
+        passwd = NULL;
+        }
+
+      ifnot (NULL == passwd)
+        {
+        Os.vlet ("HASHEDDATA", self.encryptpasswd (passwd));
+        passwd+= "\n";
+        }
+      }
+
+    passwd;
+  end
+end

@@ -42,6 +42,7 @@ typedef struct
   stderrFd,
   stdoutFn,
   stdoutFd,
+  tmpdir,
   at_exit,
   err_handler,
   exit

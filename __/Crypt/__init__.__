@@ -1,0 +1,40 @@
+class Crypt
+  import crypto
+
+  var CRYPTO_DEFAULT_SYMETRIC = "aes-256-cbc";
+  var CRYPTO_DEFAULT_DIGEST = "md5";
+  var CRYPTO_DEFAULT_ROUNDS = 1;
+
+  def encrypt (data, pass)
+    variable key, iv;
+    variable alg = CRYPTO_DEFAULT_SYMETRIC;
+    variable md = CRYPTO_DEFAULT_DIGEST;
+    variable rounds = CRYPTO_DEFAULT_ROUNDS;
+
+    variable salt = pack("I2", rand (2));
+    (key, iv) = _genkeyiv (pass, salt, rounds, alg, md);
+
+    variable out = _encrypt (data, key, iv, alg);
+    out = "Salted__" + salt + out;
+    out;
+  end
+
+  def decrypt (data, pass)
+    variable key, iv;
+    variable alg = CRYPTO_DEFAULT_SYMETRIC;
+    variable md = CRYPTO_DEFAULT_DIGEST;
+    variable rounds = CRYPTO_DEFAULT_ROUNDS;
+    variable salt = "";
+    variable dstart = 0;
+    if (data[[0:7]] == "Salted__")
+      {
+      salt=data[[8:15]];
+   	  dstart=16;
+      }
+
+    (key, iv)=_genkeyiv (pass, salt, rounds, alg, md);
+
+    variable out = _decrypt (data[[dstart:]], key, iv, alg);
+    out;
+  end
+end

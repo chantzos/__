@@ -1,12 +1,12 @@
 variable COM = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
-variable COMDIR = Env->COM_PATH + "/" + COM;
+variable COMDIR = Env->STD_COM_PATH + "/" + COM;
 
 public variable openstdout = 0;
 public define initproc (p) {}
 public define close_smg ();
 public define restore_smg ();
 
-Class.init ("Opt");
+Class.load ("Opt");
 
 Class.new ("Smg";methods = ["get_screen_size", "at_exit", "is_smg_inited"],
   funs = [{"get_screen_size0"}, {"at_exit0"}, {"is_smg_inited0"}]);

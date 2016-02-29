@@ -128,17 +128,20 @@ private define __assignself__ (name)
     `public variable ` + name + ` =  __->__ ("` +
      name + `", "Class::getself");`;
 
+  if (qualifier_exists ("return_buf"))
+    return __buf__;
+
   __eval__ (__buf__, name);
 }
 
-private define __getfun__ (from, fname)
+private define __getfun__ (from, fun)
 {
   variable f = qualifier ("class", __getclass__ (from, 0)) ["__FUN__"];
 
-  ifnot (assoc_key_exists (f, fname))
-    f[fname] = @Fun_Type;
+  ifnot (assoc_key_exists (f, fun))
+    f[fun] = @Fun_Type;
 
-  f[fname];
+  f[fun];
 }
 
 private define __setfun__ (cname, funname, funcref, nargs, const)
@@ -189,7 +192,10 @@ private define __eval_method__ (cname, funname, nargs)
     `set_struct_field (__->__ ("` + cname + `", "Class::getself"), "` +
     funname + `", &` + cname + "_" + funname + `);` + "\n";
 
-  __eval__ (eval_buf, "methods");
+  if (qualifier_exists ("return_buf"))
+    return eval_buf;
+
+  __eval__ (eval_buf, cname);
 }
 
 private define __my_read__ (fname)
@@ -543,30 +549,9 @@ private define addFun ()
   __initfun__ (self.__name, funname, funcref;;__qualifiers);
 }
 
-private define addFunFrom (self, from, funname)
-{
-  variable rc = qualifier ("superclass", __getclass__ (from, 0));
-  variable c = qualifier ("class", __getclass__ (self.__name, 0));
-  variable f = rc["__FUN__"];
-  variable rf = assoc_get_keys (f);
-
-  ifnot (any (funname == rf))
-    throw ClassError, "funfrom::" + funname + " is not part of " + from;
-
-  c["__FUN__"][funname] = f[funname];
-
-  __setself__ (c, String_Type[0]);
-  __assignself__ (self.__name);
-}
-
-private define vget (self, varname)
-{
-  __->__ (self.__name, varname, "Class::vget::varget";;__qualifiers);
-}
-
 private define vlet (self, varname, varval)
 {
-  __->__ (self.__name, varname, varval, "Class::vset::varlet";;
+  __->__ (self.__name, varname, varval, "Class::vset::vlet";;
     struct {@__qualifiers, const = 1});
 
   variable eval_buf = "static define " + varname  + " ()\n{\n__->__ (\"" +
@@ -579,8 +564,6 @@ private define vlet (self, varname, varval)
 private define __def_methods__ (cname, c)
 {
   __setfun__ (cname, "fun", &addFun, 2, 1;class = c);
-  __setfun__ (cname, "funfrom", &addFunFrom, 2, 1;class = c);
-  __setfun__ (cname, "vget", &vget, 1, 1;class = c);
   __setfun__ (cname, "vlet", &vlet, 2, 1;class = c);
 }
 
@@ -686,16 +669,15 @@ private define __LoadClass__ (cname)
         classpath), F_OK|R_OK))
       throw ClassError, sprintf ("Class::LoadClass::%S, %S", classpath, errno_string (errno));
 
-  variable eval_buf = __my_read__ (classpath);
-
-  __eval__ (eval_buf, cname);
+  () = evalfile (classpath, cname);
 }
 
-private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc)
+private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, scope)
 {
   @funname = tokens[1];
-  @const = 1;
+  @const = '!' != tokens[0][-1];
   @isproc = 0;
+  @scope = "private";
 
   variable i, ind, tmp;
 
@@ -745,6 +727,10 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc)
       @const = 0;
     else if ("proc" == tokens[i])
       @isproc = 1;
+    else if ("public" == tokens[i])
+      @scope = "public";
+    else if ("static" == tokens[i])
+      @scope = "private";
     else
       throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";
 }
@@ -779,7 +765,16 @@ private define __Class_From_Init__ (classpath)
   variable ot_def = 0;
   variable funs = Assoc_Type[Fun_Type];
   variable funname, nargs, args, i, found, tmp,
-    super = cname, const, isproc, eval_buf = "", var_buf, v, tok;
+    super = cname, const, isproc, scope,
+    eval_buf = "", var_buf, v, tok;
+
+  funs["let"] = @Fun_Type;
+  funs["let"].nargs = 2;
+  funs["let"].const = 1;
+
+  funs["fun"] = @Fun_Type;
+  funs["fun"].nargs = '?';
+  funs["fun"].const = 1;
 
   if (any (cname == assoc_get_keys (__CLASS__)))
     ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
@@ -789,7 +784,7 @@ private define __Class_From_Init__ (classpath)
     {
     tokens = strtok (line);
 
-    ifnot (length (tokens))
+    if (0 == length (tokens) || '%' == tokens[0][0])
       continue;
 
     if (1 == length (tokens) && "end" == tokens[0])
@@ -798,19 +793,6 @@ private define __Class_From_Init__ (classpath)
       break;
       }
 
-    if ("require" == tokens[0])
-      if (1 == length (tokens))
-        throw ClassError, "Class::__INIT__::require statement needs an argument";
-      else
-        {
-        variable lib = tokens[1];
-        ifnot (assoc_key_exists (__CLASS__, lib))
-          % definitely it should break at some point
-          Load.init (lib);
-
-        continue;
-        }
-
     if ("import" == tokens[0])
       if (1 == length (tokens))
         throw ClassError, "Class::__INIT__::import statement needs an argument";
@@ -818,8 +800,51 @@ private define __Class_From_Init__ (classpath)
         {
         variable module = tokens[1];
         variable ns = length (tokens) > 2 ? tokens[2] : NULL;
-        if ("NULL" == ns) ns = NULL;
-        Load.module (module, ns);
+
+        if ("NULL" == ns)
+          ns = NULL;
+
+        eval_buf = "Load.module (\"" + module + "\", " + (NULL != ns ? "\"" : "") +
+          string (ns) + (NULL != ns ? "\"" : "") + ");\n\n" + eval_buf;
+
+        continue;
+        }
+
+    if ("typedef" == tokens[0])
+      if (1 == length (tokens))
+        throw ClassError, "typedef statement needs an argument";
+      else
+        {
+        variable type = tokens[1];
+        tmp = strchop (type, '_', 0);
+
+        if (1 == length (tmp) || "Type" != tmp[1])
+          type += "_Type";
+
+        tmp = "typedef struct {\n";
+
+        found = 0;
+
+        while (-1 != fgets (&line, fp))
+          {
+          if ("end" == strtrim (line))
+            {
+            found = 1;
+            break;
+            }
+
+          ifnot (',' == line[-2])
+            throw ClassError, "typedef statement: missing comma";
+
+          tmp += line;
+          }
+
+        ifnot (found)
+          throw ClassError, "Class::__INIT__::do block, end identifier is missing";
+
+        tmp += "}" + type + ";\n\n";
+
+        eval_buf = tmp + eval_buf;
         continue;
         }
 
@@ -841,9 +866,6 @@ private define __Class_From_Init__ (classpath)
         throw ClassError, "Class::__INIT__::do block, end identifier is missing";
        continue;
       }
-
-    if ('%' == tokens[0][0])
-      continue;
 
     if ("var" == tokens[0])
       if (2 > length (tokens))
@@ -966,21 +988,22 @@ private define __Class_From_Init__ (classpath)
         continue;
         }
 
-    if ("def" == tokens[0])
+    if ("def" == tokens[0] || "def!" == tokens[0])
       if (3 > length (tokens))
         throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
       else
         {
-        __get_fun_head__ (tokens, &funname, &nargs, &args, &const, &isproc);
+        __get_fun_head__ (tokens,
+          &funname, &nargs, &args, &const, &isproc, &scope);
 
         args = strtrim (args, "()");
         args = strtok (args, ",");
 
         if ('?' == nargs)
-          eval_buf += `private define ` + funname + " ()\n{\n";
+          eval_buf += scope + ` define ` + funname + " ()\n{\n";
         else
-          eval_buf += `private define ` + funname + " (" + (isproc ? "" : "self" +
-            (length (args) ? ", " : "")) + strjoin (args, ", ") + ")\n{\n";
+          eval_buf += scope + ` define ` + funname + " (" + (isproc ? "" : "self" +
+             (length (args) ? ", " : "")) + strjoin (args, ", ") + ")\n{\n";
 
         found = 0;
         while (-1 != fgets (&line, fp))
@@ -1016,7 +1039,12 @@ private define __Class_From_Init__ (classpath)
         throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
       else
         {
-        __get_fun_head__ (tokens, &funname, &nargs, &args, &const, &isproc);
+        __get_fun_head__ (tokens,
+          &funname, &nargs, &args, &const, &isproc, &scope);
+
+        eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
+          "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
+             ";\n$9.const = " + string (const) + ";\n";
 
         funs[funname] = @Fun_Type;
         funs[funname].nargs = nargs;
@@ -1027,25 +1055,31 @@ private define __Class_From_Init__ (classpath)
   if (ot_class)
     throw ClassError, "Class::__INIT__::end identifier is missing";
 
-  variable c = __getclass__ (cname, 1);
-  variable _r_ = c["__R__"];
-  variable _f_ = c["__FUN__"];
   variable __funs__ = assoc_get_keys (funs);
 
-  _r_.name = cname;
-  _r_.super = super;
-  _r_.path = classpath;
-  _r_.isself = 1;
-
-  __def_methods__ (cname, c);
-  __setself__ (c, __funs__);
-  __assignself__ (cname);
-
   _for i (0, length (__funs__) - 1)
-    {
-    _f_[__funs__[i]] = funs[__funs__[i]];
-    __eval_method__ (cname, __funs__[i], funs[__funs__[i]].nargs);
-    }
+    eval_buf += __eval_method__ (cname, __funs__[i], funs[__funs__[i]].nargs;
+      return_buf);
+
+  eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
+    classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
+      "\"], \"Class::classnew::NULL\");\n" + eval_buf;
+
+  eval_buf += __assignself__ (cname;return_buf) + "\n";
+
+  eval_buf += cname + ".let = Class.let;\n";
+  eval_buf += cname + ".fun = Class.fun;";
+
+  __in__ = classpath + "/" + cname + ".sl";
+
+  variable dump = fopen (__in__, "w");
+  () = fprintf (dump, "%S\n", eval_buf);
+  () = fclose (dump);
+
+  byte_compile_file (__in__, 0);
+
+  ifnot ("Input" == cname)
+  () = remove (__in__);
 
   if (strlen (eval_buf))
     __eval__ (eval_buf, cname);
@@ -1056,6 +1090,7 @@ private define __Class_From_Init__ (classpath)
 __setfun__ ("Class", "setfun", &__setfun__, 5, 1);
 __setfun__ ("Class", "getfun", &__getfun__, 2, 1);
 __setfun__ ("Class", "getself", &__getself__, 1, 1);
+__setfun__ ("Class", "classnew", &__classnew__, 4, 1);
 __setfun__ ("Class", "ClassNew", &__ClassNew__, 1, 1);
 __setfun__ ("Class", "LoadClass", &__LoadClass__, 1, 1);
 __setfun__ ("Class", "ClassInit", &__Class_From_Init__, 1, 1);
@@ -1081,6 +1116,8 @@ public variable Class = struct
   {
   new = &__new__,
   load = &__load__,
-  init = &__from_init__
+  init = &__from_init__,
+  let = &vlet,
+  fun = &addFun
   };
 

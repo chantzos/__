@@ -3,11 +3,11 @@ Class.init ("Load");
 Class.init ("Exc");
 Class.init ("Array");
 Class.init ("Assoc");
-Class.init ("Env");
-Class.init ("File");
 Class.init ("Path");
+Class.init ("File");
 Class.init ("Dir");
 Class.init ("Sys");
+Class.init ("Env");
 Class.init ("IO");
 
 __use_namespace ("Smg");

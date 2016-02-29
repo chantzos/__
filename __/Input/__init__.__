@@ -212,7 +212,7 @@ class Input
   end
 
   def getch ()
-    (@[&__tty_getch, &__getch][TTY_INITED]) ();
+    (@[&__tty_getch, &__getch][This.is_smg ()]) ();
   end
 
   def get_en_lang ()

@@ -1,0 +1,49 @@
+class Sock
+  var gbt;
+
+  def get_int (fd)
+    () = read (fd, &gbt, 32);
+    eval (gbt);
+  end
+
+  def send_int (fd, i)
+    () = write (fd, sprintf ("%S", i));
+  end
+
+  def get_str (fd)
+    () = read (fd, &gbt, 16384);
+    gbt;
+  end
+
+  def send_str (fd, str)
+    () = write (fd, str);
+  end
+
+  def get_str_ar (rdfd, wrfd)
+    gbt = get_int (NULL, rdfd);
+    send_int (NULL, wrfd, 0);
+    () = read (rdfd, &gbt, gbt);
+    strchop (gbt, '\n', 0);
+  end
+
+  def send_str_ar (rdfd, wrfd, str_ar)
+    str_ar = strjoin (str_ar, "\n");
+    send_int (NULL, wrfd, int (sum (strbytelen (str_ar))));
+    () = get_int (NULL, rdfd);
+    () = write (wrfd, str_ar);
+  end
+
+  def get_int_ar (rdfd, wrfd)
+    gbt = get_int (NULL, rdfd);
+    send_int (NULL, wrfd, 1);
+    () = read (rdfd, &gbt, gbt);
+    eval (gbt);
+  end
+
+  def send_int_ar (rdfd, wrfd, int_ar)
+    int_ar = "[" + strjoin (array_map (String_Type, &string, int_ar), ",") + "];";
+    send_int (NULL, wrfd, int (sum (strbytelen (int_ar))));
+    () = get_int (NULL, rdfd);
+    () = write (wrfd, int_ar);
+  end
+end

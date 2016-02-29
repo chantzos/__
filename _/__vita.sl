@@ -68,31 +68,21 @@ public define Progr_Init (name)
 {
   variable p = @ThisProg_Type;
 
-  p.name = name;
-  p.argv = __argv;
-
-  p.shell = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1);
-
-  p.ved = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1);
-
-  p.os = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0);
-
+  p.name   = name;
+  p.argv   = __argv;
+  p.shell  = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1);
+  p.ved    = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1);
+  p.os     = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0);
   p.is_tty = &__is_tty;
-
   p.is_smg = &__is_smg;
-
   p.stderrFn = __get_qualifier_as (
     String_Type, "stderrFn", qualifier ("stderrFn"), NULL);
-
   p.stdoutFn = __get_qualifier_as (
     String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL);
-
   p.at_exit = __get_qualifier_as (
     Ref_Type, "at_exit", qualifier ("at_exit"), &__def_at_exit__);
-
   p.exit = __get_qualifier_as (
     Ref_Type, "exit", qualifier ("exit"), &__def_exit__);
-
   p.err_handler = __get_qualifier_as (
     Ref_Type, "err_handler", qualifier ("err_handler"), &__def_err_handler__);
 

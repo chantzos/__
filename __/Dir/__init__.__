@@ -4,7 +4,7 @@ class Dir
     return 0;
 
     variable st = stat_file (dir);
-    File.is_type (NULL == st ? NULL : st.st_mode, dir) ? 1 : -1;
+    File.is_type (NULL == st ? NULL : st.st_mode, "dir") ? 1 : -1;
   end
 
   def eval (dir)

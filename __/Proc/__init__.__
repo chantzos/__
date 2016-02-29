@@ -1,0 +1,290 @@
+class Proc
+  import fork
+  import socket
+
+  typedef Proc
+    pid,
+    argv,
+    uid,
+    gid,
+    user,
+    setid,
+    issu,
+    stdin,
+    stdout,
+    stderr,
+    execv,
+    execve,
+    atexit,
+    connect,
+    loadproc,
+    loadcommand,
+  end
+
+  typedef Descr
+    in,
+    out,
+    file,
+    mode,
+    keep,
+    read,
+    write,
+    wr_flags,
+    append_flags,
+  end
+
+  def parse_flags (fd) proc
+    ifnot (NULL == fd.wr_flags)
+      {
+      ifnot (assoc_key_exists (File->FLAGS, fd.wr_flags))
+        fd.wr_flags = File->FLAGS[">"];
+      else
+        fd.wr_flags = File->FLAGS[fd.wr_flags];
+      }
+    else
+      if (-1 == access (fd.file, F_OK))
+        fd.wr_flags = File->FLAGS[">"];
+      else
+        fd.wr_flags = File->FLAGS[">|"];
+
+    ifnot (NULL == fd.append_flags)
+      fd.wr_flags |= fd.append_flags;
+
+    if (fd.wr_flags & O_CREAT)
+      if (NULL == fd.mode)
+        fd.mode = File->PERM["_PRIVATE"];
+  end
+
+  def open_file (fd, fp) proc
+    fd.keep = dup_fd (fileno (fp));
+
+    parse_flags (fd);
+
+    ifnot (NULL == fd.mode)
+      fd.write = open (fd.file, fd.wr_flags, fd.mode);
+    else
+      fd.write = open (fd.file, fd.wr_flags);
+
+    () = dup2_fd (fd.write, _fileno (fp));
+  end
+
+  def close_fd (fd, fp) proc
+    () = _close (_fileno (fd.write));
+    () = dup2_fd (fd.keep, _fileno (fp));
+  end
+
+  def open_fd (fd, fp) proc
+    fd.keep = dup_fd (fileno (fp));
+
+    (fd.read, fd.write) = pipe ();
+    variable retval = dup2_fd (fd.write, _fileno (fp));
+    % do something
+  end
+
+  def _openforread (fd, fp) proc
+    fd.keep = dup_fd (fileno (fp));
+
+    ifnot (NULL == fd.file)
+      {
+      fd.read = open (fd.file, O_RDONLY);
+      () = dup2_fd (fd.read, _fileno (fp));
+      return;
+      }
+
+    (fd.read, fd.write) = pipe ();
+
+    () = write (fd.write, fd.in);
+
+    () = close (fd.write);
+
+    () = dup2_fd (fd.read, _fileno (fp));
+  end
+
+  def _open (fd, fp) proc
+    ifnot (NULL == fd.file)
+      open_file (fd, fp);
+    else
+      open_fd (fd, fp);
+  end
+
+  def atexit (s) proc
+    ifnot (NULL == s.stdout)
+      {
+      close_fd (s.stdout, stdout);
+
+      if (NULL == s.stdout.file)
+        s.stdout.out = IO.readfd (s.stdout.read);
+      }
+
+    ifnot (NULL == s.stderr)
+      {
+      close_fd (s.stderr, stderr);
+
+      if (NULL == s.stderr.file)
+        s.stderr.out = IO.readfd (s.stderr.read);
+      }
+
+    ifnot (NULL == s.stdin)
+      if (NULL == s.stdin.file)
+        close_fd (s.stdin, stdin);
+      else
+        () = dup2_fd (s.stdin.keep, 0);
+  end
+
+  def connect_to_socket (s, sockaddr) proc
+    variable
+      i = -1,
+      sock = socket (PF_UNIX, SOCK_STREAM, 0);
+
+    forever
+      {
+      i++;
+      if (5000 < i)
+        return NULL;
+
+      try
+        connect (sock, sockaddr);
+      catch AnyError:
+        continue;
+
+      break;
+      }
+
+    return sock;
+  end
+
+  def dopid (s) proc
+    ifnot (NULL == s.stdin)
+      _openforread (s.stdin, stdin);
+
+    ifnot (NULL == s.stdout)
+      _open (s.stdout, stdout);
+
+    ifnot (NULL == s.stderr)
+      _open (s.stderr, stderr);
+
+    return fork ();
+  end
+
+  def _execv (s, argv, bg) proc
+    variable status = 0;
+
+    s.pid = dopid (s);
+
+    ifnot (s.pid) % allow for a function callback, call a default else
+      {
+      if (NULL != s.setid)
+        if (NULL != s.uid && NULL != s.gid && NULL != s.user)
+          {
+          if (-1 == initgroups (s.user, s.gid))
+            {
+            IO.tostderr ("initgroups: " + errno_string (errno));
+            return NULL;
+            }
+
+          if (-1 == setgid (s.gid))
+            {
+            IO.tostderr ("setgid: " + errno_string (errno));
+            return NULL;
+            }
+
+          if (-1 == setuid (s.uid))
+            {
+            IO.tostderr ("setuid: " + errno_string (errno));
+            return NULL;
+            }
+          }
+
+      if (-1 == execv (argv[0], argv))
+        return NULL;
+      }
+
+    if (NULL == bg)
+      {
+      status = waitpid (s.pid, 0);
+      s.atexit ();
+      return status;
+      }
+
+    s.pid;
+  end
+
+  def _execve (s, argv, env, bg) proc
+    variable status = 0;
+
+    s.pid = dopid (s);
+
+    ifnot (s.pid)
+      {
+      if (NULL != s.setid)
+        if (NULL != s.uid && NULL != s.gid && NULL != s.user)
+          {
+          if (-1 == initgroups (s.user, s.gid))
+            {
+            IO.tostderr ("initgroups: " + errno_string (errno));
+            return NULL;
+            }
+
+          if (-1 == setgid (s.gid))
+            {
+            IO.tostderr ("setgid: " + errno_string (errno));
+            return NULL;
+            }
+
+          if (-1 == setuid (s.uid))
+            {
+            IO.tostderr ("setuid: " + errno_string (errno));
+            return NULL;
+            }
+          }
+
+      if (-1 == execve (argv[0], argv, env))
+        return NULL;
+      }
+
+    if (NULL == bg)
+      {
+      status = waitpid (s.pid, 0);
+      s.atexit ();
+      return status;
+      }
+
+    s.pid;
+  end
+
+%  def loadproc () proc
+%    return path_dirname (__FILE__) + "/loadproc.sl";
+%  end
+
+%  private define loadcommand ()
+%  {
+%    return path_dirname (__FILE__) + "/loadcommand.sl";
+%  }
+
+  def init (in, out, err)
+    variable
+      p = @Proc_Type;
+
+    if (in)
+      p.stdin = @Descr_Type;
+
+    if (out)
+      p.stdout = @Descr_Type;
+
+    if (err)
+      p.stderr = @Descr_Type;
+
+    p.atexit = &atexit;
+    p.connect = &connect_to_socket;
+%    p.loadproc = loadproc ();
+%    p.loadcommand = loadcommand ();
+    p.execve = &_execve;
+    p.execv = &_execv;
+    p.setid = qualifier ("setid");
+    p.uid = qualifier ("uid");
+    p.gid = qualifier ("gid");
+    p.user = qualifier ("user");
+
+    p;
+  end
+end

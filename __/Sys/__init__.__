@@ -3,7 +3,7 @@ class Sys
   let OS = uname.sysname;
 
   def checkperm (mode, perm)
-    Sys.modetoint (mode) == perm ? 0 : -1;
+    self.modetoint (mode) == perm ? 0 : -1;
   end
 
   def setperm (file, perm)
@@ -43,9 +43,31 @@ class Sys
       NULL;
    end
 
-  fun getgrname (gid)
+  def getgrname (gid)
+    variable gr = getgrgid (gid);
 
-  fun getpwname (uid)
+    if (NULL == gr)
+      if (errno)
+        throw ClassError, "Sys::getgrname::" + errno_string (errno);
+      else
+        throw ClassError, "Sys::getgrname::cannot find the GID " + string (gid) +
+         " in /etc/group, who are you?";
+
+    gr.gr_name;
+  end
+
+  def getpwname (uid)
+    variable pw =getpwuid (uid);
+
+    if (NULL == pw)
+      if (errno)
+        throw ClassError, "Sys::getpwname::" + errno_string (errno);
+      else
+        throw ClassError, "Sys::getpwname::cannot find the UID " + string (uid) +
+         " in /etc/passwd, who are you?";
+
+    pw.pw_name;
+  end
 
   fun getpwuidgid (user)
 end

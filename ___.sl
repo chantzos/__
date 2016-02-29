@@ -9,9 +9,9 @@ private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
 private variable
   CC = "gcc";
 private variable
-  MODULES = ["__", "getkey", "slsmg", "socket", "fork", "pcre", "rand"];
+  MODULES = ["__", "getkey", "slsmg", "socket", "fork", "pcre", "rand", "crypto"];
 private variable
-  FLAGS = ["-lm -lpam", "", "", "", "", "-lpcre", ""];
+  FLAGS = ["-lm -lpam", "", "", "", "", "-lpcre", "", "-lssl"];
 private variable
   DEF_FLAGS = "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable
@@ -35,7 +35,7 @@ private variable DEBUG = any ("--debug" == __argv);
 
 public variable This, io;
 
-private define exit_me (self, msg, code)
+public define exit_me (self, msg, code)
 {
   self.at_exit ();
 
@@ -251,11 +251,11 @@ private variable BIN_PATH       = ROOT_PATH + "/bin";
 private variable USER_PATH      = ROOT_PATH + "/usr";
 private variable USER_DATA_PATH = ROOT_PATH + "/usr/data";
 
-private variable LIB_SLANG_PATH = LIB_PATH + "/__";
-private variable LIB_C_PATH     = LIB_PATH + "/C";
-private variable LIB_DATA_PATH  = LIB_PATH + "/data";
-private variable LIB_APP_PATH   = LIB_PATH + "/app";
-private variable LIB_COM_PATH   = LIB_PATH + "/com";
+private variable STD_SLANG_PATH = LIB_PATH + "/__";
+private variable STD_C_PATH     = LIB_PATH + "/C";
+private variable STD_DATA_PATH  = LIB_PATH + "/data";
+private variable STD_APP_PATH   = LIB_PATH + "/app";
+private variable STD_COM_PATH   = LIB_PATH + "/com";
 
 private variable SRC_PROTO_PATH = SRC_PATH + "/_";
 private variable SRC_SLANG_PATH = SRC_PATH + "/__";
@@ -266,8 +266,8 @@ private variable SRC_COM_PATH   = SRC_PATH + "/com";
 private variable INST_PATHS = [
   ROOT_PATH, LIB_PATH, TMP_PATH, BIN_PATH,
   USER_PATH, USER_DATA_PATH,
-  LIB_SLANG_PATH, LIB_C_PATH, LIB_DATA_PATH,
-  LIB_APP_PATH, LIB_COM_PATH];
+  STD_SLANG_PATH, STD_C_PATH, STD_DATA_PATH,
+  STD_APP_PATH, STD_COM_PATH];
 
 private define __eval__ (__buf__)
 {
@@ -426,9 +426,9 @@ private define __install_modules__ ()
   _for i (0, length (MODULES) - 1)
     {
     if (-1 == rename (SRC_TMP_PATH + "/" + MODULES[i] + "-module.so",
-        LIB_C_PATH + "/" + MODULES[i] + "-module.so"))
+        STD_C_PATH + "/" + MODULES[i] + "-module.so"))
       This.exit ("failed to rename " + SRC_TMP_PATH + "/" + MODULES[i] + "-module.so to " +
-        LIB_C_PATH + "\n" + errno_string (errno), 1);
+        STD_C_PATH + "\n" + errno_string (errno), 1);
     }
 }
 
@@ -437,7 +437,7 @@ private define __install_bytecompiled__ ()
   variable i;
   _for i (0, length (BYTECOMPILED) - 1)
     if (-1 == rename (SRC_TMP_PATH + "/" + BYTECOMPILED[i] + ".slc",
-       LIB_SLANG_PATH + "/" + BYTECOMPILED[i] + ".slc"))
+       STD_SLANG_PATH + "/" + BYTECOMPILED[i] + ".slc"))
      This.exit ("failed to rename " + SRC_TMP_PATH + "/" +
        BYTECOMPILED[i] + ".slc to " + LIB_PATH + "/" +
        BYTECOMPILED[i] + ".slc" + "\n" + errno_string (errno), 1);
@@ -480,7 +480,12 @@ private define file_callback_libs (file, st, src_path, dest_path)
 
   dest = strreplace (file, src_path, dest_path);
 
-  File.copy (file, dest);
+  ifnot (path_extname (file) == ".slc")
+    File.copy (file, dest);
+  else
+     if (-1 == rename (file, dest))
+        This.exit ("failed to rename " + file + " to " + dest + "\n" +
+          errno_string (errno), 1);
 
   1;
 }
@@ -521,7 +526,6 @@ ROOTPATH = realpath (ROOTPATH + "/..");
 
   variable fp = fopen (BIN_PATH + "/__com.sl", "w");
   () = fprintf (fp, "%s\n", scr);
-  () = fflush (fp);
   () = fclose (fp);
 
   if (-1 == chmod (BIN_PATH + "/__com.sl", 0755))
@@ -531,6 +535,22 @@ ROOTPATH = realpath (ROOTPATH + "/..");
   Path.walk (SRC_COM_PATH + "/", &__scripts_dir_callback__, NULL);
 
   () = chdir (SRC_PATH);
+}
+
+private variable CLASSES = [
+  "Input", "Smg", "Rand", "Crypt", "Os", "Opt", "String", "Rline",
+  "Re", "Diff", "Proc", "Sock", "Subst", "Sync", "Ved"];
+
+private define __bytecompile_classes__ ()
+{
+  variable i;
+  _for i (0, length (CLASSES) - 1)
+    {
+    if (VERBOSE)
+      io.tostdout ("compiling ", CLASSES[i]);
+
+    Class.init (CLASSES[i]);
+    }
 }
 
 private define __main__ ()
@@ -564,8 +584,24 @@ private define __main__ ()
     {
     __build_modules__;
 
+%    if (VERBOSE)
+%      io.tostdout ("installing modules to " + STD_C_PATH);
+
+%    __install_modules__;
+    }
+
+  set_import_module_path (get_import_module_path + ":" + SRC_TMP_PATH +
+    ":" + STD_C_PATH);
+
+  if (VERBOSE)
+    io.tostdout ("Compiling classes");
+
+  __bytecompile_classes__;
+
+  ifnot (DONT_COMPILE_MODULES)
+    {
     if (VERBOSE)
-      io.tostdout ("installing modules to " + LIB_C_PATH);
+      io.tostdout ("installing modules to " + STD_C_PATH);
 
     __install_modules__;
     }
@@ -586,15 +622,15 @@ private define __main__ ()
     io.tostdout ("installing libraries");
 
   Path.walk (SRC_SLANG_PATH, &lib_dir_callback, &file_callback_libs;
-    dargs = {SRC_SLANG_PATH, LIB_SLANG_PATH},
-    fargs = {SRC_SLANG_PATH, LIB_SLANG_PATH});
+    dargs = {SRC_SLANG_PATH, STD_SLANG_PATH},
+    fargs = {SRC_SLANG_PATH, STD_SLANG_PATH});
 
   if (VERBOSE)
     io.tostdout ("installing commands");
 
   Path.walk (SRC_COM_PATH, &lib_dir_callback, &file_callback_libs;
-    dargs = {SRC_COM_PATH, LIB_COM_PATH},
-    fargs = {SRC_COM_PATH, LIB_COM_PATH});
+    dargs = {SRC_COM_PATH, STD_COM_PATH},
+    fargs = {SRC_COM_PATH, STD_COM_PATH});
 
   __install_scripts__;
 
