@@ -2,14 +2,14 @@ variable COM = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 variable COMDIR = Env->STD_COM_PATH + "/" + COM;
 
 public variable openstdout = 0;
+
 public define initproc (p) {}
 public define close_smg ();
 public define restore_smg ();
 
 Class.load ("Opt");
-
-Class.new ("Smg";methods = ["get_screen_size", "at_exit", "is_smg_inited"],
-  funs = [{"get_screen_size0"}, {"at_exit0"}, {"is_smg_inited0"}]);
+Class.load ("Input");
+Class.load ("Smg";__init__ = "__tty_init__", as = "SmgTTY");
 
 public define exit_me (x)
 {
@@ -26,9 +26,14 @@ public define verboseoff ()
   IO.fun ("tostdout?";funcrefname = "tostdout_null", const = 0);
 }
 
-private define send_msg_dr (self, msg)
+private define send_msg_dr (msg)
 {
-  IO.tostdout (msg);
+  Smg.send_msg_dr (msg);
+}
+
+private define send_msg (msg)
+{
+  Smg.send_msg (msg);
 }
 
 define sigint_handler (sig)
@@ -91,9 +96,9 @@ public define info ()
   exit_me (0);
 }
 
-(LINES, COLUMNS) = Smg.get_screen_size ();
+%(LINES, COLUMNS) = Smg.get_screen_size ();
 
-Smg.fun ("send_msg_dr1", &send_msg_dr);
+%Smg.fun ("send_msg_dr1", &send_msg_dr);
 
 signal (SIGINT, &sigint_handler);
 

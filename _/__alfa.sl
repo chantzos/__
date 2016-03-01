@@ -18,7 +18,6 @@ typedef struct
   {
   __name,
   err_handler,
-  __v__
   } Self_Type;
 
 typedef struct

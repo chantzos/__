@@ -5,6 +5,8 @@ public define exit_me (x)
 
 Load.module ("socket");
 
+Class.load ("Smg");
+Class.load ("Input");
 Class.load ("Rand");
 Class.load ("Crypt");
 Class.load ("Os");
@@ -16,7 +18,6 @@ Class.load ("String");
 Class.load ("Re");
 Class.load ("Subst");
 Class.load ("Ved");
-%Class.init ("Ved");
 
 Smg.init ();
 

@@ -1,0 +1,43 @@
+class Smg
+  var public LINES     = NULL;
+  var public COLUMNS   = NULL;
+  var public PROMPTROW = NULL;
+  var public MSGROW    = NULL;
+
+  let COLOR = NULL;
+
+  def get_screen_size ()
+    variable
+      retval,
+      fp = popen ("stty size", "r");
+
+    () = fgets (&retval, fp);
+
+    () = pclose (fp);
+
+    retval = strtok (retval);
+
+    integer (retval[0]), integer (retval[1]);
+  end
+
+  def at_exit ()
+  end
+
+  def is_smg_inited ()
+    0;
+  end
+
+  def send_msg_dr (msg)
+    IO.tostdout (msg);
+  end
+
+  def send_msg (msg)
+    IO.tostdout (msg);
+  end
+
+  do
+    (LINES, COLUMNS) = get_screen_size (NULL);
+    PROMPTROW = LINES - 2;
+    MSGROW = LINES - 1;
+  end
+end

@@ -101,7 +101,6 @@ private define __initclass__ (cname)
   __CLASS__[cname]["__FUN__"] = Assoc_Type[Fun_Type];
   __CLASS__[cname]["__R__"] = @Class_Type;
   __CLASS__[cname]["__SELF__"] = @Self_Type;
-  __CLASS__[cname]["__SELF__"].__v__ = Assoc_Type[Any_Type];
 
   __V__[cname] = Assoc_Type[Var_Type];
 }

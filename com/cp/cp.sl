@@ -1,4 +1,4 @@
-Class.init ("Re");
+Class.load ("Re");
 
 variable VERBOSE = 0;
 define __verbose_on ()

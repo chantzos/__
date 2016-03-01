@@ -57,7 +57,7 @@ private define __my_copy_verb__ (source, dest)
     return -1;
     }
 
-  IO.tostdout (sprintf ("copying `%s' -> `%s' ", source, dest);n);
+  IO.tostdout (sprintf ("`%s' -> `%s' ", source, dest);n);
 
   while (-1 != fread (&buf, String_Type, 4096, source_fp))
     {

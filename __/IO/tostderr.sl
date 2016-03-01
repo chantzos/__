@@ -8,14 +8,11 @@ private define tostderr_tty (args)
       qualifier_exists ("n") ? "" : "\n"));
   else if (1 == length (args) && typeof (args[0]) == List_Type)
     {
-    variable ff= fopen ("/tmp/yes", "a+");
-      () = fprintf (ff, "|%S\n|", args[0]);
-      () = fflush (ff);
     variable i;
     str = "";
     _for i (0, length (args[0]) - 1)
       if (Struct_Type == typeof (args[0][i]))
-        str += struct_tostring (args[0][i]);
+        str += struct_tostring (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
       else if (Array_Type == typeof (args[0][i]))
         {
         variable ia;
@@ -26,13 +23,6 @@ private define tostderr_tty (args)
       else
         str += sprintf ("%S%S", args[0][i],
         qualifier_exists ("n") ? "" : "\n");
-%    str = Array.map (String_Type, &sprintf, "%S%S", args[0],
-%      qualifier_exists ("n" ? "" : "\n"));
-%      () = fprintf (ia, "|%S\n|", str);
-%      () = fflush (ia);
-%      str = strjoin (str, "\n");
-      () = fprintf (ff, "str |%S\n|", str);
-      () = fflush (ff);
       }
   else
     {
@@ -61,14 +51,11 @@ private define tostderr_redir (args)
       qualifier_exists ("n") ? "" : "\n"));
   else if (1 == length (args) && typeof (args[0]) == List_Type)
     {
-    variable ff= fopen ("/tmp/yes", "a+");
-      () = fprintf (ff, "|%S\n|", args[0]);
-      () = fflush (ff);
     variable i;
     str = "";
     _for i (0, length (args[0]) - 1)
       if (Struct_Type == typeof (args[0][i]))
-        str += struct_tostring (args[0][i]);
+        str += struct_tostring (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
       else if (Array_Type == typeof (args[0][i]))
         {
         variable ia;
@@ -79,13 +66,6 @@ private define tostderr_redir (args)
       else
         str += sprintf ("%S%S", args[0][i],
         qualifier_exists ("n") ? "" : "\n");
-%    str = Array.map (String_Type, &sprintf, "%S%S", args[0],
-%      qualifier_exists ("n" ? "" : "\n"));
-%      () = fprintf (ia, "|%S\n|", str);
-%      () = fflush (ia);
-%      str = strjoin (str, "\n");
-      () = fprintf (ff, "str |%S\n|", str);
-      () = fflush (ff);
       }
   else
     {

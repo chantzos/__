@@ -229,14 +229,14 @@ private define __initfun__ (cl, funname, funcref)
 
   variable nargs = (nargs = qualifier ("nargs"),
     NULL == nargs
-       ? funname[-1] == '?'
-         ? (funname = strtrim_end (funname, "?"), VARARGS)
-         : any (['0':'9'] == funname[-1])
-           ? (nargs = funname[-1] - '0', funname = substr (funname, 1, strlen (funname) - 1), nargs)
-           : NULL
-       : Integer_Type == typeof (nargs)
-         ? nargs
-         : NULL);
+      ? funname[-1] == '?'
+        ? (funname = strtrim_end (funname, "?"), VARARGS)
+        : any (['0':'9'] == funname[-1])
+          ? (nargs = funname[-1] - '0', funname = substr (funname, 1, strlen (funname) - 1), nargs)
+          : NULL
+      : Integer_Type == typeof (nargs)
+        ? nargs
+        : NULL);
   if (NULL == nargs && Ref_Type == typeof (funcref))
     throw ClassError, "__initfun__::nargs qualifier required and should be of Integer_Type";
 
@@ -364,7 +364,6 @@ private define __setself__ (c, methods)
 
   variable k = assoc_get_keys (f);
   variable handler = c["__SELF__"].err_handler;
-  variable vars = c["__SELF__"].__v__;
   variable i;
 
   _for i (0, length (k) - 1)
@@ -386,7 +385,6 @@ private define __setself__ (c, methods)
 
   c["__SELF__"].err_handler = handler;
   c["__SELF__"].__name = c["__R__"].name;
-  c["__SELF__"].__v__ = vars;
 }
 
 private define __classnew__ (cname, super, classpath, isself, methods)
@@ -434,7 +432,7 @@ public define struct_tostring (s)
 {
   variable fields = get_struct_field_names (s);
   variable fmt = "";
-  loop (length (fields) - 1)
+  loop (length (fields))
     fmt += "%S : %%S\n";
 
   fmt = sprintf (fmt[[:-2]], push_array (fields));
@@ -561,117 +559,6 @@ private define vlet (self, varname, varval)
   __eval__ (eval_buf, self.__name);
 }
 
-private define __def_methods__ (cname, c)
-{
-  __setfun__ (cname, "fun", &addFun, 2, 1;class = c);
-  __setfun__ (cname, "vlet", &vlet, 2, 1;class = c);
-}
-
-private define __ClassNew__ (cname)
-{
-  variable super =
-    __get_qualifier_as (String_Type, "super", qualifier ("super"), cname);
-
-  variable methods = (methods = qualifier ("methods"),
-    NULL == methods
-      ? String_Type[0]
-      : Array_Type == typeof (methods) && String_Type == _typeof (methods)
-        ? methods
-        : NULL);
-  if (NULL == methods)
-    throw ClassError, "ClassNew::methods qualifier should be of String_Type[]";
-
-  variable funs = (funs = qualifier ("funs"),
-    NULL == funs
-      ? String_Type[0]
-      : Array_Type == typeof (funs) && List_Type == _typeof (funs)
-        ? funs
-        : NULL);
-  if (NULL == funs)
-    throw ClassError, "ClassNew::funs qualifier should be of List_Type[]";
-
-  variable vars = (vars = qualifier ("vars"),
-    NULL == vars
-      ? String_Type[0]
-      : Array_Type == typeof (vars) && List_Type == _typeof (vars)
-        ? vars
-        : NULL);
-  if (NULL == vars)
-    throw ClassError, "ClassNew::vars qualifier should be of List_Type[]";
-
-  variable classpath = __get_qualifier_as (String_Type,
-    "classpath", qualifier ("classpath"), CLASSPATH + "/" + cname);
-
-  variable isself = __get_qualifier_as (
-    Integer_Type, "isself", qualifier ("isself"), 1);
-
-  if (isself)
-    methods = [methods, "fun", "funfrom"];
-
-  variable i;
-  variable rc = super == cname ? NULL : __getclass__ (super, 0);
-  variable f = NULL == rc ? NULL : rc["__FUN__"];
-  variable rf = NULL == f ? NULL : assoc_get_keys (f);
-  variable rfuns = NULL == rc
-    ? String_Type[0]
-    : (rfuns = qualifier ("fromsuper"),
-      NULL == rfuns
-        ? rf
-        : Array_Type == typeof (rfuns) && String_Type == _typeof (rfuns)
-          ? rfuns
-          : NULL);
-  if (NULL == rfuns)
-    throw ClassError, "ClassNew::superfuns qualifier should be of String_Type[]";
-
-  methods = [methods, rfuns];
-
-  variable c = __classnew__ (cname, super, classpath, isself, methods);
-
-  _for i (0, length (funs) - 1)
-    if (1 == length (funs[i]))
-      __initfun__ (cname, funs[i][0], NULL;;struct {@__qualifiers, class = c});
-    else if (2 == length (funs[i]))
-      __initfun__ (cname, funs[i][0], funs[i][1];;struct {@__qualifiers, class = c});
-    else if (3 == length (funs[i]))
-       if (Integer_Type == typeof (funs[i][2]))
-         __initfun__ (cname, funs[i][0], funs[i][1];;
-           struct {@__qualifiers, class = c, nargs = funs[i][2]});
-
-  ifnot (NULL == rc)
-    _for i (0, length (rfuns) - 1)
-      ifnot (any (rf == rfuns[i]))
-        throw ClassError, "ClassNew::" + rfuns[i] + ":: is not part of " + super;
-      else
-        c["__FUN__"][rfuns[i]] = f[rfuns[i]];
-
-  if (isself)
-    {
-    _for i (0, length (vars) - 1)
-      if (2 == length (vars[i]))
-        if (typeof (vars[i][0]) == String_Type)
-          c["__SELF__"].__v__[vars[i][0]] = vars[i][1];
-
-    __def_methods__ (cname, c);
-    __setself__ (c, methods);
-    __assignself__ (cname);
-    }
-}
-
-private define __LoadClass__ (cname)
-{
-  variable classpath = __get_qualifier_as (String_Type,
-    "classpath", qualifier ("classpath"), CLASSPATH + "/" + cname);
-
-  classpath += "/" + cname + ".slc";
-
-  if (-1 == access (classpath, F_OK|R_OK))
-    if (-1 == access ((classpath = substr (classpath, 1, strlen (classpath) - 1),
-        classpath), F_OK|R_OK))
-      throw ClassError, sprintf ("Class::LoadClass::%S, %S", classpath, errno_string (errno));
-
-  () = evalfile (classpath, cname);
-}
-
 private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, scope)
 {
   @funname = tokens[1];
@@ -740,13 +627,19 @@ private define __Class_From_Init__ (classpath)
   ifnot (path_is_absolute (classpath))
     classpath = CLASSPATH + "/" + classpath;
 
-  variable __in__ = classpath + "/__init__.__";
+  variable __init__ = __get_qualifier_as (String_Type, "__init__",
+    qualifier ("__init__"), "__init__");
+
+  variable __in__ = classpath + "/" + __init__ + ".__";
+
   if (-1 == access (__in__, F_OK|R_OK))
     throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
 
   variable line, fp = fopen (__in__, "r");
+
   if (NULL == fp)
-    throw ClassError, "Class::__INIT__::" + __in__ + "::cannot open";
+    throw ClassError, "Class::__INIT__::" + __in__ + "::cannot open, " +
+      errno_string (errno);
 
   variable len = fgets (&line, fp);
 
@@ -840,7 +733,7 @@ private define __Class_From_Init__ (classpath)
           }
 
         ifnot (found)
-          throw ClassError, "Class::__INIT__::do block, end identifier is missing";
+          throw ClassError, "Class::__INIT__::typedef block, end identifier is missing";
 
         tmp += "}" + type + ";\n\n";
 
@@ -1068,9 +961,13 @@ private define __Class_From_Init__ (classpath)
   eval_buf += __assignself__ (cname;return_buf) + "\n";
 
   eval_buf += cname + ".let = Class.let;\n";
-  eval_buf += cname + ".fun = Class.fun;";
+  eval_buf += cname + ".fun = Class.fun;\n";
+  eval_buf += "__uninitialize (&$9);";
 
-  __in__ = classpath + "/" + cname + ".sl";
+  variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
+    cname);
+
+  __in__ = classpath + "/" + as + ".sl";
 
   variable dump = fopen (__in__, "w");
   () = fprintf (dump, "%S\n", eval_buf);
@@ -1078,11 +975,23 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
-  ifnot ("Input" == cname)
   () = remove (__in__);
+}
 
-  if (strlen (eval_buf))
-    __eval__ (eval_buf, cname);
+private define __LoadClass__ (cname)
+{
+  variable classpath = __get_qualifier_as (String_Type,
+    "classpath", qualifier ("classpath"), CLASSPATH + "/" + cname);
+
+  variable as = __get_qualifier_as (String_Type, "as",
+    qualifier ("as"), cname);
+
+  variable cpath = classpath + "/" + as + ".slc";
+
+  if (-1 == access (cpath, F_OK|R_OK) || qualifier_exists ("force"))
+    __Class_From_Init__ (classpath;;__qualifiers);
+
+  () = evalfile (classpath + "/" + as, cname);
 }
 
 () = __classnew__ ("Class", "Class", NULL, 0, String_Type[0]);
@@ -1091,32 +1000,18 @@ __setfun__ ("Class", "setfun", &__setfun__, 5, 1);
 __setfun__ ("Class", "getfun", &__getfun__, 2, 1);
 __setfun__ ("Class", "getself", &__getself__, 1, 1);
 __setfun__ ("Class", "classnew", &__classnew__, 4, 1);
-__setfun__ ("Class", "ClassNew", &__ClassNew__, 1, 1);
 __setfun__ ("Class", "LoadClass", &__LoadClass__, 1, 1);
-__setfun__ ("Class", "ClassInit", &__Class_From_Init__, 1, 1);
 __setfun__ ("Class", "vset", &__vset__, 3, 1);
 __setfun__ ("Class", "vget", &__vget__, 2, 1);
-
-private define __new__ (self, cname)
-{
-  __->__ (cname, "Class::ClassNew::NULL";;__qualifiers);
-}
 
 private define __load__ (self, cname)
 {
   __->__ (cname, "Class::LoadClass::NULL";;__qualifiers);
 }
 
-private define __from_init__ (self, cname)
-{
-  __->__ (cname, "Class::ClassInit::NULL";;__qualifiers);
-}
-
 public variable Class = struct
   {
-  new = &__new__,
   load = &__load__,
-  init = &__from_init__,
   let = &vlet,
   fun = &addFun
   };

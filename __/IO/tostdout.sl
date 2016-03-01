@@ -7,8 +7,23 @@ private define tostdout_tty (args)
     str = strjoin (Array.map (String_Type, &sprintf, "%S%S", args[0],
       qualifier_exists ("n") ? "" : "\n"));
   else if (1 == length (args) && typeof (args[0]) == List_Type)
-    str = strjoin (Array.map (String_Type, &sprintf, "%S%S", args[0],
-      qualifier_exists ("n" ? "" : "\n")));
+    {
+    variable i;
+    str = "";
+    _for i (0, length (args[0]) - 1)
+      if (Struct_Type == typeof (args[0][i]))
+        str += struct_tostring (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
+      else if (Array_Type == typeof (args[0][i]))
+        {
+        variable ia;
+        _for ia (0, length (args[0][i]) - 1)
+          str += sprintf ("%S%S", args[0][i][ia],
+          qualifier_exists ("n") ? "" : "\n");
+        }
+      else
+        str += sprintf ("%S%S", args[0][i],
+        qualifier_exists ("n") ? "" : "\n");
+    }
   else
     {
     variable fmt = "%S ";
@@ -35,8 +50,23 @@ private define tostdout_redir (args)
     str = strjoin (array_map (String_Type, &sprintf, "%S%S", args[0],
       qualifier_exists ("n" ? "" : "\n")));
   else if (1 == length (args) && typeof (args[0]) == List_Type)
-    str = strjoin (Array.map (String_Type, &sprintf, "%S%S", args[0],
-      qualifier_exists ("n" ? "" : "\n")));
+    {
+    variable i;
+    str = "";
+    _for i (0, length (args[0]) - 1)
+      if (Struct_Type == typeof (args[0][i]))
+        str += struct_tostring (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
+      else if (Array_Type == typeof (args[0][i]))
+        {
+        variable ia;
+        _for ia (0, length (args[0][i]) - 1)
+          str += sprintf ("%S%S", args[0][i][ia],
+          qualifier_exists ("n") ? "" : "\n");
+        }
+      else
+        str += sprintf ("%S%S", args[0][i],
+        qualifier_exists ("n") ? "" : "\n");
+    }
   else
     {
     variable fmt = "%S ";

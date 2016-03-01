@@ -348,7 +348,6 @@ private define __read_com__ ()
 {
   variable __buf__ =  "";
   __buf__ += __read___ (THESE["__COMMAND__"]);
-  __buf__ += `Class.load ("Input");` + "\n";
   __buf__ += readfile (SRC_PROTO_PATH + "/__com.sl");
   __buf__;
 }
@@ -366,8 +365,6 @@ private define __read_app__ ()
 {
   variable __buf__ =  "";
   __buf__ += __read___ (THESE["__APP__"]);
-  __buf__ += `Class.init ("Input");` + "\n" +
-   `Class.init ("Smg");` + "\n";
   __buf__ += readfile (SRC_PROTO_PATH + "/__app.sl");
   __buf__;
 }
@@ -445,6 +442,7 @@ private define __install_bytecompiled__ ()
 
 private variable exclude_dirs = [".git", "dev", "C"];
 private variable exclude_files = ["README.md", "___.sl"];
+private variable bytecompiled_libs = [""];
 
 private define lib_dir_callback (dir, st, src_path, dest_path)
 {
@@ -457,14 +455,12 @@ private define lib_dir_callback (dir, st, src_path, dest_path)
   1;
 }
 
-private variable BYTECOMPILED_LIBS = [""];
-
 private define file_callback_libs (file, st, src_path, dest_path)
 {
   if (any (exclude_files == path_basename (file)))
     return 1;
 
-  if (any (BYTECOMPILED_LIBS == path_basename_sans_extname (file)))
+  if (any (bytecompiled_libs == path_basename_sans_extname (file)))
     {
     variable bytecompiled = file + "c";
     variable dest = strreplace (bytecompiled, src_path, dest_path);
@@ -472,8 +468,8 @@ private define file_callback_libs (file, st, src_path, dest_path)
     __bytecompile__ (file);
 
     if (-1 == rename (bytecompiled, dest))
-        This.exit ("failed to rename " + bytecompiled + " to " + dest + "\n" +
-          errno_string (errno), 1);
+      This.exit ("failed to rename " + bytecompiled + " to " + dest + "\n" +
+        errno_string (errno), 1);
 
     return 1;
     }
@@ -483,9 +479,9 @@ private define file_callback_libs (file, st, src_path, dest_path)
   ifnot (path_extname (file) == ".slc")
     File.copy (file, dest);
   else
-     if (-1 == rename (file, dest))
-        This.exit ("failed to rename " + file + " to " + dest + "\n" +
-          errno_string (errno), 1);
+    if (-1 == rename (file, dest))
+      This.exit ("failed to rename " + file + " to " + dest + "\n" +
+        errno_string (errno), 1);
 
   1;
 }
@@ -497,8 +493,8 @@ private define __scripts_dir_callback__ (dir, st)
   ifnot (strlen (com))
     return 1;
 
-  if (-1 == symlink ("__com.sl", "__" + com))
-    if (EEXIST == errno && readlink ("__" + com) == "__com.sl")
+  if (-1 == symlink ("COM.sl", "__" + com))
+    if (EEXIST == errno && readlink ("__" + com) == "COM.sl")
       return 1;
     else
       This.exit ("Couldn't create symbolic link " +  errno_string (errno), 1);
@@ -510,7 +506,7 @@ private define __install_scripts__ ()
 {
   () = chdir (BIN_PATH);
   variable scr = `#!` + BIN_PATH + "/__slsh\n\n" +
-    `if ("__com.sl" == path_basename (__argv[0]))
+    `if ("COM.sl" == path_basename (__argv[0]))
   {
   () = fprintf (stderr, "you cannot call directly this script\n");
   exit (1);
@@ -524,12 +520,10 @@ ROOTPATH = realpath (ROOTPATH + "/..");
 
 () = evalfile (ROOTPATH + "/lib/__/__com");`;
 
-  variable fp = fopen (BIN_PATH + "/__com.sl", "w");
-  () = fprintf (fp, "%s\n", scr);
-  () = fclose (fp);
+  writefile (BIN_PATH + "/COM.sl", scr);
 
-  if (-1 == chmod (BIN_PATH + "/__com.sl", 0755))
-    This.exit ("cannot change mode to " + BIN_PATH + "/__com.sl " +
+  if (-1 == chmod (BIN_PATH + "/COM.sl", 0755))
+    This.exit ("cannot change mode to " + BIN_PATH + "/COM.sl " +
       errno_string (errno), 1);
 
   Path.walk (SRC_COM_PATH + "/", &__scripts_dir_callback__, NULL);
@@ -538,8 +532,9 @@ ROOTPATH = realpath (ROOTPATH + "/..");
 }
 
 private variable CLASSES = [
-  "Input", "Smg", "Rand", "Crypt", "Os", "Opt", "String", "Rline",
-  "Re", "Diff", "Proc", "Sock", "Subst", "Sync", "Ved"];
+  "Input",  "Smg",   "Rand", "Crypt", "Os",  "Opt",
+  "String", "Rline", "Re",   "Diff",  "Proc", "Sock",
+  "Subst",  "Sync",  "Ved"];
 
 private define __bytecompile_classes__ ()
 {
@@ -547,9 +542,9 @@ private define __bytecompile_classes__ ()
   _for i (0, length (CLASSES) - 1)
     {
     if (VERBOSE)
-      io.tostdout ("compiling ", CLASSES[i]);
+      io.tostdout ("compiling", CLASSES[i]);
 
-    Class.init (CLASSES[i]);
+    Class.load (CLASSES[i]);
     }
 }
 
@@ -578,36 +573,26 @@ private define __main__ ()
   if (VERBOSE)
     io.tostdout ("compiling " + SRC_C_PATH + "/__slsh.c");
 
-  __compile_slsh__ ();
+  __compile_slsh__;
 
   ifnot (DONT_COMPILE_MODULES)
-    {
     __build_modules__;
-
-%    if (VERBOSE)
-%      io.tostdout ("installing modules to " + STD_C_PATH);
-
-%    __install_modules__;
-    }
 
   set_import_module_path (get_import_module_path + ":" + SRC_TMP_PATH +
     ":" + STD_C_PATH);
-
-  if (VERBOSE)
-    io.tostdout ("Compiling classes");
 
   __bytecompile_classes__;
 
   ifnot (DONT_COMPILE_MODULES)
     {
     if (VERBOSE)
-      io.tostdout ("installing modules to " + STD_C_PATH);
+      io.tostdout ("installing modules to", STD_C_PATH);
 
     __install_modules__;
     }
 
   if (VERBOSE)
-    io.tostdout ("installing " + SRC_TMP_PATH + "/__slsh to " + BIN_PATH);
+    io.tostdout ("installing", SRC_TMP_PATH + "/__slsh to", BIN_PATH);
 
   if (-1 == rename (SRC_TMP_PATH + "/__slsh", BIN_PATH + "/__slsh"))
     This.exit ("failed to rename " + SRC_TMP_PATH + "/__slsh to " + BIN_PATH +
