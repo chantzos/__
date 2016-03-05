@@ -1,5 +1,19 @@
 __use_namespace ("__");
 
+private variable __CLASS__ = Assoc_Type[Any_Type];
+private variable __V__ = Assoc_Type[Any_Type, NULL];
+private variable VARARGS = '?';
+
+private define __initclass__ (cname)
+{
+  __CLASS__[cname] = Assoc_Type[Any_Type];
+  __CLASS__[cname]["__FUN__"] = Assoc_Type[Fun_Type];
+  __CLASS__[cname]["__R__"] = @Class_Type;
+  __CLASS__[cname]["__SELF__"] = @Self_Type;
+
+  __V__[cname] = Assoc_Type[Var_Type];
+}
+
 private define __getclass__ (cname, init)
 {
   ifnot (assoc_key_exists (__CLASS__, cname))
@@ -686,13 +700,51 @@ private define __Class_From_Init__ (classpath)
       break;
       }
 
+    if ("require" == tokens[0])
+      if (4 > length (tokens))
+        throw ClassError, "Class::__INIT__::require declaration needs at least 4 args";
+      else
+        {
+        variable file = tokens[1];
+
+        ifnot ("from" == tokens[2])
+          throw ClassError, "Class::__INIT__::require statement, from keyword is missing";
+
+        variable from = tokens[3];
+
+        if (from == "std")
+          from = Env->STD_LIB_PATH + "/" + file;
+        else if (from == ".")
+          from = classpath- + "/" + file;
+        else
+          from = Env->STD_LIB_PATH + "/" + from + "/" + file;
+
+        variable ns = "Global";
+
+        ifnot (4 == length (tokens))
+          ifnot (6 == length (tokens))
+            throw ClassError, "Class::__INIT__::require declaration needs at least 6 args, to declare a namespace";
+          else
+            ifnot ("to" == tokens[4])
+              throw ClassError, "Class::__INIT__::require statement, to keyword is missing";
+            else
+              if ("." == tokens[5])
+                ns = cname;
+              else
+                ns = tokens[5];
+
+        eval_buf += "Load.file (\"" + from + "\", \"" + ns + "\");\n";
+
+        continue;
+        }
+
     if ("import" == tokens[0])
       if (1 == length (tokens))
         throw ClassError, "Class::__INIT__::import statement needs an argument";
       else
         {
         variable module = tokens[1];
-        variable ns = length (tokens) > 2 ? tokens[2] : NULL;
+        ns = length (tokens) > 2 ? tokens[2] : NULL;
 
         if ("NULL" == ns)
           ns = NULL;
@@ -921,9 +973,13 @@ private define __Class_From_Init__ (classpath)
         else
           eval_buf += "}\n\n";
 
-        funs[funname] = @Fun_Type;
-        funs[funname].nargs = nargs;
-        funs[funname].const = const;
+        ifnot (isproc)
+          {
+          funs[funname] = @Fun_Type;
+          funs[funname].nargs = nargs;
+          funs[funname].const = const;
+          }
+
         continue;
         }
 
@@ -956,9 +1012,9 @@ private define __Class_From_Init__ (classpath)
 
   eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
     classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
-      "\"], \"Class::classnew::NULL\");\n" + eval_buf;
+      "\"], \"Class::classnew::NULL\");\n\n" + eval_buf;
 
-  eval_buf += __assignself__ (cname;return_buf) + "\n";
+  eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
 
   eval_buf += cname + ".let = Class.let;\n";
   eval_buf += cname + ".fun = Class.fun;\n";
@@ -975,6 +1031,7 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
+ifnot ("Ved" == cname)
   () = remove (__in__);
 }
 

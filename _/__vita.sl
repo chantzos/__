@@ -89,25 +89,44 @@ public define Progr_Init (name)
   p;
 }
 
-__use_namespace ("__");
-
-private variable __CLASS__ = Assoc_Type[Any_Type];
-private variable __V__ = Assoc_Type[Any_Type, NULL];
-private variable VARARGS = '?';
-
-private define __initclass__ (cname)
-{
-  __CLASS__[cname] = Assoc_Type[Any_Type];
-  __CLASS__[cname]["__FUN__"] = Assoc_Type[Fun_Type];
-  __CLASS__[cname]["__R__"] = @Class_Type;
-  __CLASS__[cname]["__SELF__"] = @Self_Type;
-
-  __V__[cname] = Assoc_Type[Var_Type];
-}
-
 __use_namespace ("Load");
 
 private variable IMPORTED = Assoc_Type[Integer_Type, 0];
+private variable LOADED = Assoc_Type[Integer_Type, 0];
+
+private define file ()
+{
+  variable __file = "", ns = NULL;
+
+  if (2 == _NARGS)
+    __file = ();
+
+  if (3 == _NARGS)
+    (__file, ns) = ();
+
+  pop ();
+
+  if (NULL == ns || "" == ns)
+    ns = "Global";
+
+  variable lib = ns + "->" + __file;
+
+  if (LOADED[lib] && 0 == qualifier_exists ("force"))
+    return;
+
+  try
+    {
+    () = evalfile (__file, ns);
+    }
+  catch OpenError:
+    throw ClassError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
+  catch ParseError:
+    throw ClassError, "Load::file::ParseError, " + __file, __get_exception_info;
+  catch RunTimeError:
+    throw ClassError, "Load::file::RunTimeError, " + __file, __get_exception_info;
+
+  LOADED[lib] = 1;
+}
 
 private define module ()
 {
@@ -144,7 +163,7 @@ private define module ()
   IMPORTED[ns + "->" + module] = 1;
 }
 
-public variable Load = struct {__name, module = &module};
+public variable Load = struct {__name, module = &module, file = &file};
 
 __use_namespace ("IO");
 
@@ -223,4 +242,11 @@ public variable Exc = struct
   {
   __name, isnot = &isnot, print = &print, fmt = &fmt
   };
+
+__use_namespace ("Env");
+
+static define STD_LIB_PATH ()
+{
+  realpath (CLASSPATH + "/../__");
+}
 

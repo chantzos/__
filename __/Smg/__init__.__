@@ -47,7 +47,6 @@ class Smg
     get_struct_field (__COLOR__, clr);
   end
 
-
   def refresh ()
     slsmg_refresh ();
   end

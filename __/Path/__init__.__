@@ -1,7 +1,4 @@
 class Path
-  let OS = getenv ("PATH");
-  let HOME = getenv ("HOME");
-
   fun walk (dir, dir_callback, file_callback)
   fun exists (dir)
 end

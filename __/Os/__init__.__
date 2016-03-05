@@ -16,7 +16,7 @@ class Os
         passwd += char (chr);
       }
 
-    %send_msg (" ", 0);
+    Smg.send_msg (" ", 0);
 
     passwd;
   end
@@ -65,7 +65,7 @@ class Os
 
       ifnot (NULL == passwd)
         {
-        Os.vlet ("HASHEDDATA", self.encryptpasswd (passwd));
+        Os.let ("HASHEDDATA", self.encryptpasswd (passwd));
         passwd+= "\n";
         }
       }

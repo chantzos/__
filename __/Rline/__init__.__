@@ -184,7 +184,7 @@ class Rline
     if (-1 == access (histfile, F_OK|R_OK))
       return String_Type[0];
 
-    IO.readlines (histfile);
+    File.readlines (histfile);
   end
 
   def _execFunc_Type_ (func, argv) proc
@@ -1542,7 +1542,7 @@ class Rline
     rl._lin = rl.argv[0];
 
     variable
-      ar = IO.readlines (Env->STD_DATA_PATH + "/pcre/pcresyntax.txt"),
+      ar = File.readlines (Env->STD_DATA_PATH + "/pcre/pcresyntax.txt"),
       len = length (ar),
       lines = s._lines - (strlen (s._lin) / s._columns) - 3,
       prow = s._prow - (strlen (s._lin) / s._columns) - (len > lines ? lines : len) - 1;
@@ -1700,7 +1700,7 @@ class Rline
           return 0;
         }
 
-      ar = IO.readlines (file);
+      ar = File.readlines (file);
       }
 
     if (NULL == ar || typeof (ar) != Array_Type || 0 == length (ar))

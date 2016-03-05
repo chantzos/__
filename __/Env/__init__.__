@@ -1,34 +1,64 @@
 class Env
-  let PID = getpid ();
-  let UID = getuid ();
-  let GID = getgid ();
-  let USER = Sys.getpwname (UID);
-  let GROUP = Sys.getgrname (GID);
-  let TERM = getenv ("TERM");
-  let LANG = getenv ("LANG");
-  let DISPLAY = getenv ("DISPLAY");
-  let XAUTHORITY = getenv ("XAUTHORITY");
-  let SLSH_LIB_DIR = get_slang_load_path ();
+  let PID            = getpid ();
+  let UID            = getuid ();
+  let GID            = getgid ();
+  let USER           = Sys.getpwname (UID);
+  let GROUP          = Sys.getgrname (GID);
+  let TERM           = getenv ("TERM");
+  let LANG           = getenv ("LANG");
+  let DISPLAY        = getenv ("DISPLAY");
+  let XAUTHORITY     = getenv ("XAUTHORITY");
+  let IS_SU_PROC     = getuid == 0;
+  let SLSH_LIB_DIR   = get_slang_load_path ();
   let SLANG_MODULE_PATH = get_import_module_path ();
-  let IS_SU_PROC = getuid == 0;
 
+  let OS_PATH        = getenv ("PATH");
+  let HOME_PATH      = getenv ("HOME");
   let ROOT_PATH      = __tmp (&$0);
   let SRC_PATH       = ROOT_PATH + "/__";
-  let LIB_PATH       = ROOT_PATH + "/lib";
+  let STD_PATH       = ROOT_PATH + "/std";
   let TMP_PATH       = ROOT_PATH + "/tmp";
   let BIN_PATH       = ROOT_PATH + "/bin";
   let USER_PATH      = ROOT_PATH + "/usr";
-  let USER_DATA_PATH = ROOT_PATH + "/usr/data";
 
-  let STD_APP_PATH   = LIB_PATH + "/app";
-  let STD_COM_PATH   = LIB_PATH + "/com";
-  let STD_SLANG_PATH = LIB_PATH + "/__";
-  let STD_C_PATH     = LIB_PATH + "/C";
-  let STD_DATA_PATH  = LIB_PATH + "/data";
+  let STD_APP_PATH   = STD_PATH + "/app";
+  let STD_COM_PATH   = STD_PATH + "/com";
+  let STD_CLASS_PATH = STD_PATH + "/__";
+  let STD_LIB_PATH   = STD_PATH + "/___";
+  let STD_C_PATH     = STD_PATH + "/C";
+  let STD_DATA_PATH  = STD_PATH + "/data";
+
+  let USER_APP_PATH   = USER_PATH + "/app";
+  let USER_COM_PATH   = USER_PATH + "/com";
+  let USER_CLASS_PATH = USER_PATH + "/__";
+  let USER_LIB_PATH   = USER_PATH + "/___";
+  let USER_C_PATH     = USER_PATH + "/C";
+  let USER_DATA_PATH  = USER_PATH + "/data";
 
   let SRC_PROTO_PATH = SRC_PATH + "/_";
-  let SRC_SLANG_PATH = SRC_PATH + "/__";
+  let SRC_CLASS_PATH = SRC_PATH + "/__";
   let SRC_C_PATH     = SRC_PATH + "/C";
   let SRC_APP_PATH   = SRC_PATH + "/app";
   let SRC_COM_PATH   = SRC_PATH + "/com";
+
+  def defenv ()
+    variable lenv = [
+      "TERM=" + TERM,
+      "PATH=" + OS_PATH,
+      "LANG=" + LANG,
+      "HOME=" + HOME_PATH,
+      "SLANG_MODULE_PATH=" + SLANG_MODULE_PATH,
+      "SLSH_LIB_DIR=" + SLSH_LIB_DIR,
+      "COLUMNS=" + string (COLUMNS),
+      "LINES=" + string (LINES),
+      ];
+
+    ifnot (NULL == DISPLAY)
+      lenv = [lenv, "DISPLAY=" + DISPLAY];
+
+    ifnot (NULL == XAUTHORITY)
+      lenv = [lenv, "XAUTHORITY=" + XAUTHORITY];
+
+    lenv;
+  end
 end

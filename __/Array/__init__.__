@@ -40,7 +40,7 @@ class Array
   end
 
   def getsize (ar)
-    ifnot (istype (ar, String_Type))
+    ifnot (istype (self, ar, String_Type))
       throw ClassError, "Array::getsize::array should be of String_Type[]";
 
     int (sum (strbytelen (ar)) + length (ar));

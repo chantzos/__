@@ -1,7 +1,56 @@
-class Ved
-  var public Vundo;
+Ved = __->__ ("Ved", "Ved", "/home/aga/chan/__/__/Ved", 1, ["get_frame_buf",
+ "__vinitbuf",
+ "get_cur_rline",
+ "del_frame",
+ "fun",
+ "get_buf",
+ "storePos",
+ "new_frame",
+ "__vwrite_prompt",
+ "get_ftype",
+ "get_cur_frame",
+ "change_frame",
+ "init_ftype",
+ "deftype",
+ "__vsetbuf",
+ "restorePos",
+ "__vdraw_wind",
+ "__vwritefile",
+ "get_cur_wind",
+ "get_cur_bufname",
+ "__vgetlines",
+ "preloop",
+ "let",
+ "get_cur_buf",
+ "del_wind",
+ "__vparse_arg_range"], "Class::classnew::NULL");
 
-  typedef Ftype
+typedef struct {
+    cur_frame,
+    frame_rows,
+    frame_names,
+    frames,
+    buffers,
+    bufnames,
+    rline,
+}Wind_Type;
+
+typedef struct {
+    _i,
+    _index,
+    _findex,
+    ptr,
+}Pos_Type;
+
+typedef struct {
+    chr,
+    lnr,
+    prev_l,
+    next_l,
+    modified,
+}Insert_Type;
+
+typedef struct {
     _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
     _linlen,_avlins,_findex,_index,_shiftwidth,_expandtab,_undolevel,
     _autoindent,_dir,_autochdir,_is_wrapped_line,
@@ -10,35 +59,11 @@ class Ved
     vedloop,vedloopcallback,
     ved,
     draw, lexicalhl, autoindent, pairs,
-  end
+}Ftype_Type;
 
-  typedef Insert
-    chr,
-    lnr,
-    prev_l,
-    next_l,
-    modified,
-  end
+public variable Vundo;;
 
-  typedef Pos
-    _i,
-    _index,
-    _findex,
-    ptr,
-  end
-
-  typedef Wind
-    cur_frame,
-    frame_rows,
-    frame_names,
-    frames,
-    buffers,
-    bufnames,
-    rline,
-  end
-
-  var vis = struct
-    {
+private variable vis=struct    {
     _i,cur,ptr,mode,
     clr = Smg->COLOR.visual,
     l_mode,l_down,l_up,l_page_up,l_page_down,
@@ -52,55 +77,114 @@ class Ved
     vlins,lnrs,linlen,lines,sel,at_exit,
     };
 
-  let VED_DIR = Env->TMP_PATH + "/ved/" + string (Env->PID);
 
-  let EL_MAP = [902, [904:906], 908, [910:929], [931:937], [945:974]];
-  let EN_MAP = [['a':'z'], ['A':'Z']];
-  let MAPS   = [EL_MAP, EN_MAP];
-  let WCHARS = array_map (String_Type, &char, [['0':'9'], EN_MAP, EL_MAP, '_']);
-  let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':'];
-  let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';'];
+__->__ ("Ved", "VED_DIR", Env->TMP_PATH+"/ved/"+string(Env->PID), "Class::vset::NULL";const = 1, dtype = NULL);
 
-  var public POS    = Pos_Type[10];
-  var public FTYPES = Assoc_Type[Integer_Type];
-  var public MARKS  = Assoc_Type[Pos_Type];
-  var public REG    = Assoc_Type[String_Type];
-  var public VED_ROWS = [1:LINES - 3];
-  var public VED_INFOCLRFG = Smg->COLOR.infofg;
-  var public VED_INFOCLRBG = Smg->COLOR.infobg;
-  var public VED_PROMPTCLR = Smg->COLOR.prompt;
+static define VED_DIR ()
+{
+__->__ ("Ved",  "VED_DIR", "Class::vget::VED_DIR";getref);
+}
 
-  var public VED_MODIFIED = 0x01;
-  var public VED_ONDISKMODIFIED = 0x02;
-  var public VED_RDONLY = 0x04;
+__->__ ("Ved", "EL_MAP", [902,[904:906],908,[910:929],[931:937],[945:974]], "Class::vset::NULL";const = 1, dtype = NULL);
 
-  var public VED_WIND = Assoc_Type[Wind_Type];
-  var public VED_CUR_WIND = NULL;
-  var public VED_PREV_WIND;
-  var public VED_PREV_BUFINDEX;
-  var public VED_MAXFRAMES = 3;
+static define EL_MAP ()
+{
+__->__ ("Ved",  "EL_MAP", "Class::vget::EL_MAP";getref);
+}
 
-  var public VED_ISONLYPAGER = 0;
-  var public VED_RLINE = 1;
-  var public UNDELETABLE = String_Type[0];
-  var public SPECIAL = String_Type[0];
+__->__ ("Ved", "EN_MAP", [['a':'z'],['A':'Z']], "Class::vset::NULL";const = 1, dtype = NULL);
 
-  do
+static define EN_MAP ()
+{
+__->__ ("Ved",  "EN_MAP", "Class::vget::EN_MAP";getref);
+}
+
+__->__ ("Ved", "MAPS", [EL_MAP,EN_MAP], "Class::vset::NULL";const = 1, dtype = NULL);
+
+static define MAPS ()
+{
+__->__ ("Ved",  "MAPS", "Class::vget::MAPS";getref);
+}
+
+__->__ ("Ved", "WCHARS", array_map(String_Type,&char,[['0':'9'],EN_MAP,EL_MAP,'_']), "Class::vset::NULL";const = 1, dtype = NULL);
+
+static define WCHARS ()
+{
+__->__ ("Ved",  "WCHARS", "Class::vget::WCHARS";getref);
+}
+
+__->__ ("Ved", "DEFINED_UPPER_CASE", ['+',',','}',')',':'], "Class::vset::NULL";const = 1, dtype = NULL);
+
+static define DEFINED_UPPER_CASE ()
+{
+__->__ ("Ved",  "DEFINED_UPPER_CASE", "Class::vget::DEFINED_UPPER_CASE";getref);
+}
+
+__->__ ("Ved", "DEFINED_LOWER_CASE", ['-','.','{','(',';'], "Class::vset::NULL";const = 1, dtype = NULL);
+
+static define DEFINED_LOWER_CASE ()
+{
+__->__ ("Ved",  "DEFINED_LOWER_CASE", "Class::vget::DEFINED_LOWER_CASE";getref);
+}
+
+public variable POS=Pos_Type[10];
+
+public variable FTYPES=Assoc_Type[Integer_Type];
+
+public variable MARKS=Assoc_Type[Pos_Type];
+
+public variable REG=Assoc_Type[String_Type];
+
+public variable VED_ROWS=[1:LINES-3];
+
+public variable VED_INFOCLRFG=Smg->COLOR.infofg;
+
+public variable VED_INFOCLRBG=Smg->COLOR.infobg;
+
+public variable VED_PROMPTCLR=Smg->COLOR.prompt;
+
+public variable VED_MODIFIED=0x01;
+
+public variable VED_ONDISKMODIFIED=0x02;
+
+public variable VED_RDONLY=0x04;
+
+public variable VED_WIND=Assoc_Type[Wind_Type];
+
+public variable VED_CUR_WIND=NULL;
+
+public variable VED_PREV_WIND;;
+
+public variable VED_PREV_BUFINDEX;;
+
+public variable VED_MAXFRAMES=3;
+
+public variable VED_ISONLYPAGER=0;
+
+public variable VED_RLINE=1;
+
+public variable UNDELETABLE=String_Type[0];
+
+public variable SPECIAL=String_Type[0];
+
     Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
-  end
+public variable s_histfile=Env->USER_DATA_PATH+"/"+Env->USER+"/ved_search_history";
 
-  var public s_histfile = Env->USER_DATA_PATH + "/" + Env->USER + "/ved_search_history";
-  var public s_histindex = NULL;
-  var public s_history = {};
+public variable s_histindex=NULL;
 
-  def _invalid () proc
+public variable s_history={};
+
+private define _invalid ()
+{
     pop ();
-  end
+}
 
-  var public VED_PAGER = Assoc_Type[Ref_Type, &_invalid];
-  var public VEDCOUNT;
+public variable VED_PAGER=Assoc_Type[Ref_Type,&_invalid];
 
-  def build_ftype_table () proc
+public variable VEDCOUNT;;
+
+private define build_ftype_table ()
+{
     variable i;
     variable ii;
     variable ft;
@@ -116,40 +200,45 @@ class Ved
         if (Dir.isdirectory (nss[i] + "/ftypes/" + ft[ii]))
           FTYPES[ft[ii]] = 0;
       }
-  end
+}
 
-  do
     build_ftype_table ();
 
     if (-1 == Dir.make_parents (VED_DIR, File->PERM["PRIVATE"]))
       throw ClassError, "Ved::ATINIT::" + VED_DIR + ": cannot make directory, "
         + errno_string (errno);
-  end
-
-  def getXsel () public proc
+public define getXsel ()
+{
     "";
-  end
+}
 
-  def seltoX (sel) public proc
-  end
+public define seltoX (sel)
+{
+}
 
-  def topline () public proc
-  end
+public define topline ()
+{
+}
 
-  def toplinedr () public proc
-  end
+public define toplinedr ()
+{
+}
 
-  def __eval () public proc
-  end
+public define __eval ()
+{
+}
 
-  def insert () proc
-  end
+private define insert ()
+{
+}
 
-  def set_modified (s) proc
+private define set_modified (s)
+{
     s._flags |= VED_MODIFIED;
-  end
+}
 
-  def get_ftype (fn)
+private define get_ftype (self, fn)
+{
     variable ftype = substr (path_extname (fn), 2, -1);
     ifnot (any (assoc_get_keys (FTYPES) == ftype))
       if ("mutt-" == substr (path_basename (fn), 1, 5))
@@ -158,9 +247,12 @@ class Ved
         ftype = "txt";
 
     ftype;
-  end
+}
 
-  def! init_ftype (ftype)
+__->__ ("Ved", "get_ftype", &get_ftype, 1, 1, "Class::setfun::__initfun__");
+
+private define init_ftype (self, ftype)
+{
     ifnot (FTYPES[ftype])
       FTYPES[ftype] = 1;
 
@@ -171,27 +263,37 @@ class Ved
 
     type._type = ftype;
     type;
-  end
+}
 
-  def storePos (v, pos)
+__->__ ("Ved", "init_ftype", &init_ftype, 1, 0, "Class::setfun::__initfun__");
+
+private define storePos (self, v, pos)
+{
     pos._i = qualifier ("_i", v._ii);
     pos.ptr = @v.ptr;
     pos._index = v._index;
     pos._findex = v._findex;
-  end
+}
 
-  def restorePos (v, pos)
+__->__ ("Ved", "storePos", &storePos, 2, 1, "Class::setfun::__initfun__");
+
+private define restorePos (self, v, pos)
+{
     v._i = pos._i;
     v.ptr = pos.ptr;
     v._index = pos._index;
     v._findex = pos._findex;
-  end
+}
 
-  def __get_null_str (indent) proc
+__->__ ("Ved", "restorePos", &restorePos, 2, 1, "Class::setfun::__initfun__");
+
+private define __get_null_str (indent)
+{
     sprintf ("%s\000", repeat (" ", indent));
-  end
+}
 
-  def __vgetlines (fname, indent, st)
+private define __vgetlines (self, fname, indent, st)
+{
     if (-1 == access (fname, F_OK))
       {
       st.st_size = 0;
@@ -222,36 +324,45 @@ class Ved
     indent = repeat (" ", indent);
 
     array_map (String_Type, &sprintf, "%s%s", indent, lines);
-  end
+}
 
-  require topline from wind
+__->__ ("Ved", "__vgetlines", &__vgetlines, 3, 1, "Class::setfun::__initfun__");
 
-  def _on_lang_change_ (mode, ptr) public proc
+Load.file ("/home/aga/chan/std/___/wind/topline", "Global");
+public define _on_lang_change_ (mode, ptr)
+{
     topline (" -- " + mode + " --");
     Smg.setrcdr (ptr[0], ptr[1]);
-  end
+}
 
-  def __vwrite_prompt (str, col)
+private define __vwrite_prompt (self, str, col)
+{
     Smg.atrcaddnstrdr (str, VED_PROMPTCLR, PROMPTROW, 0,
       qualifier ("row", PROMPTROW), col, COLUMNS);
-  end
+}
 
-  def __vlinlen (s, r) proc
+__->__ ("Ved", "__vwrite_prompt", &__vwrite_prompt, 2, 1, "Class::setfun::__initfun__");
+
+private define __vlinlen (s, r)
+{
     r = (r == '.' ? s.ptr[0] : r) - s.rows[0];
     strlen (s.lins[r]) - s._indent;
-  end
+}
 
-  def __vline (s, r) public proc
+public define __vline (s, r)
+{
     r = (r == '.' ? s.ptr[0] : r) - s.rows[0];
     s.lins[r];
-  end
+}
 
-  def __vlnr (s, r) proc
+private define __vlnr (s, r)
+{
     r = (r == '.' ? s.ptr[0] : r) - s.rows[0];
     s.lnrs[r];
-  end
+}
 
-  def __vtail (s) proc
+private define __vtail (s)
+{
     variable
       lnr = __vlnr (s, '.') + 1,
       line = __vline (s, '.');
@@ -262,21 +373,24 @@ class Ved
       s._len + 1, (100.0 / s._len) * (lnr - 1), __vlinlen (s, '.'),
       qualifier ("chr", String.decode (substr (line, s._index + 1, 1))[0]),
       s._undolevel, length (s.undo));
-  end
+}
 
-  def __vdraw_tail (s) proc
+private define __vdraw_tail (s)
+{
     if (s._is_wrapped_line)
       Smg.hlregion (1, s.ptr[0], COLUMNS - 2, 1, 2);
 
     Smg.atrcaddnstrdr (__vtail (s;;__qualifiers ()), VED_INFOCLRFG, s.rows[-1], 0, s.ptr[0], s.ptr[1],
       COLUMNS);
-  end
+}
 
-  def __vgetlinestr (s, line, ind) proc
+private define __vgetlinestr (s, line, ind)
+{
     substr (line, ind + s._indent, s._linlen);
-  end
+}
 
-  def __vfpart_of_word (s, line, col, start) proc
+private define __vfpart_of_word (s, line, col, start)
+{
     ifnot (strlen (line))
       return "";
 
@@ -293,9 +407,10 @@ class Ved
       }
 
     substr (line, @start + 1, origcol - @start + 1);
-  end
+}
 
-  def __vfind_word (s, line, col, start, end) public proc
+public define __vfind_word (s, line, col, start, end)
+{
     if (0 == strlen (line) || ' ' == line[col] ||
         0 == any (WCHARS == char (line[col])))
       return "";
@@ -317,9 +432,10 @@ class Ved
     @end = col - 1;
 
     substr (line, @start + 1, @end - @start + 1);
-  end
+}
 
-  def __vfind_Word (s, line, col, start, end) proc
+private define __vfind_Word (s, line, col, start, end)
+{
     ifnot (col - s._indent)
       @start = s._indent;
     else
@@ -336,9 +452,10 @@ class Ved
     @end = col - 1;
 
     substr (line, @start + 1, @end - @start + 1);
-  end
+}
 
-  def __vparse_arg_range (s, arg, lnrs)
+private define __vparse_arg_range (self, s, arg, lnrs)
+{
     arg = substr (arg, strlen ("--range=") + 1, -1);
     ifnot (strlen (arg))
       return NULL;
@@ -361,17 +478,22 @@ class Ved
       return NULL;
 
     lnrs[[range[0]:range[1]]];
-  end
+}
 
-  def __get_dec (chr, dir) proc
+__->__ ("Ved", "__vparse_arg_range", &__vparse_arg_range, 3, 1, "Class::setfun::__initfun__");
+
+private define __get_dec (chr, dir)
+{
     any ([['0':'9'], '.'] == chr);
-  end
+}
 
-  def __get_hex (chr, dir) proc
+private define __get_hex (chr, dir)
+{
     any (chr == ("lhs" == dir ? ['0'] : [['0':'9'], ['a':'f'], ['A':'F'], 'x']));
-  end
+}
 
-  def __vfind_nr (indent, line, col, start, end, ishex, isoct, isbin) proc
+private define __vfind_nr (indent, line, col, start, end, ishex, isoct, isbin)
+{
     ifnot (any ([['0':'9'], '-', '.', 'x'] == line[col]))
       return "";
 
@@ -447,14 +569,16 @@ class Ved
         return "";
 
     nr;
-  end
+}
 
-  def write_line (fp, line, indent) proc
+private define write_line (fp, line, indent)
+{
     line = substr (line, indent + 1, -1);
     return fwrite (line, fp);
-  end
+}
 
-  def __vwritetofile (file, lines, indent, bts) proc
+private define __vwritetofile (file, lines, indent, bts)
+{
     variable
       i,
       retval,
@@ -473,9 +597,10 @@ class Ved
       return errno;
 
     0;
-  end
+}
 
-  def __vwritefile (s, overwrite, ptr, file, append)
+private define __vwritefile (self, s, overwrite, ptr, file, append)
+{
     variable bts = 0;
 
     if (NULL == file)
@@ -517,34 +642,42 @@ class Ved
 
     if (file == s._abspath)
       s._flags &= ~VED_MODIFIED;
-  end
+}
 
-  def waddlineat (s, line, clr, row, col, len) proc
+__->__ ("Ved", "__vwritefile", &__vwritefile, 5, 1, "Class::setfun::__initfun__");
+
+private define waddlineat (s, line, clr, row, col, len)
+{
     Smg.atrcaddnstr (line, clr, row, col, len);
     s.lexicalhl ([line], [row]);
-  end
+}
 
-  def waddline (s, line, clr, row) proc
+private define waddline (s, line, clr, row)
+{
     Smg.atrcaddnstr (line, clr, row, s._indent, s._linlen);
     s.lexicalhl ([line], [row]);
-  end
+}
 
-  def _set_clr_ (s, clr, set) proc
+private define _set_clr_ (s, clr, set)
+{
     s.clrs[-1] = clr;
     Smg->IMG[s.rows[-1]][1] = clr;
     if (set)
       Smg.hlregion (clr, s.rows[-1], 0, 1, COLUMNS);
-  end
+}
 
-  def __vset_clr_fg (s, set) proc
+private define __vset_clr_fg (s, set)
+{
     _set_clr_ (s, VED_INFOCLRFG, set);
-  end
+}
 
-  def __vset_clr_bg (s, set) proc
+private define __vset_clr_bg (s, set)
+{
     _set_clr_ (s, VED_INFOCLRBG, set);
-  end
+}
 
-  def _initrowsbuffvars_ (s) proc
+private define _initrowsbuffvars_ (s)
+{
     s.cols = Integer_Type[length (s.rows)];
     s.cols[*] = 0;
 
@@ -553,21 +686,31 @@ class Ved
     s.clrs[-1] = VED_INFOCLRFG;
 
     s._avlins = length (s.rows) - 2;
-  end
+}
 
-  def get_cur_wind ()
+private define get_cur_wind (self)
+{
     VED_WIND[VED_CUR_WIND];
-  end
+}
 
-  def get_cur_frame ()
+__->__ ("Ved", "get_cur_wind", &get_cur_wind, 0, 1, "Class::setfun::__initfun__");
+
+private define get_cur_frame (self)
+{
     self.get_cur_wind ().cur_frame;
-  end
+}
 
-  def get_cur_rline ()
+__->__ ("Ved", "get_cur_frame", &get_cur_frame, 0, 1, "Class::setfun::__initfun__");
+
+private define get_cur_rline (self)
+{
     self.get_cur_wind ().rline;
-  end
+}
 
-  def __vsetbuf (key)
+__->__ ("Ved", "get_cur_rline", &get_cur_rline, 0, 1, "Class::setfun::__initfun__");
+
+private define __vsetbuf (self, key)
+{
     variable w = self.get_cur_wind ();
 
     ifnot (any (key == w.bufnames))
@@ -584,9 +727,12 @@ class Ved
 
     if (s._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (s._dir);
-  end
+}
 
-  def _addbuf_ (s) proc
+__->__ ("Ved", "__vsetbuf", &__vsetbuf, 1, 1, "Class::setfun::__initfun__");
+
+private define _addbuf_ (s)
+{
     ifnot (path_is_absolute (s._fname))
       s._abspath = getcwd () + s._fname;
     else
@@ -600,9 +746,10 @@ class Ved
     w.buffers[s._abspath] = s;
     w.bufnames = [w.bufnames,  s._abspath];
     w.buffers[s._abspath]._dir = realpath (path_dirname (s._abspath));
-  end
+}
 
-  def __vinitbuf (s, fname, rows, lines, t)
+private define __vinitbuf (self, s, fname, rows, lines, t)
+{
     s._maxlen = t._maxlen;
     s._indent = t._indent;
     s._shiftwidth = t._shiftwidth;
@@ -657,9 +804,12 @@ class Ved
     s._ii = 0;
 
     _addbuf_ (s);
-  end
+}
 
-  def __vdraw_wind ()
+__->__ ("Ved", "__vinitbuf", &__vinitbuf, 5, 1, "Class::setfun::__initfun__");
+
+private define __vdraw_wind (self)
+{
     variable w = self.get_cur_wind ();
     variable i;
     variable s;
@@ -684,39 +834,50 @@ class Ved
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (cur._dir);
-  end
+}
 
-  % many functions (like the next) imply no errors.
-  % the logic is to unveil any code errors.
-  % like the test phase to a waterfall model.
+__->__ ("Ved", "__vdraw_wind", &__vdraw_wind, 0, 1, "Class::setfun::__initfun__");
 
-  def get_buf (name)
+private define get_buf (self, name)
+{
     variable w = self.get_cur_wind ();
 
     ifnot (any (name == w.bufnames))
       return NULL;
 
     w.buffers[name];
-  end
+}
 
-  def get_cur_buf ()
+__->__ ("Ved", "get_buf", &get_buf, 1, 1, "Class::setfun::__initfun__");
+
+private define get_cur_buf (self)
+{
     variable w = self.get_cur_wind ();
     w.buffers[w.frame_names[w.cur_frame]];
-  end
+}
 
-  def get_cur_bufname ()
+__->__ ("Ved", "get_cur_buf", &get_cur_buf, 0, 1, "Class::setfun::__initfun__");
+
+private define get_cur_bufname (self)
+{
     self.get_cur_buf ()._abspath;
-  end
+}
 
-  def get_frame_buf (frame)
+__->__ ("Ved", "get_cur_bufname", &get_cur_bufname, 0, 1, "Class::setfun::__initfun__");
+
+private define get_frame_buf (self, frame)
+{
     variable w = self.get_cur_wind ();
     if (frame >= w.frames)
       return NULL;
 
     w.buffers[w.frame_names[frame]];
-  end
+}
 
-  def change_frame ()
+__->__ ("Ved", "get_frame_buf", &get_frame_buf, 1, 1, "Class::setfun::__initfun__");
+
+private define change_frame (self)
+{
     variable w = self.get_cur_wind ();
     variable s = w.buffers[w.frame_names[w.cur_frame]];
     variable dir = qualifier ("dir", "next");
@@ -735,9 +896,12 @@ class Ved
     self.__vsetbuf (s._abspath);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def framesize (frames) proc
+__->__ ("Ved", "change_frame", &change_frame, 0, 1, "Class::setfun::__initfun__");
+
+private define framesize (frames)
+{
     variable f = Integer_Type[frames];
     variable ff = Array_Type[frames];
     variable len = length (VED_ROWS);
@@ -757,9 +921,10 @@ class Ved
       }
 
     ff;
-  end
+}
 
-  def del_frame ()
+private define del_frame (self)
+{
     variable frame = _NARGS ? () : self.get_cur_frame ();
     variable w = self.get_cur_wind ();
 
@@ -806,9 +971,12 @@ class Ved
       }
 
     self.__vdraw_wind ();
-  end
+}
 
-  def new_frame (fn)
+__->__ ("Ved", "del_frame", &del_frame, 0, 1, "Class::setfun::__initfun__");
+
+private define new_frame (self, fn)
+{
     variable w = self.get_cur_wind ();
     if (w.frames == VED_MAXFRAMES)
       return;
@@ -850,9 +1018,12 @@ class Ved
       }
 
     self.__vdraw_wind ();
-  end
+}
 
-  def del_wind (name)
+__->__ ("Ved", "new_frame", &new_frame, 1, 1, "Class::setfun::__initfun__");
+
+private define del_wind (self, name)
+{
     if (1 == length (VED_WIND))
       return;
 
@@ -872,12 +1043,16 @@ class Ved
       VED_CUR_WIND = i ? winds[i-1] : winds[-1];
       self.__vdraw_wind ();
       }
-  end
+}
 
-  def on_wind_change (w) public proc
-  end
+__->__ ("Ved", "del_wind", &del_wind, 1, 1, "Class::setfun::__initfun__");
 
-  def wind_change (to) proc
+public define on_wind_change (w)
+{
+}
+
+private define wind_change (to)
+{
     variable winds = assoc_get_keys (VED_WIND);
     winds = winds[array_sort (winds)];
 
@@ -913,17 +1088,20 @@ class Ved
     on_wind_change (w);
 
     Ved.__vdraw_wind ();
-  end
+}
 
-  def next_wind (s) proc
+private define next_wind (s)
+{
     wind_change (".");
-  end
+}
 
-  def on_wind_new (w) public proc
+public define on_wind_new (w)
+{
     (@__get_reference ("__initrline"));
-  end
+}
 
-  def wind_init (name, frames) proc
+private define wind_init (name, frames)
+{
     if (any (name == assoc_get_keys (VED_WIND)) && 0 == qualifier_exists ("force"))
       return;
 
@@ -943,9 +1121,10 @@ class Ved
 
     if (qualifier_exists ("on_wind_new"))
       on_wind_new (VED_WIND[name]);
-  end
+}
 
-  def new_wind () proc
+private define new_wind ()
+{
     variable name = _NARGS ? () : NULL;
 
     variable i;
@@ -976,9 +1155,10 @@ class Ved
 
     if (qualifier_exists ("draw_wind"))
       Ved.__vdraw_wind ();
-  end
+}
 
-  def bufdelete (s, bufname, force) proc
+private define bufdelete (s, bufname, force)
+{
     if (any (bufname == UNDELETABLE))
       return;
 
@@ -1038,17 +1218,20 @@ class Ved
       s = Ved.get_cur_buf ();
       s.draw ();
       }
-  end
+}
 
-  def _rdregs_ () proc
+private define _rdregs_ ()
+{
     ['*',  '/', '%', '='];
-  end
+}
 
-  def _regs_ () proc
+private define _regs_ ()
+{
     [['A':'Z'], ['a':'z'], '*', '"', '/', '%'];
-  end
+}
 
-  def _get_reg_ (reg) proc
+private define _get_reg_ (reg)
+{
     ifnot (any ([_regs_, '='] == reg[0]))
       return NULL;
 
@@ -1073,37 +1256,37 @@ class Ved
       return NULL;
 
     REG[reg];
-  end
+}
 
-  def _set_reg_ (reg, sel) proc
+private define _set_reg_ (reg, sel)
+{
     variable k = assoc_get_keys (REG);
 
     if (any (_regs_ () == reg[0]) || 0 == any (k == reg))
       REG[reg] = sel;
     else
       REG[reg] = REG[reg] + sel;
-  end
+}
 
-  %%% MARK
-
-  def mark_init (m) proc
+private define mark_init (m)
+{
     ifnot (assoc_key_exists (MARKS, m))
       MARKS[m] = @Pos_Type;
-  end
+}
 
-  do
     array_map (&mark_init, array_map (String_Type, &string, ['`', '<', '>']));
-  end
-
-  def mark_set (s, m) proc
+private define mark_set (s, m)
+{
     Ved.storePos (s, MARKS[m]);
-  end
+}
 
-  def markbacktick (s) proc
+private define markbacktick (s)
+{
     mark_set (s, string ('`'));
-  end
+}
 
-  def mark (s) proc
+private define mark (s)
+{
     variable m = Input.getch (;disable_langchange);
 
     if ('a' <= m <= 'z')
@@ -1112,9 +1295,10 @@ class Ved
       mark_init (m);
       mark_set (s, m);
       }
-  end
+}
 
-  def mark_get () proc
+private define mark_get ()
+{
     variable marks = assoc_get_keys (MARKS);
     variable mark = Input.getch (;disable_langchange);
 
@@ -1129,15 +1313,17 @@ class Ved
       return NULL;
 
     m;
-  end
+}
 
-  %%% VED OBJECT
-
-  def preloop (s)
+private define preloop (self, s)
+{
     markbacktick (s);
-  end
+}
 
-  def _draw_ (s) proc
+__->__ ("Ved", "preloop", &preloop, 1, 1, "Class::setfun::__initfun__");
+
+private define _draw_ (s)
+{
     if (-1 == s._len) % this shouldn't occur
       {
       Smg.send_msg ("_draw_ (), caught -1 == s._len condition" + s._fname, 1);
@@ -1203,13 +1389,15 @@ class Ved
     s.lexicalhl (ar[indices], s.vlins);
 
     (@[Smg.setrcdr, Smg.setrc][qualifier_exists ("dont_draw")]) (Smg, s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def _vedloopcallback_ (s) proc
+private define _vedloopcallback_ (s)
+{
     (@VED_PAGER[string (s._chr)]) (s);
-  end
+}
 
-  def _loop_ (s) proc
+private define _loop_ (s)
+{
     variable ismsg = 0;
     variable rl;
 
@@ -1273,9 +1461,10 @@ class Ved
       }
 
     0;
-  end
+}
 
-  def _vedloop_ (s) proc
+private define _vedloop_ (s)
+{
     forever
       try
         if (_loop_ (s))
@@ -1285,11 +1474,10 @@ class Ved
         Exc.print (NULL);
         (@__get_reference ("__vmessages"));
         }
-  end
+}
 
-  %%% SYNTAX PUBLIC FUNCTIONS
-
-  def __hl_groups (lines, vlines, colors, regexps) proc
+private define __hl_groups (lines, vlines, colors, regexps)
+{
     variable
       i,
       ii,
@@ -1334,11 +1522,10 @@ class Ved
                                                    % to match it as eol
         }
       }
-  end
+}
 
-  %%% SYN CALLBACK FUNCTIONS
-
-  def autoindent (s, indent, line) proc
+private define autoindent (s, indent, line)
+{
     % lookup for a (not private) type_autoindent
     variable f = __get_reference (s._type + "_autoindent");
     % call it (if exists) and calc the value
@@ -1347,12 +1534,14 @@ class Ved
       @indent =  s._indent + (s._autoindent ? s._shiftwidth : 0);
     else
       @indent = (@f) (s, line);
-  end
+}
 
-  def lexicalhl (s, lines, vlines) proc
-  end
+private define lexicalhl (s, lines, vlines)
+{
+}
 
-  def deftype ()
+private define deftype (self)
+{
     struct {
       _indent = 0,
       _shiftwidth = 4,
@@ -1366,11 +1555,12 @@ class Ved
       vedloop = &_vedloop_,
       vedloopcallback = &_vedloopcallback_,
       };
-  end
+}
 
-  % PAGER
+__->__ ("Ved", "deftype", &deftype, 0, 1, "Class::setfun::__initfun__");
 
-  def __pg_left (s) proc
+private define __pg_left (s)
+{
     ifnot (s.ptr[1] - s._indent)
       ifnot (s._is_wrapped_line)
         return -1;
@@ -1390,9 +1580,10 @@ class Ved
     s.ptr[1]--;
 
     0;
-  end
+}
 
-  def __pg_right (s, linlen) proc
+private define __pg_right (s, linlen)
+{
     if (s._index - s._indent == linlen - 1 || 0 == linlen)
       return -1;
 
@@ -1407,9 +1598,10 @@ class Ved
     s._findex++;
 
     1;
-  end
+}
 
-  def _indent_in_ (s, line, i_) proc
+private define _indent_in_ (s, line, i_)
+{
     ifnot (strlen (line) - s._indent)
       return NULL;
 
@@ -1420,9 +1612,10 @@ class Ved
       @i_++;
 
     substr (line, @i_ + 1 - s._indent, -1);
-  end
+}
 
-  def _adjust_col_ (s, linlen, plinlen) proc
+private define _adjust_col_ (s, linlen, plinlen)
+{
     if (linlen == 0 || 0 == s.ptr[1] - s._indent)
       {
       s.ptr[1] = s._indent;
@@ -1444,9 +1637,10 @@ class Ved
         s._index = linlen - 1 + s._indent;
         s._findex = s._indent;
         }
-  end
+}
 
-  def __define_case (chr) proc
+private define __define_case (chr)
+{
     ifnot (any (@chr == [DEFINED_LOWER_CASE, DEFINED_UPPER_CASE]))
       return 0;
 
@@ -1461,9 +1655,10 @@ class Ved
     @chr = low ? DEFINED_UPPER_CASE[ind] : DEFINED_LOWER_CASE[ind];
 
     1;
-  end
+}
 
-  def _word_change_case_ (s, what) proc
+private define _word_change_case_ (s, what)
+{
     variable
       ii,
       chr,
@@ -1506,9 +1701,10 @@ class Ved
     waddline (s, line, 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def _gotoline_ (s) proc
+private define _gotoline_ (s)
+{
     if (VEDCOUNT <= s._len + 1)
       {
       markbacktick (s);
@@ -1522,9 +1718,10 @@ class Ved
 
       Smg.setrcdr (s.ptr[0], s.ptr[1]);
       }
-  end
+}
 
-  def pg_down (s) proc
+private define pg_down (s)
+{
     variable
       lnr = __vlnr (s, '.'),
       linlen,
@@ -1569,9 +1766,10 @@ class Ved
     _adjust_col_ (s, linlen, plinlen);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def pg_up (s) proc
+private define pg_up (s)
+{
     variable
       linlen,
       plinlen;
@@ -1608,9 +1806,10 @@ class Ved
     _adjust_col_ (s, linlen, plinlen);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def pg_eof (s) proc
+private define pg_eof (s)
+{
     if (VEDCOUNT > -1)
       {
       ifnot (VEDCOUNT + 1)
@@ -1640,9 +1839,10 @@ class Ved
     s.ptr[0] = s.vlins[-1];
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def pg_bof (s) proc
+private define pg_bof (s)
+{
     if (VEDCOUNT > 0)
       {
       _gotoline_ (s);
@@ -1659,9 +1859,10 @@ class Ved
     s._index = s._indent;
 
     s.draw ();
-  end
+}
 
-  def pg_left (s) proc
+private define pg_left (s)
+{
     variable retval = __pg_left (s);
 
     if (-1 == retval)
@@ -1679,9 +1880,10 @@ class Ved
       }
 
     __vdraw_tail (s);
-  end
+}
 
-  def pg_right (s) proc
+private define pg_right (s)
+{
     variable
       line = __vline (s, '.'),
       retval = __pg_right (s, __vlinlen (s, '.'));
@@ -1697,9 +1899,10 @@ class Ved
       }
 
     __vdraw_tail (s);
-  end
+}
 
-  def pg_page_down (s) proc
+private define pg_page_down (s)
+{
     if (s._i + s._avlins > s._len)
       return;
 
@@ -1713,9 +1916,10 @@ class Ved
     s._findex = s._indent;
 
     s.draw ();
-  end
+}
 
-  def pg_page_up (s) proc
+private define pg_page_up (s)
+{
     ifnot (s.lnrs[0])
       return;
 
@@ -1732,9 +1936,10 @@ class Ved
     s._index = s._indent;
 
     s.draw ();
-  end
+}
 
-  def pg_eos (s) proc
+private define pg_eos (s)
+{
     variable linlen = __vlinlen (s, '.');
 
     markbacktick (s);
@@ -1758,9 +1963,10 @@ class Ved
       }
 
     __vdraw_tail (s);
-  end
+}
 
-  def pg_eol (s) proc
+private define pg_eol (s)
+{
     variable linlen = __vlinlen (s, s.ptr[0]);
 
     s._index = linlen - 1;
@@ -1782,9 +1988,10 @@ class Ved
       }
 
     __vdraw_tail (s);
-  end
+}
 
-  def pg_bol (s) proc
+private define pg_bol (s)
+{
     s.ptr[1] = s._indent;
     s._findex = s._indent;
     s._index = s._indent;
@@ -1797,9 +2004,10 @@ class Ved
       }
 
     __vdraw_tail (s);
-  end
+}
 
-  def pg_bolnblnk (s) proc
+private define pg_bolnblnk (s)
+{
     s.ptr[1] = s._indent;
 
     variable linlen = __vlinlen (s, '.');
@@ -1816,9 +2024,10 @@ class Ved
     s._index = s.ptr[1] - s._indent;
 
     __vdraw_tail (s);
-  end
+}
 
-  def pg_g (s) proc
+private define pg_g (s)
+{
     variable
       chr = Input.getch ();
 
@@ -1845,9 +2054,10 @@ class Ved
       (@__get_reference ("v_lastvi")) (s);
       return;
       }
-  end
+}
 
-  def pg_Yank (s) proc
+private define pg_Yank (s)
+{
     variable
       reg = qualifier ("reg", "\""),
       line = __vline (s, '.');
@@ -1855,9 +2065,10 @@ class Ved
     _set_reg_ (reg, line + "\n");
     seltoX (line + "\n");
     Smg.send_msg_dr ("yanked", 1, s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def __vreread (s) proc
+private define __vreread (s)
+{
     s.lines = Ved.__vgetlines (s._fname, s._indent, s.st_);
 
     s._len = length (s.lines) - 1;
@@ -1886,34 +2097,40 @@ class Ved
     s._i = s._ii;
 
     s.draw ();
-  end
+}
 
-  def _change_frame_ (s) proc
+private define _change_frame_ (s)
+{
     Ved.change_frame ();
     s = Ved.get_cur_buf ();
-  end
+}
 
-  def _new_frame_ (s) public proc
+public define _new_frame_ (s)
+{
     Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname");
     s = Ved.get_cur_buf ();
-  end
+}
 
-  def _del_frame_ (s) proc
+private define _del_frame_ (s)
+{
     Ved.del_frame ();
     s = Ved.get_cur_buf ();
-  end
+}
 
-  def _del_wind_ (s) proc
+private define _del_wind_ (s)
+{
     Ved.del_wind (VED_CUR_WIND);
     s = Ved.get_cur_buf ();
-  end
+}
 
-  def on_wind_change (w) proc
+private define on_wind_change (w)
+{
     topline (" -- ved --");
     Ved.__vsetbuf (w.frame_names[w.cur_frame]);
-  end
+}
 
-  def on_wind_new (w) public proc
+public define on_wind_new (w)
+{
     variable fn = VED_DIR + "/" + string (_time) + ".noname";
     variable s = Ved.init_ftype ("txt");
 
@@ -1926,14 +2143,16 @@ class Ved
     (@__get_reference ("__initrline"));
     topline (" -- ved --");
     Ved.__vdraw_wind ();
-  end
+}
 
-  def _new_wind_ (s) proc
+private define _new_wind_ (s)
+{
     new_wind (;on_wind_new);
     s = Ved.get_cur_buf ();
-  end
+}
 
-  def _goto_wind_ (s, chr) proc
+private define _goto_wind_ (s, chr)
+{
     if (any (['0':'9'] == chr))
       chr = int (chr - '0');
     else
@@ -1941,9 +2160,10 @@ class Ved
 
     wind_change (chr);
     s = Ved.get_cur_buf ();
-  end
+}
 
-  def handle_w (s) public proc
+public define handle_w (s)
+{
     variable chr = Input.getch ();
 
     if (any (['w', 's', Input->CTRL_w, 'd', 'k', 'n', ',', '.', ['0':'9']] == chr))
@@ -1984,19 +2204,22 @@ class Ved
         return;
         }
       }
-  end
+}
 
-  def __pg_on_carriage_return (s) proc
-  end
+private define __pg_on_carriage_return (s)
+{
+}
 
-  def pg_write_on_esc (s) proc
+private define pg_write_on_esc (s)
+{
     Ved.__vwritefile (s, NULL, s.ptr, NULL, NULL);
     Smg.send_msg_dr ("", 14, NULL, NULL);
     sleep (0.001);
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
-  end
+}
 
-  def pg_gotomark (s) proc
+private define pg_gotomark (s)
+{
     variable m = mark_get ();
 
     if (NULL == m)
@@ -2026,9 +2249,10 @@ class Ved
       s._findex = s._indent;
       Smg.setrcdr (s.ptr[0], s.ptr[1]);
       }
-  end
+}
 
-  def _set_nr_ (s, incrordecr) proc
+private define _set_nr_ (s, incrordecr)
+{
     variable
       count = qualifier ("count", 1),
       end,
@@ -2102,33 +2326,40 @@ class Ved
     waddline (s, line, 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def _incr_nr_ (s) proc
+private define _incr_nr_ (s)
+{
     _set_nr_ (s, "+";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
-  end
+}
 
-  def _decr_nr_ (s) proc
+private define _decr_nr_ (s)
+{
     _set_nr_ (s, "-";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
-  end
+}
 
-  def undo (s) proc
+private define undo (s)
+{
     Vundo.undo (s);
-  end
+}
 
-  def redo (s) proc
+private define redo (s)
+{
     Vundo.redo (s);
-  end
+}
 
-  %%% SEARCH
+private variable s_col;;
 
-  var s_col;
-  var s_fcol;
-  var s_lnr;
-  var s_found;
-  var s_ltype;
+private variable s_fcol;;
 
-  def _init_search_hist_ () proc
+private variable s_lnr;;
+
+private variable s_found;;
+
+private variable s_ltype;;
+
+private define _init_search_hist_ ()
+{
     variable ar = NULL;
     ifnot (access (s_histfile, F_OK|R_OK))
       ar = File.readlines (s_histfile);
@@ -2137,13 +2368,11 @@ class Ved
       array_map (&list_append, s_history, ar);
       s_histindex = 0;
       }
-  end
+}
 
-  do
     _init_search_hist_ ();
-  end
-
-  def s_exit_rout (s, pat, draw, cur_lang) proc
+private define s_exit_rout (s, pat, draw, cur_lang)
+{
     ifnot (NULL == cur_lang)
       ifnot (Input.getmapname () == cur_lang)
         Input.setlang (cur_lang);
@@ -2185,9 +2414,10 @@ class Ved
     Smg.atrcaddnstr (" ", 0, PROMPTROW, 0, COLUMNS);
 
     __vdraw_tail (s);
-  end
+}
 
-  def search_backward (s, str) proc
+private define search_backward (s, str)
+{
     variable
       i,
       ar,
@@ -2256,9 +2486,10 @@ class Ved
 
     s_found = 0;
     Smg.send_msg_dr ("Nothing found", 0, PROMPTROW, s_col);
-  end
+}
 
-  def search_forward (s, str) proc
+private define search_forward (s, str)
+{
     variable
       i,
       ar,
@@ -2328,9 +2559,10 @@ class Ved
     s_found = 0;
 
     Smg.send_msg_dr ("Nothing found", 0, PROMPTROW, s_col);
-  end
+}
 
-  def search (s) proc
+private define search (s)
+{
     variable
       chr,
       origlnr,
@@ -2493,9 +2725,10 @@ class Ved
       if (dothesearch)
         (@typesearch) (s, pat);
       }
-  end
+}
 
-  def s_getlnr (s) proc
+private define s_getlnr (s)
+{
     variable lnr = __vlnr (s, '.');
 
     if (s_ltype == "forward")
@@ -2510,9 +2743,10 @@ class Ved
         lnr--;
 
     lnr;
-  end
+}
 
-  def s_backslash_reg_ (s) proc
+private define s_backslash_reg_ (s)
+{
     variable reg = _get_reg_ ("/");
     if (NULL == reg)
       return;
@@ -2527,9 +2761,10 @@ class Ved
 
     if (s._chr == 'N')
       s_ltype = ltype;
-  end
+}
 
-  def s_search_word_ (s) proc
+private define s_search_word_ (s)
+{
     variable
       str,
       pat,
@@ -2621,15 +2856,15 @@ class Ved
         (@typesearch) (s, pat;row = MSGROW, context);
         }
       }
-  end
+}
 
-  %%% VISUAL
-
-  def v_unhl_line (vs, s, index) proc
+private define v_unhl_line (vs, s, index)
+{
     Smg.hlregion (0, vs.vlins[index], 0, 1, s._maxlen);
-  end
+}
 
-  def v_hl_ch (vs, s) proc
+private define v_hl_ch (vs, s)
+{
     variable i;
     _for i (0, length (vs.vlins) - 1)
       {
@@ -2639,9 +2874,10 @@ class Ved
 
     ifnot (qualifier_exists ("dont_draw"))
       Smg.refresh ();
-  end
+}
 
-  def v_hl_line (vs, s) proc
+private define v_hl_line (vs, s)
+{
     variable i;
     _for i (0, length (vs.vlins) - 1)
       if (vs.vlins[i] >= s.rows[0])
@@ -2653,9 +2889,10 @@ class Ved
 
     ifnot (qualifier_exists ("dont_draw"))
       Smg.refresh ();
-  end
+}
 
-  def v_calclines_up (s, vs, un, inc) proc
+private define v_calclines_up (s, vs, un, inc)
+{
     vs.cur--;
     if (un)
       v_unhl_line (vs, s, -1);
@@ -2667,9 +2904,10 @@ class Ved
 
     if (inc)
       vs.vlins++;
-  end
+}
 
-  def v_calclines_up_ (s, vs, incr) proc
+private define v_calclines_up_ (s, vs, incr)
+{
     vs.cur--;
     vs.lines = [s.lines[vs.lnrs[0] - 1], vs.lines];
     vs.lnrs = [vs.lnrs[0] - 1, vs.lnrs];
@@ -2679,9 +2917,10 @@ class Ved
 
     vs.vlins = [qualifier ("row", s.ptr[0]), vs.vlins];
     vs.linlen = [strlen (vs.lines[0]), vs.linlen];
-  end
+}
 
-  def v_l_up (vs, s) proc
+private define v_l_up (vs, s)
+{
     ifnot (__vlnr (s, '.'))
       return;
 
@@ -2707,13 +2946,11 @@ class Ved
       v_calclines_up_ (s, vs, 0);
 
     v_hl_line (vs, s);
-  end
+}
 
-  do
     vis.l_up = &v_l_up;
-  end
-
-  def v_l_page_up (vs, s) proc
+private define v_l_page_up (vs, s)
+{
     if (s._avlins > s._len)
       return;
 
@@ -2765,13 +3002,11 @@ class Ved
 
     s.draw ();
     v_hl_line (vs, s);
-  end
+}
 
-  do
     vis.l_page_up = &v_l_page_up;
-  end
-
-  def v_calclines_down (s, vs, un, dec) proc
+private define v_calclines_down (s, vs, un, dec)
+{
     vs.cur++;
     if (un)
       v_unhl_line (vs, s, 0);
@@ -2783,9 +3018,10 @@ class Ved
 
     if (dec)
       vs.vlins--;
-  end
+}
 
-  def v_calclines_down_ (s, vs, dec) proc
+private define v_calclines_down_ (s, vs, dec)
+{
     vs.cur++;
     vs.lines = [vs.lines, s.lines[vs.lnrs[-1] + 1]];
     vs.lnrs = [vs.lnrs, vs.lnrs[-1] + 1];
@@ -2795,9 +3031,10 @@ class Ved
 
     vs.vlins = [vs.vlins, s.ptr[0]];
     vs.linlen = [vs.linlen, strlen (vs.lines[-1])];
-  end
+}
 
-  def v_l_page_down (vs, s) proc
+private define v_l_page_down (vs, s)
+{
     if (vs.lnrs[-1] == s._len)
       return;
 
@@ -2846,13 +3083,11 @@ class Ved
 
     s.draw ();
     v_hl_line (vs, s);
-  end
+}
 
-  do
     vis.l_page_down = &v_l_page_down;
-  end
-
-  def v_l_down (vs, s) proc
+private define v_l_down (vs, s)
+{
     if (__vlnr (s, '.') == s._len)
       return;
 
@@ -2878,13 +3113,11 @@ class Ved
       v_calclines_down_ (s, vs, 0);
 
     v_hl_line (vs, s);
-  end
+}
 
-  do
     vis.l_down = &v_l_down;
-  end
-
-  def v_l_loop (vs, s) proc
+private define v_l_loop (vs, s)
+{
     variable chr, i, size = s.st_.st_size, reg = "\"", reginit = 0;
 
     while (chr = Input.getch (), any ([vs.l_keys, ['0':'9'], '"'] == chr))
@@ -3061,9 +3294,10 @@ class Ved
       }
 
     vs.needsdraw = 1;
-  end
+}
 
-  def v_linewise_mode (vs, s) proc
+private define v_linewise_mode (vs, s)
+{
     if (1 == length (vs.lines))
       vs.linlen = [strlen (vs.lines[0])];
     else
@@ -3072,13 +3306,11 @@ class Ved
     v_hl_line (vs, s);
 
     v_l_loop (vs, s);
-  end
+}
 
-  do
     vis.l_mode = &v_linewise_mode;
-  end
-
-  def v_c_left (vs, s, cur) proc
+private define v_c_left (vs, s, cur)
+{
     variable retval = __pg_left (s);
 
     if (-1 == retval)
@@ -3153,13 +3385,11 @@ class Ved
       vs.sel[cur] = substr (vs.lines[cur], vs.index[cur] + 1, 1) + vs.sel[cur];
 
     v_hl_ch (vs, s);
-  end
+}
 
-  do
     vis.c_left = &v_c_left;
-  end
-
-  def v_c_right (vs, s, cur) proc
+private define v_c_right (vs, s, cur)
+{
     variable retval = __pg_right (s, vs.linlen[-1]);
 
     if (-1 == retval)
@@ -3187,13 +3417,11 @@ class Ved
       vs.sel[cur] += substr (vs.lines[cur], vs.index[cur] + 1, 1);
 
     v_hl_ch (vs, s);
-  end
+}
 
-  do
     vis.c_right = &v_c_right;
-  end
-
-  def v_char_mode (vs, s) proc
+private define v_char_mode (vs, s)
+{
     variable
       sel,
       chr,
@@ -3295,36 +3523,37 @@ class Ved
     s.ptr[0] = vs.ptr[0];
     s.ptr[1] = vs.startindex;
     vs.needsdraw = 1;
-  end
+}
 
-  do
     vis.c_mode = &v_char_mode;
-  end
-
-  def v_bw_calclines (vs) proc
+private define v_bw_calclines (vs)
+{
     variable i;
     _for i (0, length (vs.lines) - 1)
       vs.sel[i] = substr (vs.lines[i], vs.startcol + 1, vs.index[i] - vs.startcol + 1);
-  end
+}
 
-  def v_bw_calclines_up (s, vs, un, inc) proc
+private define v_bw_calclines_up (s, vs, un, inc)
+{
     v_calclines_up (s, vs, un, inc);
 
     vs.index =  vs.index[[:-2]];
     vs.sel = vs.sel[[:-2]];
     vs.col  = vs.col[[:-2]];
-  end
+}
 
-  def v_bw_calclines_up_ (s, vs, incr) proc
+private define v_bw_calclines_up_ (s, vs, incr)
+{
     v_calclines_up_ (s, vs, incr);
 
     vs.index = [vs.index[0], vs.index];
     vs.sel = [substr (vs.lines[0], vs.index[0] + 1, 1), vs.sel];
     vs.col  = [vs.col[0], vs.col];
     vs.bw_maxlen = int (min (vs.linlen[where (vs.linlen)]));
-  end
+}
 
-  def v_bw_up (vs, s) proc
+private define v_bw_up (vs, s)
+{
     ifnot (__vlnr (s, '.'))
       return;
 
@@ -3352,27 +3581,27 @@ class Ved
 
     v_bw_calclines (vs);
     v_hl_ch (vs, s);
-  end
+}
 
-  do
     vis.bw_up = &v_bw_up;
-  end
-
-  def v_bw_calclines_down (s, vs, un, dec) proc
+private define v_bw_calclines_down (s, vs, un, dec)
+{
     v_calclines_down (s, vs, un, dec);
     vs.index =  vs.index[[1:]];
     vs.sel = vs.sel[[1:]];
     vs.col  = vs.col[[1:]];
-  end
+}
 
-  def v_bw_calclines_down_ (s, vs, dec) proc
+private define v_bw_calclines_down_ (s, vs, dec)
+{
     v_calclines_down_ (s, vs, dec);
     vs.index = [vs.index, vs.index[-1]];
     vs.sel = [vs.sel, substr (vs.lines[-1], vs.index[-1] + 1, 1)];
     vs.col  = [vs.col, vs.col[-1]];
-  end
+}
 
-  def v_bw_down (vs, s) proc
+private define v_bw_down (vs, s)
+{
     if (__vlnr (s, '.') == s._len)
       return;
 
@@ -3400,13 +3629,11 @@ class Ved
 
     v_bw_calclines (vs);
     v_hl_ch (vs, s);
-  end
+}
 
-  do
     vis.bw_down = &v_bw_down;
-  end
-
-  def v_bw_left (vs, s) proc
+private define v_bw_left (vs, s)
+{
     if (s.ptr[1] == vs.startcol)
       return;
 
@@ -3416,13 +3643,11 @@ class Ved
 
     v_bw_calclines (vs);
     v_hl_ch (vs, s);
-  end
+}
 
-  do
     vis.bw_left = &v_bw_left;
-  end
-
-  def v_bw_right (vs, s) proc
+private define v_bw_right (vs, s)
+{
     variable linlen = __vlinlen (s, '.');
 
     if (s._index - s._indent == linlen - 1 || 0 == linlen
@@ -3444,22 +3669,21 @@ class Ved
 
     v_bw_calclines (vs);
     v_hl_ch (vs, s);
-  end
+}
 
-  do
     vis.bw_right = &v_bw_right;
-  end
-
-  def __iswstxt__ (t) proc
+private define __iswstxt__ (t)
+{
    variable i, len = strbytelen (t);
    _for i (0, len - 1)
      ifnot (' ' == t[i])
        return 0;
 
     1;
-  end
+}
 
-  def v_bw_mode (vs, s) proc
+private define v_bw_mode (vs, s)
+{
     variable
       i,
       lnr,
@@ -3608,15 +3832,13 @@ class Ved
       }
 
     vs.needsdraw = 1;
-  end
+}
 
-  do
     vis.bw_mode = &v_bw_mode;
-  end
+private variable LastVi=NULL;
 
-  var LastVi = NULL;
-
-  def v_lastvi (s) proc
+private define v_lastvi (s)
+{
     variable vs = LastVi;
 
     if (NULL == vs)
@@ -3640,9 +3862,10 @@ class Ved
     vs.l_mode (s);
 
     vs.at_exit (s, vs.needsdraw);
-  end
+}
 
-  def v_atexit (vs, s, draw) proc
+private define v_atexit (vs, s, draw)
+{
     variable keep;
     if (draw)
       {
@@ -3682,13 +3905,11 @@ class Ved
       }
 
     LastVi = vs;
-  end
+}
 
-  do
     vis.at_exit = &v_atexit;
-  end
-
-  def v_init (s) proc
+private define v_init (s)
+{
     toplinedr ("-- visual --");
     variable lnr = __vlnr (s, '.');
     variable v = @vis;
@@ -3714,9 +3935,10 @@ class Ved
       col = [s.ptr[1]],
       @v,
       };
-  end
+}
 
-  def vis_mode (s) proc
+private define vis_mode (s)
+{
     variable
       mode = ["bw", "lw", "cw"],
       vs = v_init (s);
@@ -3731,16 +3953,16 @@ class Ved
       vs.l_mode (s);
 
     vs.at_exit (s, vs.needsdraw);
-  end
+}
 
-  % ED
-
-  def newline_str (s, indent, line) proc
+private define newline_str (s, indent, line)
+{
     s.autoindent (indent, line);
     return repeat (" ", @indent);
-  end
+}
 
-  def ed_indent_in (s) proc
+private define ed_indent_in (s)
+{
     variable
       i_ = s._indent,
       i = __vlnr (s, '.'),
@@ -3769,9 +3991,10 @@ class Ved
     waddline (s, line, 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def ed_indent_out (s) proc
+private define ed_indent_out (s)
+{
     variable
       i = __vlnr (s, '.'),
       line = __vline (s, '.');
@@ -3793,9 +4016,10 @@ class Ved
     waddline (s, line, 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def ed_join_line (s) proc
+private define ed_join_line (s)
+{
     variable
       i = __vlnr (s, '.'),
       line = __vline (s, '.');
@@ -3813,9 +4037,10 @@ class Ved
     set_modified (s);
 
     s.draw ();
-  end
+}
 
-  def ed_del_line (s) proc
+private define ed_del_line (s)
+{
     variable
       reg = qualifier ("reg", "\""),
       i = __vlnr (s, '.'),
@@ -3862,9 +4087,10 @@ class Ved
     set_modified (s;_i = s._i);
 
     0;
-  end
+}
 
-  def ed_del_word (s, what) proc
+private define ed_del_word (s, what)
+{
     variable
       reg = qualifier ("reg", "\""),
       end,
@@ -3898,9 +4124,10 @@ class Ved
     waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def ed_chang_chr (s) proc
+private define ed_chang_chr (s)
+{
     variable
       chr = Input.getch (),
       col = s._index,
@@ -3918,9 +4145,10 @@ class Ved
       waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
       __vdraw_tail (s);
       }
-  end
+}
 
-  def ed_del_trailws (s) proc
+private define ed_del_trailws (s)
+{
     variable
       col = s._index,
       i = __vlnr (s, '.');
@@ -3952,9 +4180,10 @@ class Ved
     waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def ed_del_chr (s) proc
+private define ed_del_chr (s)
+{
     variable
       reg = qualifier ("reg", "\""),
       chr = qualifier ("chr", s._chr),
@@ -4004,9 +4233,10 @@ class Ved
     waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def ed_change_word (s, what) proc
+private define ed_change_word (s, what)
+{
     variable
       reg = qualifier ("reg", "\""),
       end,
@@ -4054,9 +4284,10 @@ class Ved
     s._index = start;
 
     insert (s, &line, lnr, prev_l, next_l;modified);
-  end
+}
 
-  def ed_change (s) proc
+private define ed_change (s)
+{
     variable chr = Input.getch ();
 
     if (any (['w', 'W'] == chr))
@@ -4073,9 +4304,10 @@ class Ved
         return;
         }
       }
-  end
+}
 
-  def ed_del (s) proc
+private define ed_del (s)
+{
     variable chr = Input.getch ();
 
     if (any (['d', 'w', 'W'] == chr))
@@ -4102,9 +4334,10 @@ class Ved
         }
 
       }
-  end
+}
 
-  def ed_del_to_end (s) proc
+private define ed_del_to_end (s)
+{
     variable
       reg = qualifier ("reg", "\""),
       col = s._index,
@@ -4160,9 +4393,10 @@ class Ved
     waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
 
     __vdraw_tail (s);
-  end
+}
 
-  def ed_editline (s) proc
+private define ed_editline (s)
+{
     variable
       prev_l,
       next_l,
@@ -4212,9 +4446,10 @@ class Ved
       insert (s, &line, lnr, prev_l, next_l;modified);
     else
       insert (s, &line, lnr, prev_l, next_l);
-  end
+}
 
-  def ed_newline (s) proc
+private define ed_newline (s)
+{
     variable
       dir = s._chr == 'O' ? "prev" : "next",
       prev_l,
@@ -4268,9 +4503,10 @@ class Ved
 
     line = newline_str (s, &indent, line);
     insert (s, &line, "next" == dir ? lnr + 1 : lnr, prev_l, next_l;;__qualifiers ());
-  end
+}
 
-  def ed_Put (s) proc
+private define ed_Put (s)
+{
     variable reg = _get_reg_ (qualifier ("reg", "\""));
     variable lnr = __vlnr (s, '.');
 
@@ -4308,9 +4544,10 @@ class Ved
 
     if (qualifier_exists ("return_line"))
       return s.lines[lnr];
-  end
+}
 
-  def ed_put (s) proc
+private define ed_put (s)
+{
     variable reg = _get_reg_ (qualifier ("reg", "\""));
     variable lnr = __vlnr (s, '.');
 
@@ -4343,9 +4580,10 @@ class Ved
 
     if (qualifier_exists ("return_line"))
       return s.lines[lnr];
-  end
+}
 
-  def ed_toggle_case (s) proc
+private define ed_toggle_case (s)
+{
     variable
       col = s._index,
       i = __vlnr (s, '.'),
@@ -4376,13 +4614,12 @@ class Ved
       __vdraw_tail (s);
     else
       (@VED_PAGER[string ('l')]) (s);
-  end
+}
 
-  %%% INSERT MODE
+private variable lang=Input.getmapname();
 
-  var lang = Input.getmapname ();
-
-  def ins_tab (is, s, line) proc
+private define ins_tab (is, s, line)
+{
     % not sure what to do in feature, but as a fair compromise
     % and for now SLsmg_Tab_Width is set to 1 and nothing breaks
     % if _expandtab is set, then _shiftwidth (spaces) are inserted,
@@ -4419,18 +4656,20 @@ class Ved
 
     waddline (s, lline, 0, s.ptr[0]);
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
-  end
+}
 
-  def ins_reg (s, line) proc
+private define ins_reg (s, line)
+{
     variable reg = Input.getch ();
 
     ifnot (any ([_regs_ (), '='] == reg))
       return;
 
     @line = ed_put (s;reg = char (reg), return_line);
-  end
+}
 
-  def ins_char (is, s, line) proc
+private define ins_char (is, s, line)
+{
     @line = substr (@line, 1, s._index) + char (is.chr) + substr (@line, s._index + 1, - 1);
 
     s._index++;
@@ -4458,9 +4697,10 @@ class Ved
 
     waddline (s, lline, 0, s.ptr[0]);
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
-  end
+}
 
-  def ins_del_prev (is, s, line) proc
+private define ins_del_prev (is, s, line)
+{
     variable
       lline,
       len;
@@ -4557,9 +4797,10 @@ class Ved
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
 
     is.modified = 1;
-  end
+}
 
-  def ins_del_next (is, s, line) proc
+private define ins_del_next (is, s, line)
+{
     ifnot (s._index - s._indent)
       if (1 == strlen (@line))
         if (" " == @line)
@@ -4619,9 +4860,10 @@ class Ved
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
     is.modified = 1;
-  end
+}
 
-  def ins_eol (is, s, line) proc
+private define ins_eol (is, s, line)
+{
     variable
       lline,
       len = strlen (@line);
@@ -4642,18 +4884,20 @@ class Ved
       s.ptr[1] = len;
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
-  end
+}
 
-  def ins_bol (is, s, line) proc
+private define ins_bol (is, s, line)
+{
     s._findex = s._indent;
     s._index = s._indent;
     s.ptr[1] = s._indent;
     waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
     s._is_wrapped_line = 0;
-  end
+}
 
-  def ins_completeline (is, s, line, comp_line) proc
+private define ins_completeline (is, s, line, comp_line)
+{
     if (s._is_wrapped_line)
       return;
 
@@ -4672,9 +4916,10 @@ class Ved
       __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
       is.modified = 1;
       }
-  end
+}
 
-  def ins_right (is, s, line) proc
+private define ins_right (is, s, line)
+{
     variable len = strlen (@line);
 
     if (s._index + 1 > len || 0 == len)
@@ -4700,9 +4945,10 @@ class Ved
       }
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
-  end
+}
 
-  def ins_left (is, s, line) proc
+private define ins_left (is, s, line)
+{
     if (0 < s.ptr[1] - s._indent)
       {
       s._index--;
@@ -4723,9 +4969,10 @@ class Ved
         if (s._index - 1 == s._indent)
           s._is_wrapped_line = 0;
         }
-  end
+}
 
-  def ins_page_up (is, s, line) proc
+private define ins_page_up (is, s, line)
+{
     s.lins[s.ptr[0] - s.rows[0]] = @line;
     s.lines[is.lnr] = @line;
     s._findex = s._indent;
@@ -4740,9 +4987,10 @@ class Ved
       is.prev_l = s.lines[is.lnr - 1];
 
     is.next_l = s.lines[is.lnr + 1];
-  end
+}
 
-  def ins_page_down (is, s, line) proc
+private define ins_page_down (is, s, line)
+{
     s.lins[s.ptr[0] - s.rows[0]] = @line;
     s.lines[is.lnr] = @line;
     s._findex = s._indent;
@@ -4757,9 +5005,10 @@ class Ved
       is.next_l = s.lines[is.lnr + 1];
 
     is.prev_l = s.lines[is.lnr - 1];
-  end
+}
 
-  def ins_down (is, s, line) proc
+private define ins_down (is, s, line)
+{
     if (is.lnr == s._len)
       return;
 
@@ -4822,9 +5071,10 @@ class Ved
       : ' ';
 
     s.draw (;chr = chr);
-  end
+}
 
-  def ins_up (is, s, line) proc
+private define ins_up (is, s, line)
+{
     variable i = __vlnr (s, '.');
 
     ifnot (is.lnr)
@@ -4883,9 +5133,10 @@ class Ved
       : ' ';
 
     s.draw (;chr = chr);
-  end
+}
 
-  def ins_cr (is, s, line) proc
+private define ins_cr (is, s, line)
+{
     variable
       prev_l,
       next_l,
@@ -4947,9 +5198,10 @@ class Ved
 
       insert (s, line, is.lnr + 1, prev_l, next_l;modified, dont_draw_tail);
       }
-  end
+}
 
-  def ins_esc (is, s, line) proc
+private define ins_esc (is, s, line)
+{
     if (0 < s.ptr[1] - s._indent)
       s.ptr[1]--;
 
@@ -4969,9 +5221,10 @@ class Ved
     topline (" -- pager --");
 
     __vdraw_tail (s);
-  end
+}
 
-  def ctrl_completion_rout (s, line, type) proc
+private define ctrl_completion_rout (s, line, type)
+{
     variable
       ar,
       chr,
@@ -5148,16 +5401,18 @@ class Ved
             }
       % when ar has been changed and index = 1
       }
-  end
+}
 
-  def ins_linecompletion (s, line) proc
+private define ins_linecompletion (s, line)
+{
     ifnot (strlen (@line))
       return;
 
     ctrl_completion_rout (s, line, _function_name ());
-  end
+}
 
-  def __vfind_ldfnane (str, i) proc
+private define __vfind_ldfnane (str, i)
+{
     @i = strlen (str);
     ifnot (@i)
       return "";
@@ -5177,9 +5432,10 @@ class Ved
     while (@i);
 
     fn;
-  end
+}
 
-  def ins_fnamecompletion (lnr, s, line) proc
+private define ins_fnamecompletion (lnr, s, line)
+{
     variable rl = Ved.get_cur_rline ();
 
     Rline.set (rl;col = s.ptr[1], row = s.ptr[0]);
@@ -5200,9 +5456,10 @@ class Ved
 
     waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
-  end
+}
 
-  def blockcompletion (lnr, s, line) proc
+private define blockcompletion (lnr, s, line)
+{
    variable f = __get_reference (s._type + "_blocks");
 
     if (NULL == f)
@@ -5242,9 +5499,10 @@ class Ved
       s._i = s._ii;
       s.draw ();
       }
-  end
+}
 
-  def pag_completion (s) proc
+private define pag_completion (s)
+{
     variable chr = Input.getch ();
     variable line;
 
@@ -5259,9 +5517,10 @@ class Ved
       {
       return;
       }
-  end
+}
 
-  def ins_ctrl_x_completion (is, s, line) proc
+private define ins_ctrl_x_completion (is, s, line)
+{
     variable chr = Input.getch ();
 
     switch (chr)
@@ -5284,21 +5543,25 @@ class Ved
       {
       return;
       }
-  end
+}
 
-  def ins_wordcompletion (s, line) proc
+private define ins_wordcompletion (s, line)
+{
     ctrl_completion_rout (s, line, _function_name ());
-  end
+}
 
-  def paste_xsel (s) proc
+private define paste_xsel (s)
+{
     ed_Put (s;reg = "*");
-  end
+}
 
-  def ins_paste_xsel (is, s, line) proc
+private define ins_paste_xsel (is, s, line)
+{
     @line = ed_Put (s;reg = "*", return_line);
-  end
+}
 
-  def ins_getline (is, s, line) proc
+private define ins_getline (is, s, line)
+{
     forever
       {
       is.chr = Input.getch (;on_lang = &_on_lang_change_, on_lang_args = {"insert", s.ptr});
@@ -5442,9 +5705,10 @@ class Ved
         continue;
         }
       }
-  end
+}
 
-  def insert (s, line, lnr, prev_l, next_l) proc
+private define insert (s, line, lnr, prev_l, next_l)
+{
     Input.setlang (lang);
 
     topline (" -- insert --");
@@ -5464,9 +5728,10 @@ class Ved
     lang = Input.getmapname ();
 
     Input.setlang ("en");
-  end
+}
 
-  def _askonsubst_ (s, fn, lnr, fpart, context, lpart, replace) proc
+private define _askonsubst_ (s, fn, lnr, fpart, context, lpart, replace)
+{
     variable cmp_lnrs = Integer_Type[0];
     variable ar =
       ["@" + fn + " linenr: " + string (lnr+1),
@@ -5486,9 +5751,10 @@ class Ved
 
     variable char_ar =  ['y', 'n', 'q', 'a', 'c'];
     Smg.askprintstr (ar, char_ar, &cmp_lnrs;hl_region = hl_reg);
-  end
+}
 
-  def __substitute () proc
+private define __substitute ()
+{
     variable global = 0, ask = 1, pat = NULL, sub = NULL, ind, range = NULL;
     variable args = __pop_list (_NARGS);
     variable buf = Ved.get_cur_buf ();
@@ -5569,9 +5835,10 @@ class Ved
       set_modified (buf);
       buf.draw ();
       }
-  end
+}
 
-  def _register_ (s) proc
+private define _register_ (s)
+{
     variable reg = Input.getch ();
     ifnot (any (_regs_ () == reg))
       return;
@@ -5597,12 +5864,14 @@ class Ved
       ed_Put (s;reg = reg);
     else
       ed_put (s;reg = reg);
-  end
+}
 
-  def buffer_other (s) proc
-  end
+private define buffer_other (s)
+{
+}
 
-  def handle_comma (s) proc
+private define handle_comma (s)
+{
     variable chr = Input.getch ();
 
     ifnot (any (['p'] == chr))
@@ -5610,9 +5879,10 @@ class Ved
 
     if ('p' == chr)
       seltoX (Ved.get_cur_buf._abspath);
-  end
+}
 
-  def PROJECT_VED (argv) public proc
+public define PROJECT_VED (argv)
+{
     ifnot (length (argv) - 1)
       return;
 
@@ -5685,9 +5955,8 @@ class Ved
     VED_CUR_WIND = w;
 
     Ved.__vdraw_wind ();
-  end
+}
 
-  do
     VED_PAGER[string (Input->F3)]      = &next_wind;
     VED_PAGER[string (',')]            = &handle_comma;
     VED_PAGER[string ('"')]            = &_register_;
@@ -5761,16 +6030,176 @@ class Ved
       ifnot (NULL == Env->XAUTHORITY)
         ifnot (NULL == Sys->XCLIP_BIN)
           Load.file (Env->STD_LIB_PATH + "/X/seltoX", NULL);
-  end
-
-  def msg_handler (s, msg) proc
+private define msg_handler (s, msg)
+{
     variable b = Ved.get_cur_buf ();
     Smg.send_msg_dr (msg, 1, b.ptr[0], b.ptr[1]);
-  end
+}
 
-  do
     Class.load ("Vundo";classpath = path_dirname (__FILE__) + "/Vundo");
 
     new_wind ();
-  end
-end
+
+private define Ved_get_frame_buf (self, arg1)
+{
+  __->__ (self, arg1, "Ved::get_frame_buf::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_frame_buf", &Ved_get_frame_buf);
+
+private define Ved___vinitbuf (self, arg1, arg2, arg3, arg4, arg5)
+{
+  __->__ (self, arg1, arg2, arg3, arg4, arg5, "Ved::__vinitbuf::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vinitbuf", &Ved___vinitbuf);
+
+private define Ved_get_cur_rline (self)
+{
+  __->__ (self, "Ved::get_cur_rline::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_cur_rline", &Ved_get_cur_rline);
+
+private define Ved_del_frame (self)
+{
+  __->__ (self, "Ved::del_frame::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "del_frame", &Ved_del_frame);
+
+private define Ved_fun ()
+{
+  variable args = __pop_list (_NARGS);
+  list_append (args, "Ved::fun::fun");
+  __->__ (__push_list (args);;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "fun", &Ved_fun);
+
+private define Ved_get_buf (self, arg1)
+{
+  __->__ (self, arg1, "Ved::get_buf::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_buf", &Ved_get_buf);
+
+private define Ved_storePos (self, arg1, arg2)
+{
+  __->__ (self, arg1, arg2, "Ved::storePos::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "storePos", &Ved_storePos);
+
+private define Ved_new_frame (self, arg1)
+{
+  __->__ (self, arg1, "Ved::new_frame::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "new_frame", &Ved_new_frame);
+
+private define Ved___vwrite_prompt (self, arg1, arg2)
+{
+  __->__ (self, arg1, arg2, "Ved::__vwrite_prompt::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vwrite_prompt", &Ved___vwrite_prompt);
+
+private define Ved_get_ftype (self, arg1)
+{
+  __->__ (self, arg1, "Ved::get_ftype::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_ftype", &Ved_get_ftype);
+
+private define Ved_get_cur_frame (self)
+{
+  __->__ (self, "Ved::get_cur_frame::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_cur_frame", &Ved_get_cur_frame);
+
+private define Ved_change_frame (self)
+{
+  __->__ (self, "Ved::change_frame::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "change_frame", &Ved_change_frame);
+
+private define Ved_init_ftype (self, arg1)
+{
+  __->__ (self, arg1, "Ved::init_ftype::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "init_ftype", &Ved_init_ftype);
+
+private define Ved_deftype (self)
+{
+  __->__ (self, "Ved::deftype::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "deftype", &Ved_deftype);
+
+private define Ved___vsetbuf (self, arg1)
+{
+  __->__ (self, arg1, "Ved::__vsetbuf::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vsetbuf", &Ved___vsetbuf);
+
+private define Ved_restorePos (self, arg1, arg2)
+{
+  __->__ (self, arg1, arg2, "Ved::restorePos::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "restorePos", &Ved_restorePos);
+
+private define Ved___vdraw_wind (self)
+{
+  __->__ (self, "Ved::__vdraw_wind::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vdraw_wind", &Ved___vdraw_wind);
+
+private define Ved___vwritefile (self, arg1, arg2, arg3, arg4, arg5)
+{
+  __->__ (self, arg1, arg2, arg3, arg4, arg5, "Ved::__vwritefile::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vwritefile", &Ved___vwritefile);
+
+private define Ved_get_cur_wind (self)
+{
+  __->__ (self, "Ved::get_cur_wind::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_cur_wind", &Ved_get_cur_wind);
+
+private define Ved_get_cur_bufname (self)
+{
+  __->__ (self, "Ved::get_cur_bufname::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_cur_bufname", &Ved_get_cur_bufname);
+
+private define Ved___vgetlines (self, arg1, arg2, arg3)
+{
+  __->__ (self, arg1, arg2, arg3, "Ved::__vgetlines::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vgetlines", &Ved___vgetlines);
+
+private define Ved_preloop (self, arg1)
+{
+  __->__ (self, arg1, "Ved::preloop::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "preloop", &Ved_preloop);
+
+private define Ved_let (self, arg1, arg2)
+{
+  __->__ (self, arg1, arg2, "Ved::let::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "let", &Ved_let);
+
+private define Ved_get_cur_buf (self)
+{
+  __->__ (self, "Ved::get_cur_buf::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "get_cur_buf", &Ved_get_cur_buf);
+
+private define Ved_del_wind (self, arg1)
+{
+  __->__ (self, arg1, "Ved::del_wind::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "del_wind", &Ved_del_wind);
+
+private define Ved___vparse_arg_range (self, arg1, arg2, arg3)
+{
+  __->__ (self, arg1, arg2, arg3, "Ved::__vparse_arg_range::@method@";;__qualifiers);
+}
+set_struct_field (__->__ ("Ved", "Class::getself"), "__vparse_arg_range", &Ved___vparse_arg_range);
+
+public variable Ved =  __->__ ("Ved", "Class::getself");
+
+Ved.let = Class.let;
+Ved.fun = Class.fun;
+__uninitialize (&$9);

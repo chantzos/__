@@ -64,7 +64,7 @@ private define copy_recursive (self, source, dest)
   ifnot (typeof (opts) == Struct_Type)
     opts = self.copy_opts (;;__qualifiers);
   else
-     opts = struct {@self.copy_opts, @opts};
+     opts = struct {@self.copy_opts (;;__qualifiers), @opts};
 
   variable exit_code = 0;
 

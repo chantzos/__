@@ -46,14 +46,21 @@ class File
   end
 
   def read (file)
-    if (-1 == access (file, F_OK|R_OK))
-      throw ClassError, sprintf ("IO_Read_Error::read, %S, %s", file,
-        errno_string (errno));
+    variable fd;
 
-    variable fd = open (file, O_RDONLY);
+    ifnot (FD_Type == typeof (file))
+      {
+      if (-1 == access (file, F_OK|R_OK))
+        throw ClassError, sprintf ("IO_Read_Error::read, %S, %s", file,
+          errno_string (errno));
 
-    if (NULL == fd)
-      throw ClassError, sprintf ("IO::read file descriptor: %S", errno_string (errno));
+      fd = open (file, O_RDONLY);
+
+      if (NULL == fd)
+        throw ClassError, sprintf ("IO::read file descriptor: %S", errno_string (errno));
+      }
+   else
+     fd = file;
 
     variable buf;
     variable str = "";
