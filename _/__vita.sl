@@ -68,7 +68,7 @@ public define Progr_Init (name)
 {
   variable p = @ThisProg_Type;
 
-  p.name   = name;
+  p.appname   = name;
   p.argv   = __argv;
   p.shell  = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1);
   p.ved    = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1);

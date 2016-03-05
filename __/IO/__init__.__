@@ -1,4 +1,60 @@
 class IO
+  def fmt (args)
+    variable str;
+
+    if (1 == length (args) && typeof (args[0]) == Array_Type &&
+        any ([String_Type, Integer_Type, UInteger_Type, Char_Type] == _typeof (args[0])))
+      str = strjoin (array_map (String_Type, &sprintf, "%S%S", args[0],
+        qualifier_exists ("n") ? "" : "\n"));
+    else if (1 == length (args) && typeof (args[0]) == List_Type)
+      {
+      variable i;
+      str = "";
+      _for i (0, length (args[0]) - 1)
+        if (Struct_Type == typeof (args[0][i]))
+          str += struct_tostring (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
+        else if (Array_Type == typeof (args[0][i]))
+          {
+          variable ia;
+          _for ia (0, length (args[0][i]) - 1)
+            str += sprintf ("%S%S", args[0][i][ia],
+            qualifier_exists ("n") ? "" : "\n");
+          }
+        else
+          str += sprintf ("%S%S", args[0][i],
+          qualifier_exists ("n") ? "" : "\n");
+        }
+    else
+      {
+      variable _fmt_ = "%S ";
+      if (length (args) > 1)
+        loop (length (args) - 1) _fmt_ += "%S ";
+      else
+        _fmt_ = "%S";
+
+      _fmt_ += "%S";
+
+      str = sprintf (_fmt_, __push_list (args), qualifier_exists ("n") ? "" : "\n");
+      }
+
+    variable len = strlen (str);
+
+    if (65535 < len)
+      {
+      variable pos = 1;
+      variable str_ar = String_Type[len / 65535 + (len mod 65535 ? 1 : 0)];
+      _for i (0, length (str_ar) - 1)
+        {
+        str_ar[i] = substr (str, pos, 65535);
+        pos += 65535;
+        }
+
+      return str_ar;
+      }
+
+    str;
+  end
+
   fun ask (quest_ar, ar)
 
   fun tostderr (?) muttable

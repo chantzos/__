@@ -44,6 +44,6 @@ class Rand
   end
 
   def getstr (imin, imax, len)
-    return strjoin (array_map (String_Type, &char, self.rand_int_ar (imin, imax, len)));
+    strjoin (array_map (String_Type, &char, self.rand_int_ar (imin, imax, len)));
   end
 end

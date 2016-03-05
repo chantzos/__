@@ -296,7 +296,7 @@ class Rline
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
 
     if (0 == length (rl.history) && NULL != rl.histfile)
-      rl.history = readhistory (rl.histfile);
+      rl.history = readhistory (Rline, rl.histfile);
 
     ifnot (NULL == getcommands)
       rl.argvlist = (@getcommands);
@@ -1695,7 +1695,6 @@ class Rline
           return 0;
 
         file = file + "/args.txt";
-
         if (-1 == access (file, F_OK|R_OK))
           return 0;
         }
@@ -1725,6 +1724,7 @@ class Rline
       (args, type, desc) = (@s.filterargs) (s, args, type, desc);
 
     variable bar = array_sort (args);
+
     args = args[bar];
     type = type[bar];
     desc = desc[bar];

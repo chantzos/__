@@ -26,12 +26,12 @@ public define verboseoff ()
   IO.fun ("tostdout?";funcrefname = "tostdout_null", const = 0);
 }
 
-private define send_msg_dr (msg)
+public define send_msg_dr (msg)
 {
   Smg.send_msg_dr (msg);
 }
 
-private define send_msg (msg)
+public define send_msg (msg)
 {
   Smg.send_msg (msg);
 }
@@ -95,10 +95,6 @@ public define info ()
 
   exit_me (0);
 }
-
-%(LINES, COLUMNS) = Smg.get_screen_size ();
-
-%Smg.fun ("send_msg_dr1", &send_msg_dr);
 
 signal (SIGINT, &sigint_handler);
 

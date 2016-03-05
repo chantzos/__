@@ -30,17 +30,27 @@ public define __err_handler__ (self, s)
 
 This.err_handler = &__err_handler__;
 
-This.name     = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
-This.appdir   = Env->STD_APP_PATH + "/" + This.name;
-This.tmpdir   = Env->TMP_PATH + "/" + This.name + "/" + string (Env->PID);
-This.stderrFn = This.tmpdir + "/" + "__STDERR__a.ashell";
-This.stdoutFn = This.tmpdir + "/" + "__STDOUT__a.ashell";
+This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
+This.appdir   = Env->STD_APP_PATH + "/" + This.appname;
+This.tmpdir   = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
+This.stdouttype = "ashell";
+
+if (-1 == access (This.appdir + "/" + This.appname + ".slc", F_OK|R_OK))
+  if (-1 == access (This.appdir + "/" + This.appname + ".sl", F_OK|R_OK))
+    This.err_handler ("Couldn't find application " + This.appname);
+
+Load.file (This.appdir + "/" + This.appname);
+
+This.stderrFn = This.tmpdir + "/" + "__STDERR__" + string (_time)[[5:]] +
+  ".txt";
+This.stdoutFn = This.tmpdir + "/" + "__STDOUT__" + string (_time)[[5:]] +
+  "." + This.stdouttype;
 
 if (-1 == Dir.make_parents (This.tmpdir, File->PERM["PRIVATE"];strict))
-  This.__err_handler__ ("cannot create directory " + This.tmpdir);
+  This.err_handler ("cannot create directory " + This.tmpdir);
 
 if (-1 == Dir.make_parents (Env->USER_DATA_PATH, File->PERM["PRIVATE"];strict))
-  This.__err_handler__ ("cannot create directory " + Env->USER_DATA_PATH);
+  This.err_handler ("cannot create directory " + Env->USER_DATA_PATH);
 
 This.stdoutFd = IO.open_fn (This.stdoutFn);
 This.stderrFd = IO.open_fn (This.stderrFn);
@@ -51,8 +61,8 @@ public variable OUT_VED;
 public variable OUTBG_VED;
 public variable SOCKET;
 public variable RLINE      = NULL;
-public variable SCRATCH    = This.tmpdir + "/__SCRATCH__.ashell";
-public variable STDOUTBG   = This.tmpdir + "/__STDOUTBG__.ashell";
+public variable SCRATCH    = This.tmpdir + "/__SCRATCH__.txt";
+public variable STDOUTBG   = This.tmpdir + "/__STDOUTBG__.txt";
 public variable GREPFILE   = This.tmpdir + "/__GREP__.list";
 public variable BGDIR      = This.tmpdir + "/__PROCS__";
 public variable RDFIFO     = This.tmpdir + "/__SRV_FIFO__.fifo";
@@ -87,9 +97,14 @@ public define _log_      (str) {}
 public define _osappnew_ (s)   {}
 public define _osapprec_ (s)   {}
 
-
 public define _exit_ ()
 {
+  if (__is_initialized (&Input))
+    Input.at_exit ();
+
+  if (__is_initialized (&Smg))
+    Smg.at_exit ();
+
   variable rl = Ved.get_cur_rline ();
 
   ifnot (NULL == rl)
@@ -99,9 +114,9 @@ public define _exit_ ()
 
   if (length (searchhist))
     Rline.writehistory (list_to_array (searchhist), (@__get_reference ("s_histfile")));
-
-  exit_me (0);
 }
+
+This.at_exit = &_exit_;
 
 public define go_idled ()
 {
@@ -121,7 +136,7 @@ public define _idle_ (argv)
     return;
     }
 
- (@__get_reference ("_exit_")) (;;__qualifiers  ());
+  exit_me (0);
 }
 
 public define draw (s)
@@ -197,7 +212,7 @@ public define viewfile (s, type, pos, _i)
 
     if (ismsg)
       {
-      Ved.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
+      Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
       ismsg = 0;
       }
 
@@ -221,22 +236,24 @@ public define toscratch (str)
 
 SCRATCH_VED     = Ved.init_ftype ("txt");
 ERR_VED         = Ved.init_ftype ("txt");
-OUT_VED         = Ved.init_ftype ("ashell");
-OUTBG_VED       = Ved.init_ftype ("ashell");
+OUT_VED         = Ved.init_ftype (This.stdouttype);
+OUTBG_VED       = Ved.init_ftype (This.stdouttype);
 
 SCRATCH_VED._fd = SCRATCHFD;
 OUTBG_VED._fd   = STDOUTFDBG;
 ERR_VED._fd     = This.stderrFd;
 OUT_VED._fd     = This.stdoutFd;
 
-txt_settype    (SCRATCH_VED, SCRATCH, VED_ROWS, NULL;_autochdir = 0);
-txt_settype    (ERR_VED, This.stderrFn, VED_ROWS, NULL;_autochdir = 0);
-ashell_settype (OUT_VED, This.stdoutFn, VED_ROWS, NULL;_autochdir = 0);
-ashell_settype (OUTBG_VED, STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
+txt_settype  (SCRATCH_VED, SCRATCH, VED_ROWS, NULL;_autochdir = 0);
+txt_settype  (ERR_VED, This.stderrFn, VED_ROWS, NULL;_autochdir = 0);
+(@__get_reference (This.stdouttype + "_settype"))
+  (OUT_VED, This.stdoutFn, VED_ROWS, NULL;_autochdir = 0);
+(@__get_reference (This.stdouttype + "_settype"))
+  (OUTBG_VED, STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
 
 SPECIAL = [SPECIAL, SCRATCH, This.stderrFn, This.stdoutFn, STDOUTBG];
 
-Load.file (Env->STD_LIB_PATH + "/wind/" + This.name);
+Load.file (Env->STD_LIB_PATH + "/wind/" + This.appname);
 
 if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
   This.exit (1);
@@ -532,7 +549,7 @@ private define __eval ()
     }
 
   if (length (history))
-    () = String.write (HIST_EVAL, strjoin (history, "\n"));
+    () = File.write (HIST_EVAL, strjoin (history, "\n"));
 
   Smg.send_msg (" ", 0);
 
@@ -751,7 +768,7 @@ private define _preexec_ (argv, header, issudo, env)
   if ('!' == argv[0][0])
     argv[0] = substr (argv[0], 2, -1);
 
-  argv = [Sys->SLSH_BIN, Env->STD_LIB_PATH + "/proc/loadcommand.sl", argv];
+  argv = [Sys->SLSH_BIN, Env->STD_LIB_PATH + "/proc/loadcommand.slc", argv];
 
   if (@issudo)
     {
@@ -862,7 +879,7 @@ private define _parse_redir_ (lastarg, file, flags)
 private define _parse_argv_ (argv, isbg)
 {
   variable flags = ">>|";
-  variable file = isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf()._abspath : SCRATCH;
+  variable file = isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
   variable retval = _parse_redir_ (argv[-1], &file, &flags);
 
   file, flags, retval;
@@ -1017,7 +1034,7 @@ private define _fork_ (p, argv, env)
 
   if (strlen (err))
     if (This.shell)
-      IO.tostdout (err;n);
+      IO.tostdout (strtrim_end (err));
     else
       toscratch (err);
 }
@@ -1392,7 +1409,7 @@ private define _build_comlist_ (a)
       _for ii (0, length (c) - 1)
         {
         a[(ex ? "!" : "") + c[ii]] = @Argvlist_Type;
-        a[(ex ? "!" : "") + c[ii]].dir = d[i] +  c[ii];
+        a[(ex ? "!" : "") + c[ii]].dir = d[i] + "/" + c[ii];
         a[(ex ? "!" : "") + c[ii]].func = &_execute_;
         }
     }
@@ -1404,7 +1421,7 @@ private define _lock_ (argv)
   Smg.atrcaddnstr (" --- locked -- ", 1, LINES / 2, COLUMNS / 2 - 10,
     COLUMNS);
 
-  while (NULL == Os.getpasswd);
+  while (NULL == Os.__getpasswd ());
 
   Ved.__vdraw_wind ();
 }
@@ -1445,7 +1462,7 @@ public define init_commands ()
   a["ved"].func = __get_reference ("__ved");
 
   a["eval"] = @Argvlist_Type;
-  a["eval"].func = __get_reference ("my_eval");
+  a["eval"].func = &my_eval;
   a["eval"].type = "Func_Type";
 
   a["rehash"] = @Argvlist_Type;
@@ -1486,7 +1503,7 @@ public define init_commands ()
   a["search"].func = &_search_;
   a["search"].dir = Env->STD_COM_PATH + "/search";
 
-  variable pj = "PROJECT_" + strup (This.name);
+  variable pj = "PROJECT_" + strup (This.appname);
   variable f = __get_reference (pj);
   ifnot (NULL == f)
     {
@@ -1515,9 +1532,9 @@ public define filterexargs (s, args, type, desc)
   args, type, desc;
 }
 
-Load.file (This.appdir + "/functions/vars", NULL);
-Load.file (This.appdir + "/functions/Init", NULL);
-Load.file (This.appdir + "/functions/initrline", NULL);
+Load.file (This.appdir + "/lib/vars", NULL);
+Load.file (This.appdir + "/lib/Init", NULL);
+Load.file (This.appdir + "/lib/initrline", NULL);
 
 public define __initrline ()
 {
@@ -1531,19 +1548,14 @@ public define __initrline ()
   else
     w = Ved.get_cur_wind ();
 
-    w.rline = rlineinit (;
-      osappnew = __get_reference ("_osappnew_"),
-      osapprec = __get_reference ("_osapprec_"),
-      wind_mang = __get_reference ("wind_mang"),
-      filterargs = __get_reference ("filterexargs"),
-      filtercommands = __get_reference ("filterexcom"));
-%  else
-%    w.rline = rlineinit (;
-%      wind_mang = __get_reference ("wind_mang"),
-%      oscompl = __get_reference ("_osappnew_"),
-%      osapprec = __get_reference ("_osapprec_"),
-%      );
+  w.rline = rlineinit (;
+    osappnew = __get_reference ("_osappnew_"),
+    osapprec = __get_reference ("_osapprec_"),
+    wind_mang = __get_reference ("wind_mang"),
+    filterargs = __get_reference ("filterexargs"),
+    filtercommands = __get_reference ("filterexcom"));
 }
+
 
 public define __rehash ()
 {
@@ -1555,9 +1567,8 @@ __initrline ();
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
 Smg.init ();
+Input.init ();
 
-init_shell ();
+(@__get_reference ("init_" + This.appname));
 
-This.at_exit ();
-
-IO.tostderr ("ok from", This.name, This.tmpdir);
+This.exit (0);

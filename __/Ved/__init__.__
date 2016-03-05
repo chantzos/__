@@ -1888,7 +1888,7 @@ class Ved
     s.draw ();
   end
 
-  def _change_frame_ (s) proc
+  def _change_frame_ (s) public proc
     Ved.change_frame ();
     s = Ved.get_cur_buf ();
   end

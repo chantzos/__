@@ -168,12 +168,14 @@ class Input
     TTY_INITED;
   end
 
+  def init ()
+    init_tty (-1, 0, 0);
+    TTY_INITED = @(__get_reference ("Input->TTY_Inited"));
+  end
+
   def __getch () proc
     ifnot (TTY_INITED)
-      {
-      init_tty (-1, 0, 0);
-      TTY_INITED = @(__get_reference ("Input->TTY_Inited"));
-      }
+      init (NULL);
 
     esc_pend = qualifier ("esc_pend", 2);
 

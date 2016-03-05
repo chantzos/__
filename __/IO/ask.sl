@@ -26,8 +26,11 @@ private define ask_smg (self, quest_ar, ar)
 
 private define ask (self, quest_ar, ar)
 {
-  ifnot (This.is_smg ())
+  if (This.is_tty ())
     ask_tty (self, quest_ar, ar;;__qualifiers);
   else
-    ask_smg (self, quest_ar, ar;;__qualifiers);
+    if (This.is_smg ())
+      ask_smg (self, quest_ar, ar;;__qualifiers);
+    else
+      (@__get_reference ("ask")) (quest_ar, ar);
 }

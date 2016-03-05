@@ -377,7 +377,7 @@ class Smg
     variable type = typeof (str);
     variable ar = (any ([String_Type, BString_Type] == type))
       ? strchop (strtrim_end (str), '\n', 0)
-      : Array_Type == typeof (str)
+      : Array_Type == type
         ? any ([BString_Type, String_Type] == _typeof (str))
           ? str
           : NULL
@@ -399,11 +399,13 @@ class Smg
       struct {@__qualifiers, header = header, headerclr = headclr});
 
     ifnot (NULL == charar)
+      {
       while (chr = Input.getch (), 0 == any (chr == charar));
 
-    restore (self, @cmp_lnrs, NULL, 1);
+      restore (self, @cmp_lnrs, NULL, 1);
 
-    chr;
+      chr;
+      }
   end
 
   def get_screen_size ()

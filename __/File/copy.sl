@@ -1,6 +1,6 @@
 private define __my_send_msg__ (msg, progrbts)
 {
-  ifnot (This.is_smg ())
+  if (This.is_tty ())
     {
     if (int (@progrbts))
       {
@@ -13,7 +13,7 @@ private define __my_send_msg__ (msg, progrbts)
     @progrbts = strlen (msg);
     }
   else
-    Smg.send_msg_dr (msg, Smg->COLOR.normal, NULL, NULL);
+    send_msg_dr (msg);
 }
 
 private define __my_copy_verb__ (source, dest)

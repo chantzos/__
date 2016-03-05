@@ -74,7 +74,17 @@ class File
   end
 
   def readlines (file)
-    strchop (self.read (file;;__qualifiers), '\n', 0);
+    variable
+      end = qualifier ("end", NULL),
+      fp = fopen (file, "r");
+
+    if (NULL == fp)
+      return NULL;
+
+    ifnot (NULL == end)
+      array_map (String_Type, &strtrim_end, fgetslines (fp, end), "\n");
+    else
+      array_map (String_Type, &strtrim_end, fgetslines (fp), "\n");
   end
 
   def write (file, str)

@@ -30,7 +30,7 @@ typedef struct
 
 typedef struct
   {
-  name,
+  appname,
   argv,
   shell,
   ved,
@@ -41,6 +41,7 @@ typedef struct
   stderrFd,
   stdoutFn,
   stdoutFd,
+  stdouttype,
   tmpdir,
   appdir,
   at_exit,

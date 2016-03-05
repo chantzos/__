@@ -49,6 +49,8 @@ private define at_exit (self)
 {
 }
 
+public define send_msg_dr ();
+
 private define err_handler (self, s)
 {
   self.exit (NULL, 1);
@@ -440,7 +442,6 @@ private define __install_bytecompiled__ ()
 
 private variable exclude_dirs = [".git", "dev", "C"];
 private variable exclude_files = ["README.md", "___.sl"];
-private variable bytecompiled_libs = [""];
 
 private define lib_dir_callback (dir, st, src_path, dest_path)
 {
@@ -453,12 +454,12 @@ private define lib_dir_callback (dir, st, src_path, dest_path)
   1;
 }
 
-private define file_callback_libs (file, st, src_path, dest_path)
+private define file_callback_libs (file, st, src_path, dest_path, bytecompile)
 {
   if (any (exclude_files == path_basename (file)))
     return 1;
 
-  if (any (bytecompiled_libs == path_basename_sans_extname (file)))
+  if (path_extname (file) == ".sl" && bytecompile)
     {
     variable bytecompiled = file + "c";
     variable dest = strreplace (bytecompiled, src_path, dest_path);
@@ -626,7 +627,7 @@ private define __main__ ()
 
   Path.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_LIB_PATH, STD_LIB_PATH},
-    fargs = {SRC_LIB_PATH, STD_LIB_PATH});
+    fargs = {SRC_LIB_PATH, STD_LIB_PATH, 1});
 
   __bytecompile_classes__;
 
@@ -655,29 +656,29 @@ private define __main__ ()
 
   Path.walk (SRC_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_CLASS_PATH, STD_CLASS_PATH},
-    fargs = {SRC_CLASS_PATH, STD_CLASS_PATH});
+    fargs = {SRC_CLASS_PATH, STD_CLASS_PATH, 0});
 
-  Path.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
-    dargs = {SRC_LIB_PATH, STD_LIB_PATH},
-    fargs = {SRC_LIB_PATH, STD_LIB_PATH});
+%  Path.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
+%    dargs = {SRC_LIB_PATH, STD_LIB_PATH},
+%    fargs = {SRC_LIB_PATH, STD_LIB_PATH, 1});
 
   if (VERBOSE)
     io.tostdout ("installing commands");
 
   Path.walk (SRC_COM_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_COM_PATH, STD_COM_PATH},
-    fargs = {SRC_COM_PATH, STD_COM_PATH});
+    fargs = {SRC_COM_PATH, STD_COM_PATH, 1});
 
   __install_scripts__;
   __install_apps__;
 
    Path.walk (SRC_DATA_PATH, &lib_dir_callback, &file_callback_libs;
      dargs = {SRC_DATA_PATH, STD_DATA_PATH},
-     fargs = {SRC_DATA_PATH, STD_DATA_PATH});
+     fargs = {SRC_DATA_PATH, STD_DATA_PATH, 0});
 
    Path.walk (SRC_APP_PATH, &lib_dir_callback, &file_callback_libs;
      dargs = {SRC_APP_PATH, STD_APP_PATH},
-     fargs = {SRC_APP_PATH, STD_APP_PATH});
+     fargs = {SRC_APP_PATH, STD_APP_PATH, 1});
 
   This.exit ("installation completed", 0);
 }
