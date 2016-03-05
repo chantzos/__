@@ -40,7 +40,8 @@ class File
   fun is_lnk (file)
   fun is_reg (file)
   fun is_sock (file)
-
+  fun remove (file)
+  
   def is_type (mode, type)
     NULL == mode ? 0 : stat_is (type, mode);
   end

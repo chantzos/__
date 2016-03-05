@@ -1,0 +1,45 @@
+ SYNOPSIS
+  List information about file[s]
+
+ USAGE
+  ls [options] file[s]
+
+ DESCRIPTION
+  List information about the FILEs (the current directory by default).  Sort entries
+  alphabetically by default.
+
+ OPTIONS
+
+  -a,--all             Show also hidden files
+  -r,--recursive       List subdirectories recursively
+  --executables        List only executables
+  --maxdepth=depth     Descend at most `levels' of directories
+  --ignore=pattern     Ignore files that match `pattern'
+  --match=pattern      Show only files that match `pattern'
+  --match_type=type    Show only files that match `type'
+  --ignore_type=type   Ignore files that match `type'
+  --head=lines (int)   List only first `lines' files, default are 10
+  --tail=lines (int)   List only last `lines' files, default are 10
+  --classify           *DONT* append indicator when listing [@,/,*] (on by default)
+  -l,--long            Print output in long format
+  --find               Print in screen one file per line (in short format)
+  -v,--verbose         Be verbose
+  --info               Show info
+  --help               Show this message
+ 
+ By default the sort method is ascending alphabetical filename order
+ Other options are listed below
+  --reverse           List in descending order
+  --size              Sort by size
+  --ctime             Sort by last status change
+  --mtime             Sort by last modification time
+  --atime             Sort by last access time
+ 
+ Without option list the current directory in a short format
+ 
+ Valid options of `type' are:
+  dir, reg, lnk, chr, blk, fifo, sock
+ 
+ `Pattern' can be any acceptable pcre pattern.
+ Issue `man pcresyntax' for a quick reference or
+ `man pcrepattern' for the full syntax of the supported regular expressions.

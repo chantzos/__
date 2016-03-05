@@ -1,0 +1,7 @@
+DESCRIPTION: listing directories
+VERSION    : 0.6
+AUTHOR     : Agathoklis D. Chatzimanikas
+MAINTAINER : Agathoklis D. Chatzimanikas
+EMAIL      : aga dot chatzimanikas at gmail dot com
+URL        :
+LICENSE    : GPL2

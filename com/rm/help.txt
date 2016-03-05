@@ -1,0 +1,19 @@
+ SYNOPSIS
+  remove file[s]
+
+ USAGE
+  usage rm [options] file[s]
+
+ DESCRIPTION
+  remove file[s] or directories recursively
+
+ OPTIONS
+
+  --no_preserve_root Do not treat `/' specially when removing recursively
+  --ignore           Ignore files that match pcre pattern
+  --match            Remove only files that match pcre pattern
+  -R,--recursive     Remove directories recursively
+  -i,--interactive   Prompt before removing, choices are (always, once, never) (default always)
+  -v,--verbose       Be verbose
+  --help             Show help
+  --info             Show information

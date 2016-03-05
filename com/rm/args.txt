@@ -1,0 +1,8 @@
+--no_preserve_root void Do not treat `/' specially when removing recursively
+--ignore=          pcrepattern   Ignore files that match pattern
+--match=           pcrepattern    Remove only files that match pattern
+--recursive        void   Remove directories recursively
+--interactive      void         Prompt before, options (always, once, never), default always
+--verbose          void      Be verbose
+--help             void      Show help
+--info             void      Show information

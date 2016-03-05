@@ -407,9 +407,6 @@ This.exit = &exit_me;
 This.err_handler = &err_handler;
 This.at_exit = &at_exit;
 
-private define __build_app__ ();
-private define __build_root__ ();
-
 private define __build_modules__ ()
 {
   variable i;
@@ -583,8 +580,17 @@ private variable CLASSES = [
 private define __bytecompile_classes__ ()
 {
   variable i;
+  variable c;
+
   _for i (0, length (CLASSES) - 1)
     {
+    c = SRC_CLASS_PATH + "/" + CLASSES[i] + "/" + CLASSES[i] + ".slc";
+
+    ifnot (access (c, F_OK))
+      if (-1 == remove (c))
+        This.exit ("failed to remove already bytecompiled class: " + c +
+         ", error: " + errno_string (errno), 1);
+
     if (VERBOSE)
       io.tostdout ("compiling", CLASSES[i]);
 
@@ -658,10 +664,6 @@ private define __main__ ()
     dargs = {SRC_CLASS_PATH, STD_CLASS_PATH},
     fargs = {SRC_CLASS_PATH, STD_CLASS_PATH, 0});
 
-%  Path.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
-%    dargs = {SRC_LIB_PATH, STD_LIB_PATH},
-%    fargs = {SRC_LIB_PATH, STD_LIB_PATH, 1});
-
   if (VERBOSE)
     io.tostdout ("installing commands");
 
@@ -674,7 +676,7 @@ private define __main__ ()
 
    Path.walk (SRC_DATA_PATH, &lib_dir_callback, &file_callback_libs;
      dargs = {SRC_DATA_PATH, STD_DATA_PATH},
-     fargs = {SRC_DATA_PATH, STD_DATA_PATH, 0});
+     fargs = {SRC_DATA_PATH, STD_DATA_PATH, 1});
 
    Path.walk (SRC_APP_PATH, &lib_dir_callback, &file_callback_libs;
      dargs = {SRC_APP_PATH, STD_APP_PATH},

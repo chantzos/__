@@ -1,0 +1,20 @@
+--all          void    list also hidden files
+--maxdepth=    int     descend at most `levels' of directories (turns on recursive)
+--executables  void  list only executables
+--recursive    void    list subdirectories recursively
+--ignore=      pcrepattern  ignore files that match pcre `pattern'
+--match=       pcrepattern  list only files that match pcre `pattern'
+--match_type=  string  list only files that match `type' (dir,reg,blk,fifo,sock,chr,lnk)
+--ignore_type= string  ignore files that match `type' (dir,reg,blk,fifo,sock,chr,lnk)
+--head=        int     list only first `lines' files, default 10 (delete = for default)
+--tail=        int     list only last `lines' files, default 10 (delete = for default)
+--long         void print output in long format
+--classify     void    *DONT* append indicator when listing [@,/,*] (on by default)
+--reverse      void    list in descending order
+--size         void    sort by size
+--ctime        void    sort by last status change
+--mtime        void    sort by last modification time
+--atime        void    sort by last access time
+--find         void print in screen one file per line
+--help         void    show this message
+--info         void show information
