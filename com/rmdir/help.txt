@@ -1,0 +1,16 @@
+ SYNOPSIS
+  remove dirs[s]
+
+ USAGE
+  usage rmdir [options] dirs[s]
+
+ DESCRIPTION
+  remove dir[s]
+
+ OPTIONS
+ 
+  -i,--interactive  Ask before removing directory
+  --parents         Remove directory and its ancestors
+  -v,--verbose      Be verbose
+  --help            Show help
+  --info            Show information

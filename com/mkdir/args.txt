@@ -1,0 +1,5 @@
+--parents void  Make parent directories as needed
+--mode=   int   Set file mode in octal
+--verbose void  Be verbose
+--help    void  show help
+--info    void  show information

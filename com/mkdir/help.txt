@@ -1,0 +1,24 @@
+ SYNOPSIS
+  Make directories
+
+ USAGE
+  mkdir [options] dir... dir
+ 
+ DESCRIPTION
+  Create directory(ies) if they don't already exist
+ 
+ OPTIONS
+
+  --parents           Make parent directories as needed
+  --mode=MODE         Set file mode
+  -v,--verbose        Be verbose
+  --help              Show help
+  --info              Show information
+
+ NOTES
+
+  If `--mode' is given, then set the file permission bits
+  to "MODE", where the defaut is umask or 0755.
+
+  If `--mode' and `--parents' are given together, only
+  set with "MODE" the last part (basename) of "dir".

@@ -1,0 +1,7 @@
+DESCRIPTION: Remove director[y|ies]
+VERSION    : 0.5
+AUTHOR     : Agathoklis D. Chatzimanikas
+MAINTAINER : Agathoklis D. Chatzimanikas
+EMAIL      : aga dot chatzimanikas at gmail dot com
+URL        :
+LICENSE    : GPL2

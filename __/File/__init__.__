@@ -42,7 +42,7 @@ class File
   fun is_sock (file)
   fun move (source, dest, opts)
   fun extract (archive, verbose, dir, strip)
-  fun remove (file)
+  fun remove (file, interactive, isdir)
 
   def is_type (mode, type)
     NULL == mode ? 0 : stat_is (type, mode);

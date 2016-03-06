@@ -68,5 +68,6 @@ class Sys
     pw.pw_name;
   end
 
+  fun mode_conversion (mode)
   fun getpwuidgid (user)
 end
