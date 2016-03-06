@@ -145,7 +145,7 @@ class Ved
   def insert () proc
   end
 
-  def set_modified (s) proc
+  def set_modified (s) public proc
     s._flags |= VED_MODIFIED;
   end
 
@@ -246,7 +246,7 @@ class Ved
     s.lins[r];
   end
 
-  def __vlnr (s, r) proc
+  def __vlnr (s, r) public proc
     r = (r == '.' ? s.ptr[0] : r) - s.rows[0];
     s.lnrs[r];
   end
@@ -454,7 +454,7 @@ class Ved
     return fwrite (line, fp);
   end
 
-  def __vwritetofile (file, lines, indent, bts) proc
+  def __vwritetofile (file, lines, indent, bts) public proc
     variable
       i,
       retval,
@@ -978,7 +978,7 @@ class Ved
       Ved.__vdraw_wind ();
   end
 
-  def bufdelete (s, bufname, force) proc
+  def bufdelete (s, bufname, force) public proc
     if (any (bufname == UNDELETABLE))
       return;
 
@@ -1857,7 +1857,7 @@ class Ved
     Smg.send_msg_dr ("yanked", 1, s.ptr[0], s.ptr[1]);
   end
 
-  def __vreread (s) proc
+  def __vreread (s) public proc
     s.lines = Ved.__vgetlines (s._fname, s._indent, s.st_);
 
     s._len = length (s.lines) - 1;
@@ -5488,7 +5488,7 @@ class Ved
     Smg.askprintstr (ar, char_ar, &cmp_lnrs;hl_region = hl_reg);
   end
 
-  def __substitute () proc
+  def __substitute () public proc
     variable global = 0, ask = 1, pat = NULL, sub = NULL, ind, range = NULL;
     variable args = __pop_list (_NARGS);
     variable buf = Ved.get_cur_buf ();
@@ -5602,14 +5602,14 @@ class Ved
   def buffer_other (s) proc
   end
 
-  def handle_comma (s) proc
+  def handle_comma (s) public proc
     variable chr = Input.getch ();
 
     ifnot (any (['p'] == chr))
       return;
 
     if ('p' == chr)
-      seltoX (Ved.get_cur_buf._abspath);
+      seltoX (Ved.get_cur_buf ()._abspath);
   end
 
   def PROJECT_VED (argv) public proc

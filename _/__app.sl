@@ -55,6 +55,9 @@ if (-1 == Dir.make_parents (Env->USER_DATA_PATH, File->PERM["PRIVATE"];strict))
 This.stdoutFd = IO.open_fn (This.stdoutFn);
 This.stderrFd = IO.open_fn (This.stderrFn);
 
+VED_RLINE = 0;
+VED_ISONLYPAGER = 1;
+
 public variable SCRATCH_VED;
 public variable ERR_VED;
 public variable OUT_VED;
@@ -756,7 +759,8 @@ private define _preexec_ (argv, header, issudo, env)
 
   @header = strlen (argv[0]) > 1 && 0 == qualifier_exists ("no_header");
   @issudo = qualifier ("issudo");
-  @env = [Env.defenv (), "PPID=" + string (Env->PID)];
+  @env = [Env.defenv (), "PPID=" + string (Env->PID), "CLNT_FIFO=" + RDFIFO,
+    "SRV_FIFO=" + WRFIFO];
 
   variable p = Proc.init (@issudo, 0, 1);
 
@@ -1562,11 +1566,12 @@ public define __rehash ()
   __initrline ();
 }
 
-__initrline ();
-
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
+__initrline ();
+
 Smg.init ();
+
 Input.init ();
 
 (@__get_reference ("init_" + This.appname));
