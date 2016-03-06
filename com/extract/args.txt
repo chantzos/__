@@ -1,0 +1,5 @@
+--to-dir=    directory extract into `dir'
+--strip      void      extract archive without the leading directory
+--verbose    void      be verbose
+--help       void      show help
+--info       void      show information

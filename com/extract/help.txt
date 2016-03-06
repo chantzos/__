@@ -1,0 +1,16 @@
+ SYNOPSIS
+  Extract archives
+
+ USAGE
+  extract [options] file[s]
+ 
+ DESCRIPTION
+  Extract archive[s], suported types (xz, gz, bz2, zip, rar)
+
+ OPTIONS
+
+  --to-dir=     Extract into `dir'
+  --strip       Extract archive without the leading directory
+  -v,--verbose  Be verbose
+  --help        Show help
+  --info        Show information

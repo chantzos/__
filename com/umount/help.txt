@@ -1,0 +1,17 @@
+ SYNOPSIS
+  umount  [options]
+
+ USAGE
+  usage umount --mountpoint [options]
+
+ DESCRIPTION
+  umount filesystems
+
+ OPTIONS
+	
+  --mountpoint=  MountPoint
+  -v,--verbose   Be verbose
+
+  NOTES
+
+This is a simple umount command wrapper.

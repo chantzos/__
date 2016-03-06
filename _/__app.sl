@@ -343,6 +343,9 @@ public define runapp (argv, env)
 {
   Smg.suspend ();
 
+  if (0 > strncmp (argv[0], "__", 2))
+    argv[0] = "__" + argv[0];
+
   argv[0] = Env->BIN_PATH + "/" + argv[0];
 
   variable issudo = qualifier ("issudo");
@@ -375,7 +378,7 @@ private define __ved (argv)
 
   shell_pre_header ("ved " + fname);
 
-  runapp (["ved", fname], Env.defenv ();;__qualifiers ());
+  runapp (["__ved", fname], Env.defenv ();;__qualifiers ());
 
   shell_post_header ();
 
@@ -1403,7 +1406,7 @@ private define _build_comlist_ (a)
     c,
     ii,
     ex = qualifier_exists ("ex"),
-    d = [Env->STD_COM_PATH];
+    d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
   _for i (0, length (d) - 1)
     {

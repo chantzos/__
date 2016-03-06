@@ -1,0 +1,7 @@
+DESCRIPTION: extract archive[s]
+VERSION    : 0.2
+AUTHOR     : Agathoklis D. Chatzimanikas
+MAINTAINER : Agathoklis D. Chatzimanikas
+EMAIL      : aga dot chatzimanikas at gmail dot com
+URL        :
+LICENSE    : GPL2

@@ -1,0 +1,20 @@
+ SYNOPSIS
+  mount  [options]
+
+ USAGE
+  usage mount [options]
+
+ DESCRIPTION
+  mount filesystems or print mounted filesystems
+
+ OPTIONS
+	
+  --mountpoint=  MountPoint
+  --device=      Device
+  -v,--verbose   Be verbose
+  --info         Show info
+  --help         Show help
+
+  NOTES
+
+This is a simple mount command wrapper.

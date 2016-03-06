@@ -224,6 +224,20 @@ private define writefile (__fn__, __buf__)
     This.exit ("failed to close fd, while writing to " + __fn__ + ", " + errno_string (errno), 1);
 }
 
+private define __compile_module__ (__dir__, __module__)
+{
+  variable
+    CC_COM = CC + " " + DEF_FLAGS + " " + (DEBUG ? DEB_FLAGS : "") + " " +
+      __dir__ + "/" + __module__ +  " -o " +
+      SRC_TMP_PATH + "/" + path_basename_sans_extname (__module__) + ".so";
+
+  if (VERBOSE)
+    io.tostdout ("compiling " + __dir__ + "/" + __module__);
+
+  if (system (CC_COM))
+    This.exit ("failed to compile " + __module__, 1);
+}
+
 private define __build_module__ (i)
 {
   variable
@@ -253,7 +267,6 @@ private variable STD_PATH       = ROOT_PATH + "/std";
 private variable TMP_PATH       = ROOT_PATH + "/tmp";
 private variable BIN_PATH       = ROOT_PATH + "/bin";
 private variable USER_PATH      = ROOT_PATH + "/usr";
-private variable USER_DATA_PATH = ROOT_PATH + "/usr/data";
 
 private variable STD_CLASS_PATH = STD_PATH + "/__";
 private variable STD_LIB_PATH   = STD_PATH + "/___";
@@ -270,9 +283,25 @@ private variable SRC_APP_PATH   = SRC_PATH + "/app";
 private variable SRC_COM_PATH   = SRC_PATH + "/com";
 private variable SRC_DATA_PATH  = SRC_PATH + "/data";
 
+private variable USER_COM_PATH  = USER_PATH + "/com";
+private variable USER_APP_PATH  = USER_PATH + "/app";
+private variable USER_LIB_PATH  = USER_PATH + "/___";
+private variable USER_CLS_PATH  = USER_PATH + "/__";
+private variable USER_DATA_PATH = USER_PATH + "/data";
+private variable USER_C_PATH    = USER_PATH + "/C";
+
+private variable SRC_USER_PATH     = SRC_PATH + "/usr";
+private variable SRC_USER_COM_PATH = SRC_USER_PATH + "/com";
+private variable SRC_USER_APP_PATH = SRC_USER_PATH + "/app";
+private variable SRC_USER_LIB_PATH = SRC_USER_PATH + "/___";
+private variable SRC_USER_CLS_PATH = SRC_USER_PATH + "/__";
+private variable SRC_USER_C_PATH   = SRC_USER_PATH + "/C";
+private variable SRC_USER_DATA_PATH= SRC_USER_PATH + "/data";
+
 private variable INST_PATHS = [
   ROOT_PATH, STD_PATH, TMP_PATH, BIN_PATH,
-  USER_PATH, USER_DATA_PATH,
+  USER_PATH, USER_APP_PATH, USER_COM_PATH, USER_CLS_PATH,
+  USER_DATA_PATH, USER_C_PATH, USER_LIB_PATH,
   STD_CLASS_PATH, STD_C_PATH, STD_DATA_PATH,
   STD_APP_PATH, STD_COM_PATH, STD_LIB_PATH];
 
@@ -598,6 +627,17 @@ private define __bytecompile_classes__ ()
     }
 }
 
+private define __compile_user_module__ (module, st)
+{
+  module = path_basename (module);
+  __compile_module__ (SRC_USER_C_PATH, module);
+
+  module = SRC_TMP_PATH + "/" + path_basename_sans_extname (module) + ".so";
+
+  if (-1 == rename (module, USER_C_PATH + "/" + path_basename (module)))
+    This.exit ("failed to rename " + module + " to " + SRC_USER_C_PATH, 1);
+}
+
 private define __main__ ()
 {
   variable i;
@@ -674,13 +714,53 @@ private define __main__ ()
   __install_scripts__;
   __install_apps__;
 
-   Path.walk (SRC_DATA_PATH, &lib_dir_callback, &file_callback_libs;
-     dargs = {SRC_DATA_PATH, STD_DATA_PATH},
-     fargs = {SRC_DATA_PATH, STD_DATA_PATH, 1});
+  Path.walk (SRC_DATA_PATH, &lib_dir_callback, &file_callback_libs;
+    dargs = {SRC_DATA_PATH, STD_DATA_PATH},
+    fargs = {SRC_DATA_PATH, STD_DATA_PATH, 1});
 
-   Path.walk (SRC_APP_PATH, &lib_dir_callback, &file_callback_libs;
-     dargs = {SRC_APP_PATH, STD_APP_PATH},
-     fargs = {SRC_APP_PATH, STD_APP_PATH, 1});
+  Path.walk (SRC_APP_PATH, &lib_dir_callback, &file_callback_libs;
+    dargs = {SRC_APP_PATH, STD_APP_PATH},
+    fargs = {SRC_APP_PATH, STD_APP_PATH, 1});
+
+  ifnot (access (SRC_USER_PATH, F_OK|R_OK))
+    {
+    ifnot (access (SRC_USER_COM_PATH, F_OK|R_OK))
+      Path.walk (SRC_USER_COM_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_USER_COM_PATH, USER_COM_PATH},
+        fargs = {SRC_USER_COM_PATH, USER_COM_PATH, 1});
+
+    ifnot (access (SRC_USER_DATA_PATH, F_OK|R_OK))
+      Path.walk (SRC_USER_DATA_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_USER_DATA_PATH, USER_DATA_PATH},
+        fargs = {SRC_USER_DATA_PATH, USER_DATA_PATH, 1});
+
+    ifnot (access (SRC_USER_APP_PATH, F_OK|R_OK))
+      Path.walk (SRC_USER_APP_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_USER_APP_PATH, USER_APP_PATH},
+        fargs = {SRC_USER_APP_PATH, USER_APP_PATH, 1});
+
+    ifnot (access (SRC_USER_CLS_PATH, F_OK|R_OK))
+      Path.walk (SRC_USER_CLS_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_USER_CLS_PATH, USER_CLS_PATH},
+        fargs = {SRC_USER_CLS_PATH, USER_CLS_PATH, 0});
+
+    ifnot (access (SRC_USER_APP_PATH, F_OK|R_OK))
+      {
+      () = chdir (BIN_PATH);
+      Path.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
+      () = chdir (SRC_PATH);
+      }
+
+    ifnot (access (SRC_USER_COM_PATH, F_OK|R_OK))
+      {
+      () = chdir (BIN_PATH);
+      Path.walk (SRC_USER_COM_PATH + "/", &__scripts_dir_callback__, NULL);
+      () = chdir (SRC_PATH);
+      }
+
+   ifnot (access (SRC_USER_C_PATH, F_OK|R_OK))
+     Path.walk (SRC_USER_C_PATH, NULL, &__compile_user_module__);
+   }
 
   This.exit ("installation completed", 0);
 }

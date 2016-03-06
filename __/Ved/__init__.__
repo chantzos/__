@@ -1289,7 +1289,7 @@ class Ved
 
   %%% SYNTAX PUBLIC FUNCTIONS
 
-  def __hl_groups (lines, vlines, colors, regexps) proc
+  def __hl_groups (lines, vlines, colors, regexps) public proc
     variable
       i,
       ii,

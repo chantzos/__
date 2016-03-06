@@ -92,8 +92,7 @@ public define exit_me (x)
 
 _exit_me_ = NULL == BG ? &exit_me : &exit_me_bg;
 
-
-public define __err_handler__ (__r__)
+private define __err_handler__ (__r__)
 {
   variable code = 1;
   if (Integer_Type == typeof (__r__))
@@ -101,6 +100,8 @@ public define __err_handler__ (__r__)
 
   (@_exit_me_) (code;;__qualifiers);
 }
+
+This.err_handler = &__err_handler__;
 
 ifnot (access (stdoutfile, F_OK))
   stdoutfd = open (stdoutfile, File->FLAGS[stdoutflags]);
@@ -329,10 +330,8 @@ public define ask (questar, charar)
 }
 
 variable COMDIR = Env->STD_COM_PATH + "/" + COM;
-
-
-%if (-1 == dup2_fd (stdoutfd, _fileno (stdout)))
-%  (@_exit_me_) (1;msg = errno_string (errno));
+if (-1 == access (COMDIR, F_OK))
+  COMDIR = Env->USER_COM_PATH + "/" + COM;
 
 try
   {

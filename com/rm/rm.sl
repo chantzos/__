@@ -180,7 +180,7 @@ define main ()
 
     if (interactive == "once")
       {
-      retval = ask ([
+      retval = IO.ask ([
         sprintf ("There %d files for removal", length (filelist)),
         "Do you want to proceed?",
         "y[es remove files all files without asking again]",
@@ -205,7 +205,7 @@ define main ()
 
         {
         case 's':
-          retval = ask ([
+          retval = IO.ask ([
             sprintf ("There %d files for removal", length (filelist)),
             "Do you want to proceed?",
             "y[es remove files all files without asking again]",

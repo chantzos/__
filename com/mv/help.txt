@@ -1,0 +1,19 @@
+ SYNOPSIS
+  move file[s]
+
+ USAGE
+  usage mv [options] file[s]
+
+ DESCRIPTION
+  move file[s] or directories
+
+ OPTIONS
+
+  -i,--interactive  Prompt before moving
+  --no-clobber      Do not overwrite an existing file (overrides a previus -i option)
+  --update          Move only if source file is newer than destination
+  --backup          Make backups
+  --suffix          Overrides the default backup suffix (~)
+  -v,--verbose      Be verbose
+  --help            Show help
+  --info            Show information

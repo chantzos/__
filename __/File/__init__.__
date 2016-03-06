@@ -40,6 +40,8 @@ class File
   fun is_lnk (file)
   fun is_reg (file)
   fun is_sock (file)
+  fun move (source, dest, opts)
+  fun extract (archive, verbose, dir, strip)
   fun remove (file)
 
   def is_type (mode, type)

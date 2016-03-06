@@ -108,4 +108,6 @@ class Dir
           : st.st_mode
         : NULL, "dir") ? 1 : qualifier_exists ("strict") ? -1 : 0;
   end
+
+ fun move (source, dest, opts)
 end
