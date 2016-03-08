@@ -1531,9 +1531,9 @@ class Rline
   def getpattern (s, pat) proc
     variable pcrepat;
     variable err;
-    variable rl = init (&_null_);
+    variable rl = Rline.init (&_null_);
 
-    set (rl);
+    Rline.set (rl);
 
     rl._chr = 0;
     rl.argv = [@pat];

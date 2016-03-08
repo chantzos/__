@@ -9,9 +9,9 @@ private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
 private variable
   CC = "gcc";
 private variable
-  MODULES = ["__", "getkey", "crypto", "slsmg", "socket", "fork", "pcre", "rand"];
+  MODULES = ["__", "getkey", "crypto", "slsmg", "socket", "fork", "pcre", "rand", "iconv"];
 private variable
-  FLAGS = ["-lm -lpam", "-lssl", "", "", "", "", "-lpcre", ""];
+  FLAGS = ["-lm -lpam", "-lssl", "", "", "", "", "-lpcre", "", ""];
 private variable
   DEF_FLAGS = "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable

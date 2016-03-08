@@ -1,0 +1,20 @@
+ SYNOPSIS
+  Search in file[s] for pattern
+
+ USAGE
+  search --pat [options] file[s]
+ 
+ DESCRIPTION
+  Search for files or text and print the results like quick-fix in vim
+ 
+ OPTIONS
+
+  --pat               Pattern
+  --hidden-files      Hidden files also (off by default)
+  --hidden-dirs       Hidden directories also (off by default)
+  --maxdepth=depth    Descend at most `levels' of directories
+  --recursive         Search recursively
+  --findfiles         Find files that match pcre pattern
+  --danglinglinks     Find dangling symbolic links
+  --help              Show help
+  --info              Show information

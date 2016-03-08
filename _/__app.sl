@@ -343,10 +343,17 @@ public define runapp (argv, env)
 {
   Smg.suspend ();
 
-  if (0 > strncmp (argv[0], "__", 2))
+  if (strncmp (argv[0], "__", 2))
     argv[0] = "__" + argv[0];
 
   argv[0] = Env->BIN_PATH + "/" + argv[0];
+
+  if (-1 == access (argv[0], F_OK|X_OK))
+    {
+    IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
+    Smg.resume ();
+    return;
+    }
 
   variable issudo = qualifier ("issudo");
 
@@ -1366,7 +1373,7 @@ private define _search_ (argv)
   _fork_ (p, argv, env);
 
   ifnot (EXITSTATUS)
-    runapp (["ved", GREPFILE], Proc.defenv ());
+    runapp (["__ved", GREPFILE], Env.defenv ());
 
   shell_post_header ();
   draw (Ved.get_cur_buf ());

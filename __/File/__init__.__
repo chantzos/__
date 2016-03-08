@@ -90,9 +90,35 @@ class File
       array_map (String_Type, &strtrim_end, fgetslines (fp), "\n");
   end
 
+  def __write__ (fd, str) proc
+    if (-1 == write (fd, str))
+      {
+      IO.tostderr (qualifier ("file", ""), ": " + errno_string (errno));
+      return -1;
+      }
+
+    0;
+  end
+
   def write (file, str)
-    variable fd = open (file, O_WRONLY|O_CREAT|O_TRUNC,
-      qualifier ("flags", File->PERM["__PUBLIC"]));
+    variable type = typeof (str);
+    if (any ([String_Type, BString_Type] == type))
+      str = [str];
+    else
+      ifnot (Array_Type == type)
+        type = Null_Type;
+      else
+        ifnot (any ([BString_Type, String_Type] == _typeof (str)))
+          type = Null_Type;
+
+    if (Null_Type == type)
+      {
+      IO.tostderr ("type of string should be B?String_Type []?");
+      return -1;
+      }
+
+    variable fd =
+      open (file, O_WRONLY|O_CREAT|O_TRUNC, qualifier ("flags", File->PERM["__PUBLIC"]));
 
     if (NULL == fd)
       {
@@ -100,11 +126,8 @@ class File
       return -1;
       }
 
-    if (-1 == write (fd, str))
-      {
-      IO.tostderr (file + ": " + errno_string (errno));
+    if (any (-1 == Array.map (Integer_Type, &__write__, fd, str;file = file)))
       return -1;
-      }
 
     if (-1 == close (fd))
       {

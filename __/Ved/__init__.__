@@ -536,11 +536,11 @@ class Ved
       Smg.hlregion (clr, s.rows[-1], 0, 1, COLUMNS);
   end
 
-  def __vset_clr_fg (s, set) proc
+  def __vset_clr_fg (s, set) public proc
     _set_clr_ (s, VED_INFOCLRFG, set);
   end
 
-  def __vset_clr_bg (s, set) proc
+  def __vset_clr_bg (s, set) public proc
     _set_clr_ (s, VED_INFOCLRBG, set);
   end
 
@@ -923,7 +923,7 @@ class Ved
     (@__get_reference ("__initrline"));
   end
 
-  def wind_init (name, frames) proc
+  def wind_init (name, frames) public proc
     if (any (name == assoc_get_keys (VED_WIND)) && 0 == qualifier_exists ("force"))
       return;
 
@@ -1986,7 +1986,7 @@ class Ved
       }
   end
 
-  def __pg_on_carriage_return (s) proc
+  def __pg_on_carriage_return (s) public proc
   end
 
   def pg_write_on_esc (s) proc

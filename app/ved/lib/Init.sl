@@ -328,12 +328,15 @@ private define cl_quit ()
     ifnot ("q!" == com)
       retval = __write_buffers ();
 
-  if (__is_initialized (&Input))
-    Input.at_exit ();
+  ifnot (retval)
+    exit_me (0);
+}
 
-  if (__is_initialized (&Smg))
-    Smg.at_exit ();
-
+private define write_quit ()
+{
+  variable args = __pop_list (_NARGS);
+  % needs to write the current buffer and ask for the rest
+  variable retval = __write_buffers (;force);
   ifnot (retval)
     exit_me (0);
 }
@@ -368,16 +371,6 @@ private define _read_ ()
   set_modified (s);
   s._i = s._ii;
   s.draw ();
-}
-
-private define write_quit ()
-{
-  variable s = qualifier ("ved");
-  variable args = __pop_list (_NARGS);
-  % needs to write the current buffer and ask for the rest
-  variable retval = __write_buffers (;force);
-  ifnot (retval)
-    exit_me (0);
 }
 
 define __vmessages ()
@@ -532,6 +525,6 @@ public define init_ved ()
   fn = __argv[-1];
   if (NULL == ft)
     ft = Ved.get_ftype (fn);
-
+IO.tostderr ("FT", ft, fn);
   Ved.init_ftype (ft).ved (fn);
 }

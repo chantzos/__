@@ -1,0 +1,10 @@
+--pat=          pcrepattern  pcre pattern (required)
+--hidden-files  void hidden files also (off by default)
+--hidden-dirs   void hidden directories also (off by default)
+--excludedir=   directory exclude directory
+--maxdepth=     int descend at most `levels' of directories
+--recursive     void search recursively
+--findfiles     void find files that match `pat'
+--danglinglinks void find dangling symbolic links
+--help          void show help
+--info          void show information
