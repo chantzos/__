@@ -110,6 +110,9 @@ class File
       else
         ifnot (any ([BString_Type, String_Type] == _typeof (str)))
           type = Null_Type;
+        else
+          ifnot (qualifier_exists ("n"))
+            str += "\n";
 
     if (Null_Type == type)
       {

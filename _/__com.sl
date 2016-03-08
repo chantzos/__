@@ -1,5 +1,7 @@
 variable COM = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 variable COMDIR = Env->STD_COM_PATH + "/" + COM;
+if (-1 == access (COMDIR, F_OK))
+  COMDIR = Env->USER_COM_PATH + "/" + COM;
 
 public variable openstdout = 0;
 
@@ -71,7 +73,7 @@ public define _usage ()
     exit_me (1);
     }
 
-  IO.tostderr (ar);
+  IO.tostdout (ar);
 
   This.exit (_NARGS);
 }
@@ -91,7 +93,7 @@ public define info ()
 
   ar = File.readlines (infofile);
 
-  IO.tostderr (ar);
+  IO.tostdout (ar);
 
   exit_me (0);
 }

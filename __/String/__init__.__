@@ -16,4 +16,14 @@ class String
 
     length (l) ? list_to_array (l) : ['\n'];
   end
+
+  def to_int (str)
+    variable retval = atoi (str);
+
+    ifnot (retval)
+      if (str != "0")
+        return NULL;
+
+    retval;
+  end
 end

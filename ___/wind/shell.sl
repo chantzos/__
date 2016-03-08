@@ -2,7 +2,7 @@ private variable clr = getuid () ? 2 : 1;
 
 public define toplinedr (str)
 {
-  str += sprintf (" LANG (%s) ", Input.getmapname ());
+  str += sprintf (" LANG [%s] PID [%d] ", Input.getmapname (), Env->PID);
 
   _topline_ (&str, COLUMNS);
 
@@ -12,7 +12,7 @@ public define toplinedr (str)
 
 public define topline (str)
 {
-  str += sprintf (" LANG (%s) ", Input.getmapname ());
+  str += sprintf (" LANG [%s] PID [%d]", Input.getmapname (), Env->PID);
 
   _topline_ (&str, COLUMNS);
 

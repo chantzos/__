@@ -223,7 +223,7 @@ private define tabhook (s)
 public define rlineinit ()
 {
   variable rl = Rline.init (&my_commands;;struct {
-    histfile = Env->USER_DATA_PATH + "/" + Env->USER + ".vedhistory",
+    histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_vedhistory",
     historyaddforce = 1,
     tabhook = &tabhook,
     %totype = "Func_Type",
@@ -525,6 +525,6 @@ public define init_ved ()
   fn = __argv[-1];
   if (NULL == ft)
     ft = Ved.get_ftype (fn);
-IO.tostderr ("FT", ft, fn);
+
   Ved.init_ftype (ft).ved (fn);
 }

@@ -61,7 +61,7 @@ public define rlineinit ()
   variable rl = Rline.init (&my_commands;;struct
     {
     @__qualifiers (),
-    histfile = Env->USER_DATA_PATH + "/" + Env->USER + ".shellhistory",
+    histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_shellhistory",
     filtercommands = &filtercommands,
     filterargs = &filterargs,
     tabhook = &tabhook,

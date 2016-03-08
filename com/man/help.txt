@@ -1,0 +1,16 @@
+ SYNOPSIS
+  Display man page
+ 
+ USAGE
+  man page
+ 
+ DESCRIPTION
+  man [options] page
+
+ OPTIONS
+
+  --search            search for a man page and display it if there is one match
+  --caseless          ignore case when searching for a man page
+  --buildcache        build a cache file
+  --help              show help
+  --info              show informatiion

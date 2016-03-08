@@ -1,0 +1,5 @@
+--search=    pcrepattern search for a man page and display it if there is one match
+--caseless   void        ignore case when searching for a man page
+--buildcache void        build a cache file
+--help       void        show help
+--info       void        show information

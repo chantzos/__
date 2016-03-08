@@ -81,7 +81,7 @@ class Sync
 
     _for i (0, length (excl) - 1)
       {
-      ignobj = strchopr (excl[i], '/', 0);
+      ignobj = strtok (excl[i], "/");
       cmpnts = length (ignobj);
       lobj = strchopr (obj, '/', 0);
 
@@ -104,8 +104,9 @@ class Sync
     variable newfile = strreplace (file, other, cur);
 
     ifnot (NULL == s.ignorefileonremove)
-      if (ignore (file, s.ignorefileonremove, "file", s.ignoreonremoveverbosity))
-        return 1;
+      if (length (s.ignorefileonremove))
+        if (ignore (file, s.ignorefileonremove, "file", s.ignoreonremoveverbosity))
+          return 1;
 
     if (-1 == access (newfile, F_OK) && 0 == access (file, F_OK))
       if (-1 == rmfile (file))
@@ -121,8 +122,9 @@ class Sync
     variable newdir = strreplace (dir, other, cur);
 
     ifnot (NULL == s.ignoredironremove)
-      if (ignore (dir, s.ignoredironremove, "dir", s.ignoreonremoveverbosity))
-        return 0;
+      if (length (s.ignoredironremove))
+        if (ignore (dir, s.ignoredironremove, "dir", s.ignoreonremoveverbosity))
+          return 0;
 
     if (-1 == access (newdir, F_OK) && 0 == access (dir, F_OK))
       list_append (dirs, dir);
@@ -364,8 +366,9 @@ class Sync
       return -1;
 
     ifnot (NULL == s.ignorefile)
-      if (ignore (file, s.ignorefile, "file", s.ignoreverbosity))
-        return 1;
+      if (length (s.ignorefile))
+        if (ignore (file, s.ignorefile, "file", s.ignoreverbosity))
+          return 1;
 
     (dest, ) = strreplace (file, source, dest, 1);
 
@@ -412,8 +415,9 @@ class Sync
       return -1;
 
     ifnot (NULL == s.ignoredir)
-      if (ignore (dir, s.ignoredir, "dir", s.ignoreverbosity))
-        return 0;
+      if (length (s.ignoredir))
+        if (ignore (dir, s.ignoredir, "dir", s.ignoreverbosity))
+          return 0;
 
     (dest, ) = strreplace (dir, source, dest, 1);
 

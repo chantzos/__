@@ -1,5 +1,7 @@
 Class.load ("Re");
 
+verboseon ();
+
 private variable
   MAXDEPTH = 1,
   PAT = NULL,

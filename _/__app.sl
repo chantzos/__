@@ -774,7 +774,7 @@ private define _preexec_ (argv, header, issudo, env)
 
   variable p = Proc.init (@issudo, 0, 1);
 
-  p.issu = @issudo ? 0 : 1;
+  p.issu = 0 == @issudo;
 
   if (@header)
     shell_pre_header (argv);
@@ -938,7 +938,7 @@ private define _sendsig_ (sig, pid, passwd)
   p.stdin.in = passwd;
 
   () = p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
-    Env->STD_LIB_PATH + "/proc/sendsignalassu.sl", sig, pid], NULL);
+    Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", sig, pid], NULL);
 }
 
 private define _getbgstatus_ (pid)
@@ -982,6 +982,9 @@ private define _getbgstatus_ (pid)
   variable status = waitpid (atoi (pid), 0);
 
   variable out = File.read (STDOUTFDBG;offset = OUTBG_VED.st_.st_size);
+
+  if (strbytelen (out))
+    out = strjoin (strtok (out, "\n"), "\n");
 
   ifnot (NULL == out)
     if (This.shell)

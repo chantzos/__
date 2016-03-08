@@ -89,7 +89,7 @@ class Ved
     Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
   end
 
-  var public s_histfile = Env->USER_DATA_PATH + "/" + Env->USER + "/ved_search_history";
+  var public s_histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_ved_search_history";
   var public s_histindex = NULL;
   var public s_history = {};
 
@@ -1276,15 +1276,19 @@ class Ved
   end
 
   def _vedloop_ (s) proc
-    forever
-      try
-        if (_loop_ (s))
-          break;
-      catch AnyError:
-        {
-        Exc.print (NULL);
-        (@__get_reference ("__vmessages"));
-        }
+    if (_loop_ (s))
+      return;
+  end
+
+  def __err_handler__ (_e_) proc
+    (@__get_reference ("__vmessages"));
+    variable s = Ved.get_cur_buf ();
+    Ved.draw_wind ();
+    s.vedloop ();
+  end
+
+  do
+    This.err_handler = &__err_handler__;
   end
 
   %%% SYNTAX PUBLIC FUNCTIONS
