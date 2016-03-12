@@ -1,0 +1,10 @@
+--user-agent=      string   user-Agent to send to server default (S-Lang cURL Module)
+--location         void     follow Location
+--remote-name      void     write output to a file named as the remote file
+--output=          string   write output to <file> instead of stdout
+--remote-name-all  void     use the remote file name for all URLs
+--cacert=          string   CA certificate to verify peer against (SSL)
+--connect-timeout= int      maximum time allowed for connection
+--filelist=        string   get urls from a file
+--help             void     show help
+--info             void     show information

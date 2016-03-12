@@ -113,7 +113,7 @@ class Proc
       close_fd (s.stdout, stdout);
 
       if (NULL == s.stdout.file)
-        s.stdout.out = IO.readfd (s.stdout.read);
+        s.stdout.out = File.read (s.stdout.read);
       }
 
     ifnot (NULL == s.stderr)
@@ -121,7 +121,7 @@ class Proc
       close_fd (s.stderr, stderr);
 
       if (NULL == s.stderr.file)
-        s.stderr.out = IO.readfd (s.stderr.read);
+        s.stderr.out = File.read (s.stderr.read);
       }
 
     ifnot (NULL == s.stdin)

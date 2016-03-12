@@ -214,7 +214,7 @@ class Input
   end
 
   def getch ()
-    (@[&__tty_getch, &__getch][This.is_smg ()]) ();
+    (@[&__getch, &__tty_getch][This.is_tty ()]) ();
   end
 
   def get_en_lang ()

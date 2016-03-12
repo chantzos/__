@@ -19,3 +19,34 @@ Sys.let ("SUDO_BIN", Sys.which ("sudo"));
 
 eval ("static define COLOR ();", "Smg");
 
+if (NULL == Env->TERM)
+  {
+  IO.tostderr ("TERM environment variable isn't set");
+  This.exit (1);
+  }
+
+if (NULL == Env->LANG)
+  {
+  IO.tostderr ("LANG environment variable isn't set");
+  This.exit (1);
+  }
+
+if (5 > strlen (Env->LANG) || "UTF-8" != substr (
+  Env->LANG, strlen (Env->LANG) - 4, -1))
+  {
+  IO.tostderr ("locale: " + Env->LANG + " isn't UTF-8 (Unicode), or misconfigured");
+  This.exit (1);
+  }
+
+if (NULL == Env->HOME_PATH)
+  {
+  IO.tostderr ("HOME environment variable isn't set");
+  This.exit (1);
+  }
+
+if (NULL == Env->OS_PATH)
+  {
+  IO.tostderr ("PATH environment variable isn't set");
+  This.exit (1);
+  }
+

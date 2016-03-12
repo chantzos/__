@@ -1,0 +1,19 @@
+ SYNOPSIS
+  Download file[s]
+
+ USAGE
+  fetch [options] url
+
+ DESCRIPTION
+  Download files
+
+ OPTIONS
+
+  -A, --user-agent         User-Agent to send to server, default (S-Lang cURL Module)
+  -L, --location           Follow Location
+  -O, --remote-name        Write output to a file named as the remote file
+  -o, --output             Write output to <file> instead of stdout
+  --remote-name-all        Use the remote file name for all URLs
+  --cacert                 CA certificate to verify peer against (SSL)
+  --connect-timeout        Maximum time allowed for connection
+  --filelist               Get urls from a file

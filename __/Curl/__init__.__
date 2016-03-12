@@ -1,0 +1,162 @@
+class Curl
+  import curl
+
+  def write_to_var_callback (out, str) proc
+    @out += str;
+    0;
+  end
+
+  def write_callback (fp, str) proc
+    variable len = bstrlen (str);
+    if (len != fwrite (str, fp))
+      return -1;
+
+    0;
+  end
+
+  def fetch (s, url)
+    ifnot (s.tovar)
+      {
+      variable
+        file = qualifier ("file", strchop (url, '/', 0)[-1]),
+        fp = fopen (file, "w");
+
+      if (NULL == fp)
+        {
+        IO.tostderr (file + " cannot be opened");
+        return -1;
+        }
+      }
+    else
+      {
+      s.write_callback = &write_to_var_callback;
+      s.output =  "";
+      }
+
+    try
+      {
+      variable c = curl_new (url);
+
+      if (s.followlocation)
+        curl_setopt (c, CURLOPT_FOLLOWLOCATION, 1);
+
+      ifnot (s.tovar)
+        curl_setopt (c, CURLOPT_WRITEFUNCTION, s.write_callback, fp);
+      else
+        curl_setopt (c, CURLOPT_WRITEFUNCTION, s.write_callback, &s.output);
+
+      ifnot (NULL == s.progress_callback)
+        curl_setopt (c, CURLOPT_PROGRESSFUNCTION, s.progress_callback, s);
+
+      curl_setopt (c, CURLOPT_HTTPHEADER, [s.useragent]);
+
+      if (s.connectiontimeout)
+        curl_setopt (c, CURLOPT_CONNECTTIMEOUT, s.connectiontimeout);
+
+      curl_setopt (c, CURLOPT_NOSIGNAL, 1);
+
+      ifnot (NULL == s.cacert)
+        curl_setopt (c, CURLOPT_CAINFO, s.cacert);
+
+      curl_perform (c);
+      }
+    catch CurlError:
+      {
+      ifnot (qualifier_exists ("dont_print"))
+        Exc.print (__get_exception_info);
+
+      ifnot (s.tovar)
+        {
+        () = fclose (fp);
+        () = remove (file);
+        }
+
+      return __get_exception_info.error;
+      }
+
+    variable buf;
+
+    ifnot (s.tovar)
+      {
+      if (-1 == fclose (fp))
+        {
+        IO.tostderr (sprintf ("Unable to close file `%s'", file));
+        if (-1 == remove (file))
+          IO.tostderr (sprintf ("Unable to remove file `%s', ERRNO: %s", file,
+            errno_string (errno)));
+
+        return -1;
+        }
+
+      fp = fopen (file, "rb");
+      if (-1 == fread (&buf, String_Type, 100, fp))
+        {
+        IO.tostderr (sprintf ("Unable to read file `%s'", file));
+        return -1;
+        }
+
+      if (-1 == fclose (fp))
+        {
+        IO.tostderr (sprintf ("Unable to close file `%s'", file));
+        if (-1 == remove (file))
+          IO.tostderr (sprintf ("Unable to remove file `%s', ERRNO: %s", file,
+            errno_string (errno)));
+
+        return -1;
+        }
+      }
+    else
+      buf = substr (s.output, 1, 100);
+
+    if (string_match (buf, "404 Not Found", 1))
+      {
+      IO.tostderr (sprintf ("remote file `%s' didn't retrieved (404 Not Found)",
+         path_basename (url)));
+        return -1;
+      }
+
+    0;
+  end
+
+  def new (?)
+    variable s =
+      struct
+        {
+        write_callback = __get_qualifier_as (Ref_Type, "write_callback",
+          qualifier ("write_callback"), &write_callback),
+        progress_callback = __get_qualifier_as (Ref_Type, "progress_callback",
+          qualifier ("progress_callback"), NULL),
+        followlocation = __get_qualifier_as (Integer_Type, "follow",
+          qualifier ("follow"), 1),
+        useragent = __get_qualifier_as (String_Type, "agent",
+          qualifier ("agent"), "User-Agent: S-Lang cURL Module"),
+        cacert = __get_qualifier_as (String_Type, "cacert",
+          qualifier ("cacert"), "/etc/ssl/certs/ca-certificates.crt"),
+        connectiontimeout = __get_qualifier_as (Integer_Type, "timeout",
+          qualifier ("timeout"), 0),
+        tovar = __get_qualifier_as (Integer_Type, "tovar",
+          qualifier ("tovar"), 0),
+        output,
+        };
+
+    variable args = __pop_list (_NARGS - 1);
+    args = list_to_array (args, String_Type);
+
+    variable self = ();
+
+    ifnot (length (args))
+      return s;
+
+    variable i, retval;
+     _for i (0, length (args) - 1)
+       retval = Array.map (Integer_Type, &fetch, self, s, args[i];;__qualifiers);
+
+    all (0 == retval) ? 0 : -1;
+  end
+
+  def isconnected ()
+    variable s = self.new (;tovar = 1);
+    any ([39:43] ==
+      self.fetch (s, "http://www.google.com";tovar = 1, dont_print)) ? 0 :1;
+  end
+end

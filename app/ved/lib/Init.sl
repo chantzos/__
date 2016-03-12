@@ -434,7 +434,7 @@ public define handle_comma (s)
     }
 
   if (refresh)
-    Smg.refresh;
+    Smg.refresh ();
 }
 
 

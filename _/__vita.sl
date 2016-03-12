@@ -247,6 +247,20 @@ __use_namespace ("Env");
 
 static define STD_LIB_PATH ()
 {
-  realpath (CLASSPATH + "/../__");
+  realpath (CLASSPATH + "/../___");
 }
 
+static define USER_LIB_PATH ()
+{
+  realpath (CLASSPATH + "/../usr/___");
+}
+
+static define STD_CLASS_PATH ()
+{
+  realpath (CLASSPATH);
+}
+
+static define USER_CLASS_PATH ()
+{
+  realpath (CLASSPATH + "/../usr/__");
+}

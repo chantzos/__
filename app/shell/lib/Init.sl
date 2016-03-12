@@ -8,20 +8,23 @@ public define on_wind_change (w)
 {
   topline (" -- shell --");
   Ved.__vsetbuf (w.frame_names[w.cur_frame]);
-  This.stdoutFd = Ved.get_cur_buf._fd;
+  This.stdoutFd = Ved.get_cur_buf ()._fd;
 }
 
 public define on_wind_new (w)
 {
-  variable o = This.tmpdir + "/" + "__STDERR__s" + ".ashell";
+  This.stdoutFn = This.tmpdir + "/" + "__STDOUT__" + string (_time)[[5:]] +
+  "." + This.stdouttype;
 
-  variable oved = Ved.init_ftype ("ashell");
+  SPECIAL = [SPECIAL, This.stdoutFn];
 
-  oved._fd = IO.open_fn (o);
+  variable oved = Ved.init_ftype (This.stdouttype);
 
-  (@__get_reference ("ashell_settype")) (oved, o, VED_ROWS, NULL);
+  oved._fd = IO.open_fn (This.stdoutFn);
 
-  Ved.__vsetbuf (o);
+  (@__get_reference (This.stdouttype + "_settype")) (oved, This.stdoutFn, VED_ROWS, NULL);
+
+  Ved.__vsetbuf (This.stdoutFn);
 
   This.stdoutFd = oved._fd;
 
@@ -31,33 +34,32 @@ public define on_wind_new (w)
 
   (@__get_reference ("__initrline"));
 
-  draw (oved);
+  Ved.__vdraw_wind ();
 }
 
-define _change_frame_ (s)
+public define _change_frame_ (s)
 {
-  Ved.change_frame ();
+  Ved.change_frame (;;__qualifiers);
   s = Ved.get_cur_buf ();
   This.stdoutFd = s._fd;
 }
 
-define _del_frame_ (s)
+public define _del_frame_ (s)
 {
   Ved.del_frame ();
   s = Ved.get_cur_buf ();
-  Ved.stdoutFd = s._fd;
+  This.stdoutFd = s._fd;
 }
 
-%define _new_frame_ (s)
-%{
-%  Ved.new_frame (Dir->Vget ("TEMPDIR") + "/" + string (Env->Vget ("PID")) + "_" + APP.appname +
-%    string (_time)[[5:]] + "_stdout.shell");
+public define _new_frame_ (s)
+{
+  Ved.new_frame (This.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
+    "." + This.stdouttype);
 
-%  variable b = get_cur_buf ();
-%  b._fd = initstream (b._abspath;err_func = &__on_err);
-
-%  STDOUTFD = b._fd;
-%}
+  s = Ved.get_cur_buf ();
+  s._fd = IO.open_fn (s._abspath);
+  This.stdoutFd = s._fd;
+}
 
 define intro ();
 

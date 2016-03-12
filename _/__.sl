@@ -636,44 +636,15 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, sc
       throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";
 }
 
-private define __Class_From_Init__ (classpath)
+private define __Class_From_Init__ ();
+private define parse_class ();
+private define parse_class (cname, classpath, fp, funs, eval_buf)
 {
-  ifnot (path_is_absolute (classpath))
-    classpath = CLASSPATH + "/" + classpath;
-
-  variable __init__ = __get_qualifier_as (String_Type, "__init__",
-    qualifier ("__init__"), "__init__");
-
-  variable __in__ = classpath + "/" + __init__ + ".__";
-
-  if (-1 == access (__in__, F_OK|R_OK))
-    throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
-
-  variable line, fp = fopen (__in__, "r");
-
-  if (NULL == fp)
-    throw ClassError, "Class::__INIT__::" + __in__ + "::cannot open, " +
-      errno_string (errno);
-
-  variable len = fgets (&line, fp);
-
-  if (0 >= len - 1)
-    throw ClassError, "Class::__INIT__::class is not declared in the first line";
-
-  variable tokens = strtok (line);
-  if (1 == length (tokens))
-    throw ClassError, "Class::__INIT__::name of the class is required";
-
-  ifnot ("class" == tokens[0])
-    throw ClassError, "Class::__INIT__::class identifier is missing";
-
-  variable cname = tokens[1];
   variable ot_class = 1;
   variable ot_def = 0;
-  variable funs = Assoc_Type[Fun_Type];
   variable funname, nargs, args, i, found, tmp,
     super = cname, const, isproc, scope,
-    eval_buf = "", var_buf, v, tok;
+    var_buf, v, tok, line, tokens;
 
   funs["let"] = @Fun_Type;
   funs["let"].nargs = 2;
@@ -682,10 +653,6 @@ private define __Class_From_Init__ (classpath)
   funs["fun"] = @Fun_Type;
   funs["fun"].nargs = '?';
   funs["fun"].const = 1;
-
-  if (any (cname == assoc_get_keys (__CLASS__)))
-    ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
-      throw ClassError, "Class::__INIT__::" + cname + " is already defined";
 
   while (-1 != fgets (&line, fp))
     {
@@ -712,12 +679,14 @@ private define __Class_From_Init__ (classpath)
 
         variable from = tokens[3];
 
-        if (from == "std")
-          from = Env->STD_LIB_PATH + "/" + file;
-        else if (from == ".")
-          from = classpath- + "/" + file;
+        if (from == ".")
+          from = classpath + "/" + file;
         else
+          {
           from = Env->STD_LIB_PATH + "/" + from + "/" + file;
+          if (-1 == access (from + ".slc", F_OK))
+            from = strreplace (from, Env->STD_LIB_PATH, Env->USER_LIB_PATH);
+          }
 
         variable ns = "Global";
 
@@ -733,7 +702,68 @@ private define __Class_From_Init__ (classpath)
               else
                 ns = tokens[5];
 
-        eval_buf += "Load.file (\"" + from + "\", \"" + ns + "\");\n";
+        @eval_buf += "Load.file (\"" + from + "\", \"" + ns + "\");\n";
+
+        continue;
+        }
+
+    if (any (["include", "load"] == tokens[0]))
+      if (1 == length (tokens))
+        throw ClassError, "Class::__INIT__::include statement needs an argument";
+      else
+        {
+        variable lcname = tokens[1];
+        variable lfrom = lcname;
+        variable lclasspath = CLASSPATH + "/" + lcname;
+        variable lfile = lclasspath + "/__init__.__";
+
+        ifnot (2 == length (tokens))
+          ifnot ("from" == tokens[2])
+            throw ClassError, "Class::__INIT__::include, from identifier is expected";
+          else
+            if (3 == length (tokens))
+              throw ClassError, "Class::__INIT__::include, from expects a namespcase";
+            else
+              {
+              lfrom = tokens[3];
+              lclasspath =CLASSPATH + "/" + lfrom;
+              lfile = lclasspath + "/" + lcname + ".__";
+              }
+
+        variable isinusr = 0;
+
+        if (-1 == access (lfile, F_OK))
+          if (-1 == access ((lfile = strreplace (
+            lfile, CLASSPATH, CLASSPATH + "/../usr/__"), isinusr = 1, lfile), F_OK))
+            throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
+
+        if ("include" == tokens[0])
+          {
+          variable lfp = fopen (lfile, "r");
+          if (NULL == lfp)
+            throw ClassError, "Class::__INIT__::" + lfile + "::cannot open";
+
+          () = fgets (&line, lfp);
+          variable lot_class = parse_class (lcname, lclasspath, lfp, funs, eval_buf);
+
+          if (lot_class)
+            throw ClassError, "Class::__INIT__::end identifier is missing";
+          }
+        else
+          {
+          @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
+            __init__ = path_basename_sans_extname (lfile), return_buf);
+
+%          @eval_buf += `() = evalfile (CLASSPATH + ` + (isinusr ? "\"/../usr/__\"" : "") +
+%           ` "/` + lfrom + `" + "/" + path_basename_sans_extname ("` + lfile + `") + ".slc",
+%            "` + lcname + `");` + "\n\n";
+%       variable ll = fopen ("/tmp/a.sl", "w");
+%         () = fprintf (ll, "%S\n", @eval_buf);
+%         () = fflush (ll);
+%          @eval_buf += `() = evalfile (path_dirname ("` + strreplace (lclasspath,
+%            realpath (CLASSPATH + "/.."), realpath (Env->STD_CLASS_PATH + "/..")) + `/") + "/" +
+%            path_basename_sans_extname ("` + lfile + `") + ".slc", "` + lcname + `");` + "\n\n";
+          }
 
         continue;
         }
@@ -749,8 +779,8 @@ private define __Class_From_Init__ (classpath)
         if ("NULL" == ns)
           ns = NULL;
 
-        eval_buf = "Load.module (\"" + module + "\", " + (NULL != ns ? "\"" : "") +
-          string (ns) + (NULL != ns ? "\"" : "") + ");\n\n" + eval_buf;
+        @eval_buf = "Load.module (\"" + module + "\", " + (NULL != ns ? "\"" : "") +
+          string (ns) + (NULL != ns ? "\"" : "") + ");\n\n" + @eval_buf;
 
         continue;
         }
@@ -789,7 +819,7 @@ private define __Class_From_Init__ (classpath)
 
         tmp += "}" + type + ";\n\n";
 
-        eval_buf = tmp + eval_buf;
+        @eval_buf = tmp + @eval_buf;
         continue;
         }
 
@@ -804,7 +834,7 @@ private define __Class_From_Init__ (classpath)
           break;
           }
 
-        eval_buf += line;
+        @eval_buf += line;
         }
 
       ifnot (found)
@@ -864,7 +894,7 @@ private define __Class_From_Init__ (classpath)
             }
           }
 
-        eval_buf += v + "\n\n";
+        @eval_buf += v + "\n\n";
         continue;
         }
 
@@ -922,11 +952,11 @@ private define __Class_From_Init__ (classpath)
           v.type = Null_Type;
           }
 
-        eval_buf += "__->__ (\"" + cname + "\", \"" + vname + "\", " +
+        @eval_buf += "__->__ (\"" + cname + "\", \"" + vname + "\", " +
           var_buf + ", \"Class::vset::NULL\";const = " + string (v.const) + ", dtype = " +
             string (v.type) + ");\n\n";
 
-        eval_buf += "static define " + vname + " ()\n{\n__->__ (\"" +
+        @eval_buf += "static define " + vname + " ()\n{\n__->__ (\"" +
         cname + "\",  \"" + vname + "\", \"Class::vget::" + vname +
           "\";getref);\n}\n\n";
 
@@ -945,9 +975,9 @@ private define __Class_From_Init__ (classpath)
         args = strtok (args, ",");
 
         if ('?' == nargs)
-          eval_buf += scope + ` define ` + funname + " ()\n{\n";
+          @eval_buf += scope + ` define ` + funname + " ()\n{\n";
         else
-          eval_buf += scope + ` define ` + funname + " (" + (isproc ? "" : "self" +
+          @eval_buf += scope + ` define ` + funname + " (" + (isproc ? "" : "self" +
              (length (args) ? ", " : "")) + strjoin (args, ", ") + ")\n{\n";
 
         found = 0;
@@ -959,19 +989,19 @@ private define __Class_From_Init__ (classpath)
             break;
             }
 
-          eval_buf += line;
+          @eval_buf += line;
           }
 
         ifnot (found)
           throw ClassError, "Class::__INIT__::end identifier is missing";
 
         ifnot (isproc)
-          eval_buf += "}\n\n" +
+          @eval_buf += "}\n\n" +
           `__->__ ("` + cname + `", "` + funname +
           `", &` + funname + `, ` + string (nargs) + `, ` + string (const) +
           `, "Class::setfun::__initfun__");` + "\n\n";
         else
-          eval_buf += "}\n\n";
+          @eval_buf += "}\n\n";
 
         ifnot (isproc)
           {
@@ -991,7 +1021,7 @@ private define __Class_From_Init__ (classpath)
         __get_fun_head__ (tokens,
           &funname, &nargs, &args, &const, &isproc, &scope);
 
-        eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
+        @eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
           "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
              ";\n$9.const = " + string (const) + ";\n";
 
@@ -1000,6 +1030,52 @@ private define __Class_From_Init__ (classpath)
         funs[funname].const = const;
         }
     }
+
+  ot_class;
+}
+
+private define __Class_From_Init__ (classpath)
+{
+  ifnot (path_is_absolute (classpath))
+    classpath = CLASSPATH + "/" + classpath;
+
+  variable __init__ = __get_qualifier_as (String_Type, "__init__",
+    qualifier ("__init__"), "__init__");
+
+  variable __in__ = classpath + "/" + __init__ + ".__";
+
+  if (-1 == access (__in__, F_OK|R_OK))
+    throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
+
+  variable line, fp = fopen (__in__, "r");
+
+  if (NULL == fp)
+    throw ClassError, "Class::__INIT__::" + __in__ + "::cannot open";
+
+  variable len = fgets (&line, fp);
+
+  if (0 >= len - 1)
+    throw ClassError, "Class::__INIT__::class is not declared in the first line";
+
+  variable tokens = strtok (line);
+  if (1 == length (tokens))
+    throw ClassError, "Class::__INIT__::name of the class is required";
+
+  ifnot ("class" == tokens[0])
+    throw ClassError, "Class::__INIT__::class identifier is missing";
+
+  variable cname = tokens[1];
+
+  variable tmp, i, super = cname;
+
+  if (any (cname == assoc_get_keys (__CLASS__)))
+    ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
+      throw ClassError, "Class::__INIT__::" + cname + " is already defined";
+
+  variable funs = Assoc_Type[Fun_Type];
+  variable eval_buf = "";
+
+  variable ot_class = parse_class (cname, classpath, fp, funs, &eval_buf);
 
   if (ot_class)
     throw ClassError, "Class::__INIT__::end identifier is missing";
@@ -1022,6 +1098,9 @@ private define __Class_From_Init__ (classpath)
 
   variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
     cname);
+
+ if (qualifier_exists ("return_buf"))
+   return eval_buf;
 
   __in__ = classpath + "/" + as + ".sl";
 

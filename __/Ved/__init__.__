@@ -759,8 +759,12 @@ class Ved
     ff;
   end
 
-  def del_frame ()
-    variable frame = _NARGS ? () : self.get_cur_frame ();
+  def del_frame (?)
+    variable frame = _NARGS > 1 ? () : NULL;
+    variable self = ();
+    if (NULL == frame)
+      frame = self.get_cur_frame ();
+
     variable w = self.get_cur_wind ();
 
     if (frame >= w.frames)
@@ -1822,6 +1826,9 @@ class Ved
     __vdraw_tail (s);
   end
 
+  def v_lastvi () proc
+  end
+
   def pg_g (s) proc
     variable
       chr = Input.getch ();
@@ -1846,7 +1853,7 @@ class Ved
 
     if ('v' == chr)
       {
-      (@__get_reference ("v_lastvi")) (s);
+      v_lastvi (s);
       return;
       }
   end
@@ -1893,7 +1900,7 @@ class Ved
   end
 
   def _change_frame_ (s) public proc
-    Ved.change_frame ();
+    Ved.change_frame (;;__qualifiers);
     s = Ved.get_cur_buf ();
   end
 
@@ -1950,11 +1957,17 @@ class Ved
   def handle_w (s) public proc
     variable chr = Input.getch ();
 
-    if (any (['w', 's', Input->CTRL_w, 'd', 'k', 'n', ',', '.', ['0':'9']] == chr))
+    if (any (['w', 's', Input->UP, Input->CTRL_w, Input->DOWN, 'd', 'k', 'n', ',', '.', ['0':'9']] == chr))
       {
       if (any (['w', Input->CTRL_w, Input->DOWN] == chr))
         {
-        _change_frame_ (s);
+        _change_frame_ (s;dir = "next");
+        return;
+        }
+
+      if (any ([Input->UP] == chr))
+        {
+        _change_frame_ (s;dir = "prev");
         return;
         }
 
@@ -5646,7 +5659,8 @@ class Ved
     if (length (pj) + length (assoc_get_keys (VED_WIND)) > 10)
       return;
 
-    variable wc = VED_CUR_WIND, i, w = NULL, j, found, nwns, owns = assoc_get_keys (VED_WIND);
+    variable wc = VED_CUR_WIND, i, w = NULL, j, found,
+      nwns,owns = assoc_get_keys (VED_WIND);
 
     _for i (0, length (pj) - 1)
       {
@@ -5772,9 +5786,10 @@ class Ved
     Smg.send_msg_dr (msg, 1, b.ptr[0], b.ptr[1]);
   end
 
+%  load Vundo from Ved
   do
     Class.load ("Vundo";classpath = path_dirname (__FILE__) + "/Vundo");
-
+  
     new_wind ();
   end
 end

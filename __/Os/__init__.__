@@ -26,7 +26,7 @@ class Os
 
    variable data = Rand.getstr ('0', 'z', 40);
 
-    Crypt.encrypt (data, passwd);
+    return Crypt.encrypt (data, passwd);
   end
 
   def confirmpasswd (data, passwd)
@@ -72,4 +72,6 @@ class Os
 
     passwd;
   end
+
+  fun login ()
 end

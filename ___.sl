@@ -5,20 +5,27 @@ private variable SRC_PATH =
       : SRC_PATH);
 private variable SRC_C_PATH = SRC_PATH + "/C";
 private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
-
-private variable
-  CC = "gcc";
-private variable
-  MODULES = ["__", "getkey", "crypto", "slsmg", "socket", "fork", "pcre", "rand", "iconv"];
-private variable
-  FLAGS = ["-lm -lpam", "-lssl", "", "", "", "", "-lpcre", "", ""];
-private variable
-  DEF_FLAGS = "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
-private variable
-  DEB_FLAGS = "-Wall -Wformat=2 -W -Wunused -Wundef -pedantic -Wno-long-long\
+private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
+private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
+private variable DEBUG = any ("--debug" == __argv);
+private variable CC = "gcc";
+private variable MODULES = [
+  "__", "getkey", "crypto", "slsmg", "socket", "fork", "pcre", "rand",
+  "iconv", "curl", "json"];
+private variable FLAGS = [
+  "-lm -lpam", "-lssl", "", "", "", "", "-lpcre", "", "", "-lcurl", ""];
+private variable DEF_FLAGS =
+  "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
+private variable DEB_FLAGS =
+  "-Wall -Wformat=2 -W -Wunused -Wundef -pedantic -Wno-long-long\
  -Winline -Wmissing-prototypes -Wnested-externs -Wpointer-arith\
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
+private variable CLASSES = [
+  "Input",  "Smg",    "Rand",  "Crypt", "Os",   "Opt",
+  "String", "Struct", "Rline", "Re",    "Diff", "Proc",
+  "Sock",   "Subst",  "Sync",  "Ved",   "Api",  "Root",
+  "Curl", "Json"];
 
 private variable THESE = Assoc_Type[String_Type];
 
@@ -28,10 +35,6 @@ THESE["__"] = `public variable This = Progr_Init ("__");`;
 THESE["__COMMAND__"] = `public variable This = Progr_Init ("__COMMAND__";` +
     `shell = 0, smg = 0, ved = 0);`;
 THESE["__APP__"] = `public variable This = Progr_Init ("__APP__");`;
-
-private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
-private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
-private variable DEBUG = any ("--debug" == __argv);
 
 public variable This, io;
 
@@ -600,11 +603,6 @@ ROOTPATH = realpath (ROOTPATH + "/..");
 
   () = chdir (SRC_PATH);
 }
-
-private variable CLASSES = [
-  "Input",  "Smg",   "Rand", "Crypt", "Os",  "Opt",
-  "String", "Rline", "Re",   "Diff",  "Proc", "Sock",
-  "Subst",  "Sync",  "Ved"];
 
 private define __bytecompile_classes__ ()
 {

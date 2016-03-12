@@ -1,0 +1,5 @@
+class Struct
+  def field_exists (s, f)
+    wherefirst (get_struct_field_names (s) == f);
+  end
+end
