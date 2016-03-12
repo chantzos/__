@@ -1,0 +1,27 @@
+ SYNOPSIS
+  Apply substitutions to input files
+
+ USAGE
+  searchandreplace [options] [file[s]]
+
+ DESCRIPTION
+  searchandreplace is a stream editor that can perform on an input stream text
+  transformations
+
+ OPTIONS
+
+  --dont-ask-when-subst Dont ask when substituting (default yes)
+  --dont-ask-when-write Dont ask when write to file (default yes)
+  --rmspacesfromtheend  Remove spaces from the end of a string (predefined)
+  --maxdepth=depth      Descend at most `levels' of directories
+  --hidden-files        Hidden files also (off by default)
+  --hidden-dirs         Hidden directories also (off by default)
+  --pat                 Pattern (required)
+  --sub                 Substitution (required)
+  --global              Do global substitutions
+  --backup              Make backups
+  --suffix              Change the default backup suffix
+  --in-place            Write changes to file
+  --recursive           Search and replace recursivelly
+  --help                Show this message
+  --info                Show information

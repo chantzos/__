@@ -1,0 +1,17 @@
+--dont-ask-when-subst void don't ask when substituting (by default yes)
+--dont-ask-when-write void don't ask when write to file (by default yes)
+--hidden-files        void hidden files also (off by default)
+--hidden-dirs         void hidden directories also (off by default)
+--excludedir=         directory exclude directory
+--maxdepth=           int  descend at most `levels' of directories
+--rmspacesfromtheend  void remove spaces from the end of a string (predefined)
+--pat=                pcrepattern  pcre pattern (required)
+--sub=                pcrepattern substitution (required)
+--global              void do global substitutions
+--backup              void  make backups
+--suffix=             string change the default backup suffix
+--in-place            void write changes to file
+--recursive           void search and replace recursivelly
+--verbose             void be verbose
+--help                void show help
+--info                void show information

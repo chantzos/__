@@ -184,7 +184,7 @@ class Subst
 
                {
                case 'c':
-                 return 1;
+                 return -1;
                }
             }
 
@@ -238,7 +238,7 @@ class Subst
     IO.ask (ar, char_ar;hl_region = hl_reg);
   end
 
-  def new (s, pat, sub)
+  def new (pat, sub)
     try
       {
       struct
