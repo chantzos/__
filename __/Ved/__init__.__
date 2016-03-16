@@ -1287,7 +1287,7 @@ class Ved
   def __err_handler__ (_e_) proc
     (@__get_reference ("__vmessages"));
     variable s = Ved.get_cur_buf ();
-    Ved.draw_wind ();
+    Ved.__vdraw_wind ();
     s.vedloop ();
   end
 

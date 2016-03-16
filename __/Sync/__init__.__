@@ -356,7 +356,7 @@ class Sync
         return -1;
         }
 
-    IO.tostdout (sprintf ("`%s' -> `%s' %s", source, path_basename (dest), backuptext));
+%    IO.tostdout (sprintf ("`%s' -> `%s' %s", source, path_basename (dest), backuptext));
 
     1;
   end
