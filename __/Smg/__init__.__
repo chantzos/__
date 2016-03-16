@@ -89,6 +89,11 @@ class Smg
     SUSPENDSTATE = 0;
   end
 
+  def clear_and_redraw ()
+    self.suspend ();
+    self.resume ();
+  end
+
   def setrc (row, col)
     slsmg_gotorc (row, col);
   end

@@ -9,6 +9,12 @@ class Array
     1;
   end
 
+  def push (a)
+    variable i;
+    _for i (0, length (a) - 1)
+      a[i];
+  end
+
   % unique-shift code from upstream
   def shift (x, n)
     variable len = length (x);

@@ -23,9 +23,9 @@ private variable DEB_FLAGS =
  -Wlogical-op";
 private variable CLASSES = [
   "Input",  "Smg",    "Rand",  "Crypt", "Os",   "Opt",
-  "String", "Struct", "Rline", "Re",    "Diff", "Proc",
-  "Sock",   "Subst",  "Sync",  "Ved",   "Api",  "Root",
-  "Curl", "Json", "Time"];
+  "String", "Rline",  "Re",    "Diff",  "Proc", "Sock",
+  "Subst",  "Sync",   "Ved",   "Api",   "Root", "Curl",
+  "Json",   "Time",  "Scm"];
 
 private variable THESE = Assoc_Type[String_Type];
 
@@ -600,6 +600,7 @@ ROOTPATH = realpath (ROOTPATH + "/..");
       errno_string (errno), 1);
 
   Path.walk (SRC_APP_PATH + "/", &__apps_dir_callback__, NULL);
+  Path.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
 
   () = chdir (SRC_PATH);
 }
