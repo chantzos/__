@@ -61,10 +61,15 @@ public define _new_frame_ (s)
   This.stdoutFd = s._fd;
 }
 
-define intro ();
+public define intro ()
+{
+  variable file = Env->USER_COM_PATH + "/intro/intro.slc";
+  if (-1 == access (file, F_OK))
+    file = Env->STD_COM_PATH + "/intro/intro.slc";
+  () = evalfile (file);
+}
 
-
-%load.from ("com/intro", "intro", NULL;err_handler = &__err_handler__);
+intro ();
 
 public define shell ();
 

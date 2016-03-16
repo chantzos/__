@@ -6,22 +6,22 @@ define _shell_ (argv)
   draw (Ved.get_cur_buf ());
 }
 
-%private define _intro_ (argv)
-%{
-%  intro (get_cur_rline (), get_cur_buf ());
-%}
+private define _intro_ (argv)
+{
+  intro (Ved.get_cur_rline (), Ved.get_cur_buf ());
+}
 
 private define my_commands ()
 {
   variable a = init_commands ();
 
-%  a["intro"] = @Argvlist_Type;
-%  a["intro"].func = &_intro_;
+  a["intro"] = @Argvlist_Type;
+  a["intro"].func = &_intro_;
 
   a["shell"] = @Argvlist_Type;
   a["shell"].func = &_shell_;
 
-  return a;
+  a;
 }
 
 private define filtercommands (s, ar)

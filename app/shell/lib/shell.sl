@@ -12,11 +12,11 @@ public define shell ()
 {
   Ved.__vsetbuf (OUT_VED._abspath);
 
-%  ifnot (fileexists (Dir->Vget ("TEMPDIR") + "/" + strftime ("%m_%d-intro")))
-%    {
-%    runcom (["intro"], NULL);
-%    () = String.write (Dir->Vget ("TEMPDIR") + "/" + strftime ("%m_%d-intro"), "ok");
-%    }
+  if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
+    {
+    runcom (["intro"], NULL);
+    () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
+    }
 
   topline (" -- shell --");
 
