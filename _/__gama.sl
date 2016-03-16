@@ -12,6 +12,8 @@ Class.load ("Assoc");
 Class.load ("File");
 Class.load ("Dir");
 Class.load ("Path");
+Class.load ("Stack");
+Class.load ("Struct");
 Class.load ("IO");
 
 Sys.let ("SLSH_BIN", Env->BIN_PATH + "/__slsh");

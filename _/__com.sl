@@ -53,6 +53,19 @@ public define initproc (in, out, err)
   Proc.init (in, out, err);
 }
 
+public define editfile (file)
+{
+  variable status;
+  variable p = Proc.init (0, 0, 0);
+  variable ft = __get_qualifier_as (String_Type, "ftype", qualifier ("ftype"), NULL);
+  ifnot (NULL == ft)
+    status = p.execv ([Env->BIN_PATH + "/__ved", "--ftype=" + ft, file], NULL);
+  else
+    status = p.execv ([Env->BIN_PATH + "/__ved", file], NULL);
+
+  status.exit_status;
+}
+
 public define _usage ()
 {
   verboseon ();

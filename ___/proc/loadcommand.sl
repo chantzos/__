@@ -1,27 +1,31 @@
-variable classpath =  realpath (path_dirname (__FILE__) + "/../../__");
+private variable classpath =  realpath (path_dirname (__FILE__) + "/../../__");
 
-variable COM = __argv[1];
+% FATAL
+() = evalfile (classpath + "/__");
+
+private variable COM = __argv[1];
 
 __set_argc_argv (__argv[[1:]]);
 
-() = evalfile (classpath + "/__");
-
 Input.init ();
 
-variable openstdout = 1;
-variable COMDIR;
-variable _exit_me_;
-variable PPID = getenv ("PPID");
-variable BG = getenv ("BG");
-variable BGPIDFILE;
-variable BGX = 0;
-variable WRFIFO = getenv ("CLNT_FIFO");
-variable RDFIFO = getenv ("SRV_FIFO");
-variable RDFD = NULL;
-variable WRFD = NULL;
-variable stdoutfile = getenv ("stdoutfile");
-variable stdoutflags = getenv ("stdoutflags");
-variable stdoutfd;
+public variable openstdout = 1;
+public variable openstderr = 1;
+
+private variable _exit_me_;
+private variable PPID = getenv ("PPID");
+private variable BG = getenv ("BG");
+private variable BGPIDFILE;
+private variable BGX = 0;
+private variable WRFIFO = getenv ("CLNT_FIFO");
+private variable RDFIFO = getenv ("SRV_FIFO");
+private variable RDFD = NULL;
+private variable WRFD = NULL;
+private variable stdoutflags = getenv ("stdoutflags");
+private variable stderrflags = getenv ("stderrflags");
+
+This.stdoutFn = getenv ("stdoutfile");
+This.stderrFn = getenv ("stderrfile");
 
 private define sigalrm_handler (sig)
 {
@@ -39,8 +43,7 @@ if (NULL == BG)
   RDFD = open (RDFIFO, O_RDONLY);
   WRFD = open (WRFIFO, O_WRONLY);
   }
-
-ifnot (NULL == BG)
+else
   {
   BGPIDFILE = BG + "/" + string (Env->PID) + ".RUNNING";
   () = open (BGPIDFILE, O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
@@ -103,16 +106,22 @@ private define __err_handler__ (__r__)
 
 This.err_handler = &__err_handler__;
 
-ifnot (access (stdoutfile, F_OK))
-  stdoutfd = open (stdoutfile, File->FLAGS[stdoutflags]);
+private variable COMDIR = Env->STD_COM_PATH + "/" + COM;
+
+if (-1 == access (COMDIR, F_OK))
+  COMDIR = Env->USER_COM_PATH + "/" + COM;
+
+ifnot (access (This.stdoutFn, F_OK))
+  This.stdoutFd = open (This.stdoutFn, File->FLAGS[stdoutflags]);
 else
-  stdoutfd = open (stdoutfile, File->FLAGS[stdoutflags], File->PERM["__PUBLIC"]);
+  This.stdoutFd = open (This.stdoutFn, File->FLAGS[stdoutflags], File->PERM["__PUBLIC"]);
 
-This.stdoutFn = stdoutfile;
-This.stdoutFd = stdoutfd;
-This.stderrFd = fileno (stderr);
+ifnot (access (This.stderrFn, F_OK))
+  This.stderrFd = open (This.stderrFn, File->FLAGS[stderrflags]);
+else
+  This.stderrFd = open (This.stderrFn, File->FLAGS[stderrflags], File->PERM["__PUBLIC"]);
 
-if (NULL == stdoutfd)
+if (any (NULL == [This.stdoutFd, This.stderrFd]))
   (@_exit_me_) (1;msg = errno_string (errno));
 
 Class.load ("Smg";as = "__tty_init__");
@@ -181,42 +190,80 @@ public define info ()
   exit_me (0);
 }
 
-public define initproc (p)
-{
-  p.stdout.file = stdoutfile;
-  p.stdout.wr_flags = stdoutflags;
-}
-
-if (NULL == BG)
-  sigprocmask (SIG_UNBLOCK, [SIGINT]);
-
-define sigint_handler (sig)
+private define sigint_handler (sig)
 {
   IO.tostderr ("process interrupted by the user");
   (@_exit_me_) (130);
 }
 
 if (NULL == BG)
+  {
+  sigprocmask (SIG_UNBLOCK, [SIGINT]);
   signal (SIGINT, &sigint_handler);
+  }
 
-define sigint_handler_null ();
-define sigint_handler_null (sig)
+private define sigint_handler_null ();
+private define sigint_handler_null (sig)
 {
   signal (sig, &sigint_handler_null);
 }
 
-public define close_smg ()
+public define initproc (in, out, err)
+{
+  variable p = Proc.init (in, out, err);
+  if (out)
+    {
+    p.stdout.file = This.stdoutFn;
+    p.stdout.wr_flags = stdoutflags;
+    }
+
+  if (err)
+    {
+    p.stderr.file = This.stderrFn;
+    p.stderr.wr_flags = stderrflags;
+    }
+
+  p;
+}
+
+private define close_smg ()
 {
   Sock.send_str (WRFD, "close_smg");
 
   () = Sock.get_int (RDFD);
 }
 
-public define restore_smg ()
+private define restore_smg ()
 {
   Sock.send_str (WRFD, "restore_smg");
 
   () = Sock.get_int (RDFD);
+}
+
+public define to_tty ()
+{
+  close_smg ();
+  Input.at_exit ();
+}
+
+public define restore_screen ()
+{
+  restore_smg ();
+}
+
+public define editfile (file)
+{
+  close_smg ();
+  variable status;
+  variable p = Proc.init (0, 0, 0);
+  variable ft = __get_qualifier_as (String_Type, "ftype", qualifier ("ftype"), NULL);
+  ifnot (NULL == ft)
+    status = p.execv ([Env->BIN_PATH + "/__ved", "--ftype=" + ft, file], NULL);
+  else
+    status = p.execv ([Env->BIN_PATH + "/__ved", file], NULL);
+
+  restore_smg ();
+  status.exit_status;
 }
 
 public define send_msg_dr (msg)
@@ -328,10 +375,6 @@ public define ask (questar, charar)
 
   chr;
 }
-
-variable COMDIR = Env->STD_COM_PATH + "/" + COM;
-if (-1 == access (COMDIR, F_OK))
-  COMDIR = Env->USER_COM_PATH + "/" + COM;
 
 try
   {
