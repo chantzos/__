@@ -1,0 +1,6 @@
+--recursive   void change recursivelly
+--mode=       int  set mode bits as e.g., 0644
+--directories void change also mode bits to directories when `recursive'
+--verbose     void be verbose
+--help        void show help
+--info        void show information

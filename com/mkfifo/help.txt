@@ -1,0 +1,19 @@
+ SYNOPSIS
+  Create FIFOs
+
+ USAGE
+  mkfifo [options] file[s]
+ 
+ DESCRIPTION
+  Create FIFOs (named pipes)
+ 
+ OPTIONS
+
+  --mode=MODE      Set file mode
+  -v,--verbose     Be verbose
+  --help           Show help
+
+ NOTES
+
+  If `--mode' is given, then set the file permission bits
+  to "MODE", where the defaut is 0644.

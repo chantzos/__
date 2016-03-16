@@ -1,0 +1,19 @@
+ SYNOPSIS
+  make links
+
+ USAGE
+  ln [options] file file
+
+ DESCRIPTION
+  create hardlinks or symbolic links
+
+ OPTIONS
+
+  -i,--interactive  Ask before removing existing files
+  --backup          Make backups
+  --suffix          Change the default backup suffix (~)
+  -s,--symbolic     Make symbolic links instead of hardlinks
+  -f,--force        Remove existing file
+  -v,--verbose      Be verbose
+  --help            Show this message
+  --info            Show information

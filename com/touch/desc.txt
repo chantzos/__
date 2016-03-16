@@ -1,0 +1,7 @@
+DESCRIPTION: Change file timestamps
+VERSION    : 0.8
+AUTHOR     : Agathoklis D. Chatzimanikas
+MAINTAINER : Agathoklis D. Chatzimanikas
+EMAIL      : aga dot chatzimanikas at gmail dot com
+URL        :
+LICENSE    : GPL2

@@ -1,0 +1,13 @@
+ SYNOPSIS
+  concatanate file[s]
+
+ USAGE
+  cat [options] file[s]
+
+ DESCRIPTION
+  concatanate file[s]
+
+ OPTIONS
+
+  --help       show this message
+  --info       show information

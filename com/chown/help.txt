@@ -1,0 +1,24 @@
+ SYNOPSIS
+  change user-id and group-id of file[s]
+
+ USAGE
+  chown --user [options] file ...
+
+ DESCRIPTION
+  change user-id and group-id of file[s]
+
+ OPTIONS
+
+  --user          Change user
+  --group         Change group
+  --changeref     Change also reference (in case of symbolic link)
+  -r,--recursive  Change recursivelly
+  -v,--berbose    Be verbose
+  --help          Show this message
+  --info          Show information
+
+ NOTES
+ 
+  If a link is encountered and the link refers to a directory, it does
+  not recurse, even if --recursive is given;
+  This behavior is a matter of change in future.

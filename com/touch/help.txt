@@ -1,0 +1,19 @@
+ SYNOPSIS
+  Change timestamp
+
+ USAGE
+  touch [options] file[s]
+ 
+ DESCRIPTION
+  Change file timestamps or create files
+
+
+ OPTIONS
+
+  --time=       Use this time "sec:min:hour:day:mon:year" instead of current time
+  --atime       Change the access time
+  --mtime       Change only the modification time
+  --no-create   Do not create any files
+  -v,--verbose  Be verbose
+  --help        Show help
+  --info        Show information

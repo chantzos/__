@@ -1,0 +1,4 @@
+--mode= int  set fifo mode (in octal, e.g, 0600), default 0644
+--verbose void be verbose
+--help  void show help
+--info  void show information

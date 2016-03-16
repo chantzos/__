@@ -1,0 +1,7 @@
+--group=    string group ownership
+--user=     string user ownership
+--changeref void   change also reference (in case of symbolic link)
+--recursive void   change recursivelly
+--verbose   void   be verbose
+--help      void   show help
+--info      void   show information
