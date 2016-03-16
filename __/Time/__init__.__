@@ -221,4 +221,6 @@ class Time
       sprintf ("Constellation: %s", zodiac)
     ];
   end
+  fun easter_catholic (year)
+  fun easter_orthodox (year)
 end

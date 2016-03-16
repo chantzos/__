@@ -2,4 +2,15 @@ class Struct
   def field_exists (s, f)
     wherefirst (get_struct_field_names (s) == f);
   end
+
+  def to_string (s)
+    variable fields = get_struct_field_names (s);
+    variable fmt = "";
+    loop (length (fields))
+      fmt += "%S : %%S\n";
+
+    fmt = sprintf (fmt[[:-2]], Array.push (fields));
+
+    sprintf (fmt, Stack.reverse (_push_struct_field_values (s), pop ()));
+  end
 end

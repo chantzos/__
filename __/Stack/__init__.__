@@ -1,0 +1,8 @@
+class Stack
+  def reverse ()
+    variable args = __pop_list (_NARGS);
+    variable i;
+    _for i (length (args) - 1, 0, -1)
+      args[i];
+  end
+end
