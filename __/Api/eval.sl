@@ -1,5 +1,63 @@
-private define _tabcallback (rl)
+private variable realtime_evaluation = 0;
+
+private define _null_ ()
 {
+  NULL;
+}
+
+private define _tabcallback (s)
+{
+  variable rl = Rline.init (&_null_);
+  Rline.set (rl);
+
+  rl._chr = 0;
+  rl.argv = @s.argv;
+  rl._col = strlen (rl.argv[0]) + 1;
+  rl._ind = 0;
+  rl._lin = rl.argv[0];
+
+  Smg.setrcdr (PROMPTROW, strlen (rl.argv[0]));
+
+  variable res;
+  variable ar;
+  forever
+    {
+    ar = String_Type[0];
+    try
+      {
+      res = eval (substr (rl.argv[0], 1, strlen (rl.argv[0]) - 1));
+      if (typeof (res) == Struct_Type)
+        ar = get_struct_field_names (res);
+      }
+    catch AnyError:
+      return 0;
+
+    variable tmp = "";
+    variable chr = Rline.hlitem (rl, ar, rl.argv[0], rl._col, &tmp);
+
+    if (' ' == chr)
+      {
+      Rline.restore (rl.cmp_lnrs, NULL, NULL, rl._columns);
+
+      s.argv[s._ind] += strchop (tmp, ' ', 0)[0];
+      s._col = strlen (s.argv[0]) + 1;
+      return 0;
+      }
+
+    if (1 == rl._col)
+      Smg.atrcaddnstr (" ", 0, MSGROW, 0, s._columns);
+
+    if (any (['\r', 033] == chr))
+      {
+      if (033 == chr)
+        return 0;
+      s.argv = rl.argv;
+      return;
+      }
+
+    rl._lin = rl.argv[0];
+    Rline.routine (rl;insert_ws);
+  }
 }
 
 private define _assign_ (line)
@@ -26,11 +84,21 @@ private define _assign_ (line)
 private define _evalstr_ (line)
 {
   variable res, retval = NULL;
+  variable depth = _stkdepth ();
 
   try
     {
     ifnot ('=' == line[0])
-      res = string (eval (line));
+      {
+      eval (line);
+      if (_stkdepth > depth)
+        {
+        res = ();
+        res = string (res);
+        }
+      else
+        res = "";
+      }
     else
       return NULL;
 
@@ -64,15 +132,24 @@ private define eval (self)
     res = NULL,
     index = -1;
 
+  variable depth = _stkdepth ();
+
   forever
     {
+    if (_stkdepth > depth)
+      loop (_stkdepth - depth)
+        pop ();
+
     rl._lin = ">" + rl.argv[0];
     Rline.prompt (rl, rl._lin, rl._col);
     rl._chr = Input.getch ();
 
+    if (Input->F1 == rl._chr)
+      realtime_evaluation++;
+
     if ('\t' == rl._chr)
       {
-      (@tabcb) (rl);
+      () = (@tabcb) (rl);
       continue;
       }
 
@@ -120,7 +197,8 @@ private define eval (self)
 
       rl.argv[0] = history[index];
       rl._col = strlen (rl.argv[0]) + 1;
-      () = _evalstr_ (rl.argv[0];send_msg);
+      ifnot (realtime_evaluation mod 2)
+        () = _evalstr_ (rl.argv[0];send_msg);
       continue;
       }
 
@@ -134,7 +212,8 @@ private define eval (self)
         index = length (history) - 1;
       rl.argv[0] = history[index];
       rl._col = strlen (rl.argv[0]) + 1;
-      () = _evalstr_ (rl.argv[0];send_msg);
+      ifnot (realtime_evaluation mod 2)
+        () = _evalstr_ (rl.argv[0];send_msg);
       continue;
       }
 
@@ -164,7 +243,8 @@ private define eval (self)
     ifnot (strlen (rl.argv[0]))
       continue;
 
-    () = _evalstr_ (rl.argv[0];send_msg);
+    ifnot (realtime_evaluation mod 2)
+      () = _evalstr_ (rl.argv[0];send_msg);
     }
 
   if (length (history))
