@@ -32,6 +32,7 @@ class File
   fun copy_recursive (source, dest)
   fun copy_opts ()
   fun __copy__ (source, dest, st_source, st_dest, opts)
+  fun ln (source, dest, opts)
   fun are_same (filea, fileb)
   fun is_block (file)
   fun is_chr (file)
@@ -142,13 +143,15 @@ class File
   end
 
   def append (file, str)
-    if (-1 == access (file, F_OK|W_OK))
+    variable fd;
+
+    if (-1 == access (file, F_OK|R_OK))
       {
       IO.tostderr (file + ": " + errno_string (errno));
       return -1;
       }
 
-    variable fd = open (file, O_WRONLY|O_APPEND);
+    fd = open (file, O_WRONLY|O_APPEND);
 
     if (NULL == fd)
       {
@@ -162,7 +165,7 @@ class File
       return -1;
       }
 
-    if (-1 == write (fd, str))
+    if (-1 == (@__get_reference ("write")) (fd, str))
       {
       IO.tostderr (file + ": " + errno_string (errno));
       return -1;
