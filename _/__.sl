@@ -709,7 +709,7 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
 
     if (any (["include", "load"] == tokens[0]))
       if (1 == length (tokens))
-        throw ClassError, "Class::__INIT__::include statement needs an argument";
+        throw ClassError, "Class::__INIT__::" + tokens[0] + " statement needs an argument";
       else
         {
         variable lcname = tokens[1];
@@ -750,11 +750,10 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
             throw ClassError, "Class::__INIT__::end identifier is missing";
           }
         else
-          {
           @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
             __init__ = path_basename_sans_extname (lfile), return_buf);
 
-%          @eval_buf += `() = evalfile (CLASSPATH + ` + (isinusr ? "\"/../usr/__\"" : "") +
+%       @eval_buf += `() = evalfile (CLASSPATH + ` + (isinusr ? "\"/../usr/__\"" : "") +
 %           ` "/` + lfrom + `" + "/" + path_basename_sans_extname ("` + lfile + `") + ".slc",
 %            "` + lcname + `");` + "\n\n";
 %       variable ll = fopen ("/tmp/a.sl", "w");
@@ -763,7 +762,6 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
 %          @eval_buf += `() = evalfile (path_dirname ("` + strreplace (lclasspath,
 %            realpath (CLASSPATH + "/.."), realpath (Env->STD_CLASS_PATH + "/..")) + `/") + "/" +
 %            path_basename_sans_extname ("` + lfile + `") + ".slc", "` + lcname + `");` + "\n\n";
-          }
 
         continue;
         }

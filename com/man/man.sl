@@ -50,12 +50,12 @@ define getpage (page)
 
   if (".gz" == path_extname (page))
     {
-    p = Proc.init (0, 1, 0);
+    p = initproc (0, 1, 0);
     p.stdout.file = fname;
 
     status = p.execv ([gzip, "-dc", page], NULL);
 
-    p = Proc.init (0, 1, 1);
+    p = initproc (0, 1, 1);
     p.stdout.file = outfn;
     p.stderr.file = errfn;
 
@@ -64,7 +64,7 @@ define getpage (page)
   else
     {
     fname = page;
-    p = Proc.init (0, 1, 1);
+    p = initproc (0, 1, 1);
     p.stdout.file = outfn;
     p.stderr.file = errfn;
 
@@ -106,7 +106,7 @@ define getpage (page)
       if (".gz" == path_extname (page))
         {
         matchfn = sprintf ("%s/%s", MYMANDIR, match);
-        p = Proc.init (0, 1, 0);
+        p = initproc (0, 1, 0);
         p.stdout.file = matchfn;
 
         status = p.execv ([gzip, "-dc", page], NULL);
@@ -115,7 +115,7 @@ define getpage (page)
         File.copy (page, sprintf ("%s/%s", MYMANDIR, match));
       }
 
-    p = Proc.init (0, 1, 0);
+    p = initproc (0, 1, 0);
     p.stdout.file = outfn;
 
     status = p.execv ([groff, "-Tutf8", "-m", "man", "-I", MYMANDIR, fname], NULL);
@@ -128,10 +128,7 @@ define getpage (page)
       }
     }
 
-  p = Proc.init (1, openstdout, 0);
-
-  if (openstdout)
-    initproc (p);
+  p = initproc (1, openstdout, openstderr);
 
   p.stdin.file = outfn;
 
@@ -140,7 +137,7 @@ define getpage (page)
   () = remove (outfn);
   () = remove (fname);
 
-  0;
+  status.exit_status;
 }
 
 private define file_callback (file, st, filelist)

@@ -13,6 +13,7 @@ class Rline
     _ind,
     _lines,
     _columns,
+    funclist,
     lcmp,
     history,
     histfile,
@@ -156,9 +157,7 @@ class Rline
 
     variable list = hist[wherenot (hist == argv)];
 
-    list = [argv, length (list) > 100 ? list[[:99]] : list];
-
-    list;
+    [argv, length (list) > 100 ? list[[:99]] : list];
   end
 
   def writehistory (hist, histfile)
@@ -195,6 +194,44 @@ class Rline
     (@func) (__push_list (list);;struct {@__qualifiers (), argv0 = argv[0]});
   end
 
+  def __exec_proc__ (s, argvlist) proc
+    variable _addhistory = 1;
+
+    if (1 < length (s.argv))
+      ifnot (strlen (s.argv[-1]))
+        s.argv = s.argv[[:-2]];
+
+    if (NULL == argvlist[s.argv[0]].func)
+      return;
+
+    variable origargv = @s.argv;
+
+    ifnot (NULL == argvlist[s.argv[0]].type)
+      if (argvlist[s.argv[0]].type == "Proc_Type")
+        (@proctype) (argvlist[s.argv[0]].func, s.argv;;
+          struct {@__qualifiers (), rl = s});
+      else if (argvlist[s.argv[0]].type == "Func_Type")
+        _execFunc_Type_ (argvlist[s.argv[0]].func, s.argv;;
+          struct {@__qualifiers (), rl = s});
+      else
+        _addhistory = 0;
+    else
+      if (s.totype == "Proc_Type")
+        (@proctype) (argvlist[s.argv[0]].func, s.argv;;
+          struct {@__qualifiers (), rl = s});
+      else if (s.totype == "Func_Type")
+        _execFunc_Type_ (argvlist[s.argv[0]].func, s.argv;;
+          struct {@__qualifiers (), rl = s});
+      else
+        _addhistory = 0;
+
+    if (_addhistory)
+      {
+      s.history = addhistory (NULL, s.history, origargv, s.historyaddforce);
+      addlcmp (NULL, s.lcmp, origargv[-1]);
+      }
+  end
+
   def _execline_ (s) proc
     ifnot (strlen (s.argv[0]))
       {
@@ -207,43 +244,15 @@ class Rline
       }
 
     ifnot (any (assoc_get_keys (s.argvlist) == s.argv[0]))
-      return;
-
-    variable _addhistory = 1;
-
-    if (1 < length (s.argv))
-      ifnot (strlen (s.argv[-1]))
-        s.argv = s.argv[[:-2]];
-
-    if (NULL == s.argvlist[s.argv[0]].func)
-      return;
-
-    variable origargv = @s.argv;
-
-    ifnot (NULL == s.argvlist[s.argv[0]].type)
-      if (s.argvlist[s.argv[0]].type == "Proc_Type")
-        (@proctype) (s.argvlist[s.argv[0]].func, s.argv;;
-          struct {@__qualifiers (), rl = s});
-      else if (s.argvlist[s.argv[0]].type == "Func_Type")
-        _execFunc_Type_ (s.argvlist[s.argv[0]].func, s.argv;;
-          struct {@__qualifiers (), rl = s});
-      else
-        _addhistory = 0;
-    else
-      if (s.totype == "Proc_Type")
-        (@proctype) (s.argvlist[s.argv[0]].func, s.argv;;
-          struct {@__qualifiers (), rl = s});
-      else if (s.totype == "Func_Type")
-        _execFunc_Type_ (s.argvlist[s.argv[0]].func, s.argv;;
-          struct {@__qualifiers (), rl = s});
-      else
-        _addhistory = 0;
-
-    if (_addhistory)
       {
-      s.history = addhistory (NULL, s.history, origargv, s.historyaddforce);
-      addlcmp (NULL, s.lcmp, origargv[-1]);
+      ifnot (NULL == s.funclist)
+        if (any (assoc_get_keys (s.funclist) == s.argv[0]))
+          __exec_proc__ (s, s.funclist);
+
+      return;
       }
+
+    __exec_proc__ (s, s.argvlist);
   end
 
   def set (s)
@@ -294,6 +303,8 @@ class Rline
     rl.osapprec = qualifier ("osapprec");
     rl.wind_mang = qualifier ("wind_mang");
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
+    rl.funclist = __get_qualifier_as (Assoc_Type, "funclist",
+      qualifier ("funclist"), NULL);
 
     if (0 == length (rl.history) && NULL != rl.histfile)
       rl.history = readhistory (Rline, rl.histfile);
@@ -709,7 +720,7 @@ class Rline
       }
   end
 
-  def hlitem (s, ar, base, acol, item) proc
+  def hlitem (s, ar, base, acol, item)
     variable
       chr,
       car,
@@ -1155,7 +1166,7 @@ class Rline
         }
 
       tmp = "";
-      chr = hlitem (s, append_dir_indicator (file, ar), file, s._col, &tmp);
+      chr = hlitem (NULL, s, append_dir_indicator (file, ar), file, s._col, &tmp);
 
       if (Input->CTRL_n == chr)
         {
@@ -1313,7 +1324,7 @@ class Rline
         }
 
       tmp = "";
-      chr = hlitem (s, bar, s.argv[0], s._col, &tmp);
+      chr = hlitem (NULL, s, bar, s.argv[0], s._col, &tmp);
 
       if (' ' == chr)
         {
@@ -1422,7 +1433,7 @@ class Rline
 
       tmp = "";
 
-      chr = hlitem (s, append_dir_indicator (file, ar), file, s._col, &tmp;
+      chr = hlitem (NULL, s, append_dir_indicator (file, ar), file, s._col, &tmp;
         header = qualifier ("header", @fname));
 
       s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
@@ -1783,7 +1794,7 @@ class Rline
       ar = array_map (String_Type, &sprintf, "%-17s %s", args[ar], desc[ar]);
 
       tmp = "";
-      chr = hlitem (s, ar, arg, s._col, &tmp;dont_format);
+      chr = hlitem (NULL, s, ar, arg, s._col, &tmp;dont_format);
 
       if (033 == chr)
         {
@@ -2012,6 +2023,7 @@ class Rline
 
   def readline (s)
     variable retval;
+    variable commands;
     variable initdone = 0;
 
     ifnot (NULL == holdedcommand)
@@ -2142,13 +2154,25 @@ class Rline
             }
           }
         else
-          if (commandcmp (NULL, s, assoc_get_keys (s.argvlist)) == 1)
+          {
+          if ('@' == s.argv[0][0])
+            {
+            ifnot (NULL == s.funclist)
+              commands = assoc_get_keys (s.funclist);
+            else
+              commands = String_Type[0];
+            }
+          else
+            commands = assoc_get_keys (s.argvlist);
+
+          if (commandcmp (NULL, s, commands) == 1)
             {
             s.execline (;;__qualifiers ());
             return;
             }
           else
             continue;
+          }
         }
 
       routine (NULL, s);

@@ -38,10 +38,7 @@ define main ()
 
   if (mountpoint == NULL == device)
     {
-    p = Proc.init (0, openstdout, 0);
-
-    if (openstdout)
-      initproc (p);
+    p = initproc (0, openstdout, 0);
 
     status = p.execv ([mount], NULL);
 
@@ -77,10 +74,7 @@ define main ()
   else
     argv = [mount, device, mountpoint];
 
-  p = Proc.init (0, openstdout, 0);
-
-  if (openstdout)
-    initproc (p);
+  p = initproc (0, openstdout, 0);
 
   status = p.execv (argv, NULL);
 

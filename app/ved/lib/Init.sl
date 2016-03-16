@@ -126,6 +126,11 @@ private define _buffer_other_ ()
   b.draw (;dont_draw);
 }
 
+private define _chbuf_ ()
+{
+  _buffer_other_ (;;struct {@__qualifiers, not_special});
+}
+
 private define _bdelete ()
 {
   variable force = qualifier ("argv0")[-1] != '!';
@@ -444,8 +449,8 @@ VED_CLINE["e"]   =      &_edit_other;
 VED_CLINE["b"]   =      &_edit_other;
 VED_CLINE["bd"]  =      &_bdelete;
 VED_CLINE["bd!"] =      &_bdelete;
-VED_CLINE["bp"]  =      &_buffer_other_;
-VED_CLINE["bn"]  =      &_buffer_other_;
+VED_CLINE["bp"]  =      &_chbuf_;
+VED_CLINE["bn"]  =      &_chbuf_;
 VED_CLINE["r"]   =      &_read_;
 VED_CLINE["q"]   =      &cl_quit;
 VED_CLINE["Q"]   =      &cl_quit;

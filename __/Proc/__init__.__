@@ -17,8 +17,6 @@ class Proc
     execve,
     atexit,
     connect,
-    loadproc,
-    loadcommand,
   end
 
   typedef Descr
@@ -150,7 +148,7 @@ class Proc
       break;
       }
 
-    return sock;
+    sock;
   end
 
   def dopid (s) proc
@@ -163,17 +161,17 @@ class Proc
     ifnot (NULL == s.stderr)
       _open (s.stderr, stderr);
 
-    return fork ();
+    fork ();
   end
 
-  def _execv (s, argv, bg) proc
+  def __exec_proc__ (s, argv, bg, env) proc
     variable status = 0;
 
     s.pid = dopid (s);
 
     ifnot (s.pid) % allow for a function callback, call a default else
       {
-      if (NULL != s.setid)
+      ifnot (NULL == s.setid)
         if (NULL != s.uid && NULL != s.gid && NULL != s.user)
           {
           if (-1 == initgroups (s.user, s.gid))
@@ -195,8 +193,14 @@ class Proc
             }
           }
 
-      if (-1 == execv (argv[0], argv))
-        return NULL;
+      if (NULL == env)
+        if (-1 == execv (argv[0], argv))
+          return NULL;
+        else
+          {}
+      else
+        if (-1 == execve (argv[0], argv, env))
+          return NULL;
       }
 
     if (NULL == bg)
@@ -209,57 +213,13 @@ class Proc
     s.pid;
   end
 
-  def _execve (s, argv, env, bg) proc
-    variable status = 0;
-
-    s.pid = dopid (s);
-
-    ifnot (s.pid)
-      {
-      if (NULL != s.setid)
-        if (NULL != s.uid && NULL != s.gid && NULL != s.user)
-          {
-          if (-1 == initgroups (s.user, s.gid))
-            {
-            IO.tostderr ("initgroups: " + errno_string (errno));
-            return NULL;
-            }
-
-          if (-1 == setgid (s.gid))
-            {
-            IO.tostderr ("setgid: " + errno_string (errno));
-            return NULL;
-            }
-
-          if (-1 == setuid (s.uid))
-            {
-            IO.tostderr ("setuid: " + errno_string (errno));
-            return NULL;
-            }
-          }
-
-      if (-1 == execve (argv[0], argv, env))
-        return NULL;
-      }
-
-    if (NULL == bg)
-      {
-      status = waitpid (s.pid, 0);
-      s.atexit ();
-      return status;
-      }
-
-    s.pid;
+  def __execve__ (s, argv, env, bg) proc
+    __exec_proc__ (s, argv, bg, env);
   end
 
-%  def loadproc () proc
-%    return path_dirname (__FILE__) + "/loadproc.sl";
-%  end
-
-%  private define loadcommand ()
-%  {
-%    return path_dirname (__FILE__) + "/loadcommand.sl";
-%  }
+  def __execv__ (s, argv, bg) proc
+    __exec_proc__ (s, argv, bg, NULL);
+  end
 
   def init (in, out, err)
     variable
@@ -276,15 +236,12 @@ class Proc
 
     p.atexit = &atexit;
     p.connect = &connect_to_socket;
-%    p.loadproc = loadproc ();
-%    p.loadcommand = loadcommand ();
-    p.execve = &_execve;
-    p.execv = &_execv;
-    p.setid = qualifier ("setid");
-    p.uid = qualifier ("uid");
-    p.gid = qualifier ("gid");
-    p.user = qualifier ("user");
-
+    p.execve = &__execve__;
+    p.execv = &__execv__;
+    p.setid = __get_qualifier_as (Integer_Type, "setid", qualifier ("setid"), NULL);
+    p.uid   = __get_qualifier_as (Integer_Type, "uid",   qualifier ("uid"), NULL);
+    p.gid   = __get_qualifier_as (Integer_Type, "gid",   qualifier ("gid"), NULL);
+    p.user  = __get_qualifier_as (String_Type, "user",   qualifier ("user"), NULL);
     p;
   end
 end

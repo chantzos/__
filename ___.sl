@@ -25,7 +25,7 @@ private variable CLASSES = [
   "Input",  "Smg",    "Rand",  "Crypt", "Os",   "Opt",
   "String", "Struct", "Rline", "Re",    "Diff", "Proc",
   "Sock",   "Subst",  "Sync",  "Ved",   "Api",  "Root",
-  "Curl", "Json"];
+  "Curl", "Json", "Time"];
 
 private variable THESE = Assoc_Type[String_Type];
 
@@ -568,11 +568,11 @@ private define __apps_dir_callback__ (dir, st)
 
   if (-1 == symlink ("APP.sl", "__" + app))
     if (EEXIST == errno && readlink ("__" + app) == "APP.sl")
-      return 1;
+      return 0;
     else
       This.exit ("Couldn't create symbolic link " +  errno_string (errno), 1);
 
-  1;
+  0;
 }
 
 private define __install_apps__ ()

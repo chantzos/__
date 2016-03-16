@@ -33,6 +33,12 @@ This.err_handler = &__err_handler__;
 
 This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 This.appdir   = Env->STD_APP_PATH + "/" + This.appname;
+
+if (-1 == access (This.appdir, F_OK))
+  if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
+      This.appdir), F_OK))
+   This.__err_handler__ (This.appname, "no such application");
+
 This.tmpdir   = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
 This.stdouttype = "ashell";
 
@@ -257,8 +263,6 @@ txt_settype  (ERR_VED, This.stderrFn, VED_ROWS, NULL;_autochdir = 0);
 
 SPECIAL = [SPECIAL, SCRATCH, This.stderrFn, This.stdoutFn, STDOUTBG];
 
-Load.file (Env->STD_LIB_PATH + "/wind/" + This.appname);
-
 if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
   This.exit (1);
 
@@ -311,7 +315,7 @@ private define _scratch_ (ved)
   NEEDSWINDDRAW = 1;
 }
 
-private define __scratch (argv)
+public define __scratch (argv)
 {
   variable ved = @Ved.get_cur_buf ();
 
@@ -619,7 +623,7 @@ private define _preexec_ (argv, header, issudo, env)
   @env = [Env.defenv (), "PPID=" + string (Env->PID), "CLNT_FIFO=" + RDFIFO,
     "SRV_FIFO=" + WRFIFO];
 
-  variable p = Proc.init (@issudo, 0, 1);
+  variable p = Proc.init (@issudo, 0, 0);
 
   p.issu = 0 == @issudo;
 
@@ -725,7 +729,7 @@ private define _parse_redir_ (lastarg, file, flags)
       return -1;
       }
 
-    ifnot (File.isreg (lfile))
+    ifnot (File.is_reg (lfile))
       {
       IO.tostderr (lfile + ": is not a regular file");
       return -1;
@@ -888,13 +892,13 @@ private define _forkbg_ (p, argv, env)
 
 private define _fork_ (p, argv, env)
 {
-  variable errfd = @FD_Type (_fileno (This.stderrFd));
+%  variable errfd = @FD_Type (_fileno (This.stderrFd));
 
   () = p.execve (argv, env, 1);
 
   _waitpid_ (p);
 
-  variable err = File.read (errfd;offset = ERR_VED.st_.st_size);
+  variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
 
   if (strlen (err))
     if (This.shell)
@@ -977,10 +981,11 @@ private define _execute_ (argv)
     isscratch = 1;
     }
 
-  p.stderr.file = This.stderrFn;
-  p.stderr.wr_flags = ">>|";
+%  p.stderr.file = This.stderrFn;
+%  p.stderr.wr_flags = ">>|";
 
-  env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags];
+  env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
+   "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
 
   ifnot (isbg)
     _fork_ (p, argv, env);
@@ -999,6 +1004,11 @@ private define _execute_ (argv)
 
   ifnot (isbg)
     _getbgjobs_ ();
+
+  % (ugly) hack to fix the err messages from sudo to mess the screen
+  % since we don't open the stderr stream in the process
+  if (issudo)
+    Smg.clear_and_redraw ();
 
   _postexec_ (header;;__qualifiers ());
 }
@@ -1215,10 +1225,11 @@ private define _search_ (argv)
 
   stdoutfile = GREPFILE;
   stdoutflags = ">|";
-  p.stderr.file = This.stderrFn;
-  p.stderr.wr_flags = ">>|";
+%  p.stderr.file = This.stderrFn;
+%  p.stderr.wr_flags = ">>|";
 
-  env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags];
+  env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
+    "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
 
   _fork_ (p, argv, env);
 
@@ -1265,6 +1276,10 @@ private define _build_comlist_ (a)
     ex = qualifier_exists ("ex"),
     d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
+ ifnot (ex)
+   ifnot (This.shell)
+     ex = 1;
+
   _for i (0, length (d) - 1)
     {
     c = listdir (d[i]);
@@ -1290,7 +1305,7 @@ private define _lock_ (argv)
   Ved.__vdraw_wind ();
 }
 
-define runcom (argv, issudo)
+public define runcom (argv, issudo)
 {
   variable rl = Ved.get_cur_rline ();
 
@@ -1306,6 +1321,30 @@ define runcom (argv, issudo)
 
 public define __rehash ();
 
+private define draw_buf (argv)
+{
+  draw (Ved.get_cur_buf ());
+}
+
+private define draw_wind (argv)
+{
+  Ved.__vdraw_wind ();
+}
+
+public define init_functions ()
+{
+  variable
+    a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+
+
+  a["@draw_buf"] = @Argvlist_Type;
+  a["@draw_buf"].func = &draw_buf;
+
+  a["@draw_wind"] = @Argvlist_Type;
+  a["@draw_wind"].func = &draw_wind;
+  a;
+}
+
 public define init_commands ()
 {
   variable
@@ -1313,8 +1352,8 @@ public define init_commands ()
 
   _build_comlist_ (a;;__qualifiers ());
 
-  a["@"] = @Argvlist_Type;
-  a["@"].func = __get_reference ("__scratch");
+  a["scratch"] = @Argvlist_Type;
+  a["scratch"].func = __get_reference ("__scratch");
 
   a["edit"] = @Argvlist_Type;
   a["edit"].func = __get_reference ("__edit");
@@ -1399,6 +1438,7 @@ public define filterexargs (s, args, type, desc)
 Load.file (This.appdir + "/lib/vars", NULL);
 Load.file (This.appdir + "/lib/Init", NULL);
 Load.file (This.appdir + "/lib/initrline", NULL);
+Load.file (Env->STD_LIB_PATH + "/wind/" + This.appname);
 
 public define __initrline ()
 {
@@ -1413,6 +1453,7 @@ public define __initrline ()
     w = Ved.get_cur_wind ();
 
   w.rline = rlineinit (;
+    funclist = init_functions (),
     osappnew = __get_reference ("_osappnew_"),
     osapprec = __get_reference ("_osapprec_"),
     wind_mang = __get_reference ("wind_mang"),

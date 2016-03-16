@@ -4,11 +4,12 @@ if (-1 == access (COMDIR, F_OK))
   COMDIR = Env->USER_COM_PATH + "/" + COM;
 
 public variable openstdout = 0;
+public variable openstderr = 0;
 
-public define initproc (p) {}
-public define close_smg ();
-public define restore_smg ();
+public define to_tty ();
+public define restore_screen ();
 
+Class.load ("Proc");
 Class.load ("Opt");
 Class.load ("Input");
 Class.load ("Smg";__init__ = "__tty_init__", as = "SmgTTY");
@@ -38,13 +39,18 @@ public define send_msg (msg)
   Smg.send_msg (msg);
 }
 
-define sigint_handler (sig)
+private define sigint_handler (sig)
 {
   if (__is_initialized (&Input))
     Input.at_exit ();
 
   IO.tostderr ("\b\bprocess interrupted by the user");
   This.exit (130);
+}
+
+public define initproc (in, out, err)
+{
+  Proc.init (in, out, err);
 }
 
 public define _usage ()
