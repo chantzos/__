@@ -1,0 +1,268 @@
+class Scm
+  let EXEC = Sys.which ("git");
+
+  var funcs = Assoc.new (Array_Type,
+    [
+    "init", "branch", "status", "log", "diff", "add", "brancnew",
+    "branchdelete", "branchchange", "commit", "commitall", "pull",
+    "lastlog", "diffrevision", "logpatch", "applypatch", "merge",
+    ],
+    {
+    [EXEC, "init"],
+    [EXEC, "branch"],
+    [EXEC, "status", "-s"],
+    [EXEC, "log", "--pretty=format:commit: %h %H%n%B%ncommiter: %cn  %cD%n", "--after="],
+    [EXEC, "diff"],
+    [EXEC, "add", "-v"],
+    [EXEC, "branch"],
+    [EXEC, "branch", "-d"],
+    [EXEC, "checkout"],
+    [EXEC, "commit", "-v", "--message="],
+    [EXEC, "commit", "-a", "-v", "--message="],
+    [EXEC, "pull"],
+    [EXEC, "log", "-1", "HEAD", "-p"],
+    [EXEC, "log", "--no-walk", "-p"],
+    [EXEC, "log", "-p"],
+    [EXEC, "apply", "-p1", "--verbose"],
+    [EXEC, "merge"],
+    });
+
+  def __exec__ (argv, status) proc
+    variable p = Proc.init (0, 1, 1);
+    @status = p.execv (argv, NULL);
+    p;
+  end
+
+  def __fmt_output__ (buf) proc
+    strchop (buf, '\n', 0);
+  end
+
+  def chdir_to_repo (repo) proc
+    if (-1 == chdir (repo))
+      {
+      IO.tostderr (sprintf ("%s, cannot change dir, ERRNO: %s", repo, errno_string (errno)));
+      return -1;
+      }
+
+    0;
+  end
+
+  def status ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def lastlog ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def pull ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def diff ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def add (file)
+    variable
+      status,
+      argv = [funcs[_function_name], file],
+      p = __exec__ (argv, &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def diffrevision (revision)
+    variable
+      status,
+      argv = [funcs[_function_name], revision],
+      p = __exec__ (argv, &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def log ()
+    variable
+      status,
+      argv = funcs[_function_name];
+
+    argv[-2] += repeat ("_", COLUMNS);
+    argv[-1] += string (localtime (_time).tm_year + 1900 - 2);
+
+    variable p = __exec__ (argv, &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def applypatch (patch)
+    variable
+      status,
+      p = __exec__ ([funcs[_function_name], patch], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def merge (branch)
+    variable
+      status,
+      p = __exec__ ([funcs[_function_name], branch], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def logpatch ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def init ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def branch ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (status.exit_status)
+      {
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+      return;
+      }
+
+    variable ar = strtrim_end (strchop (p.stdout.out, '\n', 0));
+    ar = ar[where (strlen (ar))];
+
+    variable curbranch = substr (ar[wherenot (array_map (
+    Integer_Type, &strncmp, ar, "* ", 2))][0], 3, -1);
+    ar = [
+    sprintf ("Current tree has %d branches", length (ar)),
+    repeat ("_", COLUMNS),
+    strtrim_beg (strtrim_beg (ar, "*")),
+    repeat ("_", COLUMNS),
+    sprintf ("Current Branch: %s", curbranch, 2)
+    ];
+
+   IO.tostdout (ar);
+  end
+
+  def branchnew (branch)
+    variable
+      status,
+      argv = [funcs[_function_name], branch],
+      p = __exec__ (argv, &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def branchdelete (branch)
+    variable
+      status,
+      argv = [funcs[_function_name], branch],
+      p = __exec__ (argv, &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def branchchange (branch)
+    variable
+      status,
+      argv = [funcs[_function_name], branch],
+      p = __exec__ (argv, &status);
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def commit (msg)
+    variable
+      status,
+      argv = funcs[_function_name],
+      p = __exec__ (argv, &status);
+
+    argv[-1] += msg;
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+
+  def commitall (msg)
+    variable
+      status,
+      argv = funcs[_function_name],
+      p = __exec__ (argv, &status);
+
+    argv[-1] += msg;
+
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out));
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out));
+  end
+end
