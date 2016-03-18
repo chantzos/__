@@ -49,7 +49,7 @@ private define __my_copy_verb__ (source, dest)
     return -1;
     }
 
-  dest_fp = fopen (dest, "wb");
+  dest_fp = fopen (dest, qualifier ("flags", "wb"));
 
   if (NULL == dest_fp)
     {
@@ -99,7 +99,7 @@ private define __my_copy__ (source, dest)
     return -1;
     }
 
-  dest_fp = fopen (dest, "wb");
+  dest_fp = fopen (dest, qualifier ("flags", "wb"));
 
   if (NULL == dest_fp)
     {

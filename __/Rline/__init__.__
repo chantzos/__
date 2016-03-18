@@ -1693,15 +1693,27 @@ class Rline
     ifnot (NULL == args)
       ar = args;
     else
-      if (NULL != s.argvlist[s.argv[0]].args)
-        ar = s.argvlist[s.argv[0]].args;
+      if (assoc_key_exists (s.argvlist, s.argv[0]))
+        ifnot (NULL == s.argvlist[s.argv[0]].args)
+          ar = s.argvlist[s.argv[0]].args;
+        else
+          ar = NULL;
+      else
+        if (assoc_key_exists (s.funclist, s.argv[0]))
+          ifnot (NULL == s.funclist[s.argv[0]].args)
+            ar = s.funclist[s.argv[0]].args;
 
     if (ar == NULL == args)
       {
       variable file = qualifier ("file");
       if (NULL == file)
         {
-        file = s.argvlist[s.argv[0]].dir;
+        if (assoc_key_exists (s.argvlist, s.argv[0]))
+          file = s.argvlist[s.argv[0]].dir;
+        else
+          if (assoc_key_exists (s.funclist, s.argv[0]))
+            file = s.funclist[s.argv[0]].dir;
+
         if (NULL == file)
           return 0;
 

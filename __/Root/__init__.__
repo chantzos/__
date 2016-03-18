@@ -76,7 +76,7 @@ class Root
       }
 
     s.st_ = st;
-    s.lines = Ved.__vgetlines (s._abspath, s._indent, st);
+    s.lines = Ved.getlines (s._abspath, s._indent, st);
 
     s._len = length (s.lines) - 1;
 
@@ -99,7 +99,7 @@ class Root
 
   def viewfile (s, type, pos, _i) public proc
     variable ismsg = 0;
-    Ved.__vsetbuf (s._abspath);
+    Ved.setbuf (s._abspath);
 
     topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
 
@@ -753,10 +753,10 @@ class Root
   end
 
   def init_sys ()
-    (VED_RLINE, VED_MAXFRAMES, VED_ISONLYPAGER) = 0, 1, 1;
+    (VED_RLINE, This.max_frames, VED_ISONLYPAGER) = 0, 1, 1;
     ERR_VED = Ved.init_ftype ("txt");
     (@__get_reference ("txt_settype")) (ERR_VED, This.stderrFn, VED_ROWS, NULL);
-    Ved.__vsetbuf (ERR_VED._abspath);
+    Ved.setbuf (ERR_VED._abspath);
     ERR_VED._fd = This.stderrFd;
 
     self._apptable_ ();

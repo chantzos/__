@@ -207,10 +207,11 @@ class Scm
   def commit (msg)
     variable
       status,
-      argv = @funcs[_function_name],
-      p = __exec__ (argv, &status);
+      argv = @funcs[_function_name];
 
     argv[-1] += msg;
+
+    variable   p = __exec__ (argv, &status);
 
     __print__ (p, status;;__qualifiers);
   end

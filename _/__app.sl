@@ -5,6 +5,8 @@ public define exit_me (x)
   This.exit (x);
 }
 
+This.max_frames = 2;
+
 Load.module ("socket");
 
 Class.load ("Smg");
@@ -162,7 +164,7 @@ public define draw (s)
     }
 
   s.st_ = st;
-  s.lines = Ved.__vgetlines (s._abspath, s._indent, st);
+  s.lines = Ved.getlines (s._abspath, s._indent, st);
 
   s._len = length (s.lines) - 1;
 
@@ -186,7 +188,7 @@ public define draw (s)
 public define viewfile (s, type, pos, _i)
 {
   variable ismsg = 0;
-  Ved.__vsetbuf (s._abspath);
+  Ved.setbuf (s._abspath);
 
   topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
 
@@ -309,7 +311,7 @@ private define _scratch_ (ved)
     return;
 
   viewfile (SCRATCH_VED, "SCRATCH", [1, 0], 0);
-  Ved.__vsetbuf (ved._abspath);
+  Ved.setbuf (ved._abspath);
   ved.draw ();
 
   NEEDSWINDDRAW = 1;
@@ -322,16 +324,16 @@ public define __scratch (argv)
   _scratch_ (ved);
 
   NEEDSWINDDRAW = 0;
-  Ved.__vdraw_wind ();
+  Ved.draw_wind ();
 }
 
 private define __edit (argv)
 {
-  precom ();
-
-  variable b = Ved.get_cur_buf ();
-
-  viewfile (b, b._fname, b.ptr, b._ii);
+  variable s = Ved.get_cur_buf ();
+  Ved.preloop (s);
+  topline ("-- pager --");
+  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  s.vedloop ();
 }
 
 private define __messages (argv)
@@ -339,9 +341,9 @@ private define __messages (argv)
   variable ved = @Ved.get_cur_buf ();
 
   viewfile (ERR_VED, "MSG", NULL, NULL);
-  Ved.__vsetbuf (ved._abspath);
+  Ved.setbuf (ved._abspath);
 
-  Ved.__vdraw_wind ();
+  Ved.draw_wind ();
 }
 
 public define runapp (argv, env)
@@ -443,7 +445,7 @@ private define _write_ (argv)
     variable arg = argv[ind];
     argv[ind] = NULL;
     argv = argv[wherenot (_isnull (argv))];
-    if (NULL == (lnrs = Ved.__vparse_arg_range (b, arg, lnrs), lnrs))
+    if (NULL == (lnrs = Ved.parse_arg_range (b, arg, lnrs), lnrs))
       return;
     }
 
@@ -460,7 +462,7 @@ private define _write_ (argv)
 
   if (any (["w", "w!", "W"]  == command))
     {
-    Ved.__vwritefile (b, "w!" == command, [PROMPTROW, 1], file, append;
+    Ved.writefile (b, "w!" == command, [PROMPTROW, 1], file, append;
       lines = b.lines[lnrs]);
     }
 }
@@ -475,7 +477,7 @@ private define _postexec_ (header)
 
   if (NEEDSWINDDRAW)
     {
-    Ved.__vdraw_wind ();
+    Ved.draw_wind ();
     NEEDSWINDDRAW = 0;
     }
   else
@@ -1302,7 +1304,7 @@ private define _lock_ (argv)
 
   while (NULL == Os.__getpasswd ());
 
-  Ved.__vdraw_wind ();
+  Ved.draw_wind ();
 }
 
 public define runcom (argv, issudo)
@@ -1328,7 +1330,33 @@ private define draw_buf (argv)
 
 private define draw_wind (argv)
 {
-  Ved.__vdraw_wind ();
+  Ved.draw_wind ();
+}
+
+% needed by File.copy, but it will be moved from this file
+public define send_msg_dr (msg)
+{
+  Smg.send_msg_dr (msg, 0, NULL, NULL);
+}
+
+private define scratch_to_stdout (argv)
+{
+  File.copy (SCRATCH, This.stdoutFn;flags = "ab", verbose = 1);
+  pop ();
+  draw (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
+}
+
+private define __clear__ (argv)
+{
+  variable fn = SCRATCH;
+  if (Opt.is_arg ("--stdout", argv))
+    fn = This.stdoutFn;
+  else if (Opt.is_arg ("--stderr", argv))
+    fn = This.stderrFn;
+
+  () = File.write (fn, "\000");
+  SCRATCH_VED._fd = IO.open_fn (SCRATCH);
+    
 }
 
 public define init_functions ()
@@ -1336,12 +1364,20 @@ public define init_functions ()
   variable
     a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
 
-
   a["@draw_buf"] = @Argvlist_Type;
   a["@draw_buf"].func = &draw_buf;
 
   a["@draw_wind"] = @Argvlist_Type;
   a["@draw_wind"].func = &draw_wind;
+
+  a["@scratch_to_stdout"] = @Argvlist_Type;
+  a["@scratch_to_stdout"].func = &scratch_to_stdout;
+
+  a["@clear"] = @Argvlist_Type;
+  a["@clear"].func = &__clear__;
+  a["@clear"].args = ["--stderr void clear stderr (default is scratch)",
+                      "--stdout void clear stdout"];
+
   a;
 }
 
@@ -1460,7 +1496,6 @@ public define __initrline ()
     filterargs = __get_reference ("filterexargs"),
     filtercommands = __get_reference ("filterexcom"));
 }
-
 
 public define __rehash ()
 {
