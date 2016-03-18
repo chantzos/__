@@ -8,5 +8,5 @@ public define ashell_settype (s, fname, rows, lines)
 
   def.lexicalhl = &ashell_lexicalhl;
 
-  Ved.__vinitbuf (s, fname, rows, lines, def;;__qualifiers ());
+  Ved.initbuf (s, fname, rows, lines, def;;__qualifiers ());
 }

@@ -46,7 +46,10 @@ typedef struct
   appdir,
   at_exit,
   err_handler,
-  exit
+  exit,
+  framesize_fun,
+  frames,
+  max_frames,
   } ThisProg_Type;
 
 public variable This, Smg, Input, LINES, COLUMNS;

@@ -26,7 +26,7 @@ IO.tostderr ("add called", s, rows);
     c.ptr[0] = 1;
     c.ptr[1] = s.col - 1 + c._indent;
     c._index = c.ptr[1];
-    Ved.__vsetbuf (c._abspath);
+    Ved.setbuf (c._abspath);
     return 0;
     }
 
@@ -39,7 +39,7 @@ IO.tostderr ("add called", s, rows);
 
   variable def = Ved.deftype ();
   def._autochdir = 0;
-  Ved.__vinitbuf (c, s.fname, rows, lines, def);
+  Ved.initbuf (c, s.fname, rows, lines, def);
 
   c._len = length (lines) - 1;
   c._i = c._len >= s.lnr - 1 ? s.lnr - 1 : 0;
@@ -47,7 +47,7 @@ IO.tostderr ("add called", s, rows);
   c.ptr[1] = qualifier ("col", s.col - 1);
   c._index = c.ptr[1];
 
-  Ved.__vsetbuf (c._abspath);
+  Ved.setbuf (c._abspath);
 
   0;
 }
@@ -100,7 +100,7 @@ IO.tostderr ("lfname", l.fname);
     {
     w.cur_frame = 0;
     s = Ved.get_buf (l.fname);
-    Ved.__vsetbuf (s._abspath);
+    Ved.setbuf (s._abspath);
     s._i = s._len >= l.lnr - 1 ? l.lnr - 1 : 0;
     s.ptr[0] = 1;
     s.ptr[1] = l.col - 1 + s._indent;

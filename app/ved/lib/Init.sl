@@ -40,8 +40,8 @@ private define addfname (fname)
     s._i = s._ii;
     }
 
-  Ved.__vsetbuf (s._abspath);
-  Ved.__vwrite_prompt (" ", 0);
+  Ved.setbuf (s._abspath);
+  Ved.write_prompt (" ", 0);
   s.draw (;dont_draw);
 }
 
@@ -121,8 +121,8 @@ private define _buffer_other_ ()
   b = w.buffers[b];
   b._i = b._ii;
 
-  Ved.__vsetbuf (b._abspath);
-  Ved.__vwrite_prompt (" ", 0);
+  Ved.setbuf (b._abspath);
+  Ved.write_prompt (" ", 0);
   b.draw (;dont_draw);
 }
 
@@ -365,7 +365,7 @@ private define _read_ ()
   ifnot (st.st_size)
     return;
 
-  variable ar = Ved.__vgetlines (file, s._indent, st);
+  variable ar = Ved.getlines (file, s._indent, st);
 
   variable lnr = __vlnr (s, '.');
 
@@ -383,7 +383,7 @@ define __vmessages ()
   variable keep = Ved.get_cur_buf ();
   variable s = (@__get_reference ("ERR_VED"));
   VED_ISONLYPAGER = 1;
-  Ved.__vsetbuf (s._abspath);
+  Ved.setbuf (s._abspath);
 
   topline (" -- pager -- ( MESSAGES BUF) --";row = s.ptr[0], col = s.ptr[1]);
 
@@ -399,7 +399,7 @@ define __vmessages ()
 
   s.st_ = st;
 
-  s.lines = Ved.__vgetlines (s._abspath, s._indent, st);
+  s.lines = Ved.getlines (s._abspath, s._indent, st);
 
   s._len = length (s.lines) - 1;
 
@@ -415,9 +415,9 @@ define __vmessages ()
 
   VED_ISONLYPAGER = 0;
 
-  Ved.__vsetbuf (keep._abspath);
+  Ved.setbuf (keep._abspath);
 
-  Ved.__vdraw_wind ();
+  Ved.draw_wind ();
 }
 
 public define handle_comma (s)

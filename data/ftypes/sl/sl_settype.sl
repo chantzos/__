@@ -10,5 +10,5 @@ public define sl_settype (s, fname, rows, lines)
   def._expandtab = 1;
   def.lexicalhl = &sl_lexicalhl;
 
-  Ved.__vinitbuf (s, fname, rows, lines, def);
+  Ved.initbuf (s, fname, rows, lines, def);
 }

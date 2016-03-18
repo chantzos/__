@@ -438,6 +438,7 @@ __build__ ("__me__");
 This.exit = &exit_me;
 This.err_handler = &err_handler;
 This.at_exit = &at_exit;
+This.max_frames = 2;
 
 private define __build_modules__ ()
 {

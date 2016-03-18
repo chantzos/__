@@ -6,10 +6,12 @@ public define _myframesize_ (frames)
   return f;
 }
 
+This.framesize_fun = &_myframesize_;
+
 public define list_ved (s, fname)
 {
-  VED_MAXFRAMES = 2;
-  wind_init ("a", 2;force, framesize_func = &_myframesize_);
+  This.max_frames = 2;
+  wind_init ("a", 2;force);
 
   __initrline ();
 

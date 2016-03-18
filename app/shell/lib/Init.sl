@@ -7,7 +7,7 @@ public define __on_err (err, code)
 public define on_wind_change (w)
 {
   topline (" -- shell --");
-  Ved.__vsetbuf (w.frame_names[w.cur_frame]);
+  Ved.setbuf (w.frame_names[w.cur_frame]);
   This.stdoutFd = Ved.get_cur_buf ()._fd;
 }
 
@@ -24,7 +24,7 @@ public define on_wind_new (w)
 
   (@__get_reference (This.stdouttype + "_settype")) (oved, This.stdoutFn, VED_ROWS, NULL);
 
-  Ved.__vsetbuf (This.stdoutFn);
+  Ved.setbuf (This.stdoutFn);
 
   This.stdoutFd = oved._fd;
 
@@ -34,7 +34,7 @@ public define on_wind_new (w)
 
   (@__get_reference ("__initrline"));
 
-  Ved.__vdraw_wind ();
+  Ved.draw_wind ();
 }
 
 public define _change_frame_ (s)

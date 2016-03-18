@@ -10,7 +10,7 @@ private define mainloop ()
 
 public define shell ()
 {
-  Ved.__vsetbuf (OUT_VED._abspath);
+  Ved.setbuf (OUT_VED._abspath);
 
   if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
     {

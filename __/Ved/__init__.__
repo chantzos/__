@@ -35,6 +35,8 @@ class Ved
     buffers,
     bufnames,
     rline,
+    name,
+    dir,
   end
 
   var vis = struct
@@ -53,7 +55,6 @@ class Ved
     };
 
   let VED_DIR = Env->TMP_PATH + "/ved/" + string (Env->PID);
-
   let EL_MAP = [902, [904:906], 908, [910:929], [931:937], [945:974]];
   let EN_MAP = [['a':'z'], ['A':'Z']];
   let MAPS   = [EL_MAP, EN_MAP];
@@ -61,25 +62,21 @@ class Ved
   let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':'];
   let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';'];
 
-  var public POS    = Pos_Type[10];
+  var VED_INFOCLRFG = Smg->COLOR.infofg;
+  var VED_INFOCLRBG = Smg->COLOR.infobg;
+  var VED_PROMPTCLR = Smg->COLOR.prompt;
+  var VED_PREV_WIND;
+  var VED_PREV_BUFINDEX;
+  var MARKS  = Assoc_Type[Pos_Type];
+
+  var public VED_WIND = Assoc_Type[Wind_Type];
   var public FTYPES = Assoc_Type[Integer_Type];
-  var public MARKS  = Assoc_Type[Pos_Type];
   var public REG    = Assoc_Type[String_Type];
   var public VED_ROWS = [1:LINES - 3];
-  var public VED_INFOCLRFG = Smg->COLOR.infofg;
-  var public VED_INFOCLRBG = Smg->COLOR.infobg;
-  var public VED_PROMPTCLR = Smg->COLOR.prompt;
-
   var public VED_MODIFIED = 0x01;
   var public VED_ONDISKMODIFIED = 0x02;
   var public VED_RDONLY = 0x04;
-
-  var public VED_WIND = Assoc_Type[Wind_Type];
   var public VED_CUR_WIND = NULL;
-  var public VED_PREV_WIND;
-  var public VED_PREV_BUFINDEX;
-  var public VED_MAXFRAMES = 3;
-
   var public VED_ISONLYPAGER = 0;
   var public VED_RLINE = 1;
   var public UNDELETABLE = String_Type[0];
@@ -191,7 +188,7 @@ class Ved
     sprintf ("%s\000", repeat (" ", indent));
   end
 
-  def __vgetlines (fname, indent, st)
+  def getlines (fname, indent, st)
     if (-1 == access (fname, F_OK))
       {
       st.st_size = 0;
@@ -231,7 +228,7 @@ class Ved
     Smg.setrcdr (ptr[0], ptr[1]);
   end
 
-  def __vwrite_prompt (str, col)
+  def write_prompt (str, col)
     Smg.atrcaddnstrdr (str, VED_PROMPTCLR, PROMPTROW, 0,
       qualifier ("row", PROMPTROW), col, COLUMNS);
   end
@@ -338,7 +335,7 @@ class Ved
     substr (line, @start + 1, @end - @start + 1);
   end
 
-  def __vparse_arg_range (s, arg, lnrs)
+  def parse_arg_range (s, arg, lnrs)
     arg = substr (arg, strlen ("--range=") + 1, -1);
     ifnot (strlen (arg))
       return NULL;
@@ -475,7 +472,7 @@ class Ved
     0;
   end
 
-  def __vwritefile (s, overwrite, ptr, file, append)
+  def writefile (s, overwrite, ptr, file, append)
     variable bts = 0;
 
     if (NULL == file)
@@ -567,7 +564,7 @@ class Ved
     self.get_cur_wind ().rline;
   end
 
-  def __vsetbuf (key)
+  def setbuf (key)
     variable w = self.get_cur_wind ();
 
     ifnot (any (key == w.bufnames))
@@ -602,7 +599,7 @@ class Ved
     w.buffers[s._abspath]._dir = realpath (path_dirname (s._abspath));
   end
 
-  def __vinitbuf (s, fname, rows, lines, t)
+  def initbuf (s, fname, rows, lines, t)
     s._maxlen = t._maxlen;
     s._indent = t._indent;
     s._shiftwidth = t._shiftwidth;
@@ -633,7 +630,7 @@ class Ved
 
     s.rows = rows;
 
-    s.lines = NULL == lines ? Ved.__vgetlines (s._fname, s._indent, s.st_) : lines;
+    s.lines = NULL == lines ? Ved.getlines (s._fname, s._indent, s.st_) : lines;
     s._flags = 0;
     s._is_wrapped_line = 0;
 
@@ -659,7 +656,7 @@ class Ved
     _addbuf_ (s);
   end
 
-  def __vdraw_wind ()
+  def draw_wind ()
     variable w = self.get_cur_wind ();
     variable i;
     variable s;
@@ -732,7 +729,7 @@ class Ved
 
     __vset_clr_fg (s, 1);
 
-    self.__vsetbuf (s._abspath);
+    self.setbuf (s._abspath);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
   end
@@ -777,7 +774,11 @@ class Ved
     w.frame_names = w.frame_names[wherenot (_isnull (w.frame_names))];
     w.frames--;
 
-    variable setframesize = qualifier ("framesize_func", &framesize);
+    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
+      qualifier ("framesize_fun"), This.framesize_fun);
+
+    if (NULL == setframesize)
+      setframesize = &framesize;
 
     w.frame_rows = (@setframesize) (w.frames);
 
@@ -809,12 +810,12 @@ class Ved
       s._index = s._indent;
       }
 
-    self.__vdraw_wind ();
+    self.draw_wind ();
   end
 
   def new_frame (fn)
     variable w = self.get_cur_wind ();
-    if (w.frames == VED_MAXFRAMES)
+    if (w.frames == This.max_frames)
       return;
 
     variable i;
@@ -823,7 +824,11 @@ class Ved
 
     w.frames++;
 
-    variable setframesize = qualifier ("framesize_func", &framesize);
+    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
+      qualifier ("framesize_fun"), This.framesize_fun);
+
+    if (NULL == setframesize)
+      setframesize = &framesize;
 
     w.frame_rows = (@setframesize) (w.frames);
 
@@ -836,7 +841,7 @@ class Ved
 
     w.frame_names = [w.frame_names, fn];
 
-    self.__vsetbuf (s._abspath);
+    self.setbuf (s._abspath);
 
     % fine tuning maybe is needed
     _for i (0, w.cur_frame - 1)
@@ -853,7 +858,7 @@ class Ved
       s._index = s._indent;
       }
 
-    self.__vdraw_wind ();
+    self.draw_wind ();
   end
 
   def del_wind (name)
@@ -874,7 +879,7 @@ class Ved
     if (name == VED_CUR_WIND)
       {
       VED_CUR_WIND = i ? winds[i-1] : winds[-1];
-      self.__vdraw_wind ();
+      self.draw_wind ();
       }
   end
 
@@ -916,7 +921,7 @@ class Ved
 
     on_wind_change (w);
 
-    Ved.__vdraw_wind ();
+    Ved.draw_wind ();
   end
 
   def next_wind (s) proc
@@ -931,11 +936,16 @@ class Ved
     if (any (name == assoc_get_keys (VED_WIND)) && 0 == qualifier_exists ("force"))
       return;
 
-    variable setframesize = qualifier ("framesize_func", &framesize);
+    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
+      qualifier ("framesize_fun"), This.framesize_fun);
+
+    if (NULL == setframesize)
+      setframesize = &framesize;
 
     VED_WIND[name] = @Wind_Type;
-    VED_WIND[name].frames = frames > VED_MAXFRAMES
-      ? VED_MAXFRAMES
+    VED_WIND[name].name = name;
+    VED_WIND[name].frames = frames > This.max_frames
+      ? This.max_frames
       : frames < 1
         ? 1
         : frames;
@@ -954,6 +964,11 @@ class Ved
 
     variable i;
     variable winds = assoc_get_keys (VED_WIND);
+    variable frames = __get_qualifier_as (Integer_Type, "frames",
+      qualifier ("frames"), This.frames);
+
+    if (NULL == frames)
+      frames = 1;
 
     if (any (name == winds))
       return;
@@ -976,10 +991,10 @@ class Ved
       VED_CUR_WIND = name;
       }
 
-    wind_init (name, 1;;__qualifiers ());
+    wind_init (name, frames;;__qualifiers ());
 
     if (qualifier_exists ("draw_wind"))
-      Ved.__vdraw_wind ();
+      Ved.draw_wind ();
   end
 
   def bufdelete (s, bufname, force) public proc
@@ -1024,8 +1039,8 @@ class Ved
         VED_CUR_WIND = winds[0];
         w = Ved.get_cur_wind ();
         s = Ved.get_cur_buf ();
-        Ved.__vsetbuf (s._abspath);
-        Ved.__vdraw_wind ();
+        Ved.setbuf (s._abspath);
+        Ved.draw_wind ();
         return;
         }
 
@@ -1037,7 +1052,7 @@ class Ved
       {
       index = index ? index - 1 : length (w.bufnames) - 1;
 
-      Ved.__vsetbuf (w.bufnames[index]);
+      Ved.setbuf (w.bufnames[index]);
 
       s = Ved.get_cur_buf ();
       s.draw ();
@@ -1287,7 +1302,7 @@ class Ved
   def __err_handler__ (_e_) proc
     (@__get_reference ("__vmessages"));
     variable s = Ved.get_cur_buf ();
-    Ved.__vdraw_wind ();
+    Ved.draw_wind ();
     s.vedloop ();
   end
 
@@ -1669,6 +1684,39 @@ class Ved
     s.draw ();
   end
 
+  def pg_end_word (s) proc
+    variable
+      line = __vline (s, '.'),
+      col = s._index;
+
+    if (isblank (substr (line, col + 1, 1)))
+      return;
+
+    variable start, end,
+      retval,
+      len = __vlinlen (s, '.'),
+      needsdraw = 0,
+      word = __vfind_Word (s, line, col, &start, &end);
+
+    loop (end - col)
+      {
+      retval = __pg_right (s, len);
+      if (-1 == retval)
+        break;
+      if (retval)
+        needsdraw = 1;
+      }
+
+    if (needsdraw)
+      {
+      line = __vgetlinestr (s, line, s._findex + 1 - s._indent);
+      waddline (s, line, 0, s.ptr[0]);
+      s._is_wrapped_line = 1;
+      }
+
+    __vdraw_tail (s);
+  end
+
   def pg_left (s) proc
     variable retval = __pg_left (s);
 
@@ -1869,7 +1917,7 @@ class Ved
   end
 
   def __vreread (s) public proc
-    s.lines = Ved.__vgetlines (s._fname, s._indent, s.st_);
+    s.lines = Ved.getlines (s._fname, s._indent, s.st_);
 
     s._len = length (s.lines) - 1;
 
@@ -1921,7 +1969,7 @@ class Ved
 
   def on_wind_change (w) proc
     topline (" -- ved --");
-    Ved.__vsetbuf (w.frame_names[w.cur_frame]);
+    Ved.setbuf (w.frame_names[w.cur_frame]);
   end
 
   def on_wind_new (w) public proc
@@ -1933,13 +1981,13 @@ class Ved
     variable func = __get_reference ("txt_settype");
     (@func) (s, fn, w.frame_rows[0], NULL);
 
-    Ved.__vsetbuf (fn);
+    Ved.setbuf (fn);
     (@__get_reference ("__initrline"));
     topline (" -- ved --");
-    Ved.__vdraw_wind ();
+    Ved.draw_wind ();
   end
 
-  def _new_wind_ (s) proc
+  def _new_wind_ (s) public proc
     new_wind (;on_wind_new);
     s = Ved.get_cur_buf ();
   end
@@ -2007,7 +2055,7 @@ class Ved
   end
 
   def pg_write_on_esc (s) proc
-    Ved.__vwritefile (s, NULL, s.ptr, NULL, NULL);
+    Ved.writefile (s, NULL, s.ptr, NULL, NULL);
     Smg.send_msg_dr ("", 14, NULL, NULL);
     sleep (0.001);
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
@@ -2377,7 +2425,7 @@ class Ved
     if (length (s_history))
       s_histindex = 0;
 
-    Ved.__vwrite_prompt (str, s_col);
+    Ved.write_prompt (str, s_col);
 
     forever
       {
@@ -2449,7 +2497,7 @@ class Ved
 
           s_col = strlen (pat) + 1;
           str = pchr + pat;
-          Ved.__vwrite_prompt (str, s_col);
+          Ved.write_prompt (str, s_col);
           (@typesearch) (s, pat);
           continue;
           }
@@ -2465,7 +2513,7 @@ class Ved
 
           s_col = strlen (pat) + 1;
           str = pchr + pat;
-          Ved.__vwrite_prompt (str, s_col);
+          Ved.write_prompt (str, s_col);
           (@typesearch) (s, pat);
           continue;
           }
@@ -2505,7 +2553,7 @@ class Ved
         }
 
       str = pchr + pat;
-      Ved.__vwrite_prompt (str, s_col);
+      Ved.write_prompt (str, s_col);
 
       if (dothesearch)
         (@typesearch) (s, pat);
@@ -5331,7 +5379,7 @@ class Ved
         s.lins[s.ptr[0] - s.rows[0]] = @line;
         s.lines[is.lnr] = @line;
         s.st_.st_size = Array.getsize (s.lines);
-        Ved.__vwritefile (s, NULL, s.ptr, NULL, NULL);
+        Ved.writefile (s, NULL, s.ptr, NULL, NULL);
         s._flags &= ~VED_MODIFIED;
         Smg.send_msg_dr (s._abspath + " written", 0, s.ptr[0], s.ptr[1]);
         sleep (0.02);
@@ -5544,7 +5592,7 @@ class Ved
     ind = Opt.is_arg ("--range=", args);
     ifnot (NULL == ind)
       {
-      lnrs = Ved.__vparse_arg_range (buf, args[ind], lnrs);
+      lnrs = Ved.parse_arg_range (buf, args[ind], lnrs);
       if (NULL == lnrs)
         return;
       }
@@ -5693,7 +5741,7 @@ class Ved
       variable func = __get_reference (sprintf ("%s_settype", ft));
       (@func) (s, fn, cw.frame_rows[Ved.get_cur_frame ()], NULL);
 
-      Ved.__vsetbuf (s._abspath);
+      Ved.setbuf (s._abspath);
       }
 
     if (NULL == w)
@@ -5702,7 +5750,7 @@ class Ved
     VED_PREV_WIND = wc;
     VED_CUR_WIND = w;
 
-    Ved.__vdraw_wind ();
+    Ved.draw_wind ();
   end
 
   do
@@ -5738,6 +5786,7 @@ class Ved
     VED_PAGER[string ('G')]            = &pg_eof;
     VED_PAGER[string ('g')]            = &pg_g;
     VED_PAGER[string (' ')]            = &pg_page_down;
+    VED_PAGER[string ('e')]            = &pg_end_word;
     VED_PAGER[string ('l')]            = &pg_right;
     VED_PAGER[string ('h')]            = &pg_left;
     VED_PAGER[string ('-')]            = &pg_eos;
@@ -5789,7 +5838,7 @@ class Ved
 %  load Vundo from Ved
   do
     Class.load ("Vundo";classpath = path_dirname (__FILE__) + "/Vundo");
-  
+
     new_wind ();
   end
 end
