@@ -34,17 +34,14 @@ class Scm
   end
 
   def __fmt_output__ (buf) proc
-    strchop (buf, '\n', 0);
+    strtok (buf, "\n");
   end
 
-  def chdir_to_repo (repo) proc
-    if (-1 == chdir (repo))
-      {
-      IO.tostderr (sprintf ("%s, cannot change dir, ERRNO: %s", repo, errno_string (errno)));
-      return -1;
-      }
-
-    0;
+  def __print__ (p, status) proc
+    if (status.exit_status)
+      IO.tostderr (__fmt_output__ (p.stderr.out);;__qualifiers);
+    else
+      IO.tostdout (__fmt_output__ (p.stdout.out);;__qualifiers);
   end
 
   def status ()
@@ -52,10 +49,7 @@ class Scm
       status,
       p = __exec__ (funcs[_function_name], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def lastlog ()
@@ -63,10 +57,7 @@ class Scm
       status,
       p = __exec__ (funcs[_function_name], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def pull ()
@@ -74,10 +65,7 @@ class Scm
       status,
       p = __exec__ (funcs[_function_name], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def diff ()
@@ -85,10 +73,7 @@ class Scm
       status,
       p = __exec__ (funcs[_function_name], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def add (file)
@@ -97,10 +82,7 @@ class Scm
       argv = [funcs[_function_name], file],
       p = __exec__ (argv, &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def diffrevision (revision)
@@ -109,26 +91,20 @@ class Scm
       argv = [funcs[_function_name], revision],
       p = __exec__ (argv, &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def log ()
     variable
       status,
-      argv = funcs[_function_name];
+      argv = @funcs[_function_name];
 
     argv[-2] += repeat ("_", COLUMNS);
     argv[-1] += string (localtime (_time).tm_year + 1900 - 2);
 
     variable p = __exec__ (argv, &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def applypatch (patch)
@@ -136,10 +112,7 @@ class Scm
       status,
       p = __exec__ ([funcs[_function_name], patch], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def merge (branch)
@@ -147,21 +120,26 @@ class Scm
       status,
       p = __exec__ ([funcs[_function_name], branch], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def logpatch ()
     variable
       status,
-      p = __exec__ (funcs[_function_name], &status);
+      file = qualifier ("redir_to_file", This.tmpdir + "/scm_log_patch.diff"),
+      p = Proc.init (0, 1, 1);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
+    p.stdout.file = file;
+
+    status = p.execv (funcs[_function_name], NULL);
+
+    ifnot (status.exit_status)
+      IO.tostdout (File.readlines (file);;__qualifiers);
     else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+      IO.tostderr (p.stderr.out;;__qualifiers);
+
+    ifnot (qualifier_exists ("redir_to_file"))
+      () = remove (file);
   end
 
   def init ()
@@ -169,10 +147,7 @@ class Scm
       status,
       p = __exec__ (funcs[_function_name], &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def branch ()
@@ -182,7 +157,7 @@ class Scm
 
     if (status.exit_status)
       {
-      IO.tostderr (__fmt_output__ (p.stderr.out));
+      IO.tostderr (__fmt_output__ (p.stderr.out);;__qualifiers);
       return;
       }
 
@@ -199,7 +174,7 @@ class Scm
     sprintf ("Current Branch: %s", curbranch, 2)
     ];
 
-   IO.tostdout (ar);
+   IO.tostdout (ar;;__qualifiers);
   end
 
   def branchnew (branch)
@@ -208,10 +183,7 @@ class Scm
       argv = [funcs[_function_name], branch],
       p = __exec__ (argv, &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def branchdelete (branch)
@@ -220,10 +192,7 @@ class Scm
       argv = [funcs[_function_name], branch],
       p = __exec__ (argv, &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def branchchange (branch)
@@ -232,37 +201,28 @@ class Scm
       argv = [funcs[_function_name], branch],
       p = __exec__ (argv, &status);
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def commit (msg)
     variable
       status,
-      argv = funcs[_function_name],
+      argv = @funcs[_function_name],
       p = __exec__ (argv, &status);
 
     argv[-1] += msg;
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+    __print__ (p, status;;__qualifiers);
   end
 
   def commitall (msg)
     variable
       status,
-      argv = funcs[_function_name],
+      argv = @funcs[_function_name],
       p = __exec__ (argv, &status);
 
     argv[-1] += msg;
 
-    if (status.exit_status)
-      IO.tostderr (__fmt_output__ (p.stderr.out));
-    else
-      IO.tostdout (__fmt_output__ (p.stdout.out));
+   __print__ (p, status;;__qualifiers);
   end
 end
