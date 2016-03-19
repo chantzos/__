@@ -50,6 +50,7 @@ typedef struct
   framesize_fun,
   frames,
   max_frames,
+  isatsession,
   } ThisProg_Type;
 
 public variable This, Smg, Input, LINES, COLUMNS;

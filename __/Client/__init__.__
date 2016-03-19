@@ -1,0 +1,85 @@
+class Client
+  let SESSION_PID = getenv ("SESSION_PID");
+  let SESSION_WRFIFO = getenv ("SESSION_WRFIFO");
+  let SESSION_RDFIFO = getenv ("SESSION_RDFIFO");
+  let SESSION_RDFIFO_FD = NULL;
+  let SESSION_WRFIFO_FD = NULL;
+
+  def init ()
+    self.let ("SESSION_WRFIFO_FD", open (SESSION_WRFIFO, O_WRONLY));
+    self.let ("SESSION_RDFIFO_FD", open (SESSION_RDFIFO, O_RDONLY));
+  end
+
+  def app_new (s) public proc
+    variable apps = assoc_get_keys (APPS);
+
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+
+    () = Rline.commandcmp (s, apps);
+
+    if (any (apps == s.argv[0]))
+      {
+      Smg.suspend ();
+      Input.at_exit ();
+
+      Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
+      Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+
+      variable retval = Sock.get_int (SESSION_RDFIFO_FD);
+      if (retval)
+        exit_me (0);
+      }
+    else
+      return;
+
+    Smg.resume ();
+    Input.init ();
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+  end
+
+  def app_reconnect (s) public proc
+    Sock.send_int (SESSION_WRFIFO_FD, Api->APP_GET_CONNECTED);
+    variable apps = Sock.get_str_ar (SESSION_RDFIFO_FD, SESSION_WRFIFO_FD);
+    variable me = sprintf ("%s::%d", This.appname, Env->PID);
+    apps[where (me == apps)] = NULL;
+    apps = apps[wherenot (_isnull (apps))];
+
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+
+    () = Rline.commandcmp (s, apps);
+
+    if (any (apps == s.argv[0]))
+      {
+      if (s.argv[0] == This.appname + "::" + string (Env->PID))
+        return;
+
+      Smg.suspend ();
+      Input.at_exit ();
+      Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
+      Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+
+      variable retval = Sock.get_int (SESSION_RDFIFO_FD);
+      if (retval)
+        exit_me (0);
+      }
+    else
+      return;
+
+    Smg.resume ();
+    Input.init ();
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+  end
+
+  def send_exit ()
+    Sock.send_int (SESSION_WRFIFO_FD, Api->GO_ATEXIT);
+  end
+
+  def go_idled () public proc
+    Sock.send_int (SESSION_WRFIFO_FD, Api->GO_IDLED);
+    return Sock.get_int (SESSION_RDFIFO_FD);
+  end
+end

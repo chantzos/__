@@ -738,7 +738,7 @@ class Rline
       colr = 5,
       index = 0,
       header = qualifier ("header"),
-      max_len = max (strlen (ar)) + 2,
+      max_len = length (ar) ? max (strlen (ar)) + 2 : 0,
       fmt = sprintf ("%%-%ds", max_len),
       lines;
 

@@ -1,11 +1,32 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
+public variable Client, Srv;
+
 public define exit_me (x)
 {
-  This.exit (x);
+  if (Array_Type == typeof (x))
+    x = atoi (x[0]);
+
+  This.at_exit ();
+
+  ifnot (NULL == This.isatsession)
+    Client.send_exit ();
+  else
+    Srv.at_exit ();
+
+  exit (x);
 }
 
+public define __err_handler__ (self, s)
+{
+  self.at_exit ();
+  IO.tostderr (s);
+  exit (1);
+}
+
+This.err_handler = &__err_handler__;
 This.max_frames = 2;
+This.isatsession = getenv ("SESSION");
 
 Load.module ("socket");
 
@@ -24,14 +45,10 @@ Class.load ("Subst");
 Class.load ("Ved");
 Class.load ("Api");
 
-public define __err_handler__ (self, s)
-{
-  self.at_exit ();
-  IO.tostderr (s);
-  exit (1);
-}
-
-This.err_handler = &__err_handler__;
+ifnot (NULL == This.isatsession)
+  Class.load ("Client");
+else
+  Class.load ("Srv");
 
 This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 This.appdir   = Env->STD_APP_PATH + "/" + This.appname;
@@ -83,18 +100,6 @@ public variable HIST_EVAL  = Env->USER_DATA_PATH + "/.__" + Env->USER + "_EVAL__
 public variable SCRATCHFD  = IO.open_fn (SCRATCH);
 public variable STDOUTFDBG = IO.open_fn (STDOUTBG);
 public variable BGPIDS     = Assoc_Type[Struct_Type];
-public variable OSPPID     = NULL;
-public variable SOCKADDR   = getenv ("SOCKADDR");
-public variable LOGERR     = 0x01;
-public variable LOGNORM    = 0x02;
-public variable LOGALL     = 0x03;
-public variable GO_ATEXIT  = 0x0C8;
-public variable GO_IDLED   = 0x012c;
-public variable RECONNECT  = 0x0190;
-public variable APP_GET_ALL   = 0x2bc;
-public variable APP_CON_NEW   = 0x1f4;
-public variable APP_RECON_OTH = 0x258;
-public variable APP_GET_CONNECTED = 0x320;
 
 public variable iarg       = 0;
 public variable EXITSTATUS = 0;
@@ -104,10 +109,6 @@ private variable licom = 0;
 private variable icom  = 0;
 private variable redirexists   = NULL;
 private variable NEEDSWINDDRAW = 0;
-
-public define _log_      (str) {}
-public define _osappnew_ (s)   {}
-public define _osapprec_ (s)   {}
 
 public define _exit_ ()
 {
@@ -130,11 +131,6 @@ public define _exit_ ()
 
 This.at_exit = &_exit_;
 
-public define go_idled ()
-{
-  This.exit (0);
-}
-
 public define _idle_ (argv)
 {
   Smg.suspend ();
@@ -145,6 +141,7 @@ public define _idle_ (argv)
   ifnot (retval)
     {
     Smg.resume ();
+    Input.init ();
     return;
     }
 
@@ -349,6 +346,7 @@ private define __messages (argv)
 public define runapp (argv, env)
 {
   Smg.suspend ();
+  Input.at_exit ();
 
   if (strncmp (argv[0], "__", 2))
     argv[0] = "__" + argv[0];
@@ -359,6 +357,7 @@ public define runapp (argv, env)
     {
     IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
     Smg.resume ();
+    Input.init ();
     return;
     }
 
@@ -372,13 +371,20 @@ public define runapp (argv, env)
     }
 
   variable status;
+  variable bg = qualifier_exists ("bg") ? 1 : NULL;
 
   ifnot (NULL == env)
-    status = p.execve (argv, env, NULL);
+    status = p.execve (argv, env, bg);
   else
-    status = p.execv (argv, NULL);
+    status = p.execv (argv, bg);
 
-  Smg.resume ();
+  ifnot (NULL == bg)
+    status;
+  else
+    {
+    Smg.resume ();
+    Input.init ();
+    }
 }
 
 private define __ved (argv)
@@ -1430,7 +1436,7 @@ public define init_commands ()
   a["killbgjob"].func = &_kill_bg_job;
 
   a["q"] = @Argvlist_Type;
-  a["q"].func = This.exit;
+  a["q"].func = &exit_me;
 
   a["cd"] = @Argvlist_Type;
   a["cd"].func = &_cd_;
@@ -1490,8 +1496,8 @@ public define __initrline ()
 
   w.rline = rlineinit (;
     funclist = init_functions (),
-    osappnew = __get_reference ("_osappnew_"),
-    osapprec = __get_reference ("_osapprec_"),
+    osappnew = __get_reference ("app_new"),
+    osapprec = __get_reference ("app_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
     filterargs = __get_reference ("filterexargs"),
     filtercommands = __get_reference ("filterexcom"));
@@ -1503,6 +1509,13 @@ public define __rehash ()
 }
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
+
+Api.app_table ();
+
+ifnot (NULL == This.isatsession)
+  Client.init ();
+else
+  Srv.init ();
 
 __initrline ();
 

@@ -1108,6 +1108,7 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
+ifnot ("Srv" == cname)
   () = remove (__in__);
 }
 

@@ -24,8 +24,8 @@ private variable DEB_FLAGS =
 private variable CLASSES = [
   "Input",  "Smg",    "Rand",  "Crypt", "Os",   "Opt",
   "String", "Rline",  "Re",    "Diff",  "Proc", "Sock",
-  "Subst",  "Sync",   "Ved",   "Api",   "Root", "Curl",
-  "Json",   "Time",  "Scm"];
+  "Subst",  "Sync",   "Ved",   "Api",   "Curl", "Json",
+  "Time",   "Scm",    "Srv",   "Client"];
 
 private variable THESE = Assoc_Type[String_Type];
 

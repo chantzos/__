@@ -3,7 +3,7 @@ class Scm
 
   var funcs = Assoc.new (Array_Type,
     [
-    "init", "branch", "status", "log", "diff", "add", "brancnew",
+    "init", "branch", "status", "log", "diff", "add", "branchnew",
     "branchdelete", "branchchange", "commit", "commitall", "pull",
     "lastlog", "diffrevision", "logpatch", "applypatch", "merge",
     ],

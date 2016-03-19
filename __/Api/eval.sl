@@ -32,6 +32,9 @@ private define _tabcallback (s)
     catch AnyError:
       return 0;
 
+    ifnot (length (ar))
+      return 0;
+
     variable tmp = "";
     variable chr = Rline.hlitem (rl, ar, rl.argv[0], rl._col, &tmp);
 

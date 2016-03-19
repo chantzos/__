@@ -348,12 +348,13 @@ private define write_quit ()
 
 private define _read_ ()
 {
-  variable s = qualifier ("ved");
+  variable s = Ved.get_cur_buf ();
 
   ifnot (_NARGS)
     return;
 
   variable file = ();
+
   if (-1 == access (file, F_OK|R_OK))
     return;
 
