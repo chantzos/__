@@ -821,7 +821,7 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
         continue;
         }
 
-    if ("do" == tokens[0])
+    if ("beg" == tokens[0])
       {
       found = 0;
       while (-1 != fgets (&line, fp))
@@ -1108,7 +1108,6 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
-ifnot ("Srv" == cname)
   () = remove (__in__);
 }
 

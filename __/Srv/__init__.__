@@ -18,13 +18,6 @@ class Srv
         errno_string (errno);
   end
 
-  def get_connected_app (app)
-    ifnot (any (app == CONNECTED_APPS))
-      return String_Type[0];
-
-    %assoc_get_keys (CONN[app]);
-  end
-
   def app_at_exit (s)
     variable code = waitpid (s.pid, 0);
 
@@ -58,6 +51,7 @@ class Srv
 
   def app_new (s) public proc
     variable apps = assoc_get_keys (APPS);
+    variable retval;
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -65,11 +59,7 @@ class Srv
     () = Rline.commandcmp (s, apps);
 
     if (any (apps == s.argv[0]))
-      {
-      variable retval = Srv.connect_to_app (s.argv[0]);
-      if (1 == retval)
-        return;
-      }
+      Srv.connect_to_app (s.argv[0]);
     else
       return;
 
@@ -83,17 +73,12 @@ class Srv
           break;
         }
       else if (2 == retval)
-        {
-        retval = Srv.connect_to_app (CUR_APP);
-        if (1 == retval)
-          break;
-        }
+        Srv.connect_to_app (CUR_APP);
       else
         break;
       }
 
-    Smg.resume ();
-    Input.init ();
+    Api.restore_screen ();
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end
@@ -115,13 +100,11 @@ class Srv
       if (s.argv[0] == This.appname + "::" + string (Env->PID))
         return;
 
-      Smg.suspend ();
-      Input.at_exit ();
+      Api.reset_screen ();
       variable retval = Srv.reconnect_to_app (s.argv[0]);
       if (1 == retval)
         {
-        Smg.resume ();
-        Input.init ();
+        Api.restore_screen ();
         Rline.set (s);
         Rline.prompt (s, s._lin, s._col);
         return;
@@ -140,17 +123,12 @@ class Srv
           break;
         }
       else if (2 == retval)
-        {
-        retval = Srv.connect_to_app (CUR_APP);
-        if (1 == retval)
-          break;
-        }
+        Srv.connect_to_app (CUR_APP);
       else
         break;
       }
 
-    Smg.resume ();
-    Input.init ();
+    Api.restore_screen ();
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end
@@ -189,6 +167,7 @@ class Srv
       if (Api->APP_RECON_OTH == retval)
         {
         s.state |= Api->IDLED;
+        Sock.send_int (s.fd, 1);
         CUR_APP = Sock.get_str (SRV_FIFO_FD);
         return 1;
         }
@@ -196,6 +175,7 @@ class Srv
       if (Api->APP_CON_NEW == retval)
         {
         s.state |= Api->IDLED;
+        Sock.send_int (s.fd, 1);
         CUR_APP = Sock.get_str (SRV_FIFO_FD);
         return 2;
         }
@@ -248,6 +228,5 @@ class Srv
 
     CUR_APP = app + "::" + string (s.pid);
     CUR_IND++;
-    0;
   end
 end

@@ -3,7 +3,7 @@ class Vundo
   var Redo = NULL;
   var Level = 0;
 
-  do
+  beg
     Rec[0] = struct {pos = @Pos_Type, data, inds, deleted, blwise};
     Rec[1] = struct {pos = @Pos_Type, data, inds, deleted, blwise};
     Rec[2] = struct {pos = @Pos_Type, data, inds, deleted, blwise};

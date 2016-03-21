@@ -51,7 +51,7 @@ private define __def_err_handler__ (self, s)
 private define __is_tty (self)
 {
   if (__is_initialized (&Input))
-    Input.is_tty_inited () == 0;
+    Input.is_inited () == 0;
   else
     1;
 }
@@ -59,7 +59,7 @@ private define __is_tty (self)
 private define __is_smg (self)
 {
   if (__is_initialized (&Smg))
-    Smg.is_smg_inited ();
+    Smg.is_inited ();
   else
     0;
 }

@@ -38,7 +38,7 @@ class Json
     return _json_encode_string (data);
   end
 
-  do
+  beg
     add_type_handler (String_Type, BString_Type, &json_encode_string);
   end
 
@@ -49,7 +49,7 @@ class Json
       sprintf (`invalid boolean value '\%03o'; only '\000' and '\001' are allowed`, data);
   end
 
-  do
+  beg
     add_type_handler (UChar_Type, &json_encode_boolean);
   end
 
@@ -57,7 +57,7 @@ class Json
     "null"B;
   end
 
-  do
+  beg
     add_type_handler (Null_Type, &json_encode_null);
   end
 
@@ -65,7 +65,7 @@ class Json
     string (data);
   end
 
-  do
+  beg
     add_type_handler (Char_Type,	Short_Type, UShort_Type, 	Int_Type, UInt_Type,
   	     Long_Type, ULong_Type, LLong_Type, ULLong_Type,	Float_Type, Double_Type,
   	  &json_encode_number);
@@ -112,7 +112,7 @@ class Json
     bstrcat (__tmp(json), indent, "}");
   end
 
-  do
+  beg
     add_type_handler (Struct_Type, &json_encode_object);
   end
 
@@ -163,7 +163,7 @@ class Json
     bstrcat (__tmp (json), indent, "]");
   end
 
-  do
+  beg
     add_type_handler (List_Type, Array_Type, &json_encode_array);
   end
 
@@ -179,7 +179,7 @@ class Json
         type + " does not represent a JSON data structure";
   end
 
-  do
+  beg
     Type_Map[where (_isnull (Type_Map))] = &default_handler;
   end
 

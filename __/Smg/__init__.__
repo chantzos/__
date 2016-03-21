@@ -60,8 +60,12 @@ class Smg
     SMGINITED = 1;
   end
 
-  def is_smg_inited ()
+  def is_inited ()
     SMGINITED;
+  end
+
+  def suspend_state ()
+    SUSPENDSTATE;
   end
 
   def at_exit ()
@@ -417,7 +421,7 @@ class Smg
     SLsmg_Screen_Rows, SLsmg_Screen_Cols;
   end
 
-  do
+  beg
     array_map (Void_Type, &set_basic_color,
       ["normal", "error", "success", "warn", "prompt",
        "border", "focus", "hlchar",   "hlregion", "topline",

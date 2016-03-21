@@ -82,7 +82,7 @@ class Ved
   var public UNDELETABLE = String_Type[0];
   var public SPECIAL = String_Type[0];
 
-  do
+  beg
     Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
   end
 
@@ -115,7 +115,7 @@ class Ved
       }
   end
 
-  do
+  beg
     build_ftype_table ();
 
     if (-1 == Dir.make_parents (VED_DIR, File->PERM["PRIVATE"]))
@@ -652,7 +652,6 @@ class Ved
 
     s._i = 0;
     s._ii = 0;
-
     _addbuf_ (s);
   end
 
@@ -837,7 +836,7 @@ class Ved
     variable ft = self.get_ftype (fn);
     s = self.init_ftype (ft);
     variable func = __get_reference (sprintf ("%s_settype", ft));
-    (@func) (s, fn, w.frame_rows[-1], NULL);
+    (@func) (s, fn, w.frame_rows[-1], NULL;;__qualifiers);
 
     w.frame_names = [w.frame_names, fn];
 
@@ -1110,7 +1109,7 @@ class Ved
       MARKS[m] = @Pos_Type;
   end
 
-  do
+  beg
     array_map (&mark_init, array_map (String_Type, &string, ['`', '<', '>']));
   end
 
@@ -1269,7 +1268,7 @@ class Ved
 
       if (':' == s._chr && (VED_RLINE || 0 == VED_ISONLYPAGER))
         {
-        topline (" -- command line --");
+        topline (" -- command --");
         rl = Ved.get_cur_rline ();
         Rline.set (rl);
         Rline.readline (rl;
@@ -1306,7 +1305,7 @@ class Ved
     s.vedloop ();
   end
 
-  do
+  beg
     This.err_handler = &__err_handler__;
   end
 
@@ -1953,7 +1952,7 @@ class Ved
   end
 
   def _new_frame_ (s) public proc
-    Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname");
+    Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname";_autochdir = 0);
     s = Ved.get_cur_buf ();
   end
 
@@ -1979,7 +1978,7 @@ class Ved
     SPECIAL = [SPECIAL, fn];
 
     variable func = __get_reference ("txt_settype");
-    (@func) (s, fn, w.frame_rows[0], NULL);
+    (@func) (s, fn, w.frame_rows[0], NULL;_autochdir = 0);
 
     Ved.setbuf (fn);
     (@__get_reference ("__initrline"));
@@ -2204,7 +2203,7 @@ class Ved
       }
   end
 
-  do
+  beg
     _init_search_hist_ ();
   end
 
@@ -2774,7 +2773,7 @@ class Ved
     v_hl_line (vs, s);
   end
 
-  do
+  beg
     vis.l_up = &v_l_up;
   end
 
@@ -2832,7 +2831,7 @@ class Ved
     v_hl_line (vs, s);
   end
 
-  do
+  beg
     vis.l_page_up = &v_l_page_up;
   end
 
@@ -2913,7 +2912,7 @@ class Ved
     v_hl_line (vs, s);
   end
 
-  do
+  beg
     vis.l_page_down = &v_l_page_down;
   end
 
@@ -2945,7 +2944,7 @@ class Ved
     v_hl_line (vs, s);
   end
 
-  do
+  beg
     vis.l_down = &v_l_down;
   end
 
@@ -3139,7 +3138,7 @@ class Ved
     v_l_loop (vs, s);
   end
 
-  do
+  beg
     vis.l_mode = &v_linewise_mode;
   end
 
@@ -3220,7 +3219,7 @@ class Ved
     v_hl_ch (vs, s);
   end
 
-  do
+  beg
     vis.c_left = &v_c_left;
   end
 
@@ -3254,7 +3253,7 @@ class Ved
     v_hl_ch (vs, s);
   end
 
-  do
+  beg
     vis.c_right = &v_c_right;
   end
 
@@ -3362,7 +3361,7 @@ class Ved
     vs.needsdraw = 1;
   end
 
-  do
+  beg
     vis.c_mode = &v_char_mode;
   end
 
@@ -3419,7 +3418,7 @@ class Ved
     v_hl_ch (vs, s);
   end
 
-  do
+  beg
     vis.bw_up = &v_bw_up;
   end
 
@@ -3467,7 +3466,7 @@ class Ved
     v_hl_ch (vs, s);
   end
 
-  do
+  beg
     vis.bw_down = &v_bw_down;
   end
 
@@ -3483,7 +3482,7 @@ class Ved
     v_hl_ch (vs, s);
   end
 
-  do
+  beg
     vis.bw_left = &v_bw_left;
   end
 
@@ -3511,7 +3510,7 @@ class Ved
     v_hl_ch (vs, s);
   end
 
-  do
+  beg
     vis.bw_right = &v_bw_right;
   end
 
@@ -3675,7 +3674,7 @@ class Ved
     vs.needsdraw = 1;
   end
 
-  do
+  beg
     vis.bw_mode = &v_bw_mode;
   end
 
@@ -3749,7 +3748,7 @@ class Ved
     LastVi = vs;
   end
 
-  do
+  beg
     vis.at_exit = &v_atexit;
   end
 
@@ -5753,7 +5752,7 @@ class Ved
     Ved.draw_wind ();
   end
 
-  do
+  beg
     VED_PAGER[string (Input->F3)]      = &next_wind;
     VED_PAGER[string (',')]            = &handle_comma;
     VED_PAGER[string ('"')]            = &_register_;
@@ -5836,7 +5835,7 @@ class Ved
   end
 
 %  load Vundo from Ved
-  do
+  beg
     Class.load ("Vundo";classpath = path_dirname (__FILE__) + "/Vundo");
 
     new_wind ();

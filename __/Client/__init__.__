@@ -20,10 +20,10 @@ class Client
 
     if (any (apps == s.argv[0]))
       {
-      Smg.suspend ();
-      Input.at_exit ();
+      Api.reset_screen ();
 
       Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
+      () = Sock.get_int (SESSION_RDFIFO_FD);
       Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
 
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
@@ -33,15 +33,16 @@ class Client
     else
       return;
 
-    Smg.resume ();
-    Input.init ();
+    Api.restore_screen ();
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end
 
   def app_reconnect (s) public proc
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_GET_CONNECTED);
+
     variable apps = Sock.get_str_ar (SESSION_RDFIFO_FD, SESSION_WRFIFO_FD);
+
     variable me = sprintf ("%s::%d", This.appname, Env->PID);
     apps[where (me == apps)] = NULL;
     apps = apps[wherenot (_isnull (apps))];
@@ -56,9 +57,9 @@ class Client
       if (s.argv[0] == This.appname + "::" + string (Env->PID))
         return;
 
-      Smg.suspend ();
-      Input.at_exit ();
+      Api.reset_screen ();
       Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
+      () = Sock.get_int (SESSION_RDFIFO_FD);
       Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
 
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
@@ -68,8 +69,7 @@ class Client
     else
       return;
 
-    Smg.resume ();
-    Input.init ();
+    Api.restore_screen ();
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end

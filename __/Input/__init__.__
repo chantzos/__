@@ -164,7 +164,7 @@ class Input
     maps[curlang];
   end
 
-  def is_tty_inited ()
+  def is_inited ()
     TTY_INITED;
   end
 
@@ -253,7 +253,7 @@ class Input
     TTY_INITED = @(__get_reference ("Input->TTY_Inited"));
   end
 
-  do
+  beg
     maps[0] = get_en_lang (NULL);
     maps[1] = get_el_lang (NULL);
     getchar_lang = maps[0];

@@ -4,7 +4,6 @@ private define _line_ (str)
 {
   variable b = Ved.get_cur_buf ();
 
-  @str += "(" + string (_stkdepth ()) + ")";
   @str += sprintf (" ftype (%s) LANG (%s) ", Ved.get_cur_buf ()._type,
     Input.getmapname ());
 
@@ -26,4 +25,3 @@ define toplinedr (str)
   _topline_ (&str, COLUMNS);
   Smg.atrcaddnstrdr (str, clr, 0, 0, b.ptr[0], b.ptr[1], COLUMNS);
 }
-

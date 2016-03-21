@@ -345,8 +345,7 @@ private define __messages (argv)
 
 public define runapp (argv, env)
 {
-  Smg.suspend ();
-  Input.at_exit ();
+  Api.reset_screen ();
 
   if (strncmp (argv[0], "__", 2))
     argv[0] = "__" + argv[0];
@@ -356,8 +355,7 @@ public define runapp (argv, env)
   if (-1 == access (argv[0], F_OK|X_OK))
     {
     IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
-    Smg.resume ();
-    Input.init ();
+    Api.restore_screen ();
     return;
     }
 

@@ -67,5 +67,25 @@ class Api
       }
   end
 
+  def reset_screen ()
+    if (Input.is_inited ())
+      Input.at_exit ();
+
+    if (Smg.is_inited ())
+      ifnot (Smg.suspend_state ())
+        Smg.suspend ();
+  end
+
+  def restore_screen ()
+    ifnot (Input.is_inited ())
+      Input.init ();
+
+    ifnot (Smg.is_inited ())
+      Smg.init ();
+    else
+      if (Smg.suspend_state ())
+        Smg.resume ();
+  end
+
   fun eval ()
 end

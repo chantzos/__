@@ -23,7 +23,7 @@ class Smg
   def at_exit ()
   end
 
-  def is_smg_inited ()
+  def is_inited ()
     0;
   end
 
@@ -35,7 +35,7 @@ class Smg
     IO.tostdout (msg);
   end
 
-  do
+  beg
     (LINES, COLUMNS) = get_screen_size (NULL);
     PROMPTROW = LINES - 2;
     MSGROW = LINES - 1;
