@@ -106,18 +106,18 @@ class Rline
   end
 
   def _execProc_Type_ (func, argv) proc
-    variable issudo = 0;
+    variable issu = 0;
     variable passwd = "";
-    variable index = Opt.is_arg ("--sudo", argv);
+    variable index = Opt.is_arg ("--su", argv);
 
     ifnot (NULL == index)
       {
-      issudo = 1;
+      issu = 1;
       argv[index] = NULL;
       argv = argv[wherenot (_isnull (argv))];
 
       ifnot (Env->UID)
-        issudo = 0;
+        issu = 0;
       else
         passwd = Os.__getpasswd ();
 
@@ -127,7 +127,7 @@ class Rline
 
     argv = _glob_ (argv);
 
-    (@func) (argv;;struct {@__qualifiers (), issudo = issudo, passwd = passwd});
+    (@func) (argv;;struct {@__qualifiers (), issu = issu, passwd = passwd});
   end
 
   var proctype = &_execProc_Type_;
@@ -2067,6 +2067,13 @@ class Rline
         ifnot (NULL == s.osapprec)
           {
           s.osapprec ();
+          continue;
+          }
+
+      if (any (Input->rmap.osappnew_su == s._chr))
+        ifnot (NULL == s.osappnew)
+          {
+          s.osappnew (;issu = 1);
           continue;
           }
 

@@ -27,7 +27,7 @@ class Client
       Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
 
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
-      if (retval)
+      if (retval == Api->GO_ATEXIT)
         exit_me (0);
       }
     else
@@ -63,7 +63,7 @@ class Client
       Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
 
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
-      if (retval)
+      if (retval == Api->GO_ATEXIT)
         exit_me (0);
       }
     else

@@ -24,9 +24,7 @@ class Os
   def encryptpasswd (passwd)
     passwd = NULL == passwd ? self.getpasswd () : passwd;
 
-   variable data = Rand.getstr ('0', 'z', 40);
-
-    return Crypt.encrypt (data, passwd);
+    Crypt.encrypt (Rand.getstr ('0', 'z', 40), passwd);
   end
 
   def confirmpasswd (data, passwd)
@@ -36,7 +34,7 @@ class Os
   end
 
   def authenticate (user, passwd)
-    return auth (user, passwd);
+    auth (user, passwd);
   end
 
   def __getpasswd ()
@@ -51,7 +49,7 @@ class Os
         Smg.send_msg_dr ("Authentication error", 1, NULL, NULL);
         }
       else
-        passwd+= "\n";
+        passwd += "\n";
       }
     else
       {
@@ -66,7 +64,7 @@ class Os
       ifnot (NULL == passwd)
         {
         Os.let ("HASHEDDATA", self.encryptpasswd (passwd));
-        passwd+= "\n";
+        passwd += "\n";
         }
       }
 

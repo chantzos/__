@@ -1,5 +1,5 @@
  /*
- * This code was written by Agathoklis D. Hatzimanikas
+ * This code was written by Agathoklis D. Chatzimanikas
  * with some ideas and code from various sources around the OS universe
  * You may distribute it under the terms of the GNU General Public
  * License.

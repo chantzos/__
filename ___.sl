@@ -53,6 +53,7 @@ private define at_exit (self)
 }
 
 public define send_msg_dr ();
+public variable APP_ERR;
 
 private define err_handler (self, s)
 {

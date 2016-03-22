@@ -1,6 +1,7 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
 public variable Client, Srv;
+public variable APP_ERR;
 
 public define exit_me (x)
 {
@@ -133,15 +134,13 @@ This.at_exit = &_exit_;
 
 public define _idle_ (argv)
 {
-  Smg.suspend ();
-  Input.at_exit ();
+  Api.reset_screen ();
 
   variable retval = go_idled ();
 
   ifnot (retval)
     {
-    Smg.resume ();
-    Input.init ();
+    Api.restore_screen ();
     return;
     }
 
@@ -345,7 +344,7 @@ private define __messages (argv)
 
 public define runapp (argv, env)
 {
-  Api.reset_screen ();
+  APP_ERR = 0;
 
   if (strncmp (argv[0], "__", 2))
     argv[0] = "__" + argv[0];
@@ -355,18 +354,44 @@ public define runapp (argv, env)
   if (-1 == access (argv[0], F_OK|X_OK))
     {
     IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
-    Api.restore_screen ();
-    return;
+    APP_ERR = 1;
+    return NULL;
     }
 
-  variable issudo = qualifier ("issudo");
+  variable issu = qualifier ("issu");
+  variable passwd = qualifier ("passwd");
 
-  variable p = Proc.init (issudo, 0, 0);
-  if (issudo)
+  variable p = Proc.init (issu, 0, 0);
+
+  if (issu)
     {
-    p.stdin.in = qualifier ("passwd");
+    if (NULL == passwd)
+      {
+      variable isgoingtoreset = 0;
+      ifnot (This.isscreenactive)
+        {
+        Api.restore_screen ();
+        isgoingtoreset = 1;
+        }
+
+        passwd = Os.__getpasswd ();
+
+        if (isgoingtoreset)
+          Api.reset_screen ();
+
+        if (NULL == passwd)
+          {
+          APP_ERR = 1;
+          return NULL;
+          }
+        }
+
+    p.stdin.in = passwd;
+
     argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
     }
+
+  Api.reset_screen ();
 
   variable status;
   variable bg = qualifier_exists ("bg") ? 1 : NULL;
@@ -376,13 +401,10 @@ public define runapp (argv, env)
   else
     status = p.execv (argv, bg);
 
-  ifnot (NULL == bg)
-    status;
-  else
-    {
-    Smg.resume ();
-    Input.init ();
-    }
+  if (NULL == bg)
+    Api.restore_screen ();
+
+  status;
 }
 
 private define __ved (argv)
@@ -396,7 +418,7 @@ private define __ved (argv)
 
   shell_pre_header ("ved " + fname);
 
-  runapp (["__ved", fname], Env.defenv ();;__qualifiers ());
+  () = runapp (["__ved", fname], Env.defenv ();;__qualifiers ());
 
   shell_post_header ();
 
@@ -620,18 +642,18 @@ private define _waitpid_ (p)
   EXITSTATUS = status.exit_status;
 }
 
-private define _preexec_ (argv, header, issudo, env)
+private define _preexec_ (argv, header, issu, env)
 {
   precom ();
 
   @header = strlen (argv[0]) > 1 && 0 == qualifier_exists ("no_header");
-  @issudo = qualifier ("issudo");
+  @issu = qualifier ("issu");
   @env = [Env.defenv (), "PPID=" + string (Env->PID), "CLNT_FIFO=" + RDFIFO,
     "SRV_FIFO=" + WRFIFO];
 
-  variable p = Proc.init (@issudo, 0, 0);
+  variable p = Proc.init (@issu, 0, 0);
 
-  p.issu = 0 == @issudo;
+  p.issu = 0 == @issu;
 
   if (@header)
     shell_pre_header (argv);
@@ -641,7 +663,7 @@ private define _preexec_ (argv, header, issudo, env)
 
   argv = [Sys->SLSH_BIN, Env->STD_LIB_PATH + "/proc/loadcommand.slc", argv];
 
-  if (@issudo)
+  if (@issu)
     {
     p.stdin.in = qualifier ("passwd");
     if (NULL == p.stdin.in)
@@ -756,39 +778,6 @@ private define _parse_argv_ (argv, isbg)
   file, flags, retval;
 }
 
-private define _getpasswd_ ()
-{
-  variable passwd, retval;
-
-  ifnot (NULL == Os->HASHEDDATA)
-    {
-    retval = Os.confirmpasswd (Os->HASHEDDATA, &passwd);
-
-    if (NULL == retval)
-      {
-      passwd = NULL;
-      Smg.send_msg_dr ("Authentication error", 1, NULL, NULL);
-      }
-    else
-      passwd+= "\n";
-    }
-  else
-    {
-    passwd = Os.getpasswd ();
-
-    if (-1 == Os.authenticate (Env->USER, passwd))
-      passwd = NULL;
-
-    ifnot (NULL == passwd)
-      {
-      Os.vlet ("HASHEDDATA", Os.encryptpasswd (passwd));
-      passwd+= "\n";
-      }
-    }
-
-  passwd;
-}
-
 private define _sendsig_ (sig, pid, passwd)
 {
   variable p = Proc.init (1, 0, 0);
@@ -802,7 +791,7 @@ private define _getbgstatus_ (pid)
 {
   variable pidfile = BGDIR + "/" + pid + ".WAIT";
   variable force = qualifier_exists ("force");
-  variable isnotsudo = BGPIDS[pid].issu;
+  variable isnotsu = BGPIDS[pid].issu;
 
   if (-1 == access (pidfile, F_OK))
     ifnot (force)
@@ -810,9 +799,9 @@ private define _getbgstatus_ (pid)
     else
       pidfile = BGDIR + "/" + pid + ".RUNNING";
 
-  if (0 == isnotsudo && Env->UID)
+  if (0 == isnotsu && Env->UID)
     {
-    variable passwd = _getpasswd_ ();
+    variable passwd = Os.__getpasswd ();
     if (NULL == passwd)
       return;
 
@@ -825,7 +814,7 @@ private define _getbgstatus_ (pid)
       return;
       }
 
-  if (isnotsudo || (isnotsudo == 0 == Env->UID))
+  if (isnotsu || (isnotsu == 0 == Env->UID))
     {
     variable rdfd = open (RDFIFO, O_RDONLY);
     variable buf = Sock.get_str (rdfd);
@@ -928,9 +917,9 @@ private define _execute_ (argv)
     argv[-1] = substr (argv[-1], 1, strlen (argv[-1]) - 1);
     }
 
-  variable header, issudo, env, stdoutfile, stdoutflags;
+  variable header, issu, env, stdoutfile, stdoutflags;
 
-  variable p = _preexec_ (argv, &header, &issudo, &env;;__qualifiers ());
+  variable p = _preexec_ (argv, &header, &issu, &env;;__qualifiers ());
 
   if (NULL == p)
     return;
@@ -1013,7 +1002,7 @@ private define _execute_ (argv)
 
   % (ugly) hack to fix the err messages from sudo to mess the screen
   % since we don't open the stderr stream in the process
-  if (issudo)
+  if (issu)
     Smg.clear_and_redraw ();
 
   _postexec_ (header;;__qualifiers ());
@@ -1220,9 +1209,9 @@ private define _search_ (argv)
 {
   precom ();
 
-  variable header, issudo, env, stdoutfile, stdoutflags;
+  variable header, issu, env, stdoutfile, stdoutflags;
 
-  variable p = _preexec_ (argv, &header, &issudo, &env;;__qualifiers ());
+  variable p = _preexec_ (argv, &header, &issu, &env;;__qualifiers ());
 
   if (NULL == p)
     return;
@@ -1240,7 +1229,7 @@ private define _search_ (argv)
   _fork_ (p, argv, env);
 
   ifnot (EXITSTATUS)
-    runapp (["__ved", GREPFILE], Env.defenv ());
+    () = runapp (["__ved", GREPFILE], Env.defenv ());
 
   shell_post_header ();
   draw (Ved.get_cur_buf ());
@@ -1311,7 +1300,7 @@ private define _lock_ (argv)
   Ved.draw_wind ();
 }
 
-public define runcom (argv, issudo)
+public define runcom (argv, issu)
 {
   variable rl = Ved.get_cur_rline ();
 
@@ -1322,7 +1311,7 @@ public define runcom (argv, issudo)
     }
 
   rl.argv = argv;
-  (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issudo = issudo, @__qualifiers ()});
+  (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});
 }
 
 public define __rehash ();
@@ -1469,7 +1458,7 @@ public define filterexcom (s, ar)
 public define filterexargs (s, args, type, desc)
 {
   if (s._ind && '!' == s.argv[0][0])
-    return [args, "--sudo", "--pager"], [type, "void", "void"],
+    return [args, "--su", "--pager"], [type, "void", "void"],
       [desc, "execute command as superuser", "viewoutput in a scratch buffer"];
 
   args, type, desc;

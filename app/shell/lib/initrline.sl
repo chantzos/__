@@ -1,7 +1,7 @@
 define _shell_ (argv)
 {
   shell_pre_header ("shell");
-  runapp ([argv], NULL;;__qualifiers ());
+  () = runapp ([argv], NULL;;__qualifiers ());
   shell_post_header ();
   draw (Ved.get_cur_buf ());
 }
@@ -32,7 +32,7 @@ private define filtercommands (s, ar)
 
 private define filterargs (s, args, type, desc)
 {
-  return [args, "--sudo", "--pager"], [type, "void", "void"],
+  return [args, "--su", "--pager"], [type, "void", "void"],
     [desc, "execute command as superuser", "viewoutput in a scratch buffer"];
 }
 

@@ -21,6 +21,7 @@ class Api
   let APP_CON_NEW   = 0x1f4;
   let APP_RECON_OTH = 0x258;
   let APP_GET_CONNECTED = 0x320;
+  let RESUME = 0x384;
   let CONNECTED = 0x1;
   let IDLED = 0x2;
 
@@ -74,6 +75,8 @@ class Api
     if (Smg.is_inited ())
       ifnot (Smg.suspend_state ())
         Smg.suspend ();
+
+    This.isscreenactive = 0;
   end
 
   def restore_screen ()
@@ -85,6 +88,8 @@ class Api
     else
       if (Smg.suspend_state ())
         Smg.resume ();
+
+    This.isscreenactive = 1;
   end
 
   fun eval ()

@@ -246,10 +246,10 @@ public define to_tty ()
   Input.at_exit ();
 }
 
-public define restore_screen ()
-{
-  restore_smg ();
-}
+%public define restore_screen ()
+%{
+%  restore_smg ();
+%}
 
 public define editfile (file)
 {
