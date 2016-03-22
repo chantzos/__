@@ -8,7 +8,7 @@ class Srv
   var CUR_IND = -1;
 
   def go_idled () public proc
-    This.exit (0);
+    exit_me (0);
   end
 
   def init ()

@@ -52,6 +52,7 @@ typedef struct
   max_frames,
   isatsession,
   isscreenactive,
+  isachild,
   } ThisProg_Type;
 
 public variable This, Smg, Input, LINES, COLUMNS;

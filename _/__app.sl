@@ -10,10 +10,11 @@ public define exit_me (x)
 
   This.at_exit ();
 
-  ifnot (NULL == This.isatsession)
-    Client.send_exit ();
-  else
-    Srv.at_exit ();
+  if (NULL == This.isachild)
+    ifnot (NULL == This.isatsession)
+      Client.send_exit ();
+    else
+      Srv.at_exit ();
 
   exit (x);
 }
@@ -28,6 +29,7 @@ public define __err_handler__ (self, s)
 This.err_handler = &__err_handler__;
 This.max_frames = 2;
 This.isatsession = getenv ("SESSION");
+This.isachild = getenv ("ISACHILD");
 
 Load.module ("socket");
 
@@ -46,10 +48,13 @@ Class.load ("Subst");
 Class.load ("Ved");
 Class.load ("Api");
 
-ifnot (NULL == This.isatsession)
-  Class.load ("Client");
+ifnot (NULL == This.isachild)
+  Class.load ("Child");
 else
-  Class.load ("Srv");
+  ifnot (NULL == This.isatsession)
+    Class.load ("Client");
+  else
+    Class.load ("Srv");
 
 This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 This.appdir   = Env->STD_APP_PATH + "/" + This.appname;
@@ -418,7 +423,7 @@ private define __ved (argv)
 
   shell_pre_header ("ved " + fname);
 
-  () = runapp (["__ved", fname], Env.defenv ();;__qualifiers ());
+  () = runapp (["__ved", fname], [Env.defenv (), "ISACHILD=1"];;__qualifiers ());
 
   shell_post_header ();
 
@@ -1499,10 +1504,11 @@ UNDELETABLE = [UNDELETABLE, SPECIAL];
 
 Api.app_table ();
 
-ifnot (NULL == This.isatsession)
-  Client.init ();
-else
-  Srv.init ();
+if (NULL == This.isachild)
+  ifnot (NULL == This.isatsession)
+    Client.init ();
+  else
+    Srv.init ();
 
 __initrline ();
 

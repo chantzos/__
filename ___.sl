@@ -22,10 +22,10 @@ private variable DEB_FLAGS =
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
 private variable CLASSES = [
-  "Input",  "Smg",    "Rand",  "Crypt", "Os",   "Opt",
-  "String", "Rline",  "Re",    "Diff",  "Proc", "Sock",
-  "Subst",  "Sync",   "Ved",   "Api",   "Curl", "Json",
-  "Time",   "Scm",    "Srv",   "Client"];
+  "Input",  "Smg",    "Rand",  "Crypt",  "Os",   "Opt",
+  "String", "Rline",  "Re",    "Diff",   "Proc", "Sock",
+  "Subst",  "Sync",   "Ved",   "Api",    "Curl", "Json",
+  "Time",   "Scm",    "Srv",   "Client", "Child"];
 
 private variable THESE = Assoc_Type[String_Type];
 
