@@ -137,21 +137,6 @@ public define _exit_ ()
 
 This.at_exit = &_exit_;
 
-public define _idle_ (argv)
-{
-  Api.reset_screen ();
-
-  variable retval = go_idled ();
-
-  ifnot (retval)
-    {
-    Api.restore_screen ();
-    return;
-    }
-
-  exit_me (0);
-}
-
 public define draw (s)
 {
   variable st = NULL == s._fd ? lstat_file (s._abspath) : fstat (s._fd);
@@ -318,35 +303,6 @@ private define _scratch_ (ved)
   NEEDSWINDDRAW = 1;
 }
 
-public define __scratch (argv)
-{
-  variable ved = @Ved.get_cur_buf ();
-
-  _scratch_ (ved);
-
-  NEEDSWINDDRAW = 0;
-  Ved.draw_wind ();
-}
-
-private define __edit (argv)
-{
-  variable s = Ved.get_cur_buf ();
-  Ved.preloop (s);
-  topline ("-- pager --");
-  Smg.setrcdr (s.ptr[0], s.ptr[1]);
-  s.vedloop ();
-}
-
-private define __messages (argv)
-{
-  variable ved = @Ved.get_cur_buf ();
-
-  viewfile (ERR_VED, "MSG", NULL, NULL);
-  Ved.setbuf (ved._abspath);
-
-  Ved.draw_wind ();
-}
-
 public define runapp (argv, env)
 {
   APP_ERR = 0;
@@ -412,24 +368,6 @@ public define runapp (argv, env)
   status;
 }
 
-private define __ved (argv)
-{
-  precom ();
-
-  variable fname = 1 == length (argv) ? SCRATCH : argv[1];
-
-  if ("-" == fname)
-    fname = This.stdoutFn;
-
-  shell_pre_header ("ved " + fname);
-
-  () = runapp (["__ved", fname], [Env.defenv (), "ISACHILD=1"];;__qualifiers ());
-
-  shell_post_header ();
-
-  draw (Ved.get_cur_buf ());
-}
-
 private define _tabcallback (rl)
 {
 }
@@ -453,49 +391,6 @@ private define _assign_ (line)
     Smg.send_msg (__get_exception_info.message, 0);
 
   retval;
-}
-
-public define __eval ()
-{
-  Api.eval (;;__qualifiers ());
-}
-
-private define _write_ (argv)
-{
-  variable b = Ved.get_cur_buf ();
-  variable lnrs = [0:b._len];
-  variable range = NULL;
-  variable append = NULL;
-  variable ind = Opt.is_arg ("--range=", argv);
-  variable lines;
-  variable file;
-  variable command;
-
-  ifnot (NULL == ind)
-    {
-    variable arg = argv[ind];
-    argv[ind] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
-    if (NULL == (lnrs = Ved.parse_arg_range (b, arg, lnrs), lnrs))
-      return;
-    }
-
-  ind = wherefirst (">>" == argv);
-  ifnot (NULL == ind)
-    {
-    append = 1;
-    argv[ind] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
-    }
-
-  command = argv[0];
-  file = length (argv) - 1 ? argv[1] : NULL;
-
-  if (any (["w", "w!", "W"]  == command))
-    {
-    Ved.writefile (b, "w!" == command, [PROMPTROW, 1], file, append;
-      lines = b.lines[lnrs]);
-    }
 }
 
 private define _postexec_ (header)
@@ -1013,62 +908,6 @@ private define _execute_ (argv)
   _postexec_ (header;;__qualifiers ());
 }
 
-private define _kill_bg_job (argv)
-{
-  shell_pre_header (argv);
-
-  if (1 == length (argv))
-    {
-    shell_post_header ();
-    draw (Ved.get_cur_buf ());
-    return;
-    }
-
-  variable pid = argv[1];
-
-  ifnot (assoc_key_exists (BGPIDS, pid))
-    {
-    shell_post_header ();
-    draw (Ved.get_cur_buf ());
-    return;
-    }
-
-  _getbgstatus_ (pid;force);
-
-  if (This.shell)
-    IO.tostdout (pid + ": killed");
-  else
-    Smg.send_msg_dr (pid + ": killed", 0, PROMPTROW, 1);
-
-  shell_post_header ();
-  draw (Ved.get_cur_buf ());
-}
-
-private define _list_bg_jobs_ (argv)
-{
-  shell_pre_header (argv);
-
-  variable ar = String_Type[0];
-  variable i;
-  variable pids = assoc_get_keys (BGPIDS);
-
-  ifnot (length (pids))
-    {
-    shell_post_header ();
-    draw (Ved.get_cur_buf ());
-    return;
-    }
-
-  _for i (0, length (pids) - 1)
-    ar = [ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n"];
-
-  IO.tostdout (ar);
-
-  shell_post_header ();
-
-  draw (Ved.get_cur_buf ());
-}
-
 private define _builtinpre_ (argv)
 {
   EXITSTATUS = 0;
@@ -1091,7 +930,95 @@ private define _builtinpost_ ()
   draw (Ved.get_cur_buf ());
 }
 
-private define _echo_ (argv)
+private define _build_comlist_ (a)
+{
+  variable
+    i,
+    c,
+    ii,
+    ex = qualifier_exists ("ex"),
+    d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
+
+ ifnot (ex)
+   ifnot (This.shell)
+     ex = 1;
+
+  _for i (0, length (d) - 1)
+    {
+    c = listdir (d[i]);
+
+    ifnot (NULL == c)
+      _for ii (0, length (c) - 1)
+        {
+        a[(ex ? "!" : "") + c[ii]] = @Argvlist_Type;
+        a[(ex ? "!" : "") + c[ii]].dir = d[i] + "/" + c[ii];
+        a[(ex ? "!" : "") + c[ii]].func = &_execute_;
+        }
+    }
+}
+
+public define runcom (argv, issu)
+{
+  variable rl = Ved.get_cur_rline ();
+
+  ifnot (any (assoc_get_keys (rl.argvlist) == argv[0]))
+    {
+    IO.tostderr (argv[0] + ": no such command");
+    return;
+    }
+
+  rl.argv = argv;
+  (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});
+}
+
+private define __rehash__ ();
+
+private define draw_buf (argv)
+{
+  draw (Ved.get_cur_buf ());
+}
+
+private define draw_wind (argv)
+{
+  Ved.draw_wind ();
+}
+
+% needed by File.copy, but it will be moved from this file
+public define send_msg_dr (msg)
+{
+  Smg.send_msg_dr (msg, 0, NULL, NULL);
+}
+
+private define scratch_to_stdout (argv)
+{
+  File.copy (SCRATCH, This.stdoutFn;flags = "ab", verbose = 1);
+  pop ();
+  draw (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
+}
+
+private define __clear__ (argv)
+{
+  variable fn = SCRATCH;
+  if (Opt.is_arg ("--stdout", argv))
+    fn = This.stdoutFn;
+  else if (Opt.is_arg ("--stderr", argv))
+    fn = This.stderrFn;
+
+  () = File.write (fn, "\000");
+  SCRATCH_VED._fd = IO.open_fn (SCRATCH);
+}
+
+public define __scratch (argv)
+{
+  variable ved = @Ved.get_cur_buf ();
+
+  _scratch_ (ved);
+
+  NEEDSWINDDRAW = 0;
+  Ved.draw_wind ();
+}
+
+private define __echo__ (argv)
 {
   _builtinpre_ (argv);
 
@@ -1189,7 +1116,7 @@ private define _echo_ (argv)
   _builtinpost_ ();
 }
 
-private define _cd_ (argv)
+private define __cd__ (argv)
 {
   if (1 == length (argv))
     {
@@ -1210,7 +1137,7 @@ private define _cd_ (argv)
   _builtinpost_ ();
 }
 
-private define _search_ (argv)
+private define __search__ (argv)
 {
   precom ();
 
@@ -1234,13 +1161,13 @@ private define _search_ (argv)
   _fork_ (p, argv, env);
 
   ifnot (EXITSTATUS)
-    () = runapp (["__ved", GREPFILE], Env.defenv ());
+    () = runapp (["__ved", GREPFILE], [Env.defenv (), "ISACHILD=1"]);
 
   shell_post_header ();
   draw (Ved.get_cur_buf ());
 }
 
-private define _which_ (argv)
+private define __which__ (argv)
 {
   _builtinpre_ (argv);
 
@@ -1267,34 +1194,97 @@ private define _which_ (argv)
   _builtinpost_ ();
 }
 
-private define _build_comlist_ (a)
+private define __write__ (argv)
 {
-  variable
-    i,
-    c,
-    ii,
-    ex = qualifier_exists ("ex"),
-    d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
+  variable b = Ved.get_cur_buf ();
+  variable lnrs = [0:b._len];
+  variable range = NULL;
+  variable append = NULL;
+  variable ind = Opt.is_arg ("--range=", argv);
+  variable lines;
+  variable file;
+  variable command;
 
- ifnot (ex)
-   ifnot (This.shell)
-     ex = 1;
-
-  _for i (0, length (d) - 1)
+  ifnot (NULL == ind)
     {
-    c = listdir (d[i]);
+    variable arg = argv[ind];
+    argv[ind] = NULL;
+    argv = argv[wherenot (_isnull (argv))];
+    if (NULL == (lnrs = Ved.parse_arg_range (b, arg, lnrs), lnrs))
+      return;
+    }
 
-    ifnot (NULL == c)
-      _for ii (0, length (c) - 1)
-        {
-        a[(ex ? "!" : "") + c[ii]] = @Argvlist_Type;
-        a[(ex ? "!" : "") + c[ii]].dir = d[i] + "/" + c[ii];
-        a[(ex ? "!" : "") + c[ii]].func = &_execute_;
-        }
+  ind = wherefirst (">>" == argv);
+  ifnot (NULL == ind)
+    {
+    append = 1;
+    argv[ind] = NULL;
+    argv = argv[wherenot (_isnull (argv))];
+    }
+
+  command = argv[0];
+  file = length (argv) - 1 ? argv[1] : NULL;
+
+  if (any (["w", "w!", "W"]  == command))
+    {
+    Ved.writefile (b, "w!" == command, [PROMPTROW, 1], file, append;
+      lines = b.lines[lnrs]);
     }
 }
 
-private define _lock_ (argv)
+private define __edit__ (argv)
+{
+  variable s = Ved.get_cur_buf ();
+  Ved.preloop (s);
+  topline ("-- pager --");
+  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  s.vedloop ();
+}
+
+private define __messages__ (argv)
+{
+  variable ved = @Ved.get_cur_buf ();
+
+  viewfile (ERR_VED, "MSG", NULL, NULL);
+  Ved.setbuf (ved._abspath);
+
+  Ved.draw_wind ();
+}
+
+private define __ved__ (argv)
+{
+  precom ();
+
+  variable fname = 1 == length (argv) ? SCRATCH : argv[1];
+
+  if ("-" == fname)
+    fname = This.stdoutFn;
+
+  shell_pre_header ("ved " + fname);
+
+  () = runapp (["__ved", fname], [Env.defenv (), "ISACHILD=1"];;__qualifiers ());
+
+  shell_post_header ();
+
+  draw (Ved.get_cur_buf ());
+}
+
+public define __idle__ (argv)
+{
+  Api.reset_screen ();
+
+  variable retval = go_idled ();
+
+  ifnot (retval)
+    {
+    Api.restore_screen ();
+    return;
+    }
+
+  exit_me (0);
+}
+
+private define __lock__ (argv)
 {
   Smg.cls ();
   Smg.atrcaddnstr (" --- locked -- ", 1, LINES / 2, COLUMNS / 2 - 10,
@@ -1305,56 +1295,65 @@ private define _lock_ (argv)
   Ved.draw_wind ();
 }
 
-public define runcom (argv, issu)
+private define __list_bg_jobs__ (argv)
 {
-  variable rl = Ved.get_cur_rline ();
+  shell_pre_header (argv);
 
-  ifnot (any (assoc_get_keys (rl.argvlist) == argv[0]))
+  variable ar = String_Type[0];
+  variable i;
+  variable pids = assoc_get_keys (BGPIDS);
+
+  ifnot (length (pids))
     {
-    IO.tostderr (argv[0] + ": no such command");
+    shell_post_header ();
+    draw (Ved.get_cur_buf ());
     return;
     }
 
-  rl.argv = argv;
-  (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});
-}
+  _for i (0, length (pids) - 1)
+    ar = [ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n"];
 
-public define __rehash ();
+  IO.tostdout (ar);
 
-private define draw_buf (argv)
-{
+  shell_post_header ();
+
   draw (Ved.get_cur_buf ());
 }
 
-private define draw_wind (argv)
+private define __kill_bg_job__ (argv)
 {
-  Ved.draw_wind ();
+  shell_pre_header (argv);
+
+  if (1 == length (argv))
+    {
+    shell_post_header ();
+    draw (Ved.get_cur_buf ());
+    return;
+    }
+
+  variable pid = argv[1];
+
+  ifnot (assoc_key_exists (BGPIDS, pid))
+    {
+    shell_post_header ();
+    draw (Ved.get_cur_buf ());
+    return;
+    }
+
+  _getbgstatus_ (pid;force);
+
+  if (This.shell)
+    IO.tostdout (pid + ": killed");
+  else
+    Smg.send_msg_dr (pid + ": killed", 0, PROMPTROW, 1);
+
+  shell_post_header ();
+  draw (Ved.get_cur_buf ());
 }
 
-% needed by File.copy, but it will be moved from this file
-public define send_msg_dr (msg)
+public define __eval ()
 {
-  Smg.send_msg_dr (msg, 0, NULL, NULL);
-}
-
-private define scratch_to_stdout (argv)
-{
-  File.copy (SCRATCH, This.stdoutFn;flags = "ab", verbose = 1);
-  pop ();
-  draw (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
-}
-
-private define __clear__ (argv)
-{
-  variable fn = SCRATCH;
-  if (Opt.is_arg ("--stdout", argv))
-    fn = This.stdoutFn;
-  else if (Opt.is_arg ("--stderr", argv))
-    fn = This.stderrFn;
-
-  () = File.write (fn, "\000");
-  SCRATCH_VED._fd = IO.open_fn (SCRATCH);
-    
+  Api.eval (;;__qualifiers ());
 }
 
 public define init_functions ()
@@ -1375,7 +1374,6 @@ public define init_functions ()
   a["@clear"].func = &__clear__;
   a["@clear"].args = ["--stderr void clear stderr (default is scratch)",
                       "--stdout void clear stdout"];
-
   a;
 }
 
@@ -1387,57 +1385,57 @@ public define init_commands ()
   _build_comlist_ (a;;__qualifiers ());
 
   a["scratch"] = @Argvlist_Type;
-  a["scratch"].func = __get_reference ("__scratch");
+  a["scratch"].func = &__scratch;
 
   a["edit"] = @Argvlist_Type;
-  a["edit"].func = __get_reference ("__edit");
-
-  a["messages"] = @Argvlist_Type;
-  a["messages"].func = __get_reference ("__messages");
-
-  a["ved"] = @Argvlist_Type;
-  a["ved"].func = __get_reference ("__ved");
+  a["edit"].func = &__edit__;
 
   a["eval"] = @Argvlist_Type;
   a["eval"].func = &__eval;
   a["eval"].type = "Func_Type";
 
+  a["messages"] = @Argvlist_Type;
+  a["messages"].func = &__messages__;
+
+  a["ved"] = @Argvlist_Type;
+  a["ved"].func = &__ved__;
+
   a["rehash"] = @Argvlist_Type;
-  a["rehash"].func = &__rehash;
+  a["rehash"].func = &__rehash__;
   a["rehash"].type = "Func_Type";
 
   a["echo"] = @Argvlist_Type;
-  a["echo"].func = &_echo_;
+  a["echo"].func = &__echo__;
 
   a["lock"] = @Argvlist_Type;
-  a["lock"].func = &_lock_;
+  a["lock"].func = &__lock__;
 
   a["&"] = @Argvlist_Type;
-  a["&"].func = &_idle_;
+  a["&"].func = &__idle__;
 
   a["w"] = @Argvlist_Type;
-  a["w"].func = &_write_;
+  a["w"].func = &__write__;
   a["w"].args = ["--range= int first linenr, last linenr"];
 
   a["w!"] = a["w"];
 
   a["bgjobs"] = @Argvlist_Type;
-  a["bgjobs"].func = &_list_bg_jobs_;
+  a["bgjobs"].func = &__list_bg_jobs__;
 
   a["killbgjob"] = @Argvlist_Type;
-  a["killbgjob"].func = &_kill_bg_job;
+  a["killbgjob"].func = &__kill_bg_job__;
 
   a["q"] = @Argvlist_Type;
   a["q"].func = &exit_me;
 
   a["cd"] = @Argvlist_Type;
-  a["cd"].func = &_cd_;
+  a["cd"].func = &__cd__;
 
   a["which"] = @Argvlist_Type;
-  a["which"].func = &_which_;
+  a["which"].func = &__which__;
 
   a["search"] = @Argvlist_Type;
-  a["search"].func = &_search_;
+  a["search"].func = &__search__;
   a["search"].dir = Env->STD_COM_PATH + "/search";
 
   variable pj = "PROJECT_" + strup (This.appname);
@@ -1469,10 +1467,20 @@ public define filterexargs (s, args, type, desc)
   args, type, desc;
 }
 
-Load.file (This.appdir + "/lib/vars", NULL);
-Load.file (This.appdir + "/lib/Init", NULL);
-Load.file (This.appdir + "/lib/initrline", NULL);
-Load.file (Env->STD_LIB_PATH + "/wind/" + This.appname);
+ifnot (access (This.appdir + "/lib/vars.slc", F_OK))
+  Load.file (This.appdir + "/lib/vars", NULL);
+
+ifnot (access (This.appdir + "/lib/Init.slc", F_OK))
+  Load.file (This.appdir + "/lib/Init", NULL);
+
+ifnot (access (This.appdir + "/lib/initrline.slc", F_OK))
+  Load.file (This.appdir + "/lib/initrline", NULL);
+
+ifnot (access (Env->USER_LIB_PATH + "/wind/" + This.appname + ".slc", F_OK))
+  Load.file (Env->USER_LIB_PATH + "/wind/" + This.appname);
+else
+  ifnot (access (Env->STD_LIB_PATH + "/wind/" + This.appname + ".slc", F_OK))
+    Load.file (Env->STD_LIB_PATH + "/wind/" + This.appname);
 
 public define __initrline ()
 {
@@ -1495,7 +1503,7 @@ public define __initrline ()
     filtercommands = __get_reference ("filterexcom"));
 }
 
-public define __rehash ()
+private define __rehash__ ()
 {
   __initrline ();
 }

@@ -5834,9 +5834,9 @@ class Ved
     Smg.send_msg_dr (msg, 1, b.ptr[0], b.ptr[1]);
   end
 
-%  load Vundo from Ved
+  load Vundo from Ved
   beg
-    Class.load ("Vundo";classpath = path_dirname (__FILE__) + "/Vundo");
+%    Class.load ("Vundo";classpath = path_dirname (__FILE__) + "/Vundo");
 
     new_wind ();
   end

@@ -1,11 +1,3 @@
-define _shell_ (argv)
-{
-  shell_pre_header ("shell");
-  () = runapp ([argv], NULL;;__qualifiers ());
-  shell_post_header ();
-  draw (Ved.get_cur_buf ());
-}
-
 private define _intro_ (argv)
 {
   intro (Ved.get_cur_rline (), Ved.get_cur_buf ());
@@ -17,9 +9,6 @@ private define my_commands ()
 
   a["intro"] = @Argvlist_Type;
   a["intro"].func = &_intro_;
-
-  a["shell"] = @Argvlist_Type;
-  a["shell"].func = &_shell_;
 
   a;
 }

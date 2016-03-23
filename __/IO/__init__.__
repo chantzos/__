@@ -12,7 +12,7 @@ class IO
       str = "";
       _for i (0, length (args[0]) - 1)
         if (Struct_Type == typeof (args[0][i]))
-          str += struct_tostring (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
+          str += Struct.to_string (args[0][i]) + (qualifier_exists ("n") ? "" : "\n");
         else if (Array_Type == typeof (args[0][i]))
           {
           variable ia;

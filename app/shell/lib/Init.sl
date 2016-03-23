@@ -1,9 +1,3 @@
-public define __on_err (err, code)
-{
-  % A TABLE ERR
-  IO.tostderr (err);
-}
-
 public define on_wind_change (w)
 {
   topline (" -- shell --");
