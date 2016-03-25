@@ -21,13 +21,14 @@ private variable regexps = [
 (?<=\s|\[|\()([tT]his(?=\.))\
 |(?<=^|\s)(class(?=\s))\
 |(?<=\s)(var(?=\s))\
-|(?<=\s)(beg(?=$))\
+|(?<=^|\s)(beg(?=$))\
 |(?<=\s)(let!?(?=\s))\
 |(?<=\s)(def!?(?=\s))\
 |(?<=\s)(typedef(?=\s))\
 |(?<=\s)(muttable(?=\s|$))\
 |(?<=\s)(fun(?=\s))\
-|(?<=\s)(require(?=\s[a-z_]*) \w*(?=\s))\
+|(?<=\s)(load|require|include (?=[a-z]*))\
+|(?<=\s)(from(?=\s))\
 |(?<=\s)(import(?=\s))\
 |(?<=\s)(proc(?=$))\
 |(?<=^|\s)(end(?=\s|$))\

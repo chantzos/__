@@ -1,0 +1,502 @@
+beg
+  var s_col;
+  var s_fcol;
+  var s_lnr;
+  var s_found;
+  var s_ltype;
+
+  def _init_search_hist_ () proc
+    variable ar = NULL;
+    ifnot (access (s_histfile, F_OK|R_OK))
+      ar = File.readlines (s_histfile);
+    if (NULL != ar && length (ar))
+      {
+      array_map (&list_append, s_history, ar);
+      s_histindex = 0;
+      }
+  end
+
+  beg
+    _init_search_hist_ ();
+  end
+
+  def s_exit_rout (s, pat, draw, cur_lang) proc
+    ifnot (NULL == cur_lang)
+      ifnot (Input.getmapname () == cur_lang)
+        Input.setlang (cur_lang);
+
+    if (s_found && pat != NULL)
+      {
+      list_insert (s_history, pat);
+      if (NULL == s_histindex)
+        s_histindex = 0;
+
+      _set_reg_ ("/", pat);
+      }
+
+    if (draw)
+      if (s_found)
+        {
+        markbacktick (s);
+        s_fcol = s_fcol > s._maxlen ? s._indent : s_fcol;
+
+        if (s_lnr < s._avlins)
+          {
+          s._i = 0;
+          s.ptr[0] = s.rows[0] + s_lnr;
+          }
+        else
+          {
+          s._i = s_lnr - 2;
+          s.ptr[0] = s.rows[0] + 2;
+          }
+
+        s.ptr[1] = s_fcol;
+        s._index = s_fcol;
+        s._findex = s._indent;
+        s.draw ();
+        }
+
+    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+    Smg.send_msg (" ", 0);
+    Smg.atrcaddnstr (" ", 0, PROMPTROW, 0, COLUMNS);
+
+    __vdraw_tail (s);
+  end
+
+  def search_backward (s, str) proc
+    variable
+      i,
+      ar,
+      pat,
+      pos,
+      cols,
+      match,
+      line,
+      wrapped = 0,
+      clrs = Integer_Type[0],
+      rows = Integer_Type[4];
+
+    rows[*] = MSGROW;
+
+    try
+      {
+      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP);
+      }
+    catch ParseError:
+      {
+      Smg.send_msg_dr ("error compiling pcre pattern", 1, PROMPTROW, s_col);
+      return;
+      }
+
+    i = s_lnr;
+
+    while (i > -1 || (i > s_lnr && wrapped))
+      {
+      line = __vgetlinestr (s, s.lines[i], 1);
+      if (pcre_exec (pat, line))
+        {
+        match = pcre_nth_match (pat, 0);
+        ar = [
+          sprintf ("row %d|", i + 1),
+          substrbytes (line, 1, match[0]),
+          substrbytes (line, match[0] + 1, match[1] - match[0]),
+          substrbytes (line, match[1] + 1, -1)];
+        cols = strlen (ar[[:-2]]);
+        cols = [0, array_map (Integer_Type, &int, cumsum (cols))];
+        clrs = [0, 0, VED_PROMPTCLR, 0];
+
+        pos = [qualifier ("row", PROMPTROW),  s_col];
+        if (qualifier_exists ("context"))
+          pos[1] = match[1];
+
+        Smg.aratrcaddnstrdr (ar, clrs, rows, cols, pos[0], pos[1], COLUMNS);
+
+        s_lnr = i;
+        s_fcol = match[0];
+        s_found = 1;
+
+        return;
+        }
+      else
+        ifnot (i)
+          if (wrapped)
+            break;
+          else
+            {
+            i = s._len;
+            wrapped = 1;
+            }
+        else
+          i--;
+      }
+
+    s_found = 0;
+    Smg.send_msg_dr ("Nothing found", 0, PROMPTROW, s_col);
+  end
+
+  def search_forward (s, str) proc
+    variable
+      i,
+      ar,
+      pat,
+      pos,
+      cols,
+      match,
+      line,
+      wrapped = 0,
+      clrs = Integer_Type[0],
+      rows = Integer_Type[4];
+
+    rows[*] = MSGROW;
+
+    try
+      {
+      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP);
+      }
+    catch ParseError:
+      {
+      Smg.send_msg_dr ("error compiling pcre pattern", 1, PROMPTROW, s_col);
+      return;
+      }
+
+    i = s_lnr;
+
+    while (i <= s._len || (i < s_lnr && wrapped))
+      {
+      line = __vgetlinestr (s, s.lines[i], 1);
+      if (pcre_exec (pat, line))
+        {
+        match = pcre_nth_match (pat, 0);
+        ar = [
+          sprintf ("row %d|", i + 1),
+          substrbytes (line, 1, match[0]),
+          substrbytes (line, match[0] + 1, match[1] - match[0]),
+          substrbytes (line, match[1] + 1, -1)];
+        cols = strlen (ar[[:-2]]);
+        cols = [0, array_map (Integer_Type, &int, cumsum (cols))];
+        clrs = [0, 0, VED_PROMPTCLR, 0];
+
+        pos = [qualifier ("row", PROMPTROW), s_col];
+        if (qualifier_exists ("context"))
+          pos[1] = match[1];
+
+        Smg.aratrcaddnstrdr (ar, clrs, rows, cols, pos[0], pos[1], COLUMNS);
+
+        s_lnr = i;
+        s_fcol = match[0];
+        s_found = 1;
+
+        return;
+        }
+      else
+        if (i == s._len)
+          if (wrapped)
+            break;
+          else
+            {
+            i = 0;
+            wrapped = 1;
+            }
+        else
+          i++;
+      }
+
+    s_found = 0;
+
+    Smg.send_msg_dr ("Nothing found", 0, PROMPTROW, s_col);
+  end
+
+  def search (s) proc
+    variable
+      chr,
+      origlnr,
+      dothesearch = qualifier_exists ("dothesearch"),
+      cur_lang = Input.getmapname (),
+      type = qualifier ("type", Input->BSLASH == s._chr ? "forward" : "backward"),
+      typesearch = type == "forward" ? &search_forward : &search_backward,
+      pchr = type == "forward" ? "/" : "?",
+      pat = qualifier ("pat",  ""),
+      str = pchr + pat;
+
+    s_found = 0;
+    s_lnr = qualifier ("lnr", __vlnr (s, '.'));
+    s_ltype = type;
+    s_fcol = s.ptr[1];
+    s_col = strlen (str);
+
+    if (dothesearch)
+      {
+      (@typesearch) (s, pat);
+      s_exit_rout (s, pat, s_found, cur_lang);
+      return;
+      }
+
+    origlnr = s_lnr;
+
+    if (length (s_history))
+      s_histindex = 0;
+
+    Ved.write_prompt (str, s_col);
+
+    forever
+      {
+      dothesearch = 0;
+      chr = Input.getch (;on_lang = &_on_lang_change_, on_lang_args = {"search", [PROMPTROW, s_col]});
+
+      if (033 == chr)
+        {
+        s_exit_rout (s, NULL, 0, cur_lang);
+        break;
+        }
+
+      if ((' ' <= chr < 64505) &&
+          0 == any (chr == [Input->rmap.backspace, Input->rmap.delete,
+          [Input->UP:Input->RIGHT], [Input->F1:Input->F12]]))
+        {
+        if (s_col == strlen (pat) + 1)
+          pat += char (chr);
+        else
+          pat = substr (pat, 1, s_col - 1) + char (chr) + substr (pat, s_col, -1);
+
+        s_col++;
+        dothesearch = 1;
+        }
+
+      if (any (chr == Input->rmap.backspace) && strlen (pat))
+        if (s_col - 1)
+          {
+          if (s_col == strlen (pat) + 1)
+            pat = substr (pat, 1, strlen (pat) - 1);
+          else
+            pat = substr (pat, 1, s_col - 2) + substr (pat, s_col, -1);
+
+          s_lnr = origlnr;
+
+          s_col--;
+          dothesearch = 1;
+          }
+
+      if (any (chr == Input->rmap.delete) && strlen (pat))
+        {
+        ifnot (s_col - 1)
+          (pat = substr (pat, 2, -1), dothesearch = 1);
+        else if (s_col != strlen (pat) + 1)
+          (pat = substr (pat, 1, s_col - 1) + substr (pat, s_col + 1, -1),
+           dothesearch = 1);
+        }
+
+      if (any (chr == Input->rmap.left) && s_col != 1)
+        s_col--;
+
+      if (any (chr == Input->rmap.right) && s_col != strlen (pat) + 1)
+        s_col++;
+
+      if ('\r' == chr)
+        {
+        s_exit_rout (s, pat, s_found, cur_lang);
+        break;
+        }
+
+      if (chr == Input->UP)
+        ifnot (NULL == s_histindex)
+          {
+          pat = s_history[s_histindex];
+          if (s_histindex == length (s_history) - 1)
+            s_histindex = 0;
+          else
+            s_histindex++;
+
+          s_col = strlen (pat) + 1;
+          str = pchr + pat;
+          Ved.write_prompt (str, s_col);
+          (@typesearch) (s, pat);
+          continue;
+          }
+
+      if (chr == Input->DOWN)
+        ifnot (NULL == s_histindex)
+          {
+          pat = s_history[s_histindex];
+          ifnot (s_histindex)
+            s_histindex = length (s_history) - 1;
+          else
+            s_histindex--;
+
+          s_col = strlen (pat) + 1;
+          str = pchr + pat;
+          Ved.write_prompt (str, s_col);
+          (@typesearch) (s, pat);
+          continue;
+          }
+
+      if (chr == Input->CTRL_n)
+        {
+        if (type == "forward")
+          if (s_lnr == s._len)
+            s_lnr = 0;
+          else
+            s_lnr++;
+        else
+          ifnot (s_lnr)
+            s_lnr = s._len;
+          else
+            s_lnr--;
+
+        (@typesearch) (s, pat);
+        }
+
+      if (chr == Input->CTRL_p)
+        {
+        typesearch = type == "forward" ? &search_backward : &search_forward;
+        if (type == "backward")
+          if (s_lnr == s._len)
+            s_lnr = 0;
+          else
+            s_lnr++;
+        else
+          ifnot (s_lnr)
+            s_lnr = s._len;
+          else
+            s_lnr--;
+
+        (@typesearch) (s, pat);
+        typesearch = type == "forward" ? &search_forward : &search_backward;
+        }
+
+      str = pchr + pat;
+      Ved.write_prompt (str, s_col);
+
+      if (dothesearch)
+        (@typesearch) (s, pat);
+      }
+  end
+
+  def s_getlnr (s) proc
+    variable lnr = __vlnr (s, '.');
+
+    if (s_ltype == "forward")
+      if (lnr == s._len)
+        lnr = 0;
+      else
+        lnr++;
+    else
+      ifnot (lnr)
+        lnr = s._len;
+      else
+        lnr--;
+
+    lnr;
+  end
+
+  def s_backslash_reg_ (s) proc
+    variable reg = _get_reg_ ("/");
+    if (NULL == reg)
+      return;
+
+    if (s._chr == 'N')
+      {
+      variable ltype = s_ltype;
+      s_ltype = (ltype == "forward") ? "backward" : "forward";
+      }
+
+    search (s;pat = reg, type = s_ltype, lnr = s_getlnr (s), dothesearch);
+
+    if (s._chr == 'N')
+      s_ltype = ltype;
+  end
+
+  def s_search_word_ (s) proc
+    variable
+      str,
+      pat,
+      end,
+      chr,
+      lcol,
+      type,
+      start,
+      origlnr,
+      typesearch,
+      line = __vline (s, '.');
+
+    s_found = 0;
+    s_fcol = s.ptr[1];
+    s_lnr = __vlnr (s, '.');
+
+    type = '*' == s._chr ? "forward" : "backward";
+    s_ltype = type;
+
+    typesearch = type == "forward" ? &search_forward : &search_backward;
+
+    if (type == "forward")
+      if (s_lnr == s._len)
+        s_lnr = 0;
+      else
+        s_lnr++;
+    else
+      if (s_lnr == 0)
+        s_lnr = s._len;
+      else
+        s_lnr--;
+
+    s_col = s._index;
+    lcol = s_col;
+
+    if (isblank (substr (line, lcol + 1, 1)))
+      return;
+
+    pat = __vfind_word (s, line, lcol, &start, &end);
+
+    if (s_col - s._indent)
+      pat = "\\W+" + pat;
+    else
+      pat = "^" + pat;
+
+    if (s._index < __vlinlen (s, '.'))
+      pat += "\\W";
+
+    (@typesearch) (s, pat;row = MSGROW, context);
+
+    forever
+      {
+      ifnot (s_found)
+        {
+        s_exit_rout (s, NULL, 0, NULL);
+        return;
+        }
+
+      chr = Input.getch (;disable_langchange);
+
+      ifnot (any ([Input->CTRL_n, 033, '\r'] == chr))
+        continue;
+
+      if (033 == chr)
+        {
+        s_exit_rout (s, NULL, 0, NULL);
+        return;
+        }
+
+      if ('\r' == chr)
+        {
+        s_exit_rout (s, pat, s_found, NULL);
+        return;
+        }
+
+      if (chr == Input->CTRL_n)
+        {
+        if (type == "forward")
+          if (s_lnr == s._len)
+            s_lnr = 0;
+          else
+            s_lnr++;
+        else
+          ifnot (s_lnr)
+            s_lnr = s._len;
+          else
+            s_lnr--;
+
+        (@typesearch) (s, pat;row = MSGROW, context);
+        }
+      }
+  end
+end

@@ -1,0 +1,430 @@
+beg
+  def storePos (v, pos)
+    pos._i = qualifier ("_i", v._ii);
+    pos.ptr = @v.ptr;
+    pos._index = v._index;
+    pos._findex = v._findex;
+  end
+
+  def restorePos (v, pos)
+    v._i = pos._i;
+    v.ptr = pos.ptr;
+    v._index = pos._index;
+    v._findex = pos._findex;
+  end
+
+  def getlines (fname, indent, st)
+    if (-1 == access (fname, F_OK))
+      {
+      st.st_size = 0;
+      return [__get_null_str (indent)];
+      }
+
+    if (-1 == access (fname, R_OK))
+      {
+      Smg.send_msg (fname + ": is not readable", 1);
+      st.st_size = 0;
+      return [__get_null_str (indent)];
+      }
+
+    if (-1 == access (fname, W_OK))
+      {
+      Smg.send_msg (fname + ": is Read Only", 1);
+      st._flags |= VED_RDONLY;
+      }
+
+    variable lines = File.readlines (fname);
+
+    if (NULL == lines || 0 == length (lines))
+      {
+      lines = [__get_null_str (indent)];
+      st.st_size = 0;
+      }
+
+    indent = repeat (" ", indent);
+
+    array_map (String_Type, &sprintf, "%s%s", indent, lines);
+  end
+
+  def write_prompt (str, col)
+    Smg.atrcaddnstrdr (str, VED_PROMPTCLR, PROMPTROW, 0,
+      qualifier ("row", PROMPTROW), col, COLUMNS);
+  end
+
+  def parse_arg_range (s, arg, lnrs)
+    arg = substr (arg, strlen ("--range=") + 1, -1);
+    ifnot (strlen (arg))
+      return NULL;
+
+    arg = strchop (arg, ',', 0);
+    ifnot (2 == length (arg))
+      return NULL;
+
+    variable i, ia;
+    variable range = ["", ""];
+    _for i (0, 1)
+      _for ia (0, strlen (arg[i]) - 1)
+        ifnot ('0' <= arg[i][ia] <= '9')
+          return NULL;
+        else
+          range[i] += char (arg[i][ia]);
+
+    range = array_map (Integer_Type, &atoi, range); % add an atoi array_map'ed
+    if (range[0] > range[1] || 0 > range[0] || range[1] > s._len)
+      return NULL;
+
+    lnrs[[range[0]:range[1]]];
+  end
+
+  def writefile (s, overwrite, ptr, file, append)
+    variable bts = 0;
+
+    if (NULL == file)
+      {
+      if (s._flags & VED_RDONLY)
+        return;
+
+      file = s._abspath;
+      }
+    else
+      {
+      ifnot (access (file, F_OK))
+        {
+        ifnot (overwrite)
+          if (NULL == append)
+            {
+            Smg.send_msg_dr ("file exists, w! to overwrite", 1, ptr[0], ptr[1]);
+            return;
+            }
+
+        if (-1 == access (file, W_OK))
+          {
+          Smg.send_msg_dr ("file is not writable", 1, ptr[0], ptr[1]);
+          return;
+          }
+        }
+      }
+
+    variable retval = __vwritetofile (file, qualifier ("lines", s.lines), s._indent, &bts;
+    append = append);
+
+    if (retval)
+      {
+      Smg.send_msg_dr (errno_string (retval), 1, ptr[0], ptr[1]);
+      return;
+      }
+
+    IO.tostderr (s._abspath + ": " + string (bts) + " bytes written\n");
+
+    if (file == s._abspath)
+      s._flags &= ~VED_MODIFIED;
+  end
+
+  def get_cur_wind ()
+    VED_WIND[VED_CUR_WIND];
+  end
+
+  def get_cur_frame ()
+    self.get_cur_wind ().cur_frame;
+  end
+
+  def get_cur_rline ()
+    self.get_cur_wind ().rline;
+  end
+
+  def setbuf (key)
+    variable w = self.get_cur_wind ();
+
+    ifnot (any (key == w.bufnames))
+      return;
+
+    variable s = w.buffers[key];
+
+    variable frame = qualifier ("frame", w.cur_frame);
+
+    if (frame > length (w.frame_names) - 1)
+      return;
+
+    w.frame_names[frame] = key;
+
+    if (s._autochdir && 0 == VED_ISONLYPAGER)
+      () = chdir (s._dir);
+  end
+
+  def initbuf (s, fname, rows, lines, t)
+    s._maxlen = t._maxlen;
+    s._indent = t._indent;
+    s._shiftwidth = t._shiftwidth;
+    s._expandtab = t._expandtab;
+    s._autoindent = t._autoindent;
+    s._autochdir = qualifier ("_autochdir", t._autochdir);
+
+    s.lexicalhl = t.lexicalhl;
+    s.autoindent = t.autoindent;
+    s.draw = t.draw;
+    s.vedloop = t.vedloop;
+    s.vedloopcallback = t.vedloopcallback;
+
+    s._fname = fname;
+
+    s._linlen = s._maxlen - s._indent;
+
+    s.st_ = stat_file (s._fname);
+    if (NULL == s.st_)
+      s.st_ = struct
+        {
+        st_atime,
+        st_mtime,
+        st_uid = getuid (),
+        st_gid = getgid (),
+        st_size = 0
+        };
+
+    s.rows = rows;
+
+    s.lines = NULL == lines ? Ved.getlines (s._fname, s._indent, s.st_) : lines;
+    s._flags = 0;
+    s._is_wrapped_line = 0;
+
+    s.ptr = Integer_Type[2];
+
+    s._len = length (s.lines) - 1;
+
+    _initrowsbuffvars_ (s);
+
+    s.ptr[0] = s.rows[0];
+    s.ptr[1] = s._indent;
+
+    s._findex = s._indent;
+    s._index = s._indent;
+
+    s.undo = String_Type[0];
+    s._undolevel = 0;
+    s.undoset = {};
+
+    s._i = 0;
+    s._ii = 0;
+    _addbuf_ (s);
+  end
+
+  def draw_wind ()
+    variable w = self.get_cur_wind ();
+    variable i;
+    variable s;
+    variable cur;
+
+    _for i (0, w.frames - 1)
+      {
+      s = w.buffers[w.frame_names[i]];
+      if (i == w.cur_frame)
+        {
+        cur = s;
+        cur._i = cur._ii;
+        continue;
+        }
+
+      s._i = s._ii;
+      __vset_clr_bg (s, NULL);
+      s.draw (;dont_draw);
+      }
+
+    cur.draw ();
+    Smg.setrc (cur.ptr[0], cur.ptr[1]);
+    if (cur._autochdir && 0 == VED_ISONLYPAGER)
+      () = chdir (cur._dir);
+  end
+
+  % many functions (like the next) imply no errors.
+  % the logic is to unveil any code errors.
+  % like the test phase to a waterfall model.
+
+  def get_buf (name)
+    variable w = self.get_cur_wind ();
+
+    ifnot (any (name == w.bufnames))
+      return NULL;
+
+    w.buffers[name];
+  end
+
+  def get_cur_buf ()
+    variable w = self.get_cur_wind ();
+    w.buffers[w.frame_names[w.cur_frame]];
+  end
+
+  def get_cur_bufname ()
+    self.get_cur_buf ()._abspath;
+  end
+
+  def get_frame_buf (frame)
+    variable w = self.get_cur_wind ();
+    if (frame >= w.frames)
+      return NULL;
+
+    w.buffers[w.frame_names[frame]];
+  end
+
+  def change_frame ()
+    variable w = self.get_cur_wind ();
+    variable s = w.buffers[w.frame_names[w.cur_frame]];
+    variable dir = qualifier ("dir", "next");
+
+    __vset_clr_bg (s, 1);
+
+    if ("next" == dir)
+      w.cur_frame = w.cur_frame == w.frames - 1 ? 0 : w.cur_frame + 1;
+    else
+      w.cur_frame = 0 == w.cur_frame ? w.frames - 1 : w.cur_frame - 1;
+
+    s = self.get_cur_buf ();
+
+    __vset_clr_fg (s, 1);
+
+    self.setbuf (s._abspath);
+
+    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  end
+
+  def del_frame (?)
+    variable frame = _NARGS > 1 ? () : NULL;
+    variable self = ();
+    if (NULL == frame)
+      frame = self.get_cur_frame ();
+
+    variable w = self.get_cur_wind ();
+
+    if (frame >= w.frames)
+      return;
+
+    if (1 == w.frames)
+      return;
+
+    w.frame_names[frame] = NULL;
+    w.frame_names = w.frame_names[wherenot (_isnull (w.frame_names))];
+    w.frames--;
+
+    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
+      qualifier ("framesize_fun"), This.framesize_fun);
+
+    if (NULL == setframesize)
+      setframesize = &framesize;
+
+    w.frame_rows = (@setframesize) (w.frames);
+
+    variable cur_fr = self.get_cur_frame ();
+
+    if (frame == w.frames || cur_fr > frame)
+      w.cur_frame--;
+
+    variable i;
+    variable s;
+
+    _for i (0, w.frames - 1)
+      {
+      s = w.buffers[w.frame_names[i]];
+      s.rows = w.frame_rows[i];
+      _initrowsbuffvars_ (s);
+
+      s._i = s._ii;
+
+      if (i == w.cur_frame)
+        __vset_clr_fg (s, NULL);
+      else
+        __vset_clr_bg (s, NULL);
+
+      s.ptr[0] = s.rows[0];
+      s.ptr[1] = s._indent;
+
+      s._findex = s._indent;
+      s._index = s._indent;
+      }
+
+    self.draw_wind ();
+  end
+
+  def new_frame (fn)
+    variable w = self.get_cur_wind ();
+    if (w.frames == This.max_frames)
+      return;
+
+    variable i;
+    variable s;
+    variable b;
+
+    w.frames++;
+
+    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
+      qualifier ("framesize_fun"), This.framesize_fun);
+
+    if (NULL == setframesize)
+      setframesize = &framesize;
+
+    w.frame_rows = (@setframesize) (w.frames);
+
+    w.cur_frame = w.frames - 1;
+
+    variable ft = self.get_ftype (fn);
+    s = self.init_ftype (ft);
+    variable func = __get_reference (sprintf ("%s_settype", ft));
+    (@func) (s, fn, w.frame_rows[-1], NULL;;__qualifiers);
+
+    w.frame_names = [w.frame_names, fn];
+
+    self.setbuf (s._abspath);
+
+    % fine tuning maybe is needed
+    _for i (0, w.cur_frame - 1)
+      {
+      s = w.buffers[w.frame_names[i]];
+      s.rows = w.frame_rows[i];
+      _initrowsbuffvars_ (s);
+      s._i = s._ii;
+      s.clrs[-1] = VED_INFOCLRBG;
+      s.ptr[0] = s.rows[0];
+      s.ptr[1] = s._indent;
+
+      s._findex = s._indent;
+      s._index = s._indent;
+      }
+
+    self.draw_wind ();
+  end
+
+  def del_wind (name)
+    if (1 == length (VED_WIND))
+      return;
+
+    variable winds = assoc_get_keys (VED_WIND);
+
+    ifnot (any (name == winds))
+      return;
+
+    winds = winds[array_sort (winds)];
+
+    variable i = wherefirst (name == winds);
+
+    assoc_delete_key (VED_WIND, name);
+
+    if (name == VED_CUR_WIND)
+      {
+      VED_CUR_WIND = i ? winds[i-1] : winds[-1];
+      self.draw_wind ();
+      }
+  end
+
+  def deftype ()
+    struct {
+      _indent = 0,
+      _shiftwidth = 4,
+      _expandtab = NULL,
+      _maxlen = COLUMNS,
+      _autochdir = 1,
+      _autoindent = 0,
+      autoindent = &autoindent,
+      draw = &_draw_,
+      lexicalhl = &lexicalhl,
+      vedloop = &_vedloop_,
+      vedloopcallback = &_vedloopcallback_,
+      };
+  end
+end

@@ -1,0 +1,534 @@
+beg
+  def __pg_left (s) proc
+    ifnot (s.ptr[1] - s._indent)
+      ifnot (s._is_wrapped_line)
+        return -1;
+
+    s._index--;
+
+    if (s._is_wrapped_line && 0 == s.ptr[1] - s._indent)
+      {
+      s._findex--;
+
+      ifnot (s._findex)
+        s._is_wrapped_line = 0;
+
+      return 1;
+      }
+
+    s.ptr[1]--;
+
+    0;
+  end
+
+  def __pg_right (s, linlen) proc
+    if (s._index - s._indent == linlen - 1 || 0 == linlen)
+      return -1;
+
+    if (s.ptr[1] < s._maxlen - 1)
+      {
+      s.ptr[1]++;
+      s._index++;
+      return 0;
+      }
+
+    s._index++;
+    s._findex++;
+
+    1;
+  end
+
+  def _indent_in_ (s, line, i_) proc
+    ifnot (strlen (line) - s._indent)
+      return NULL;
+
+    ifnot (isblank (line[s._indent]))
+      return NULL;
+
+    while (isblank (line[@i_]) && @i_ < s._shiftwidth + s._indent)
+      @i_++;
+
+    substr (line, @i_ + 1 - s._indent, -1);
+  end
+
+  def _adjust_col_ (s, linlen, plinlen) proc
+    if (linlen == 0 || 0 == s.ptr[1] - s._indent)
+      {
+      s.ptr[1] = s._indent;
+      s._findex = s._indent;
+      s._index = s._indent;
+      }
+    else if (linlen > s._linlen && s.ptr[1] + 1 == s._maxlen ||
+      (s.ptr[1] - s._indent == plinlen - 1 && linlen > s._linlen))
+        {
+        s.ptr[1] = s._maxlen - 1;
+        s._findex = s._indent;
+        s._index = s._linlen - 1 + s._indent;
+        }
+    else if ((0 != plinlen && s.ptr[1] - s._indent == plinlen - 1 && (
+        linlen < s.ptr[1] || linlen < s._linlen))
+       || (s.ptr[1] - s._indent && s.ptr[1] - s._indent >= linlen))
+        {
+        s.ptr[1] = linlen - 1 + s._indent;
+        s._index = linlen - 1 + s._indent;
+        s._findex = s._indent;
+        }
+  end
+
+  def __define_case (chr) proc
+    ifnot (any (@chr == [DEFINED_LOWER_CASE, DEFINED_UPPER_CASE]))
+      return 0;
+
+    variable low = 1;
+    variable ind = wherefirst_eq (DEFINED_LOWER_CASE, @chr);
+    if (NULL == ind)
+      {
+      ind = wherefirst_eq (DEFINED_UPPER_CASE, @chr);
+      low = 0;
+      }
+
+    @chr = low ? DEFINED_UPPER_CASE[ind] : DEFINED_LOWER_CASE[ind];
+
+    1;
+  end
+
+  def _word_change_case_ (s, what) proc
+    variable
+      ii,
+      chr,
+      end,
+      start,
+      word = "",
+      func_cond = what == "toupper" ? &islower : &isupper,
+      func = what == "toupper" ? &toupper : &tolower,
+      col = s._index,
+      i = __vlnr (s, '.'),
+      line = __vline (s, '.'),
+      orig = __vfind_word (s, line, col, &start, &end);
+
+    ifnot (strlen (orig))
+      return;
+
+    variable ar = String.decode (orig);
+    _for ii (0, length (ar) - 1)
+      ifnot (__define_case (&ar[ii]))
+        if ((@func_cond) (ar[ii]))
+          word += char ((@func) (ar[ii]));
+        else
+          word += char (ar[ii]);
+      else
+        word += char (ar[ii]);
+
+    ifnot (orig == word)
+      Vundo.set (s, line, i);
+
+    line = sprintf ("%s%s%s", substr (line, 1, start), word, substr (line, end + 2, -1));
+    s.lins[s.ptr[0] - s.rows[0]] = line;
+    s.lines[i] = line;
+    s.ptr[1] = start;
+    s._index = start;
+
+    set_modified (s);
+
+    s.st_.st_size = Array.getsize (s.lines);
+
+    waddline (s, line, 0, s.ptr[0]);
+
+    __vdraw_tail (s);
+  end
+
+  def _gotoline_ (s) proc
+    if (VEDCOUNT <= s._len + 1)
+      {
+      markbacktick (s);
+      s._i = VEDCOUNT - (VEDCOUNT ? 1 : 0);
+      s.draw (;dont_draw);
+
+      s.ptr[0] = s.rows[0];
+      s.ptr[1] = s._indent;
+      s._findex = s._indent;
+      s._index = s._indent;
+
+      Smg.setrcdr (s.ptr[0], s.ptr[1]);
+      }
+  end
+
+  def pg_down (s) proc
+    variable
+      lnr = __vlnr (s, '.'),
+      linlen,
+      plinlen;
+
+    if (lnr == s._len)
+      return;
+
+    if (s._is_wrapped_line)
+      {
+      waddline (s, __vgetlinestr (s, __vline (s, '.'), 1), 0, s.ptr[0]);
+      s._is_wrapped_line = 0;
+      }
+
+    plinlen = __vlinlen (s, '.');
+
+    if (s.ptr[0] < s.vlins[-1])
+      {
+      s.ptr[0]++;
+
+      linlen = __vlinlen (s, '.');
+
+      _adjust_col_ (s, linlen, plinlen);
+
+      __vdraw_tail (s);
+
+      return;
+      }
+
+    if (s.lnrs[-1] == s._len)
+      return;
+
+    s._i++;
+
+    ifnot (s.ptr[0] == s.vlins[-1])
+      s.ptr[0]++;
+
+    s.draw (;dont_draw);
+
+    linlen = __vlinlen (s, '.');
+
+    _adjust_col_ (s, linlen, plinlen);
+
+    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  end
+
+  def pg_up (s) proc
+    variable
+      linlen,
+      plinlen;
+
+    if (s._is_wrapped_line)
+      {
+      waddline (s, __vgetlinestr (s, __vline (s, '.'), 1), 0, s.ptr[0]);
+      s._is_wrapped_line = 0;
+      }
+
+    plinlen = __vlinlen (s, '.');
+
+    if (s.ptr[0] > s.vlins[0])
+      {
+      s.ptr[0]--;
+
+      linlen = __vlinlen (s, '.');
+      _adjust_col_ (s, linlen, plinlen);
+
+      __vdraw_tail (s);
+
+      return;
+      }
+
+    ifnot (s.lnrs[0])
+      return;
+
+    s._i--;
+
+    s.draw (;dont_draw);
+
+    linlen = __vlinlen (s, '.');
+
+    _adjust_col_ (s, linlen, plinlen);
+
+    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  end
+
+  def pg_eof (s) proc
+    if (VEDCOUNT > -1)
+      {
+      ifnot (VEDCOUNT + 1)
+        VEDCOUNT = 0;
+
+      _gotoline_ (s);
+      return;
+      }
+
+    markbacktick (s);
+
+    s._i = s._len - s._avlins;
+
+    s.ptr[1] = s._indent;
+    s._findex = s._indent;
+    s._index = s._indent;
+
+    if (length (s.lins) < s._avlins - 1)
+      {
+      s.ptr[0] = s.vlins[-1];
+      Smg.setrcdr (s.ptr[0], s.ptr[1]);
+      return;
+      }
+
+    s.draw (;dont_draw);
+
+    s.ptr[0] = s.vlins[-1];
+
+    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  end
+
+  def pg_bof (s) proc
+    if (VEDCOUNT > 0)
+      {
+      _gotoline_ (s);
+      return;
+      }
+
+    markbacktick (s);
+
+    s._i = 0;
+
+    s.ptr[0] = s.rows[0];
+    s.ptr[1] = s._indent;
+    s._findex = s._indent;
+    s._index = s._indent;
+
+    s.draw ();
+  end
+
+  def pg_end_word (s) proc
+    variable
+      line = __vline (s, '.'),
+      col = s._index;
+
+    if (isblank (substr (line, col + 1, 1)))
+      return;
+
+    variable start, end,
+      retval,
+      len = __vlinlen (s, '.'),
+      needsdraw = 0,
+      word = __vfind_Word (s, line, col, &start, &end);
+
+    loop (end - col)
+      {
+      retval = __pg_right (s, len);
+      if (-1 == retval)
+        break;
+      if (retval)
+        needsdraw = 1;
+      }
+
+    if (needsdraw)
+      {
+      line = __vgetlinestr (s, line, s._findex + 1 - s._indent);
+      waddline (s, line, 0, s.ptr[0]);
+      s._is_wrapped_line = 1;
+      }
+
+    __vdraw_tail (s);
+  end
+
+  def pg_left (s) proc
+    variable retval = __pg_left (s);
+
+    if (-1 == retval)
+      return;
+
+    if (retval)
+      {
+      variable line;
+      if (s._is_wrapped_line)
+        line = __vgetlinestr (s, __vline (s, '.'), s._findex + 1);
+      else
+        line = __vgetlinestr (s, __vline (s, '.'), 1);
+
+      waddline (s, line, 0, s.ptr[0]);
+      }
+
+    __vdraw_tail (s);
+  end
+
+  def pg_right (s) proc
+    variable
+      line = __vline (s, '.'),
+      retval = __pg_right (s, __vlinlen (s, '.'));
+
+    if (-1 == retval)
+      return;
+
+    if (retval)
+      {
+      line = __vgetlinestr (s, line, s._findex + 1 - s._indent);
+      waddline (s, line, 0, s.ptr[0]);
+      s._is_wrapped_line = 1;
+      }
+
+    __vdraw_tail (s);
+  end
+
+  def pg_page_down (s) proc
+    if (s._i + s._avlins > s._len)
+      return;
+
+    markbacktick (s);
+
+    s._is_wrapped_line = 0;
+    s._i += (s._avlins);
+
+    s.ptr[1] = s._indent;
+    s._index = s._indent;
+    s._findex = s._indent;
+
+    s.draw ();
+  end
+
+  def pg_page_up (s) proc
+    ifnot (s.lnrs[0])
+      return;
+
+    markbacktick (s);
+
+    if (s.lnrs[0] >= s._avlins)
+      s._i = s.lnrs[0] - s._avlins;
+    else
+      s._i = 0;
+
+    s._is_wrapped_line = 0;
+    s.ptr[1] = s._indent;
+    s._findex = s._indent;
+    s._index = s._indent;
+
+    s.draw ();
+  end
+
+  def pg_eos (s) proc
+    variable linlen = __vlinlen (s, '.');
+
+    markbacktick (s);
+
+    if (linlen > s._linlen)
+      {
+      s.ptr[1] = s._maxlen - 1;
+      s._index = s._findex + s._linlen - 1 + s._indent;
+      }
+    else if (0 == linlen)
+      {
+      s.ptr[1] = s._indent;
+      s._index = s._indent;
+      s._findex = s._indent;
+      }
+    else
+      {
+      s.ptr[1] = linlen + s._indent - 1;
+      s._findex = s._indent;
+      s._index = linlen - 1 + s._indent;
+      }
+
+    __vdraw_tail (s);
+  end
+
+  def pg_eol (s) proc
+    variable linlen = __vlinlen (s, s.ptr[0]);
+
+    s._index = linlen - 1;
+
+    if (linlen < s._linlen)
+      s.ptr[1] = linlen + s._indent - 1;
+    else
+      {
+      s.ptr[1] = s._maxlen - 1;
+      s._index += s._indent;
+
+      s._findex = linlen - s._linlen;
+
+      variable line = __vgetlinestr (s, __vline (s, '.'), s._findex + 1);
+
+      waddline (s, line, 0, s.ptr[0]);
+
+      s._is_wrapped_line = 1;
+      }
+
+    __vdraw_tail (s);
+  end
+
+  def pg_bol (s) proc
+    s.ptr[1] = s._indent;
+    s._findex = s._indent;
+    s._index = s._indent;
+
+    if (s._is_wrapped_line)
+      {
+      variable line = __vgetlinestr (s, __vline (s, '.'), 1);
+      waddline (s, line, 0, s.ptr[0]);
+      s._is_wrapped_line = 0;
+      }
+
+    __vdraw_tail (s);
+  end
+
+  def pg_bolnblnk (s) proc
+    s.ptr[1] = s._indent;
+
+    variable linlen = __vlinlen (s, '.');
+
+    loop (linlen)
+      {
+      ifnot (isblank (s.lins[s.ptr[0] - s.rows[0]][s.ptr[1]]))
+        break;
+
+      s.ptr[1]++;
+      }
+
+    s._findex = s._indent;
+    s._index = s.ptr[1] - s._indent;
+
+    __vdraw_tail (s);
+  end
+
+  def pg_g (s) proc
+    variable
+      chr = Input.getch ();
+
+    if ('g' == chr)
+      {
+      pg_bof (s);
+      return;
+      }
+
+    if ('U' == chr)
+      {
+      _word_change_case_ (s, "toupper");
+      return;
+      }
+
+    if ('u' == chr)
+      {
+      _word_change_case_ (s, "tolower");
+      return;
+      }
+
+    if ('v' == chr)
+      {
+      v_lastvi (s);
+      return;
+      }
+  end
+
+  def pg_Yank (s) proc
+    variable
+      reg = qualifier ("reg", "\""),
+      line = __vline (s, '.');
+
+    _set_reg_ (reg, line + "\n");
+    seltoX (line + "\n");
+    Smg.send_msg_dr ("yanked", 1, s.ptr[0], s.ptr[1]);
+  end
+
+  def buffer_other (s) proc
+  end
+
+  def handle_comma (s) public proc
+    variable chr = Input.getch ();
+
+    ifnot (any (['p'] == chr))
+      return;
+
+    if ('p' == chr)
+      seltoX (Ved.get_cur_buf ()._abspath);
+  end
+end

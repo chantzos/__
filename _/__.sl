@@ -675,7 +675,7 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
         variable file = tokens[1];
 
         ifnot ("from" == tokens[2])
-          throw ClassError, "Class::__INIT__::require statement, from keyword is missing";
+          throw ClassError, "Class::__INIT__::require statement, `from' keyword is missing";
 
         variable from = tokens[3];
 
@@ -695,7 +695,7 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
             throw ClassError, "Class::__INIT__::require declaration needs at least 6 args, to declare a namespace";
           else
             ifnot ("to" == tokens[4])
-              throw ClassError, "Class::__INIT__::require statement, to keyword is missing";
+              throw ClassError, "Class::__INIT__::require statement, `to' keyword is missing";
             else
               if ("." == tokens[5])
                 ns = cname;
@@ -716,19 +716,30 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
         variable lfrom = lcname;
         variable lclasspath = CLASSPATH + "/" + lcname;
         variable lfile = lclasspath + "/__init__.__";
+        variable cont = 0;
 
         ifnot (2 == length (tokens))
           ifnot ("from" == tokens[2])
-            throw ClassError, "Class::__INIT__::include, from identifier is expected";
+            throw ClassError, "Class::__INIT__::include, `from' identifier is expected";
           else
             if (3 == length (tokens))
-              throw ClassError, "Class::__INIT__::include, from expects a namespcase";
+              throw ClassError, "Class::__INIT__::include, `from' expects a namespcase";
             else
               {
+              cont = 1;
               lfrom = tokens[3];
-              lclasspath =CLASSPATH + "/" + lfrom;
+              lclasspath = CLASSPATH + "/" + lfrom;
               lfile = lclasspath + "/" + lcname + ".__";
               }
+
+        if (cont && 4 != length (tokens))
+          ifnot ("as" == tokens[4])
+            throw ClassError, "Class::__INIT__::include, `as' identifier is expected";
+          else
+            if (5 == length (tokens))
+              throw ClassError, "Class::__INIT__::include, `as' expects a class name";
+            else
+              lcname = tokens[5];
 
         variable isinusr = 0;
 
@@ -744,6 +755,10 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
             throw ClassError, "Class::__INIT__::" + lfile + "::cannot open";
 
           () = fgets (&line, lfp);
+
+          if (strncmp (line, "beg", 3))
+            throw ClassError, "Class::__INIT__::include " + lfile + " `beg' keyword is missing";
+
           variable lot_class = parse_class (lcname, lclasspath, lfp, funs, eval_buf);
 
           if (lot_class)
@@ -752,16 +767,6 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
         else
           @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
             __init__ = path_basename_sans_extname (lfile), return_buf);
-
-%       @eval_buf += `() = evalfile (CLASSPATH + ` + (isinusr ? "\"/../usr/__\"" : "") +
-%           ` "/` + lfrom + `" + "/" + path_basename_sans_extname ("` + lfile + `") + ".slc",
-%            "` + lcname + `");` + "\n\n";
-%       variable ll = fopen ("/tmp/a.sl", "w");
-%         () = fprintf (ll, "%S\n", @eval_buf);
-%         () = fflush (ll);
-%          @eval_buf += `() = evalfile (path_dirname ("` + strreplace (lclasspath,
-%            realpath (CLASSPATH + "/.."), realpath (Env->STD_CLASS_PATH + "/..")) + `/") + "/" +
-%            path_basename_sans_extname ("` + lfile + `") + ".slc", "` + lcname + `");` + "\n\n";
 
         continue;
         }

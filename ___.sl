@@ -10,10 +10,10 @@ private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
 private variable DEBUG = any ("--debug" == __argv);
 private variable CC = "gcc";
 private variable MODULES = [
-  "__", "getkey", "crypto", "slsmg", "socket", "fork", "pcre", "rand",
-  "iconv", "curl", "json"];
+  "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
+  "iconv", "json"];
 private variable FLAGS = [
-  "-lm -lpam", "-lssl", "", "", "", "", "-lpcre", "", "", "-lcurl", ""];
+  "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", ""];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable DEB_FLAGS =
@@ -257,8 +257,13 @@ private define __build_module__ (i)
 }
 
 __build_module__ (0);
-__build_module__ (1);
-__build_module__ (2);
+
+ifnot (DONT_COMPILE_MODULES)
+  {
+  __build_module__ (1);
+  __build_module__ (2);
+  __build_module__ (3);
+  }
 
 import (SRC_TMP_PATH + "/__", "Global");
 
@@ -444,7 +449,7 @@ This.max_frames = 2;
 private define __build_modules__ ()
 {
   variable i;
-  _for i (3, length (MODULES) - 1)
+  _for i (4, length (MODULES) - 1)
     __build_module__ (i);
 }
 

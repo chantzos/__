@@ -1,0 +1,45 @@
+beg
+  def _rdregs_ () proc
+    ['*',  '/', '%', '='];
+  end
+
+  def _regs_ () proc
+    [['A':'Z'], ['a':'z'], '*', '"', '/', '%'];
+  end
+
+  def _get_reg_ (reg) proc
+    ifnot (any ([_regs_, '='] == reg[0]))
+      return NULL;
+
+    if ("*" == reg)
+      return getXsel ();
+
+    if ("%" == reg)
+      return Ved.get_cur_buf ()._abspath;
+
+    if ("=" == reg)
+      {
+      variable res = __eval (;return_str);
+      ifnot (NULL == res)
+        return res;
+      else
+        return NULL;
+      }
+
+    variable k = assoc_get_keys (REG);
+
+    ifnot (any (k == reg))
+      return NULL;
+
+    REG[reg];
+  end
+
+  def _set_reg_ (reg, sel) proc
+    variable k = assoc_get_keys (REG);
+
+    if (any (_regs_ () == reg[0]) || 0 == any (k == reg))
+      REG[reg] = sel;
+    else
+      REG[reg] = REG[reg] + sel;
+  end
+end

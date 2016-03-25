@@ -1,0 +1,46 @@
+beg
+  def mark_init (m) proc
+    ifnot (assoc_key_exists (MARKS, m))
+      MARKS[m] = @Pos_Type;
+  end
+
+  beg
+    array_map (&mark_init, array_map (String_Type, &string, ['`', '<', '>']));
+  end
+
+  def mark_set (s, m) proc
+    Ved.storePos (s, MARKS[m]);
+  end
+
+  def markbacktick (s) proc
+    mark_set (s, string ('`'));
+  end
+
+  def mark (s) proc
+    variable m = Input.getch (;disable_langchange);
+
+    if ('a' <= m <= 'z')
+      {
+      m = string (m);
+      mark_init (m);
+      mark_set (s, m);
+      }
+  end
+
+  def mark_get () proc
+    variable marks = assoc_get_keys (MARKS);
+    variable mark = Input.getch (;disable_langchange);
+
+    mark = string (mark);
+
+    ifnot (any (mark == marks))
+      return NULL;
+
+    variable m = @MARKS[mark];
+
+    if (NULL == m._i)
+      return NULL;
+
+    m;
+  end
+end
