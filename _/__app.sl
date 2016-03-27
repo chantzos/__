@@ -1241,8 +1241,9 @@ private define __edit__ (argv)
   s.vedloop ();
 }
 
-private define __messages__ (argv)
+public define __messages ()
 {
+  loop (_NARGS) pop ();
   variable ved = @Ved.get_cur_buf ();
 
   viewfile (ERR_VED, "MSG", NULL, NULL);
@@ -1395,7 +1396,7 @@ public define init_commands ()
   a["eval"].type = "Func_Type";
 
   a["messages"] = @Argvlist_Type;
-  a["messages"].func = &__messages__;
+  a["messages"].func = &__messages;
 
   a["ved"] = @Argvlist_Type;
   a["ved"].func = &__ved__;

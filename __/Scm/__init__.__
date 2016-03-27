@@ -6,12 +6,13 @@ class Scm
     "init", "branch", "status", "log", "diff", "add", "branchnew",
     "branchdelete", "branchchange", "commit", "commitall", "pull",
     "lastlog", "diffrevision", "logpatch", "applypatch", "merge",
+    "generic",
     ],
     {
     [EXEC, "init"],
     [EXEC, "branch"],
     [EXEC, "status", "-s"],
-    [EXEC, "log", "--pretty=format:commit: %h %H%n%B%ncommiter: %cn  %cD%n", "--after="],
+    [EXEC, "log", "--pretty=format:commit: %h%n%B%ncommiter: %cn  %cD%n%n%>(4)%B%n", "--after="],
     [EXEC, "diff"],
     [EXEC, "add", "-v"],
     [EXEC, "branch"],
@@ -25,10 +26,22 @@ class Scm
     [EXEC, "log", "-p"],
     [EXEC, "apply", "-p1", "--verbose"],
     [EXEC, "merge"],
+    [EXEC],
     });
 
   def __exec__ (argv, status) proc
     variable p = Proc.init (0, 1, 1);
+    variable file = qualifier ("redir_to_file");
+
+    ifnot (NULL == file)
+      {
+      p.stdout.file = file;
+      variable flags = qualifier ("flags");
+
+      ifnot (NULL == flags)
+        p.stdout.wr_flags = flags;
+      }
+
     @status = p.execv (argv, NULL);
     p;
   end
@@ -41,13 +54,30 @@ class Scm
     if (status.exit_status)
       IO.tostderr (__fmt_output__ (p.stderr.out);;__qualifiers);
     else
-      IO.tostdout (__fmt_output__ (p.stdout.out);;__qualifiers);
+      if (NULL == p.stdout.file)
+        IO.tostdout (__fmt_output__ (p.stdout.out);;__qualifiers);
+
+    status.exit_status;
+  end
+
+  def generic (?)
+    variable args = __pop_list (_NARGS - 1);
+    pop ();
+
+    args = list_to_array (args, String_Type);
+
+    variable
+      status,
+      argv = [@funcs[_function_name], args],
+      p = __exec__ (argv, &status;;__qualifiers);
+
+    __print__ (p, status;;__qualifiers);
   end
 
   def status ()
     variable
       status,
-      p = __exec__ (funcs[_function_name], &status);
+      p = __exec__ (funcs[_function_name], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -55,7 +85,7 @@ class Scm
   def lastlog ()
     variable
       status,
-      p = __exec__ (funcs[_function_name], &status);
+      p = __exec__ (funcs[_function_name], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -63,7 +93,7 @@ class Scm
   def pull ()
     variable
       status,
-      p = __exec__ (funcs[_function_name], &status);
+      p = __exec__ (funcs[_function_name], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -71,7 +101,7 @@ class Scm
   def diff ()
     variable
       status,
-      p = __exec__ (funcs[_function_name], &status);
+      p = __exec__ (funcs[_function_name], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -80,7 +110,7 @@ class Scm
     variable
       status,
       argv = [funcs[_function_name], file],
-      p = __exec__ (argv, &status);
+      p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -89,7 +119,7 @@ class Scm
     variable
       status,
       argv = [funcs[_function_name], revision],
-      p = __exec__ (argv, &status);
+      p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -102,7 +132,7 @@ class Scm
     argv[-2] += repeat ("_", COLUMNS);
     argv[-1] += string (localtime (_time).tm_year + 1900 - 2);
 
-    variable p = __exec__ (argv, &status);
+    variable p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -110,7 +140,7 @@ class Scm
   def applypatch (patch)
     variable
       status,
-      p = __exec__ ([funcs[_function_name], patch], &status);
+      p = __exec__ ([funcs[_function_name], patch], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -118,7 +148,7 @@ class Scm
   def merge (branch)
     variable
       status,
-      p = __exec__ ([funcs[_function_name], branch], &status);
+      p = __exec__ ([funcs[_function_name], branch], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -126,26 +156,15 @@ class Scm
   def logpatch ()
     variable
       status,
-      file = qualifier ("redir_to_file", This.tmpdir + "/scm_log_patch.diff"),
-      p = Proc.init (0, 1, 1);
+      p = __exec__ (funcs[_function_name], &status;;__qualifiers);
 
-    p.stdout.file = file;
-
-    status = p.execv (funcs[_function_name], NULL);
-
-    ifnot (status.exit_status)
-      IO.tostdout (File.readlines (file);;__qualifiers);
-    else
-      IO.tostderr (p.stderr.out;;__qualifiers);
-
-    ifnot (qualifier_exists ("redir_to_file"))
-      () = remove (file);
+    __print__ (p, status;;__qualifiers);
   end
 
   def init ()
     variable
       status,
-      p = __exec__ (funcs[_function_name], &status);
+      p = __exec__ (funcs[_function_name], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -158,7 +177,7 @@ class Scm
     if (status.exit_status)
       {
       IO.tostderr (__fmt_output__ (p.stderr.out);;__qualifiers);
-      return;
+      return 1;
       }
 
     variable ar = strtrim_end (strchop (p.stdout.out, '\n', 0));
@@ -175,13 +194,14 @@ class Scm
     ];
 
    IO.tostdout (ar;;__qualifiers);
+   0;
   end
 
   def branchnew (branch)
     variable
       status,
       argv = [funcs[_function_name], branch],
-      p = __exec__ (argv, &status);
+      p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -190,7 +210,7 @@ class Scm
     variable
       status,
       argv = [funcs[_function_name], branch],
-      p = __exec__ (argv, &status);
+      p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -199,19 +219,32 @@ class Scm
     variable
       status,
       argv = [funcs[_function_name], branch],
-      p = __exec__ (argv, &status);
+      p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
 
-  def commit (msg)
+  def commit (?)
     variable
+      files = __pop_list (_NARGS - 1);
+
+    pop ();
+
+    if (0 >= length (files) - 1)
+      {
+      IO.tostderr ("no file[s] provided");
+      return 1;
+      }
+
+    variable
+      msg = files[-1],
       status,
       argv = @funcs[_function_name];
 
     argv[-1] += msg;
+    argv = [argv, list_to_array (files[[:-2]], String_Type)];
 
-    variable   p = __exec__ (argv, &status);
+    variable p = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -219,10 +252,10 @@ class Scm
   def commitall (msg)
     variable
       status,
-      argv = @funcs[_function_name],
-      p = __exec__ (argv, &status);
+      argv = @funcs[_function_name];
 
     argv[-1] += msg;
+    variable p = __exec__ (argv, &status;;__qualifiers);
 
    __print__ (p, status;;__qualifiers);
   end

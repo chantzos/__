@@ -768,6 +768,10 @@ private define __main__ ()
      Path.walk (SRC_USER_C_PATH, NULL, &__compile_user_module__);
    }
 
+  ifnot (string_match ("$PATH"$, BIN_PATH))
+    io.tostderr ("WARNING:", BIN_PATH, "is not a part of $PATH\n" +
+      "it should be considered to add", BIN_PATH, "to the $PATH environment variable");
+
   This.exit ("installation completed", 0);
 }
 
