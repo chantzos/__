@@ -1005,7 +1005,6 @@ private define __clear__ (argv)
     fn = This.stderrFn;
 
   () = File.write (fn, "\000");
-  SCRATCH_VED._fd = IO.open_fn (SCRATCH);
 }
 
 public define __scratch (argv)

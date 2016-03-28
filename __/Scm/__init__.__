@@ -6,13 +6,13 @@ class Scm
     "init", "branch", "status", "log", "diff", "add", "branchnew",
     "branchdelete", "branchchange", "commit", "commitall", "pull",
     "lastlog", "diffrevision", "logpatch", "applypatch", "merge",
-    "generic",
+    "generic", "get_upstream_url", "push",
     ],
     {
     [EXEC, "init"],
     [EXEC, "branch"],
     [EXEC, "status", "-s"],
-    [EXEC, "log", "--pretty=format:commit: %h%n%B%ncommiter: %cn  %cD%n%n%>(4)%B%n", "--after="],
+    [EXEC, "log", "--pretty=format:commit: %h%ncommiter: %cn %cD%n%n  %B"],
     [EXEC, "diff"],
     [EXEC, "add", "-v"],
     [EXEC, "branch"],
@@ -27,6 +27,8 @@ class Scm
     [EXEC, "apply", "-p1", "--verbose"],
     [EXEC, "merge"],
     [EXEC],
+    [EXEC, "config", "-l"],
+    [EXEC, "push", "--verbose", "--repo"],
     });
 
   def __exec__ (argv, status) proc
@@ -115,7 +117,51 @@ class Scm
     __print__ (p, status;;__qualifiers);
   end
 
+  def get_upstream_url ()
+    variable
+      status,
+      p = __exec__ (funcs[_function_name], &status);
+
+    if (NULL == p.stdout.out || 0 == strlen (p.stdout.out))
+      {
+      IO.tostderr ("cannot read config");
+      return NULL;
+      }
+
+    variable url = __fmt_output__ (p.stdout.out);
+
+    url = strtrim_end (url);
+    url = url[wherenot (strncmp (url, "remote.origin.url", strlen ("remote.origin.url")))];
+    ifnot (length (url))
+      {
+      IO.tostderr ("I cant get upstream's url");
+      return NULL;
+      }
+
+    url = strchop (url[0], '=', 0);
+    ifnot (length (url) - 1)
+      {
+      IO.tostderr ("I cant get upstream's url");
+      return NULL;
+      }
+
+    url[1];
+  end
+
+  def push (url)
+    variable
+      status,
+      argv = [@funcs[_function_name], url],
+      p = __exec__ (argv, &status;;__qualifiers);
+
+   __print__ (p, status;;__qualifiers);
+  end
+
   def diffrevision (revision)
+    if ('~' == revision[0])
+      ifnot (NULL == String.to_int (revision[[1:]]))
+        revision = sprintf ("%s%s", qualifier ("branch", "master"), revision);
+
     variable
       status,
       argv = [funcs[_function_name], revision],
@@ -124,15 +170,17 @@ class Scm
     __print__ (p, status;;__qualifiers);
   end
 
-  def log ()
+  def log (?)
     variable
       status,
       argv = @funcs[_function_name];
 
-    argv[-2] += repeat ("_", COLUMNS);
-    argv[-1] += string (localtime (_time).tm_year + 1900 - 2);
+    variable args = __pop_list (_NARGS - 1);
+    pop ();
 
-    variable p = __exec__ (argv, &status;;__qualifiers);
+    args = list_to_array (args, String_Type);
+
+    variable p = __exec__ ([argv, args], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
@@ -169,6 +217,31 @@ class Scm
     __print__ (p, status;;__qualifiers);
   end
 
+  def branches ()
+    variable p = Proc.init (0, 1, 1);
+    variable status = p.execv ([EXEC, "branch"], NULL);
+
+    if (status.exit_status)
+      {
+      IO.tostderr (__fmt_output__ (p.stderr.out);;__qualifiers);
+      return NULL;
+      }
+
+    variable b = struct {branches, cur};
+    variable ar = strtrim_end (strchop (p.stdout.out, '\n', 0));
+    ar = ar[where (strlen (ar))];
+
+    ifnot (length (ar))
+      b.branches = String_Type[0];
+    else
+      {
+      b.branches = strtrim_beg (strtrim_beg (ar, "*"));
+      b.cur = substr (ar[wherenot (strncmp (ar, "* ", 2))][0], 3, -1);
+      }
+
+    b;
+  end
+
   def branch ()
     variable
       status,
@@ -183,6 +256,12 @@ class Scm
     variable ar = strtrim_end (strchop (p.stdout.out, '\n', 0));
     ar = ar[where (strlen (ar))];
 
+    ifnot (length (ar))
+      {
+      IO.tostdout ("nothing commited yet in this repository";;__qualifiers);
+      return 0;
+      }
+
     variable curbranch = substr (ar[wherenot (array_map (
     Integer_Type, &strncmp, ar, "* ", 2))][0], 3, -1);
     ar = [
@@ -190,7 +269,7 @@ class Scm
     repeat ("_", COLUMNS),
     strtrim_beg (strtrim_beg (ar, "*")),
     repeat ("_", COLUMNS),
-    sprintf ("Current Branch: %s", curbranch, 2)
+    sprintf ("Current Branch: %s", curbranch)
     ];
 
    IO.tostdout (ar;;__qualifiers);

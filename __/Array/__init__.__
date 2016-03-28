@@ -9,6 +9,10 @@ class Array
     1;
   end
 
+  def to_list (a)
+    return {self.push (a)};
+  end
+
   def push (a)
     variable i;
     _for i (0, length (a) - 1)
