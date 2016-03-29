@@ -1135,11 +1135,11 @@ class Ved
     _set_nr_ (s, "-";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
   end
 
-  def undo (s) proc
+  def __undo__ (s) proc
     Vundo.undo (s);
   end
 
-  def redo (s) proc
+  def __redo__ (s) proc
     Vundo.redo (s);
   end
 
@@ -1381,7 +1381,7 @@ class Ved
     VED_PAGER[string (Input->LEFT)]    = &pg_left;
     VED_PAGER[string (Input->END)]     = &pg_eol;
     VED_PAGER[string (Input->CTRL_w)]  = &handle_w;
-    VED_PAGER[string (Input->CTRL_r)]  = &redo;
+    VED_PAGER[string (Input->CTRL_r)]  = &__redo__;
     VED_PAGER[string (Input->BSLASH)]  = &search;
     VED_PAGER[string (Input->QMARK)]   = &search;
     VED_PAGER[string (Input->CTRL_v)]  = &vis_mode;
@@ -1402,7 +1402,7 @@ class Ved
     VED_PAGER[string ('$')]            = &pg_eol;
     VED_PAGER[string ('^')]            = &pg_bolnblnk;
     VED_PAGER[string ('0')]            = &pg_bol;
-    VED_PAGER[string ('u')]            = &undo;
+    VED_PAGER[string ('u')]            = &__undo__;
     VED_PAGER[string ('#')]            = &s_search_word_;
     VED_PAGER[string ('*')]            = &s_search_word_;
     VED_PAGER[string ('n')]            = &s_backslash_reg_;

@@ -1,4 +1,4 @@
-define seltoX (sel)
+public define seltoX (sel)
 {
   variable len = strlen (sel);
 
@@ -26,7 +26,7 @@ define seltoX (sel)
     () = remove (file);
 }
 
-define getXsel ()
+public define getXsel ()
 {
   variable file = sprintf ("%s/%d_%d_clipboard", Ved->VED_DIR, Env->PID, Env->UID);
   variable com = [Sys->XCLIP_BIN, "-o"];
