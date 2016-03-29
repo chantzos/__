@@ -159,6 +159,8 @@ beg
     s._autoindent = t._autoindent;
     s._autochdir = qualifier ("_autochdir", t._autochdir);
 
+    s.opt_show_tilda = qualifier ("show_tilda", t.opt_show_tilda);
+
     s.lexicalhl = t.lexicalhl;
     s.autoindent = t.autoindent;
     s.draw = t.draw;
@@ -425,6 +427,11 @@ beg
       lexicalhl = &lexicalhl,
       vedloop = &_vedloop_,
       vedloopcallback = &_vedloopcallback_,
+      opt_show_tilda = 1,
       };
+  end
+
+  def __HLINE__ ()
+    repeat (char (8212), COLUMNS);
   end
 end

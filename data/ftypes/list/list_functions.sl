@@ -3,7 +3,6 @@ private variable exists = 0x01;
 
 private define add (self, s, rows)
 {
-IO.tostderr ("add called", s, rows);
   variable w = Ved.get_cur_wind ();
 
   if (any (s.fname == w.bufnames))
@@ -77,18 +76,14 @@ private define getitem (s)
 
 public define __pg_on_carriage_return (s)
 {
-IO.tostderr ("pg_called");
   ifnot (Ved.get_cur_frame ())
     return;
 
   variable l = getitem (s);
 
-IO.tostderr ("l", l);
-
   if (NULL == l)
     return;
 
-IO.tostderr ("lfname", l.fname);
   if (".list" == path_extname (l.fname))
     return;
 

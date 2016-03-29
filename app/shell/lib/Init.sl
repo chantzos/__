@@ -18,6 +18,8 @@ public define on_wind_new (w)
 
   (@__get_reference (This.stdouttype + "_settype")) (oved, This.stdoutFn, VED_ROWS, NULL);
 
+  oved.opt_show_tilda = 0;
+
   Ved.setbuf (This.stdoutFn);
 
   This.stdoutFd = oved._fd;
@@ -52,6 +54,7 @@ public define _new_frame_ (s)
 
   s = Ved.get_cur_buf ();
   s._fd = IO.open_fn (s._abspath);
+  s.opt_show_tilda = 0;
   This.stdoutFd = s._fd;
 }
 

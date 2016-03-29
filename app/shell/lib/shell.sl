@@ -10,6 +10,8 @@ private define mainloop ()
 
 public define shell ()
 {
+  OUT_VED.opt_show_tilda = 0;
+
   Ved.setbuf (OUT_VED._abspath);
 
   if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))

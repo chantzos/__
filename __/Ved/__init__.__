@@ -10,6 +10,7 @@ class Ved
     vedloop,vedloopcallback,
     ved,
     draw, lexicalhl, autoindent, pairs,
+    opt_show_tilda,
   end
 
   typedef Insert
@@ -481,7 +482,7 @@ class Ved
       ifnot (s._type == "ashell")
         clrs[[arlen:length (clrs) -2]] = 5;
       variable t = String_Type[rowslen - arlen - 1];
-      t[*] = s._type == "ashell" ? " " : "~";
+      t[*] = s.opt_show_tilda ? "~" : " ";
       ar = [ar, t];
       }
 
