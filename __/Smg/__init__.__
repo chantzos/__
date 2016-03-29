@@ -449,9 +449,9 @@ class Smg
       "brown", array_map (String_Type, &substr,
       ["brownonyellow", "brownonwhite"], 8, -1));
 
-    array_map (Void_Type, &slsmg_define_color, [22:23:1],
+    array_map (Void_Type, &slsmg_define_color, [22:24:1],
       "black", array_map (String_Type, &substr,
-      ["blackongreen", "blackoncyan"], 8, -1));
+      ["blackongreen", "blackoncyan", "blackonblack"], 8, -1));
 
     array_map (Void_Type, &set_struct_field, __COLOR__, get_struct_field_names (__COLOR__),
     array_map (Integer_Type, &get_color, get_struct_field_names (__COLOR__)));
@@ -460,4 +460,5 @@ class Smg
   end
 
   let COLOR = __COLOR__;
+  let NOCOLOR = 24;
 end

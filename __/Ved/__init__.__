@@ -62,8 +62,9 @@ class Ved
   let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':'];
   let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';'];
 
-  var VED_INFOCLRFG = Smg->COLOR.infofg;
-  var VED_INFOCLRBG = Smg->COLOR.infobg;
+  var public VED_INFOCLRFG = Smg->COLOR.infofg;
+  var public VED_INFOCLRBG = Smg->COLOR.infobg;
+
   var VED_PROMPTCLR = Smg->COLOR.prompt;
   var VED_PREV_WIND;
   var VED_PREV_BUFINDEX;
@@ -140,6 +141,20 @@ class Ved
   end
 
   def insert () proc
+  end
+
+  def toogle_infoclrbg ()
+    if (VED_INFOCLRBG == Smg->NOCOLOR)
+      VED_INFOCLRBG = Smg->COLOR.infobg;
+    else
+      VED_INFOCLRBG = Smg->NOCOLOR;
+  end
+
+  def toogle_infoclrfg ()
+    if (VED_INFOCLRFG == Smg->NOCOLOR)
+      VED_INFOCLRFG = Smg->COLOR.infofg;
+    else
+      VED_INFOCLRFG = Smg->NOCOLOR;
   end
 
   def set_modified (s) public proc
