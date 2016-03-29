@@ -768,9 +768,43 @@ private define __main__ ()
      Path.walk (SRC_USER_C_PATH, NULL, &__compile_user_module__);
    }
 
+  variable warnings = ["Warnings:\n"];
+
   ifnot (string_match ("$PATH"$, BIN_PATH))
-    io.tostderr ("WARNING:", BIN_PATH, "is not a part of $PATH\n" +
-      "it should be considered to add", BIN_PATH, "to the $PATH environment variable");
+    warnings = [warnings, BIN_PATH, "is not a part of $PATH\n" +
+      BIN_PATH + "should be added to the $PATH environment variable\n"];
+
+  if (NULL == Sys.which ("xclip"))
+    warnings = [warnings, "xclip is not installed, xclipboard won't work\n"];
+
+  if (NULL == getenv ("XAUTHORITY"))
+    warnings = [warnings, "XAUTHORITY environment variable isn't set.\nThis is" +
+      " normal if you are not logged in X but not if don't\n"];
+
+  if (NULL == getenv ("TERM"))
+    warnings = [warnings, "TERM environment variable isn't set.\n" +
+      "The programm will refuse to work\n"];
+
+  variable lang = getenv ("LANG");
+
+  if (NULL == lang)
+    warnings = [warnings, "LANG environment variable isn't set.\n" +
+      "The programm will refuse to work\n"];
+  else
+    if (5 > strlen (lang) || "UTF-8" != substr (lang, strlen (lang) - 4, -1))
+      warnings = [warnings, "locale: " + lang + " isn't UTF-8 (Unicode), or misconfigured\n", +
+      "The programm will refuse to work\n"];
+
+  if (NULL == getenv ("HOME"))
+    warnings = [warnings, "HOME environment variable isn't set.\n" +
+      "The programm will refuse to work\n"];
+
+  if (NULL == getenv ("PATH"))
+    warnings = [warnings, "PATH environment variable isn't set.\n" +
+      "The programm will refuse to work\n"];
+
+  if (length (warnings) > 1)
+    io.tostderr (warnings);
 
   This.exit ("installation completed", 0);
 }
