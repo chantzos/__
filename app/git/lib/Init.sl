@@ -1,5 +1,7 @@
 Class.load ("Scm");
 
+public define setrepo ();
+
 public variable VED_INFOCLRFG = Smg->NOCOLOR;
 public variable VED_INFOCLRBG = Smg->NOCOLOR;
 

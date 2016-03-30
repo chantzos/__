@@ -67,6 +67,7 @@ ifnot (NULL == DEBUG)
 
 This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 This.appdir   = Env->STD_APP_PATH + "/" + This.appname;
+This.datadir  = Env->USER_DATA_PATH + "/" + This.appname;
 
 if (-1 == access (This.appdir, F_OK))
   if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
@@ -90,8 +91,12 @@ This.stdoutFn = This.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
 if (-1 == Dir.make_parents (This.tmpdir, File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.tmpdir);
 
-if (-1 == Dir.make_parents (Env->USER_DATA_PATH, File->PERM["PRIVATE"];strict))
-  This.err_handler ("cannot create directory " + Env->USER_DATA_PATH);
+if (-1 == Dir.make_parents (This.datadir + "/config", File->PERM["PRIVATE"];strict))
+  This.err_handler ("cannot create directory " + This.datadir + "/config");
+
+if (-1 == Dir.make_parents (strreplace (This.datadir + "/config",
+    Env->USER_PATH, Env->SRC_PATH), File->PERM["PRIVATE"];strict))
+  This.err_handler ("cannot create directory " + This.datadir + "/config");
 
 This.stdoutFd = IO.open_fn (This.stdoutFn);
 This.stderrFd = IO.open_fn (This.stderrFn);
@@ -905,12 +910,9 @@ private define _execute_ (argv)
     isscratch = NULL;
     }
 
-  % might be a bug here if is a redirection
-  if (NULL != isscratch || 0 == This.shell)
-    ifnot (EXITSTATUS)
-      _scratch_ (Ved.get_cur_buf ());
-    else
-      ifnot (This.shell)
+  if ((NULL != isscratch || 0 == This.shell) &&
+    0 == EXITSTATUS &&
+    0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
         _scratch_ (Ved.get_cur_buf ());
 
   ifnot (isbg)

@@ -44,6 +44,7 @@ typedef struct
   stdouttype,
   tmpdir,
   appdir,
+  datadir,
   at_exit,
   err_handler,
   exit,

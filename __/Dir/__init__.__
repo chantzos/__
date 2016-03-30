@@ -11,6 +11,24 @@ class Dir
         : 0;
   end
 
+  def __isdirectory (dir, st)
+    if (-1 == access (dir, F_OK))
+      return 0;
+
+    File.is_type (
+      NULL == st
+        ? NULL
+        : Struct_Type == typeof (st)
+          ? NULL == wherefirst ("st_mode" == get_struct_field_names (st))
+            ? NULL
+            : st.st_mode
+          : NULL, "dir")
+      ? 1
+      : qualifier_exists ("strict")
+        ? -1
+        : 0;
+  end
+
   def eval (dir)
     if ('~' == dir[0])
       (dir,) = strreplace (dir, "~", Env->HOME_PATH, 1);
@@ -94,19 +112,6 @@ class Dir
         ar[i] = path_concat (ar[i-1], ar[i]);
 
     ar;
-  end
-
-  def __isdirectory (dir, st)
-    if (-1 == access (dir, F_OK))
-      return 0;
-
-    File.is_type (NULL == st
-      ? NULL
-      : Struct_Type == typeof (st)
-        ? NULL == wherefirst ("st_mode" == get_struct_field_names (st))
-          ? NULL
-          : st.st_mode
-        : NULL, "dir") ? 1 : qualifier_exists ("strict") ? -1 : 0;
   end
 
  fun move (source, dest, opts)

@@ -1119,7 +1119,7 @@ private define __Class_From_Init__ (classpath)
 private define __LoadClass__ (cname)
 {
   variable classpath = __get_qualifier_as (String_Type,
-    "classpath", qualifier ("classpath"), CLASSPATH + "/" + cname);
+    "from", qualifier ("from"), CLASSPATH + "/" + cname);
 
   variable as = __get_qualifier_as (String_Type, "as",
     qualifier ("as"), cname);

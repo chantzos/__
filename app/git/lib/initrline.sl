@@ -30,42 +30,47 @@ private define __write_info__ (s)
   info;
 }
 
-private define __setrepo__ (repo)
+public define setrepo (repo)
 {
-  repo = repo[1];
   if ("." == repo)
     repo = getcwd ();
+
+  ifnot (path_is_absolute (repo))
+    repo = getcwd + "/" + repo;
 
   if (-1 == access (repo, F_OK))
     {
     IO.tostderr (repo, "doesn't exists");
-    return;
+    __messages;
+    return -1;
     }
 
   repo = realpath (repo);
 
   ifnot ("NONE" == CUR_REPO)
     if (path_basename (repo) == CUR_REPO)
-      return;
+      return -1;
 
   if (-1 == access (repo + "/.git", F_OK))
     {
     IO.tostderr (repo, "Not a git repository");
-    return;
+    __messages;
+    return -1;
     }
 
   ifnot (repo == getcwd)
     if (-1 == chdir (repo))
       {
       IO.tostderr ("Cannot change directory to", repo, errno_string (errno));
-      return;
+      __messages;
+      return -1;
       }
 
   variable s = Scm.branches ();
   if (NULL == s)
     {
     __messages;
-    return;
+    return -1;
     }
 
   variable url = Scm.get_upstream_url ();
@@ -95,6 +100,19 @@ private define __setrepo__ (repo)
     draw (info);
     draw (std);
     }
+
+  0;
+}
+
+private define __setrepo__(argv)
+{
+  if (1 == length (argv))
+    {
+    Smg.send_msg_dr ("__setrepo__ argument is required", 1, NULL, NULL);
+    return;
+    }
+
+  () = setrepo (argv[1]);
 }
 
 private define __status__ (argv)
@@ -570,7 +588,7 @@ private define __init__ (argv)
 
   __scratch (NULL);
 
-  __setrepo__ (["", "."]);
+  () = setrepo (".");
 }
 
 private define my_commands ()
