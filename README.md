@@ -19,7 +19,7 @@ BIG FATA (WARNING) MAMA:
 
 			     In fact one of the reasons of writting this app, is just to have control
    over my environment, by giving total focus to what I'm currently doing
-   without disturptions, by giving with genereosity all the screen space it
+   without disturbions, by giving with genereosity all the screen space it
    deserves.
    
    thus a simple window resizing will make the application to misbeahave
