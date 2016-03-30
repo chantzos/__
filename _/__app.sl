@@ -681,8 +681,17 @@ private define _parse_redir_ (lastarg, file, flags)
 private define _parse_argv_ (argv, isbg)
 {
   variable flags = ">>|";
-  variable file = isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
+  variable file = @isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
+  variable lfile = file;
+
   variable retval = _parse_redir_ (argv[-1], &file, &flags);
+
+  if (lfile == file && file == SCRATCH)
+    if (NULL == This.shell || 0 == This.shell)
+      {
+      flags = ">|";
+      @isbg = 0;
+      }
 
   file, flags, retval;
 }
@@ -848,7 +857,7 @@ private define _execute_ (argv)
   else
     {
     variable file, flags, retval;
-    (file, flags, retval) = _parse_argv_ (argv, isbg);
+    (file, flags, retval) = _parse_argv_ (argv, &isbg);
 
     if (-1 == retval)
       {
@@ -885,9 +894,6 @@ private define _execute_ (argv)
     isscratch = 1;
     }
 
-%  p.stderr.file = This.stderrFn;
-%  p.stderr.wr_flags = ">>|";
-
   env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
    "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
 
@@ -899,6 +905,7 @@ private define _execute_ (argv)
     isscratch = NULL;
     }
 
+  % might be a bug here if is a redirection
   if (NULL != isscratch || 0 == This.shell)
     ifnot (EXITSTATUS)
       _scratch_ (Ved.get_cur_buf ());
@@ -1073,8 +1080,8 @@ private define __echo__ (argv)
     }
   else
     {
-    variable file, flags, retval;
-    (file, flags, retval) = _parse_argv_ (argv, 0);
+    variable file, flags, retval, isbg = 0;
+    (file, flags, retval) = _parse_argv_ (argv, &isbg);
 
     if (-1 == retval)
       {
@@ -1370,6 +1377,9 @@ public define init_functions ()
   variable
     a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
 
+  a["@lock"] = @Argvlist_Type;
+  a["@lock"].func = &__lock__;
+
   a["@draw_buf"] = @Argvlist_Type;
   a["@draw_buf"].func = &draw_buf;
 
@@ -1415,9 +1425,6 @@ public define init_commands ()
 
   a["echo"] = @Argvlist_Type;
   a["echo"].func = &__echo__;
-
-  a["lock"] = @Argvlist_Type;
-  a["lock"].func = &__lock__;
 
   a["&"] = @Argvlist_Type;
   a["&"].func = &__idle__;
