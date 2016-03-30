@@ -1,5 +1,6 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
+public variable DEBUG = NULL;
 public variable Client, Srv;
 public variable APP_ERR;
 
@@ -55,6 +56,14 @@ else
     Class.load ("Client");
   else
     Class.load ("Srv");
+
+DEBUG = Opt.is_arg ("--debug", This.argv);
+
+ifnot (NULL == DEBUG)
+  {
+  This.argv[DEBUG] = NULL;
+  This.argv = This.argv[wherenot (_isnull (This.argv))];
+  }
 
 This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 This.appdir   = Env->STD_APP_PATH + "/" + This.appname;

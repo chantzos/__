@@ -2,7 +2,7 @@ private variable clr = getuid () ? 2 : 1;
 
 public define toplinedr (str)
 {
-  str += " REPO [" + CUR_REPO + "]";
+  str += " REPO [" + CUR_REPO + "] ";
 
   _topline_ (&str, COLUMNS);
 
@@ -12,7 +12,7 @@ public define toplinedr (str)
 
 public define topline (str)
 {
-  str += " REPO [" + CUR_REPO + "]";
+  str += " REPO [" + CUR_REPO + "] ";
 
   _topline_ (&str, COLUMNS);
 

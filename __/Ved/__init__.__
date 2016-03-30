@@ -430,7 +430,7 @@ class Ved
   end
 
   def _draw_ (s) proc
-    if (-1 == s._len) % this shouldn't occur
+    if (-1 == s._len) % this shouldn't occur and stays here for debugging
       {
       Smg.send_msg ("_draw_ (), caught -1 == s._len condition" + s._fname, 1);
       s.lins = [__get_null_str (s._indent)];
@@ -479,10 +479,15 @@ class Ved
 
     if (arlen < rowslen - 1)
       {
-      ifnot (s._type == "ashell")
-        clrs[[arlen:length (clrs) -2]] = 5;
       variable t = String_Type[rowslen - arlen - 1];
-      t[*] = s.opt_show_tilda ? "~" : " ";
+      if (s.opt_show_tilda)
+        {
+        t[*] = "~";
+        clrs[[arlen:length (clrs) -2]] = 5;
+        }
+      else
+        t[*] = "\000";
+
       ar = [ar, t];
       }
 

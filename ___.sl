@@ -7,7 +7,7 @@ private variable SRC_C_PATH = SRC_PATH + "/C";
 private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
 private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
 private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
-private variable DEBUG = any ("--debug" == __argv);
+public  variable DEBUG = any ("--debug" == __argv);
 private variable CC = "gcc";
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
@@ -52,8 +52,10 @@ private define at_exit (self)
 {
 }
 
-public define send_msg_dr ();
+public variable DEBUG = NULL;
 public variable APP_ERR;
+
+public define send_msg_dr ();
 
 private define err_handler (self, s)
 {

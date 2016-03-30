@@ -462,14 +462,14 @@ VED_CLINE["messages"] = &__vmessages;
 
 public define init_ved ()
 {
-  variable __stdin = any (__argv == "-");
+  variable __stdin = any (This.argv == "-");
   variable fn;
   variable pj;
-  variable ft = Opt.is_arg ("--ftype=", __argv);
+  variable ft = Opt.is_arg ("--ftype=", This.argv);
 
   ifnot (NULL == ft)
     {
-    ft = strchop (__argv[ft], '=', 0);
+    ft = strchop (This.argv[ft], '=', 0);
     if (2 == length (ft))
       {
       ft = ft[1];
@@ -498,17 +498,17 @@ public define init_ved ()
     This.exit (0);
     }
 
-  if (1 == __argc)
+  if (1 == length (This.argv))
     {
     SCRATCH_VED.ved (SCRATCH);
     This.exit (0);
     }
 
-  pj = Opt.is_arg ("--pj=", __argv);
+  pj = Opt.is_arg ("--pj=", This.argv);
 
   ifnot (NULL == pj)
     {
-    pj = strchop (__argv[pj], '=', 0);
+    pj = strchop (This.argv[pj], '=', 0);
 
     if (1 == length (pj))
       {
@@ -528,7 +528,7 @@ public define init_ved ()
     This.exit (0);
     }
 
-  fn = __argv[-1];
+  fn = This.argv[-1];
   if (NULL == ft)
     ft = Ved.get_ftype (fn);
 
