@@ -162,6 +162,17 @@ private define __log__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
+  variable max_count = Opt.is_arg ("--max-count=", argv);
+  if (NULL == max_count)
+    argv = [argv, "--max-count=10"];
+
+  variable patch = Opt.is_arg ("--patch_show", argv);
+  ifnot (NULL == patch)
+    ifnot (any ("-p" == argv))
+      argv[patch] = "-p";
+    else
+      argv = argv[wherenot ((argv[patch] = NULL, _isnull (argv)))];
+
   variable args = argv[[1:]];
 
   ifnot (length (args))
@@ -616,8 +627,9 @@ private define my_commands ()
   a["log"] = @Argvlist_Type;
   a["log"].func = &__log__;
   a["log"].args = [
-    "--raw void show a summary of changes using the raw diff format",
-    "--max-count= int Limit the number of commits to output"];
+    "--raw void add a summary of changes using the raw diff format",
+    "--max-count= int Limit the number of proccessing commits, default 10",
+    "--patch_show void add the unified diff to the output"];
 
   a["logpatch"] = @Argvlist_Type;
   a["logpatch"].func = &__logpatch__;
