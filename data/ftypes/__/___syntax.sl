@@ -3,6 +3,8 @@ private variable colors = [
   3,
 % api functins
   11,
+% identifiers
+  12,
 % intrinsic functions
   14,
 %conditional
@@ -20,6 +22,7 @@ private variable regexps = [
   pcre_compile ("(\
 (?<=\s|\[|\()([tT]his(?=\.))\
 |(?<=^|\s)(sub)?(class(?=\s))\
+|(?<=\s)(__init__(?=$))\
 |(?<=\s)(var(?=\s))\
 |(?<=^|\s)(beg(?=$))\
 |(?<=\s)(let!?(?=\s))\
@@ -36,6 +39,9 @@ private variable regexps = [
 |(?<=&|\s|\[|\()(unless(?=\s|,))\
 |(?<=&|\s|\[|\()(raise(?=\s|,))\
 )"R, 0),
+% identifiers
+  pcre_compile ("\
+((?<=\s)(->)(?=\s|$))"R, 0),
 % intrinsic functions
   pcre_compile ("\
 ((evalfile(?=\s))\

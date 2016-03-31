@@ -365,7 +365,8 @@ beg
     if (s._i + s._avlins > s._len)
       return;
 
-    markbacktick (s);
+    if (s._chr == Input->CTRL_f)
+      markbacktick (s);
 
     s._is_wrapped_line = 0;
     s._i += (s._avlins);
@@ -381,7 +382,8 @@ beg
     ifnot (s.lnrs[0])
       return;
 
-    markbacktick (s);
+    if (s._chr == Input->CTRL_b)
+      markbacktick (s);
 
     if (s.lnrs[0] >= s._avlins)
       s._i = s.lnrs[0] - s._avlins;

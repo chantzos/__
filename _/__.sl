@@ -644,6 +644,57 @@ private define parse_block (eval_buf, line, fp, found)
 % @eval_buf - line - fp - @found
 }
 
+private define parse_function (cname, eval_buf, funs, tokens, line, fp, found)
+{
+  variable funname, nargs, args, const, isproc, scope;
+
+  if (3 > length (tokens))
+    throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
+
+  __get_fun_head__ (tokens,
+    &funname, &nargs, &args, &const, &isproc, &scope);
+
+  args = strtrim (args, "()");
+  args = strtok (args, ",");
+
+  if ('?' == nargs)
+    @eval_buf += scope + ` define ` + funname + " ()\n{\n";
+  else
+    @eval_buf += scope + ` define ` + funname + " (" + (isproc ? "" : "self" +
+       (length (args) ? ", " : "")) + strjoin (args, ", ") + ")\n{\n";
+
+  @found = 0;
+
+  while (-1 != fgets (&line, fp))
+    {
+    if ("end" == strtrim (line))
+      {
+      @found = 1;
+      break;
+      }
+
+    @eval_buf += line;
+    }
+
+  ifnot (@found)
+    throw ClassError, "Class::__INIT__::end identifier is missing";
+
+  ifnot (isproc)
+    @eval_buf += "}\n\n" +
+    `__->__ ("` + cname + `", "` + funname +
+    `", &` + funname + `, ` + string (nargs) + `, ` + string (const) +
+    `, "Class::setfun::__initfun__");` + "\n\n";
+  else
+    @eval_buf += "}\n\n";
+
+  ifnot (isproc)
+    {
+    funs[funname] = @Fun_Type;
+    funs[funname].nargs = nargs;
+    funs[funname].const = const;
+    }
+}
+
 private define parse_subclass (cname, classpath, eval_buf, tokens, line, fp, found)
 {
 % @eval_buf - @found
@@ -651,9 +702,79 @@ private define parse_subclass (cname, classpath, eval_buf, tokens, line, fp, fou
   %define submeth () {struct {m = &m};}
   %s = struct {submeth = submeth ()};
   %s.submeth.m ("A", "B");
-  variable as;
-  variable from;
-  % include self from Ved as Ved
+  if (2 > length (tokens))
+    throw ClassError, "Class::__INIT__::subclass declaration, missing subname";
+
+  variable from = NULL;
+  variable as = tokens[1];
+  ifnot (2 == length (tokens))
+    ifnot (4 <= length (tokens))
+      throw ClassError, "Class::__INIT__::subclass, expects at least four args";
+    else
+      ifnot ("from" == tokens[2])
+        throw ClassError, "Class::__INIT__::subclass, `from' identifier is expected";
+      else
+        from = tokens[3];
+
+   ifnot (NULL == from)
+     {
+     if (from == classpath)
+       from = from + "/" + as + ".__";
+     else
+       {
+       variable lfrom = from;
+       from = Env->USER_CLASS_PATH + "/" + from + "/" + as + ".__";
+       ifnot (access (from, F_OK|R_OK))
+         {
+         from = Env->STD_CLASS_PATH + "/" + lfrom + "/" + as + ".__";
+         ifnot (access (from, F_OK|R_OK))
+           throw ClassError, "Class::__INIT__::subclass, cannot locate subclass " + as +
+             " from " + lfrom;
+          }
+        }
+
+      fp = fopen (from, "r");
+      if (NULL == fp)
+        throw ClassError, "Class::__INIT__::subclass, fopen failed for " + as +
+          " from " + from;
+
+      if (-1 != fgets (&line, fp))
+        throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
+          " from " + from;
+
+      ifnot ("subclass " + as == strtrim_end (line))
+        throw ClassError, "Class::__INIT__::subclass, definitions doesn't match, expected: " +
+          "subclass " + as;
+      }
+
+  if (-1 == fgets (&line, fp))
+     throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
+       " from " + lfrom;
+
+  tokens = strtok (line);
+  if (0 == length (tokens) || tokens[0] != "__init__")
+    throw ClassError, "Class::__INIT__::subclass, __init__ declaration expected";
+
+  variable methods = String_Type[0];
+
+  while (-1 != fgets (&line, fp))
+    {
+    line = strtrim (line);
+    ifnot (strlen (line))
+      throw ClassError, "Class::__INIT__::subclass, " +
+        "method expected in __init__";
+
+    if ("end" == line)
+      break;
+
+    tokens = strtok (line);
+    if (1 < length (tokens))
+      throw ClassError, "Class::__INIT__::subclass, " +
+        "a single method expected in __init__";
+
+    methods = [methods, tokens[0]];
+    }
+
   while (-1 != fgets (&line, fp))
     {
     if ("end" == strtrim (line))
@@ -666,7 +787,7 @@ private define parse_subclass (cname, classpath, eval_buf, tokens, line, fp, fou
 }
 
 private define parse_class ();
-private define parse_class (cname, classpath, fp, funs, eval_buf)
+private define parse_class (cname, classpath, eval_buf, funs, fp)
 {
   variable ot_class = 1;
   variable ot_def = 0;
@@ -787,7 +908,7 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
           if (strncmp (line, "beg", 3))
             throw ClassError, "Class::__INIT__::include " + lfile + " `beg' keyword is missing";
 
-          variable lot_class = parse_class (lcname, lclasspath, lfp, funs, eval_buf);
+          variable lot_class = parse_class (lcname, lclasspath, eval_buf, funs, lfp);
 
           if (lot_class)
             throw ClassError, "Class::__INIT__::end identifier is missing";
@@ -1007,55 +1128,11 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
         continue;
         }
 
-    if ("def" == tokens[0] || "def!" == tokens[0])
-      if (3 > length (tokens))
-        throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
-      else
-        {
-        __get_fun_head__ (tokens,
-          &funname, &nargs, &args, &const, &isproc, &scope);
-
-        args = strtrim (args, "()");
-        args = strtok (args, ",");
-
-        if ('?' == nargs)
-          @eval_buf += scope + ` define ` + funname + " ()\n{\n";
-        else
-          @eval_buf += scope + ` define ` + funname + " (" + (isproc ? "" : "self" +
-             (length (args) ? ", " : "")) + strjoin (args, ", ") + ")\n{\n";
-
-        found = 0;
-        while (-1 != fgets (&line, fp))
-          {
-          if ("end" == strtrim (line))
-            {
-            found = 1;
-            break;
-            }
-
-          @eval_buf += line;
-          }
-
-        ifnot (found)
-          throw ClassError, "Class::__INIT__::end identifier is missing";
-
-        ifnot (isproc)
-          @eval_buf += "}\n\n" +
-          `__->__ ("` + cname + `", "` + funname +
-          `", &` + funname + `, ` + string (nargs) + `, ` + string (const) +
-          `, "Class::setfun::__initfun__");` + "\n\n";
-        else
-          @eval_buf += "}\n\n";
-
-        ifnot (isproc)
-          {
-          funs[funname] = @Fun_Type;
-          funs[funname].nargs = nargs;
-          funs[funname].const = const;
-          }
-
-        continue;
-        }
+    if (any (["def", "def!"] == tokens[0]))
+      {
+      parse_function (cname, eval_buf, funs, tokens, line, fp, &found);
+      continue;
+      }
 
     if ("fun" == tokens[0])
       if (3 > length (tokens))
@@ -1119,7 +1196,7 @@ private define __Class_From_Init__ (classpath)
   variable funs = Assoc_Type[Fun_Type];
   variable eval_buf = "";
 
-  variable ot_class = parse_class (cname, classpath, fp, funs, &eval_buf);
+  variable ot_class = parse_class (cname, classpath, &eval_buf, funs, fp);
 
   if (ot_class)
     throw ClassError, "Class::__INIT__::end identifier is missing";
