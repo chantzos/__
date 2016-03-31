@@ -637,6 +637,34 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, sc
 }
 
 private define __Class_From_Init__ ();
+
+
+private define parse_block (eval_buf, line, fp, found)
+{
+% @eval_buf - line - fp - @found
+}
+
+private define parse_subclass (cname, classpath, eval_buf, tokens, line, fp, found)
+{
+% @eval_buf - @found
+  %define m (self, a, b) {strcat (a, b);}
+  %define submeth () {struct {m = &m};}
+  %s = struct {submeth = submeth ()};
+  %s.submeth.m ("A", "B");
+  variable as;
+  variable from;
+  % include self from Ved as Ved
+  while (-1 != fgets (&line, fp))
+    {
+    if ("end" == strtrim (line))
+      {
+      @found = NULL;
+      break;
+      }
+
+    }
+}
+
 private define parse_class ();
 private define parse_class (cname, classpath, fp, funs, eval_buf)
 {
@@ -826,22 +854,35 @@ private define parse_class (cname, classpath, fp, funs, eval_buf)
         continue;
         }
 
-    if ("beg" == tokens[0])
+    if ("subclass" == tokens[0])
       {
-      found = 0;
+      found = tokens[0];
+      parse_subclass (cname, classpath, eval_buf, tokens, line, fp, &found);
+
+      ifnot (NULL == found)
+        throw ClassError, "Class::__INIT__::subclass end identifier is missing";
+       continue;
+      }
+
+    if (any (["beg", "block"] == tokens[0]))
+      {
+      found = tokens[0];
       while (-1 != fgets (&line, fp))
         {
         if ("end" == strtrim (line))
           {
-          found = 1;
+          found = NULL;
           break;
           }
 
-        @eval_buf += line;
+        if ("beg" == found)
+          @eval_buf += line;
+        else
+          parse_block (eval_buf, line, fp, &found);
         }
 
-      ifnot (found)
-        throw ClassError, "Class::__INIT__::do block, end identifier is missing";
+      ifnot (NULL == found)
+        throw ClassError, "Class::__INIT__::beg - block, end identifier is missing";
        continue;
       }
 

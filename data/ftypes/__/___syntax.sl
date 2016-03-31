@@ -19,7 +19,7 @@ private variable regexps = [
 % api public functions and vars
   pcre_compile ("(\
 (?<=\s|\[|\()([tT]his(?=\.))\
-|(?<=^|\s)(class(?=\s))\
+|(?<=^|\s)(sub)?(class(?=\s))\
 |(?<=\s)(var(?=\s))\
 |(?<=^|\s)(beg(?=$))\
 |(?<=\s)(let!?(?=\s))\
