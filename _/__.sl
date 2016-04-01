@@ -638,13 +638,344 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, sc
 
 private define __Class_From_Init__ ();
 
+private define parse_class ();
 
 private define parse_block (eval_buf, line, fp, found)
 {
 % @eval_buf - line - fp - @found
 }
 
-private define parse_function (cname, eval_buf, funs, tokens, line, fp, found)
+private define parse_require (cname, classpath, funs, eval_buf, tokens)
+{
+  if (4 > length (tokens))
+    throw ClassError, "Class::__INIT__::require declaration needs at least 4 args";
+  else
+    {
+    variable file = tokens[1];
+
+    ifnot ("from" == tokens[2])
+      throw ClassError, "Class::__INIT__::require statement, `from' keyword is missing";
+
+    variable from = tokens[3];
+
+    if (from == ".")
+      from = classpath + "/" + file;
+    else
+      {
+      from = Env->STD_LIB_PATH + "/" + from + "/" + file;
+      if (-1 == access (from + ".slc", F_OK))
+        from = strreplace (from, Env->STD_LIB_PATH, Env->USER_LIB_PATH);
+      }
+
+    variable ns = "Global";
+
+    ifnot (4 == length (tokens))
+      ifnot (6 == length (tokens))
+        throw ClassError, "Class::__INIT__::require declaration needs at least 6 args, to declare a namespace";
+      else
+        ifnot ("to" == tokens[4])
+          throw ClassError, "Class::__INIT__::require statement, `to' keyword is missing";
+        else
+          if ("." == tokens[5])
+            ns = cname;
+          else
+            ns = tokens[5];
+
+    @eval_buf += "Load.file (\"" + from + "\", \"" + ns + "\");\n";
+    }
+}
+
+private define parse_load_include (funs, eval_buf, tokens, line)
+{
+  if (1 == length (tokens))
+    throw ClassError, "Class::__INIT__::" + tokens[0] + " statement needs an argument";
+  else
+    {
+    variable lcname = tokens[1];
+    variable lfrom = lcname;
+    variable lclasspath = CLASSPATH + "/" + lcname;
+    variable lfile = lclasspath + "/__init__.__";
+    variable cont = 0;
+
+    ifnot (2 == length (tokens))
+      ifnot ("from" == tokens[2])
+        throw ClassError, "Class::__INIT__::include, `from' identifier is expected";
+      else
+        if (3 == length (tokens))
+          throw ClassError, "Class::__INIT__::include, `from' expects a namespcase";
+        else
+          {
+          cont = 1;
+          lfrom = tokens[3];
+          lclasspath = CLASSPATH + "/" + lfrom;
+          lfile = lclasspath + "/" + lcname + ".__";
+          }
+
+    if (cont && 4 != length (tokens))
+      ifnot ("as" == tokens[4])
+        throw ClassError, "Class::__INIT__::include, `as' identifier is expected";
+      else
+        if (5 == length (tokens))
+          throw ClassError, "Class::__INIT__::include, `as' expects a class name";
+        else
+          lcname = tokens[5];
+
+    variable isinusr = 0;
+
+    if (-1 == access (lfile, F_OK))
+      if (-1 == access ((lfile = strreplace (
+        lfile, CLASSPATH, CLASSPATH + "/../usr/__"), isinusr = 1, lfile), F_OK))
+        throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
+
+    if ("include" == tokens[0])
+      {
+      variable lfp = fopen (lfile, "r");
+      if (NULL == lfp)
+        throw ClassError, "Class::__INIT__::" + lfile + "::cannot open";
+
+      () = fgets (&line, lfp);
+
+      if (strncmp (line, "beg", 3))
+        throw ClassError, "Class::__INIT__::include " + lfile + " `beg' keyword is missing";
+
+      variable lot_class = parse_class (lcname, lclasspath, eval_buf, funs, lfp);
+
+      if (lot_class)
+        throw ClassError, "Class::__INIT__::end identifier is missing";
+      }
+    else
+      @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
+        __init__ = path_basename_sans_extname (lfile), return_buf);
+    }
+}
+
+private define parse_import (eval_buf, tokens)
+{
+  if (1 == length (tokens))
+    throw ClassError, "Class::__INIT__::import statement needs an argument";
+  else
+    {
+    variable module = tokens[1];
+    variable ns = length (tokens) > 2 ? tokens[2] : NULL;
+
+    if ("NULL" == ns)
+      ns = NULL;
+
+    @eval_buf = "Load.module (\"" + module + "\", " + (NULL != ns ? "\"" : "") +
+      string (ns) + (NULL != ns ? "\"" : "") + ");\n\n" + @eval_buf;
+    }
+}
+
+private define parse_typedef (eval_buf, tokens, line, fp, found)
+{
+  variable type, tmp;
+
+  if (1 == length (tokens))
+    throw ClassError, "typedef statement needs an argument";
+  else
+    {
+    type = tokens[1];
+    tmp = strchop (type, '_', 0);
+
+    if (1 == length (tmp) || "Type" != tmp[1])
+      type += "_Type";
+
+    tmp = "typedef struct {\n";
+
+    @found = 0;
+
+    while (-1 != fgets (&line, fp))
+      {
+      if ("end" == strtrim (line))
+        {
+        @found = 1;
+        break;
+        }
+
+      ifnot (',' == line[-2])
+        throw ClassError, "typedef statement: missing comma";
+
+      tmp += line;
+      }
+
+    ifnot (@found)
+      throw ClassError, "Class::__INIT__::typedef block, end identifier is missing";
+
+    tmp += "}" + type + ";\n\n";
+
+    @eval_buf = tmp + @eval_buf;
+    }
+}
+
+private define parse_let (cname, eval_buf, tokens, line, fp, found)
+{
+  variable v, vname, tok, var_buf, tmp;
+
+  if (2 > length (tokens))
+    throw ClassError, "Class::__INIT__::let declaration needs at least 1 args";
+  else
+    {
+    vname = tokens[1];
+    v = @Var_Type;
+    v.const = strup (vname) == vname ? 1 : "let" == tokens[0];
+
+    if (2 < length (tokens))
+      {
+      tok = tokens[2];
+      if (tok == "=")
+        {
+        if (length (tokens) > 3)
+          var_buf = strjoin (tokens[[3:]]);
+        else
+          var_buf = "";
+
+        ifnot (';' == var_buf[-1])
+          {
+          @found = 0;
+          while (-1 != fgets (&line, fp))
+            {
+            var_buf += line;
+            if (';' == var_buf[-2])
+              {
+              @found = 1;
+              break;
+              }
+            }
+
+          ifnot (@found)
+            throw ClassError, "Class::__INIT__::unended variable expression";
+          }
+
+        var_buf = strtrim_end (var_buf, "\n;");
+        }
+      else
+        {
+        tmp = typeof (eval (tokens[2]));
+        ifnot (DataType_Type == tmp)
+          throw ClassError, "Class::__INIT__::var declaration argunent is not DataType_Type";
+
+        v.type = tmp;
+        var_buf = "NULL";
+        }
+      }
+    else
+      {
+      var_buf = "NULL";
+      v.type = Null_Type;
+      }
+
+    @eval_buf += "__->__ (\"" + cname + "\", \"" + vname + "\", " +
+      var_buf + ", \"Class::vset::NULL\";const = " + string (v.const) + ", dtype = " +
+        string (v.type) + ");\n\n";
+
+    @eval_buf += "static define " + vname + " ()\n{\n__->__ (\"" +
+    cname + "\",  \"" + vname + "\", \"Class::vget::" + vname +
+      "\";getref);\n}\n\n";
+    }
+}
+
+private define parse_beg_block (eval_buf, tokens, line, fp, found)
+{
+  @found = tokens[0];
+  while (-1 != fgets (&line, fp))
+    {
+    if ("end" == strtrim (line))
+      {
+      @found = NULL;
+      break;
+      }
+
+    if ("beg" == @found)
+      @eval_buf += line;
+    else
+      parse_block (eval_buf, line, fp, found);
+    }
+
+  ifnot (NULL == @found)
+    throw ClassError, "Class::__INIT__::beg - block, end identifier is missing";
+}
+
+private define parse_fun (cname, funs, eval_buf, tokens)
+{
+  variable funname, nargs, args, const, isproc, scope;
+
+  if (3 > length (tokens))
+    throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
+  else
+    {
+    __get_fun_head__ (tokens,
+      &funname, &nargs, &args, &const, &isproc, &scope);
+
+    @eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
+      "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
+         ";\n$9.const = " + string (const) + ";\n";
+
+    funs[funname] = @Fun_Type;
+    funs[funname].nargs = nargs;
+    funs[funname].const = const;
+    }
+}
+
+private define parse_variable (eval_buf, tokens, line, fp, found)
+{
+  variable v, i;
+
+  if (2 > length (tokens))
+    throw ClassError, "Class::__INIT__::var declaration needs at least 1 args";
+  else
+    {
+    v = "variable ";
+    i = 2;
+
+    if (any (["private", "static", "public"] == tokens[1]))
+      {
+      v = tokens[1] + " " + v;
+
+      if (3 > length (tokens))
+        throw ClassError, "Class::__INIT__::var declaration, missing varname";
+
+      v += tokens[2];
+      i = 3;
+      }
+    else
+      v = "private " + v + tokens[1];
+
+    if (i == length (tokens))
+      v += ";";
+    else
+      {
+      ifnot (tokens[i] == "=")
+        throw ClassError, "Class::__INIT__::" + tokens[i-1] + ", is missing assigment identifier";
+
+      i++;
+
+      ifnot (i == length (tokens))
+        v += strjoin (tokens[[i-1:]]);
+
+      ifnot (';' == v[-1])
+        {
+        @found = 0;
+        while (-1 != fgets (&line, fp))
+          {
+          v += line;
+
+          if (';' == strtrim_end (line)[-1])
+            {
+            @found = 1;
+            break;
+            }
+          }
+
+        ifnot (@found)
+          throw ClassError, "Class::__INIT__::unended variable expression";
+        }
+      }
+
+    @eval_buf += v + "\n\n";
+    }
+}
+
+private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
 {
   variable funname, nargs, args, const, isproc, scope;
 
@@ -697,7 +1028,6 @@ private define parse_function (cname, eval_buf, funs, tokens, line, fp, found)
 
 private define parse_subclass (cname, classpath, eval_buf, tokens, line, fp, found)
 {
-% @eval_buf - @found
   %define m (self, a, b) {strcat (a, b);}
   %define submeth () {struct {m = &m};}
   %s = struct {submeth = submeth ()};
@@ -786,14 +1116,10 @@ private define parse_subclass (cname, classpath, eval_buf, tokens, line, fp, fou
     }
 }
 
-private define parse_class ();
 private define parse_class (cname, classpath, eval_buf, funs, fp)
 {
   variable ot_class = 1;
-  variable ot_def = 0;
-  variable funname, nargs, args, i, found, tmp,
-    super = cname, const, isproc, scope,
-    var_buf, v, tok, line, tokens;
+  variable found, super = cname, line, tokens;
 
   funs["let"] = @Fun_Type;
   funs["let"].nargs = 2;
@@ -817,163 +1143,28 @@ private define parse_class (cname, classpath, eval_buf, funs, fp)
       }
 
     if ("require" == tokens[0])
-      if (4 > length (tokens))
-        throw ClassError, "Class::__INIT__::require declaration needs at least 4 args";
-      else
-        {
-        variable file = tokens[1];
-
-        ifnot ("from" == tokens[2])
-          throw ClassError, "Class::__INIT__::require statement, `from' keyword is missing";
-
-        variable from = tokens[3];
-
-        if (from == ".")
-          from = classpath + "/" + file;
-        else
-          {
-          from = Env->STD_LIB_PATH + "/" + from + "/" + file;
-          if (-1 == access (from + ".slc", F_OK))
-            from = strreplace (from, Env->STD_LIB_PATH, Env->USER_LIB_PATH);
-          }
-
-        variable ns = "Global";
-
-        ifnot (4 == length (tokens))
-          ifnot (6 == length (tokens))
-            throw ClassError, "Class::__INIT__::require declaration needs at least 6 args, to declare a namespace";
-          else
-            ifnot ("to" == tokens[4])
-              throw ClassError, "Class::__INIT__::require statement, `to' keyword is missing";
-            else
-              if ("." == tokens[5])
-                ns = cname;
-              else
-                ns = tokens[5];
-
-        @eval_buf += "Load.file (\"" + from + "\", \"" + ns + "\");\n";
-
-        continue;
-        }
+      {
+      parse_require (cname, classpath, funs, eval_buf, tokens);
+      continue;
+      }
 
     if (any (["include", "load"] == tokens[0]))
-      if (1 == length (tokens))
-        throw ClassError, "Class::__INIT__::" + tokens[0] + " statement needs an argument";
-      else
-        {
-        variable lcname = tokens[1];
-        variable lfrom = lcname;
-        variable lclasspath = CLASSPATH + "/" + lcname;
-        variable lfile = lclasspath + "/__init__.__";
-        variable cont = 0;
-
-        ifnot (2 == length (tokens))
-          ifnot ("from" == tokens[2])
-            throw ClassError, "Class::__INIT__::include, `from' identifier is expected";
-          else
-            if (3 == length (tokens))
-              throw ClassError, "Class::__INIT__::include, `from' expects a namespcase";
-            else
-              {
-              cont = 1;
-              lfrom = tokens[3];
-              lclasspath = CLASSPATH + "/" + lfrom;
-              lfile = lclasspath + "/" + lcname + ".__";
-              }
-
-        if (cont && 4 != length (tokens))
-          ifnot ("as" == tokens[4])
-            throw ClassError, "Class::__INIT__::include, `as' identifier is expected";
-          else
-            if (5 == length (tokens))
-              throw ClassError, "Class::__INIT__::include, `as' expects a class name";
-            else
-              lcname = tokens[5];
-
-        variable isinusr = 0;
-
-        if (-1 == access (lfile, F_OK))
-          if (-1 == access ((lfile = strreplace (
-            lfile, CLASSPATH, CLASSPATH + "/../usr/__"), isinusr = 1, lfile), F_OK))
-            throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
-
-        if ("include" == tokens[0])
-          {
-          variable lfp = fopen (lfile, "r");
-          if (NULL == lfp)
-            throw ClassError, "Class::__INIT__::" + lfile + "::cannot open";
-
-          () = fgets (&line, lfp);
-
-          if (strncmp (line, "beg", 3))
-            throw ClassError, "Class::__INIT__::include " + lfile + " `beg' keyword is missing";
-
-          variable lot_class = parse_class (lcname, lclasspath, eval_buf, funs, lfp);
-
-          if (lot_class)
-            throw ClassError, "Class::__INIT__::end identifier is missing";
-          }
-        else
-          @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
-            __init__ = path_basename_sans_extname (lfile), return_buf);
-
-        continue;
-        }
+      {
+      parse_load_include (funs, eval_buf, tokens, line);
+      continue;
+      }
 
     if ("import" == tokens[0])
-      if (1 == length (tokens))
-        throw ClassError, "Class::__INIT__::import statement needs an argument";
-      else
-        {
-        variable module = tokens[1];
-        ns = length (tokens) > 2 ? tokens[2] : NULL;
-
-        if ("NULL" == ns)
-          ns = NULL;
-
-        @eval_buf = "Load.module (\"" + module + "\", " + (NULL != ns ? "\"" : "") +
-          string (ns) + (NULL != ns ? "\"" : "") + ");\n\n" + @eval_buf;
-
-        continue;
-        }
+      {
+      parse_import (eval_buf, tokens);
+      continue;
+      }
 
     if ("typedef" == tokens[0])
-      if (1 == length (tokens))
-        throw ClassError, "typedef statement needs an argument";
-      else
-        {
-        variable type = tokens[1];
-        tmp = strchop (type, '_', 0);
-
-        if (1 == length (tmp) || "Type" != tmp[1])
-          type += "_Type";
-
-        tmp = "typedef struct {\n";
-
-        found = 0;
-
-        while (-1 != fgets (&line, fp))
-          {
-          if ("end" == strtrim (line))
-            {
-            found = 1;
-            break;
-            }
-
-          ifnot (',' == line[-2])
-            throw ClassError, "typedef statement: missing comma";
-
-          tmp += line;
-          }
-
-        ifnot (found)
-          throw ClassError, "Class::__INIT__::typedef block, end identifier is missing";
-
-        tmp += "}" + type + ";\n\n";
-
-        @eval_buf = tmp + @eval_buf;
-        continue;
-        }
+      {
+      parse_typedef (eval_buf, tokens, line, fp, &found);
+      continue;
+      }
 
     if ("subclass" == tokens[0])
       {
@@ -987,169 +1178,33 @@ private define parse_class (cname, classpath, eval_buf, funs, fp)
 
     if (any (["beg", "block"] == tokens[0]))
       {
-      found = tokens[0];
-      while (-1 != fgets (&line, fp))
-        {
-        if ("end" == strtrim (line))
-          {
-          found = NULL;
-          break;
-          }
-
-        if ("beg" == found)
-          @eval_buf += line;
-        else
-          parse_block (eval_buf, line, fp, &found);
-        }
-
-      ifnot (NULL == found)
-        throw ClassError, "Class::__INIT__::beg - block, end identifier is missing";
-       continue;
+      parse_beg_block (eval_buf, tokens, line, fp, &found);
+      continue;
       }
 
     if ("var" == tokens[0])
-      if (2 > length (tokens))
-        throw ClassError, "Class::__INIT__::var declaration needs at least 1 args";
-      else
-        {
-        v = "variable ";
-        i = 2;
-
-        if (any (["private", "static", "public"] == tokens[1]))
-          {
-          v = tokens[1] + " " + v;
-
-          if (3 > length (tokens))
-            throw ClassError, "Class::__INIT__::var declaration, missing varname";
-
-          v += tokens[2];
-          i = 3;
-          }
-        else
-          v = "private " + v + tokens[1];
-
-        if (i == length (tokens))
-          v += ";";
-        else
-          {
-          ifnot (tokens[i] == "=")
-            throw ClassError, "Class::__INIT__::" + tokens[i-1] + ", is missing assigment identifier";
-
-          i++;
-
-          ifnot (i == length (tokens))
-            v += strjoin (tokens[[i-1:]]);
-
-          ifnot (';' == v[-1])
-            {
-            found = 0;
-            while (-1 != fgets (&line, fp))
-              {
-              v += line;
-
-              if (';' == strtrim_end (line)[-1])
-                {
-                found = 1;
-                break;
-                }
-              }
-
-            ifnot (found)
-              throw ClassError, "Class::__INIT__::unended variable expression";
-            }
-          }
-
-        @eval_buf += v + "\n\n";
-        continue;
-        }
+      {
+      parse_variable (eval_buf, tokens, line, fp, &found);
+      continue;
+      }
 
     if ("let" == tokens[0] || "let!" == tokens[0])
-      if (2 > length (tokens))
-        throw ClassError, "Class::__INIT__::let declaration needs at least 1 args";
-      else
-        {
-        variable vname = tokens[1];
-        v = @Var_Type;
-        v.const = strup (vname) == vname ? 1 : "let" == tokens[0];
-
-        if (2 < length (tokens))
-          {
-          tok = tokens[2];
-          if (tok == "=")
-            {
-            if (length (tokens) > 3)
-              var_buf = strjoin (tokens[[3:]]);
-            else
-              var_buf = "";
-
-            ifnot (';' == var_buf[-1])
-              {
-              found = 0;
-              while (-1 != fgets (&line, fp))
-                {
-                var_buf += line;
-                if (';' == var_buf[-2])
-                  {
-                  found = 1;
-                  break;
-                  }
-                }
-
-              ifnot (found)
-                throw ClassError, "Class::__INIT__::unended variable expression";
-              }
-
-            var_buf = strtrim_end (var_buf, "\n;");
-            }
-          else
-            {
-            tmp = typeof (eval (tokens[2]));
-            ifnot (DataType_Type == tmp)
-              throw ClassError, "Class::__INIT__::var declaration argunent is not DataType_Type";
-
-            v.type = tmp;
-            var_buf = "NULL";
-            }
-          }
-        else
-          {
-          var_buf = "NULL";
-          v.type = Null_Type;
-          }
-
-        @eval_buf += "__->__ (\"" + cname + "\", \"" + vname + "\", " +
-          var_buf + ", \"Class::vset::NULL\";const = " + string (v.const) + ", dtype = " +
-            string (v.type) + ");\n\n";
-
-        @eval_buf += "static define " + vname + " ()\n{\n__->__ (\"" +
-        cname + "\",  \"" + vname + "\", \"Class::vget::" + vname +
-          "\";getref);\n}\n\n";
-
-        continue;
-        }
+      {
+      parse_let (cname, eval_buf, tokens, line, fp, &found);
+      continue;
+      }
 
     if (any (["def", "def!"] == tokens[0]))
       {
-      parse_function (cname, eval_buf, funs, tokens, line, fp, &found);
+      parse_def (cname, eval_buf, funs, tokens, line, fp, &found);
       continue;
       }
 
     if ("fun" == tokens[0])
-      if (3 > length (tokens))
-        throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
-      else
-        {
-        __get_fun_head__ (tokens,
-          &funname, &nargs, &args, &const, &isproc, &scope);
-
-        @eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
-          "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
-             ";\n$9.const = " + string (const) + ";\n";
-
-        funs[funname] = @Fun_Type;
-        funs[funname].nargs = nargs;
-        funs[funname].const = const;
-        }
+      {
+      parse_fun (cname, funs, eval_buf, tokens);
+      continue;
+      }
     }
 
   ot_class;

@@ -95,7 +95,7 @@ if (-1 == Dir.make_parents (This.datadir + "/config", File->PERM["PRIVATE"];stri
   This.err_handler ("cannot create directory " + This.datadir + "/config");
 
 if (-1 == Dir.make_parents (strreplace (This.datadir + "/config",
-    Env->USER_PATH, Env->SRC_PATH), File->PERM["PRIVATE"];strict))
+    Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.datadir + "/config");
 
 This.stdoutFd = IO.open_fn (This.stdoutFn);

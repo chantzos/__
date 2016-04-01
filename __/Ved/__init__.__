@@ -430,7 +430,7 @@ class Ved
   end
 
   def _draw_ (s) proc
-    if (-1 == s._len) % this shouldn't occur and stays here for debugging
+    if (-1 == s._len) % this shouldn't occur
       {
       Smg.send_msg ("_draw_ (), caught -1 == s._len condition" + s._fname, 1);
       s.lins = [__get_null_str (s._indent)];
@@ -479,15 +479,10 @@ class Ved
 
     if (arlen < rowslen - 1)
       {
-      variable t = String_Type[rowslen - arlen - 1];
-      if (s.opt_show_tilda)
-        {
-        t[*] = "~";
+      ifnot (s._type == "ashell")
         clrs[[arlen:length (clrs) -2]] = 5;
-        }
-      else
-        t[*] = "\000";
-
+      variable t = String_Type[rowslen - arlen - 1];
+      t[*] = s.opt_show_tilda ? "~" : " ";
       ar = [ar, t];
       }
 
@@ -837,7 +832,16 @@ class Ved
     markbacktick (s);
   end
 
+  var ERR_STACK = 0;
   def __err_handler__ (t, _s_) proc
+    ERR_STACK++;
+    variable fd = open (This.tmpdir + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["STATIC"]);
+    () = lseek (fd, 0, SEEK_END);
+    IO.tostdout (Ved._HLINE;fd = fd);
+    IO.tostdout (Env->PID, ERR_STACK);
+    IO.tostdout (t);
+    IO.tostdout (_s_);
+
     (@__get_reference ("__vmessages"));
     variable s = Ved.get_cur_buf ();
     Ved.draw_wind ();
