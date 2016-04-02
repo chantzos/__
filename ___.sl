@@ -301,13 +301,18 @@ private variable USER_CLS_PATH  = USER_PATH + "/__";
 private variable USER_DATA_PATH = USER_PATH + "/data";
 private variable USER_C_PATH    = USER_PATH + "/C";
 
-private variable SRC_USER_PATH     = SRC_PATH + "/usr";
-private variable SRC_USER_COM_PATH = SRC_USER_PATH + "/com";
-private variable SRC_USER_APP_PATH = SRC_USER_PATH + "/app";
-private variable SRC_USER_LIB_PATH = SRC_USER_PATH + "/___";
-private variable SRC_USER_CLS_PATH = SRC_USER_PATH + "/__";
-private variable SRC_USER_C_PATH   = SRC_USER_PATH + "/C";
-private variable SRC_USER_DATA_PATH= SRC_USER_PATH + "/data";
+private variable SRC_USER_PATH       = SRC_PATH + "/usr";
+private variable SRC_USER_COM_PATH   = SRC_USER_PATH + "/com";
+private variable SRC_USER_APP_PATH   = SRC_USER_PATH + "/app";
+private variable SRC_USER_LIB_PATH   = SRC_USER_PATH + "/___";
+public variable SRC_USER_CLASS_PATH = SRC_USER_PATH + "/__";
+private variable SRC_USER_C_PATH     = SRC_USER_PATH + "/C";
+private variable SRC_USER_DATA_PATH  = SRC_USER_PATH + "/data";
+
+__use_namespace ("Env");
+
+static define SRC_USER_CLASS_PATH () {SRC_USER_PATH + "/__";}
+__use_namespace ("Install");
 
 private variable INST_PATHS = [
   ROOT_PATH, STD_PATH, TMP_PATH, BIN_PATH,
@@ -747,10 +752,10 @@ private define __main__ ()
         dargs = {SRC_USER_APP_PATH, USER_APP_PATH},
         fargs = {SRC_USER_APP_PATH, USER_APP_PATH, 1});
 
-    ifnot (access (SRC_USER_CLS_PATH, F_OK|R_OK))
-      Path.walk (SRC_USER_CLS_PATH, &lib_dir_callback, &file_callback_libs;
-        dargs = {SRC_USER_CLS_PATH, USER_CLS_PATH},
-        fargs = {SRC_USER_CLS_PATH, USER_CLS_PATH, 0});
+    ifnot (access (SRC_USER_CLASS_PATH, F_OK|R_OK))
+      Path.walk (SRC_USER_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH},
+        fargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH, 0});
 
     ifnot (access (SRC_USER_APP_PATH, F_OK|R_OK))
       {

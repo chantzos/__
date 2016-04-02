@@ -1,0 +1,21 @@
+subclass Arg
+  __init__
+    replace
+    exists
+    delete
+  end
+
+  def exists (arg, argv)
+    variable index = wherenot (strncmp (argv, arg, strlen (arg)));
+    length (index) ? index[0] : NULL;
+  end
+
+  def replace (argv, atindex, witharg)
+    (@argv)[atindex] = witharg;
+  end
+
+  def delete (argv, atindex)
+    (@argv)[atindex] = NULL;
+    @argv = (@argv)[wherenot (_isnull (@argv))];
+  end
+end

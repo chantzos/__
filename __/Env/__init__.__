@@ -44,6 +44,7 @@ class Env
 
   let SRC_STD_DATA_PATH   = SRC_PATH + "/data";
   let SRC_USER_DATA_PATH  = SRC_USER_PATH + "/data";
+  let SRC_USER_CLASS_PATH = SRC_USER_PATH + "__";
 
   def defenv ()
     variable lenv = [
