@@ -443,8 +443,23 @@ public define handle_comma (s)
     Smg.refresh ();
 }
 
+private define __app_new (s)
+{
+  variable rline = Ved.get_cur_rline ();
+  app_new (rline);
+  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+}
+
+private define __app_reconnect (s)
+{
+  variable rline = Ved.get_cur_rline ();
+  app_reconnect (rline);
+  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+}
 
 VED_PAGER[string (',')] = &handle_comma;
+VED_PAGER[string (Input->F1)] = &__app_reconnect;
+VED_PAGER[string (Input->F2)] = &__app_new;
 
 VED_CLINE["e"]   =      &_edit_other;
 VED_CLINE["b"]   =      &_edit_other;

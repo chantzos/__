@@ -34,6 +34,7 @@ class Client
       return;
 
     Api.restore_screen ();
+
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end
@@ -70,6 +71,7 @@ class Client
       return;
 
     Api.restore_screen ();
+
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end

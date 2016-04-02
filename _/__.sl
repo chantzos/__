@@ -652,8 +652,23 @@ private define __Class_From_Init__ ();
 
 private define parse_class ();
 
-private define parse_block (eval_buf, line, fp, found)
+private define parse_block (eval_buf, tokens, line, fp)
 {
+  variable open_block = 1;
+  variable block_buf = "";
+
+  while (-1 != fgets (&line, fp))
+    {
+    if ("end" == strtrim (line))
+      {
+      open_block = 0;
+      break;
+      }
+    }
+
+  if (open_block)
+    throw ClassError, "Class::__INIT__::unended block statement";
+
 % @eval_buf - line - fp - @found
 }
 
@@ -886,7 +901,7 @@ private define parse_beg_block (eval_buf, tokens, line, fp, found)
     if ("beg" == @found)
       @eval_buf += line;
     else
-      parse_block (eval_buf, line, fp, found);
+      parse_block (eval_buf, tokens, line, fp);
     }
 
   ifnot (NULL == @found)
@@ -971,7 +986,7 @@ private define parse_variable (eval_buf, tokens, line, fp, found)
 private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
 {
   if (3 > length (tokens))
-    throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
+    throw ClassError, "Class::__INIT__::def declaration needs at least 3 args";
 
   variable funname, nargs, args, const, isproc, scope;
 
@@ -995,6 +1010,12 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
       {
       @found = 1;
       break;
+      }
+
+    if ("block" == strtrim (line))
+      {
+      parse_block (eval_buf, tokens, line, fp;scope = "fun_in");
+      continue;
       }
 
     @eval_buf += line;
@@ -1290,8 +1311,8 @@ private define __Class_From_Init__ (classpath)
   variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
     cname);
 
- if (qualifier_exists ("return_buf"))
-   return eval_buf;
+  if (qualifier_exists ("return_buf"))
+    return eval_buf;
 
   __in__ = classpath + "/" + as + ".sl";
 

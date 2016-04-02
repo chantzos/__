@@ -346,16 +346,4 @@ class Opt
   end
 
   subclass Arg from Opt
-  def is_arg (arg, argv)
-    variable index = wherenot (strncmp (argv, arg, strlen (arg)));
-    length (index) ? index[0] : NULL;
-  end
-
-
-%  def if_exists ()
-%  end
-%  def replace (argv, arg, with)
-%  end
-%  def arg ()
-%  end
 end

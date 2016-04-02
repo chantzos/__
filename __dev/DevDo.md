@@ -38,7 +38,7 @@ LexPars:
 															possible at this level
               (__  to means functions|blocks that destroyed after execution :possible
                    at the one standard unit
-                    __init__   :locked 
+                    __init__   : locked 
                        {       : struct start
                        }       : struct end
                     -> prefix for send
