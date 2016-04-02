@@ -1236,11 +1236,11 @@ class Ved
 
     args = list_to_array (args, String_Type);
 
-    ind = Opt.is_arg ("--pat=", args);
+    ind = Opt.Arg.compare ("--pat=", args);
     ifnot (NULL == ind)
       pat = substr (args[ind], strlen ("--pat=") + 1, -1);
 
-    ind = Opt.is_arg ("--sub=", args);
+    ind = Opt.Arg.compare ("--sub=", args);
     ifnot (NULL == ind)
       sub = substr (args[ind], strlen ("--sub=") + 1, -1);
 
@@ -1256,15 +1256,15 @@ class Ved
       return;
       }
 
-    ind = Opt.is_arg ("--global", args);
+    ind = Opt.Arg.exists ("--global", args);
     ifnot (NULL == ind)
       global = 1;
 
-    ind = Opt.is_arg ("--dont-ask-when-subst", args);
+    ind = Opt.Arg.exists ("--dont-ask-when-subst", args);
     ifnot (NULL == ind)
       ask = 0;
 
-    ind = Opt.is_arg ("--range=", args);
+    ind = Opt.Arg.compare ("--range=", args);
     ifnot (NULL == ind)
       {
       lnrs = Ved.parse_arg_range (buf, args[ind], lnrs);
@@ -1319,7 +1319,7 @@ class Ved
     variable fn;
     variable args = argv[[1:]];
 
-    variable ind = Opt.is_arg ("--from-file=", args);
+    variable ind = Opt.Arg.compare ("--from-file=", args);
     ifnot (NULL == ind)
       {
       fn = strchop (args[ind], '=', 0);

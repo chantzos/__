@@ -57,7 +57,7 @@ else
   else
     Class.load ("Srv");
 
-DEBUG = Opt.is_arg ("--debug", This.argv);
+DEBUG = Opt.Arg.exists ("--debug", This.argv);
 
 ifnot (NULL == DEBUG)
   {
@@ -849,7 +849,7 @@ private define _execute_ (argv)
 
   argv = ();
 
-  variable isscratch = Opt.is_arg ("--pager", argv);
+  variable isscratch = Opt.Arg.exists ("--pager", argv);
 
   ifnot (NULL == isscratch)
     {
@@ -891,7 +891,7 @@ private define _execute_ (argv)
 
   if (NULL == isscratch &&
   %%% CARE FOR CHANGES argv-index
-    (any (argv[2] == ["man"]) && NULL == Opt.is_arg ("--buildcache", argv)))
+    (any (argv[2] == ["man"]) && NULL == Opt.Arg.exists ("--buildcache", argv)))
     {
     isbg = 0;
     stdoutfile = SCRATCH;
@@ -1017,9 +1017,9 @@ private define scratch_to_stdout (argv)
 private define __clear__ (argv)
 {
   variable fn = SCRATCH;
-  if (Opt.is_arg ("--stdout", argv))
+  if (Opt.Arg.exists ("--stdout", argv))
     fn = This.stdoutFn;
-  else if (Opt.is_arg ("--stderr", argv))
+  else if (Opt.Arg.exists ("--stderr", argv))
     fn = This.stderrFn;
 
   () = File.write (fn, "\000");
@@ -1217,7 +1217,7 @@ private define __write__ (argv)
   variable lnrs = [0:b._len];
   variable range = NULL;
   variable append = NULL;
-  variable ind = Opt.is_arg ("--range=", argv);
+  variable ind = Opt.Arg.compare ("--range=", argv);
   variable lines;
   variable file;
   variable command;

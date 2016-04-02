@@ -1,11 +1,16 @@
 subclass Arg
   __init__
     replace
-    exists
+    compare
     delete
+    exists
   end
 
   def exists (arg, argv)
+    wherefirst (arg == argv);
+  end
+
+  def compare (arg, argv)
     variable index = wherenot (strncmp (argv, arg, strlen (arg)));
     length (index) ? index[0] : NULL;
   end

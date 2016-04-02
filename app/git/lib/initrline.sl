@@ -162,11 +162,11 @@ private define __log__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  variable max_count = Opt.is_arg ("--max-count=", argv);
+  variable max_count = Opt.Arg.compare ("--max-count=", argv);
   if (NULL == max_count)
     argv = [argv, "--max-count=10"];
 
-  variable patch = Opt.is_arg ("--patch_show", argv);
+  variable patch = Opt.Arg.exists ("--patch_show", argv);
   ifnot (NULL == patch)
     ifnot (any ("-p" == argv))
       argv[patch] = "-p";

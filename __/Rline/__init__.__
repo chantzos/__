@@ -108,7 +108,7 @@ class Rline
   def _execProc_Type_ (func, argv) proc
     variable issu = 0;
     variable passwd = "";
-    variable index = Opt.is_arg ("--su", argv);
+    variable index = Opt.Arg.exists ("--su", argv);
 
     ifnot (NULL == index)
       {

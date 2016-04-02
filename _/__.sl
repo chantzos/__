@@ -172,7 +172,7 @@ private define __setfun__ (cname, funname, funcref, nargs, const)
 
   if (submethod)
     {
-    c["__SUB__"] = funname;
+    c["__SUB__"] = [c["__SUB__"], funname];
     return;
     }
 
@@ -1044,14 +1044,14 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
     else
       {
       variable lfrom = from;
-      from = Env->USER_CLASS_PATH + "/" + from + "/" + as + ".__";
+      from = CLASSPATH + "/../usr/__/" + from + "/" + as + ".__";
       if (-1 == access (from, F_OK|R_OK))
         if (-1 == access (
-            (from = Env->STD_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+          (from = CLASSPATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
           if (-1 == access (
-              (from = CLASSPATH + "/../usr/__/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+              (from = Env->USER_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
             if (-1 == access (
-                (from = CLASSPATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+                (from = Env->STD_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
               throw ClassError, "Class::__INIT__::subclass, cannot locate subclass " + as +
                 " from " + lfrom;
        }
