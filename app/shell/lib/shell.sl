@@ -11,6 +11,7 @@ private define mainloop ()
 public define shell ()
 {
   OUT_VED.opt_show_tilda = 0;
+  OUT_VED.opt_show_status_line = 0;
 
   Ved.setbuf (OUT_VED._abspath);
 

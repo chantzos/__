@@ -160,6 +160,7 @@ beg
     s._autochdir = qualifier ("_autochdir", t._autochdir);
 
     s.opt_show_tilda = qualifier ("show_tilda", t.opt_show_tilda);
+    s.opt_show_status_line = qualifier ("opt_show_status_line", t.opt_show_status_line);
 
     s.lexicalhl = t.lexicalhl;
     s.autoindent = t.autoindent;
@@ -428,6 +429,7 @@ beg
       vedloop = &_vedloop_,
       vedloopcallback = &_vedloopcallback_,
       opt_show_tilda = 1,
+      opt_show_status_line = 1,
       };
   end
 

@@ -454,8 +454,16 @@ private define stk_reverse ()
     args[i];
 }
 
-public define struct_tostring (s)
+public define struct_tostring ()
 {
+  ifnot (_NARGS)
+    return "";
+
+  variable s = ();
+
+  ifnot (typeof (s) == Struct_Type)
+    return s;
+
   variable fields = get_struct_field_names (s);
   variable fmt = "";
   loop (length (fields))
@@ -668,8 +676,6 @@ private define parse_block (eval_buf, tokens, line, fp)
 
   if (open_block)
     throw ClassError, "Class::__INIT__::unended block statement";
-
-% @eval_buf - line - fp - @found
 }
 
 private define parse_require (cname, classpath, funs, eval_buf, tokens)
