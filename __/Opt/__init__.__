@@ -1,6 +1,7 @@
 class Opt
 % part of S-Lang DISTRIBUTION
 % adopted for the application
+%  subclass Parse from Opt
 
   var CMDOPT_REQ_VALUE =	0x1;
   var CMDOPT_OPT_VALUE =	0x2;

@@ -2,14 +2,12 @@ Class.load ("Scm");
 
 public define setrepo ();
 
-public variable VED_INFOCLRFG = Smg->NOCOLOR;
-public variable VED_INFOCLRBG = Smg->NOCOLOR;
-
 public variable DIFF = This.tmpdir + "/__DIFF__.diff";
 public variable DIFF_VED = Ved.init_ftype ("diff");
 
 DIFF_VED._fd = IO.open_fn (DIFF);
-diff_settype (DIFF_VED, DIFF, VED_ROWS, NULL;_autochdir = 0, show_tilda = 0);
+diff_settype (DIFF_VED, DIFF, VED_ROWS, NULL;
+  _autochdir = 0, show_tilda = 0, show_status_line = 0);
 
 private variable i_colors = [Smg->COLOR.infobg];
 
@@ -67,16 +65,13 @@ public define on_wind_new (w)
   bved._fd = IO.open_fn (b);
 
   (@__get_reference (This.stdouttype + "_settype"))
-    (aved, This.stdoutFn, w.frame_rows[0], NULL;_autochdir = 0);
+    (aved, This.stdoutFn, w.frame_rows[0], NULL;
+    indent = 2, _autochdir = 0, show_tilda = 0,
+    show_status_line = 0, lexicalhl = &stat_lexicalhl);
 
-  txt_settype (bved, b, w.frame_rows[1], NULL;_autochdir = 0);
-
-  aved.opt_show_tilda = 0;
-  bved.opt_show_tilda = 0;
-  aved._indent = 2;
-
-  bved.lexicalhl = &info_lexicalhl;
-  aved.lexicalhl = &stat_lexicalhl;
+  txt_settype (bved, b, w.frame_rows[1], NULL;
+    _autochdir = 0, show_tilda = 0, show_status_line = 0,
+    lexicalhl = &info_lexicalhl);
 
   Ved.setbuf (b;frame = 1);
   Ved.setbuf (This.stdoutFn);

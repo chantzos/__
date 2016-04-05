@@ -1155,7 +1155,8 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
 
   @eval_buf = "" + cname + as + " = __->__ (\"" + cname + as + "\", \"" + cname + "\", \"" +
     sub_classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
-      "\"], \"Class::classnew::NULL\");\n\n" + @eval_buf;
+      "\"], \"Class::classnew::subclass__from__" + cname + "__as__" + as +
+        "\");\n\n" + @eval_buf;
 
   @eval_buf += "\n" + sub_buf + "\n";
 }
@@ -1306,7 +1307,7 @@ private define __Class_From_Init__ (classpath)
 
   eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
     classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
-      "\"], \"Class::classnew::NULL\");\n\n" + eval_buf;
+      "\"], \"Class::classnew::" + cname + "\");\n\n" + eval_buf;
 
   eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
 
@@ -1328,6 +1329,7 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
+ifnot ("Opt" == cname)
   () = remove (__in__);
 }
 

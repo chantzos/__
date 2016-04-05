@@ -1066,6 +1066,10 @@ beg
   def insert (s, line, lnr, prev_l, next_l) proc
     Input.setlang (lang);
 
+    variable save_st_line = s.opt_show_status_line;
+
+    s.opt_show_status_line = 1;
+
     topline (" -- insert --");
 
     variable sa = @Insert_Type;
@@ -1083,5 +1087,6 @@ beg
     lang = Input.getmapname ();
 
     Input.setlang ("en");
+    s.opt_show_status_line = save_st_line;
   end
 end

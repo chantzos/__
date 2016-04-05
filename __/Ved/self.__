@@ -152,21 +152,20 @@ beg
   end
 
   def initbuf (s, fname, rows, lines, t)
-    s._maxlen = t._maxlen;
-    s._indent = t._indent;
-    s._shiftwidth = t._shiftwidth;
-    s._expandtab = t._expandtab;
-    s._autoindent = t._autoindent;
-    s._autochdir = qualifier ("_autochdir", t._autochdir);
-
-    s.opt_show_tilda = qualifier ("show_tilda", t.opt_show_tilda);
-    s.opt_show_status_line = qualifier ("opt_show_status_line", t.opt_show_status_line);
-
-    s.lexicalhl = t.lexicalhl;
-    s.autoindent = t.autoindent;
+    s._maxlen     = qualifier ("maxlen", t._maxlen);
+    s._indent     = qualifier ("indent", t._indent);
+    s._shiftwidth = qualifier ("shiftwidth", t._shiftwidth);
+    s._expandtab  = qualifier ("expandtab", t._expandtab);
+    s._autoindent = qualifier ("_autoindent", t._autoindent);
+    s.autoindent  = qualifier ("autoindent", t.autoindent);
+    s._autochdir  = qualifier ("_autochdir", t._autochdir);
+    s.lexicalhl   = qualifier ("lexicalhl", t.lexicalhl);
     s.draw = t.draw;
     s.vedloop = t.vedloop;
     s.vedloopcallback = t.vedloopcallback;
+
+    s.opt_show_tilda = qualifier ("show_tilda", t.opt_show_tilda);
+    s.opt_show_status_line = qualifier ("show_status_line", t.opt_show_status_line);
 
     s._fname = fname;
 
@@ -199,7 +198,7 @@ beg
     s.ptr[1] = s._indent;
 
     s._findex = s._indent;
-    s._index = s._indent;
+    s._index  = s._indent;
 
     s.undo = String_Type[0];
     s._undolevel = 0;
@@ -289,6 +288,7 @@ beg
   end
 
   def del_frame (?)
+    % don't jump to special buffers after operation
     variable frame = _NARGS > 1 ? () : NULL;
     variable self = ();
     if (NULL == frame)

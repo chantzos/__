@@ -841,14 +841,15 @@ class Ved
   var ERR_STACK = 0;
   def __err_handler__ (t, _s_) proc
     ERR_STACK++;
-    variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["STATIC"]);
+
+    variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["PUBLIC"]);
     () = lseek (fd, 0, SEEK_END);
     IO.tostdout (Ved.__HLINE__ ();fd = fd);
     IO.tostdout (Env->PID, ERR_STACK;fd = fd);
     IO.tostdout (t;fd = fd);
     IO.tostdout (Struct.to_string (_s_);fd = fd);
-  if (ERR_STACK > 4)
-    exit_me (1);
+    if (ERR_STACK > 4)
+      exit_me (1);
 
     (@__get_reference ("__vmessages"));
     variable s = Ved.get_cur_buf ();
