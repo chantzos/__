@@ -61,7 +61,7 @@ define main ()
     recursive = NULL,
     filelist = {},
     dirlist = {},
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("--no-preserve-root", &no_preserve_root);
   c.add ("ignore", &assign_string_pattern, &opts.pattern, &opts.ignore;type = "string");

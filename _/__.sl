@@ -198,7 +198,8 @@ private define __eval_method__ (cname, funname, nargs)
   if (nargs == VARARGS)
     {
     def_body = "\n" + `  variable args = __pop_list (_NARGS);` + "\n" +
-    `  list_append (args, "` + cname + `::` + funname + `::` + funname + `");` + "\n" +
+    `  list_append (args, "` + qualifier ("as", cname) + `::` + funname
+     + `::` + funname + `");` + "\n" +
     `  __->__ (__push_list (args);;__qualifiers);`;
     def_args = "";
     }
@@ -208,15 +209,16 @@ private define __eval_method__ (cname, funname, nargs)
     _for i (1, nargs)
       def_args += ", arg" + string (i);
 
-    def_body = "\n" + `  __->__ (` + def_args + `, "` + cname + `::` +
+    def_body = "\n" + `  __->__ (` + def_args + `, "` + qualifier ("as", cname) + `::` +
       funname + `::@method@";;__qualifiers);`;
     }
 
    variable err_buf;
-   variable eval_buf = "\n" + `private define ` + cname + "_" + funname + ` (` + def_args + `)` + "\n" +
+   variable eval_buf = "\n" + `private define ` + cname + "_"
+     + funname + ` (` + def_args + `)` + "\n" +
     `{` + def_body + "\n}\n" +
-    `set_struct_field (__->__ ("` + cname + `", "Class::getself"), "` +
-    funname + `", &` + cname + "_" + funname + `);` + "\n";
+    `set_struct_field (__->__ ("` + qualifier ("as", cname) + `", "Class::getself"), "` +
+    qualifier ("method_name", funname) + `", &` + cname +  "_"  + funname + `);` + "\n";
 
   if (qualifier_exists ("return_buf"))
     return eval_buf;
@@ -641,7 +643,11 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, sc
     }
 
   if (ind == length (tokens))
+    {
+    if (qualifier_exists ("add_meth_decl"))
+      @funname = qualifier ("cname", "") + @funname;
     return;
+    }
 
   _for i (ind, length (tokens) - 1)
     if ("muttable" == tokens[i])
@@ -654,6 +660,10 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, sc
       @scope = "private";
     else
       throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";
+
+  if (qualifier_exists ("add_meth_decl"))
+    ifnot (@isproc)
+      @funname = qualifier ("cname", "") + @funname;
 }
 
 private define __Class_From_Init__ ();
@@ -922,7 +932,7 @@ private define parse_fun (cname, funs, eval_buf, tokens)
     throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
 
   __get_fun_head__ (tokens,
-    &funname, &nargs, &args, &const, &isproc, &scope);
+    &funname, &nargs, &args, &const, &isproc, &scope;;__qualifiers);
 
   @eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
     "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
@@ -997,7 +1007,7 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
   variable funname, nargs, args, const, isproc, scope;
 
   __get_fun_head__ (tokens,
-    &funname, &nargs, &args, &const, &isproc, &scope);
+    &funname, &nargs, &args, &const, &isproc, &scope;;__qualifiers);
 
   args = strtrim (args, "()");
   args = strtok (args, ",");
@@ -1131,19 +1141,24 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
   variable sub_classpath = path_dirname (from);
   variable i;
 
-  parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp);
+  parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;
+    add_meth_decl, cname = as + "_");
 
   variable __funs__ = assoc_get_keys (my_funs);
+  variable __funs__methods = @__funs__;
 
   _for i (0, length (__funs__) - 1)
-    sub_buf += __eval_method__ (sub_cname, __funs__[i], my_funs[__funs__[i]].nargs;
-      return_buf);
+    __funs__methods[i] =  strjoin (strchop (__funs__[i], '_', 0)[[1:]], "_");
+
+  _for i (0, length (__funs__) - 1)
+    sub_buf += __eval_method__ (cname, __funs__[i], my_funs[__funs__[i]].nargs;
+      return_buf, method_name = __funs__methods[i], as = sub_cname);
 
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
     "  struct {";
 
   _for i (0, length (methods) - 1)
-    sub_buf += methods[i] + "= &" + cname + as + "_" + methods[i] + ",";
+    sub_buf += methods[i] + "= &" + cname + "_" + as + "_" + methods[i] + ",\n";
 
   sub_buf += "};\n}\n" +
    `__->__ ("` + cname + `", "` + as +
@@ -1154,7 +1169,7 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
    `"` + as + `", ` + as + `("` + cname + `"));`;
 
   @eval_buf = "" + cname + as + " = __->__ (\"" + cname + as + "\", \"" + cname + "\", \"" +
-    sub_classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
+    sub_classpath + "\", 1, [\"" + strjoin (__funs__methods, "\",\n \"") +
       "\"], \"Class::classnew::subclass__from__" + cname + "__as__" + as +
         "\");\n\n" + @eval_buf;
 
@@ -1229,13 +1244,13 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
     if (any (["def", "def!"] == tokens[0]))
       {
-      parse_def (cname, eval_buf, funs, tokens, line, fp, &found);
+      parse_def (cname, eval_buf, funs, tokens, line, fp, &found;;__qualifiers);
       continue;
       }
 
     if ("fun" == tokens[0])
       {
-      parse_fun (cname, funs, eval_buf, tokens);
+      parse_fun (cname, funs, eval_buf, tokens;;__qualifiers);
       continue;
       }
     }
@@ -1329,7 +1344,6 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
-ifnot ("Opt" == cname)
   () = remove (__in__);
 }
 

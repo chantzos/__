@@ -20,7 +20,7 @@ define main ()
     mountpoint = NULL,
     device = NULL,
     mount = Sys.which ("mount"),
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   if (NULL == mount)
     {

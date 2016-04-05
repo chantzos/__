@@ -59,7 +59,7 @@ define main ()
     directories = NULL,
     mode = NULL,
     recursive = NULL,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("mode", &mode;type = "str");
   c.add ("recursive", &recursive);

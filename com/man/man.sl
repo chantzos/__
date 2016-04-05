@@ -161,7 +161,7 @@ define main ()
     options = 0,
     cache = NULL,
     cachefile = sprintf ("%s/cache.txt", DATA_DIR),
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   if (-1 == access (DATA_DIR, F_OK))
     if (-1 == mkdir (DATA_DIR))

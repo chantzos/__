@@ -18,7 +18,7 @@ define main ()
     parents = NULL,
     interactive = NULL,
     path_arr = String_Type[0],
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("parents", &parents);
   c.add ("i|interactive", &interactive);

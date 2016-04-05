@@ -15,7 +15,7 @@ define main ()
     atime = NULL,
     nocreate = NULL,
     tim = localtime (_time),
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("time", &tf;type = "string");
   c.add ("mtime", &mtime);

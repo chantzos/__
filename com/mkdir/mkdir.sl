@@ -16,7 +16,7 @@ define main ()
     exit_code = 0,
     verbose = NULL,
     path_arr = String_Type[0],
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("mode", &mode;type = "str");
   c.add ("parents", &parents);

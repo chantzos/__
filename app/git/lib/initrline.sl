@@ -9,7 +9,7 @@ private define __write_std__ ()
 
   () = File.write (std._abspath, __status_header__);
 
-  variable status = Scm.status (;fd = std._fd);
+  variable status = Scm.Git.status (;fd = std._fd);
   if (status)
     std = NULL;
 
@@ -66,14 +66,14 @@ public define setrepo (repo)
       return -1;
       }
 
-  variable s = Scm.branches ();
+  variable s = Scm.Git.branches ();
   if (NULL == s)
     {
     __messages;
     return -1;
     }
 
-  variable url = Scm.get_upstream_url ();
+  variable url = Scm.Git.get_upstream_url ();
   if (NULL == url)
     __messages;
 
@@ -132,7 +132,7 @@ private define __logpatch__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  ifnot (Scm.logpatch (;redir_to_file = SCRATCH, flags = ">|"))
+  ifnot (Scm.Git.logpatch (;redir_to_file = SCRATCH, flags = ">|"))
     __scratch (NULL);
   else
     __messages;
@@ -150,7 +150,7 @@ private define __diffrevision__ (argv)
     return;
     }
 
-  ifnot (Scm.diffrevision (argv[1];redir_to_file = SCRATCH,
+  ifnot (Scm.Git.diffrevision (argv[1];redir_to_file = SCRATCH,
       flags = ">|"))
     __scratch (NULL);
   else
@@ -180,7 +180,7 @@ private define __log__ (argv)
   else
     args = Array.to_list (args);
 
-  ifnot (Scm.log (__push_list (args);redir_to_file = SCRATCH, flags = ">|"))
+  ifnot (Scm.Git.log (__push_list (args);redir_to_file = SCRATCH, flags = ">|"))
     {
     variable i, ia = -1,
       ar = File.readlines (SCRATCH);
@@ -199,13 +199,13 @@ private define __log__ (argv)
 
 private define __commitall__ (argv)
 {
-  if (Scm.status (;redir_to_file = SCRATCH, flags = ">|"))
+  if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">|"))
     {
     __messages;
     return;
     }
 
-  if (Scm.diff (;redir_to_file = SCRATCH, flags = ">>"))
+  if (Scm.Git.diff (;redir_to_file = SCRATCH, flags = ">>"))
     {
     __messages;
     return;
@@ -235,10 +235,10 @@ private define __commitall__ (argv)
     return;
     }
 
-  ifnot (Scm.commitall (strjoin (lines, "\n");redir_to_file = DIFF,
+  ifnot (Scm.Git.commitall (strjoin (lines, "\n");redir_to_file = DIFF,
       flags = ">|"))
     {
-    () = Scm.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
+    () = Scm.Git.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
       redir_to_file = DIFF, flags = ">>");
 
     viewfile (DIFF_VED, "diff", [1, 0], 0);
@@ -267,13 +267,13 @@ private define __commit__ (argv)
 
   variable file = DIFF;
 
-  if (Scm.status (;redir_to_file = SCRATCH, flags = ">|"))
+  if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">|"))
     {
     __messages;
     return;
     }
 
-  if (Scm.diff (;redir_to_file = SCRATCH, flags = ">>"))
+  if (Scm.Git.diff (;redir_to_file = SCRATCH, flags = ">>"))
     {
     __messages;
     return;
@@ -308,10 +308,10 @@ private define __commit__ (argv)
 
   variable l = Array.to_list (argv);
 
-  ifnot (Scm.commit (__push_list (l), strjoin (lines, "\n");redir_to_file = DIFF,
+  ifnot (Scm.Git.commit (__push_list (l), strjoin (lines, "\n");redir_to_file = DIFF,
       flags = ">|"))
     {
-    () = Scm.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
+    () = Scm.Git.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
       redir_to_file = DIFF, flags = ">>");
 
     viewfile (DIFF_VED, "diff", [1, 0], 0);
@@ -345,7 +345,7 @@ private define __add__ (argv)
     return;
     }
 
-  ifnot (Scm.add (file;redir_to_file = SCRATCH, flags = ">|"))
+  ifnot (Scm.Git.add (file;redir_to_file = SCRATCH, flags = ">|"))
     {
     __scratch (NULL);
 
@@ -365,7 +365,7 @@ private define __diff__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  ifnot (Scm.diff (;redir_to_file = DIFF, flags = ">|"))
+  ifnot (Scm.Git.diff (;redir_to_file = DIFF, flags = ">|"))
     {
     variable ved = @Ved.get_cur_buf ();
     viewfile (DIFF_VED, "diff", [1, 0], 0);
@@ -383,7 +383,7 @@ private define __branch__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  ifnot (Scm.branch (;redir_to_file = SCRATCH, flags = ">|"))
+  ifnot (Scm.Git.branch (;redir_to_file = SCRATCH, flags = ">|"))
     __scratch (NULL);
   else
     __messages;
@@ -397,9 +397,9 @@ private define __branchnew__ (argv)
   if (1 == length (argv))
     return;
 
-  ifnot (Scm.branchnew (argv[1];redir_to_file = SCRATCH, flags = ">|"))
+  ifnot (Scm.Git.branchnew (argv[1];redir_to_file = SCRATCH, flags = ">|"))
     {
-    variable s = Scm.branches ();
+    variable s = Scm.Git.branches ();
     if (NULL == s)
       {
       __messages;
@@ -423,10 +423,10 @@ private define __branchchange__ (argv)
   if (1 == length (argv))
     return;
 
-  ifnot (Scm.branchchange (argv[1];redir_to_file = SCRATCH,
+  ifnot (Scm.Git.branchchange (argv[1];redir_to_file = SCRATCH,
       flags = ">|"))
     {
-    variable s = Scm.branches ();
+    variable s = Scm.Git.branches ();
     if (NULL == s)
       {
       __messages;
@@ -458,10 +458,10 @@ private define __branchdelete__ (argv)
   if (1 == length (argv))
     return;
 
-  ifnot (Scm.branchdelete (argv[1];redir_to_file = SCRATCH,
+  ifnot (Scm.Git.branchdelete (argv[1];redir_to_file = SCRATCH,
       flags = ">|"))
     {
-    variable s = Scm.branches ();
+    variable s = Scm.Git.branches ();
     if (NULL == s)
       {
       __messages;
@@ -482,7 +482,7 @@ private define __push_upstream__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  variable url = Scm.get_upstream_url ();
+  variable url = Scm.Git.get_upstream_url ();
   if (NULL == url)
     {
     __messages;
@@ -517,7 +517,7 @@ private define __push_upstream__ (argv)
 
   url = sprintf ("https://%s:%s@%s", username, passwd, substr (url, 9, -1));
 
-  if (Scm.push (url;redir_to_file = SCRATCH, flags = ">|"))
+  if (Scm.Git.push (url;redir_to_file = SCRATCH, flags = ">|"))
     {
     __messages;
     () = File.write (This.stderrFn, "\000");
@@ -532,7 +532,7 @@ private define __pull__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  if (Scm.pull (;redir_to_file = SCRATCH, flags = ">>"))
+  if (Scm.Git.pull (;redir_to_file = SCRATCH, flags = ">>"))
     {
     __messages;
     return;
@@ -591,7 +591,7 @@ private define __init__ (argv)
     return;
     }
 
-  if (Scm.init (;redir_to_file = SCRATCH, flags = ">|"))
+  if (Scm.Git.init (;redir_to_file = SCRATCH, flags = ">|"))
     {
     __messages;
     return;

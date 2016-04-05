@@ -206,7 +206,7 @@ define main ()
     err,
     files,
     maxdepth = 0,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("dont-ask-when-subst", &WHENSUBST);
   c.add ("dont-ask-when-write", &WHENWRITE);

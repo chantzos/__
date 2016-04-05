@@ -15,7 +15,7 @@ define main ()
     strip = NULL,
     exit_code = 0,
     noverbose = NULL,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("to-dir", &dir;type = "string");
   c.add ("strip", &strip);

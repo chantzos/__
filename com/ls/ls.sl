@@ -557,7 +557,7 @@ define main ()
     dir,
     i,
     filelist = {},
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("a|all", &opts.keep_hidden);
   c.add ("ignore", &assign_string_pattern, &opts.pattern, &opts.ignore;type = "string");

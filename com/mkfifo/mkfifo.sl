@@ -6,7 +6,7 @@ define main ()
     exit_code = 0,
     mode = NULL,
     i,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("mode", &mode;type = "str");
   c.add ("v|verbose", &verboseon);

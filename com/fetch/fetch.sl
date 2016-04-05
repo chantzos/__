@@ -42,7 +42,7 @@ define main ()
     urls,
     exit_code = 0,
     filelist = NULL,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add("O|remote-name", &curl_outfile, "remote");
   c.add("o|output", &curl_outfile;type = "string");

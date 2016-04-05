@@ -15,7 +15,7 @@ define main ()
     status,
     mountpoint = NULL,
     umount = Sys.which ("umount"),
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   if (NULL == umount)
     {

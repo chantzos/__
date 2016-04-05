@@ -205,7 +205,7 @@ define main ()
     maxdepth = NULL,
     findfiles = NULL,
     danglinglinks = NULL,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("pat", &PAT;type="string");
   c.add ("hidden-dirs", &HIDDENDIRS);

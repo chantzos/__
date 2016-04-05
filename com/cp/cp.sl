@@ -48,7 +48,7 @@ define main ()
     exit_code = 0,
     ar = String_Type[0],
     i,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("all", &opts.permissions);
   c.add ("backup", &opts.make_backup);

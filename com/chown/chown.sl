@@ -177,7 +177,7 @@ define main ()
     group = NULL,
     user = NULL,
     recursive = NULL,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("group", &group;type = "string");
   c.add ("user", &user;type = "string");

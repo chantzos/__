@@ -22,7 +22,7 @@ define main ()
     i,
     source,
     dest,
-    c = Opt.new (&_usage);
+    c = Opt.Parse.new (&_usage);
 
   c.add ("backup", &opts.make_backup);
   c.add ("suffix", &opts.backup_suffix;type="string");
