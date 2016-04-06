@@ -47,9 +47,11 @@ private define addfname (fname)
 
 private define _edit_other ()
 {
+  variable cb = Ved.get_cur_buf ();
+
   ifnot (_NARGS)
     {
-    __vreread (Ved.get_cur_buf ());
+    __vreread (cb);
     return;
     }
 
@@ -60,7 +62,7 @@ private define _edit_other ()
     {
     if (1 == _NARGS) % code needs to be written (change the filetype) 
       {
-      __vreread (Ved.get_cur_buf ());
+      __vreread (cb);
       return;
       }
 
@@ -104,17 +106,23 @@ private define _buffer_other_ ()
     return;
 
   ind = where (ar == cb)[0];
+  variable prev_ind = ind;
 
   ifnot (dir)
-    if (0 == ind)
-      ind = length (ar) - 1;
+    if (-1 != w.prev_buf_ind && w.prev_buf_ind < length (ar) && w.prev_buf_ind != ind)
+      ind = w.prev_buf_ind;
     else
-      ind--;
+      if (0 == ind)
+        ind = length (ar) - 1;
+      else
+        ind--;
   else
     if (ind == length (ar) - 1)
       ind = 0;
     else
       ind++;
+
+  w.prev_buf_ind = prev_ind;
 
   b = ar[ind];
 

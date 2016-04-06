@@ -843,12 +843,13 @@ class Rline
           (irow, icol, index) =
             lrow - 1,
             length (car) >= lines
-              ? items - 1
+              ? items - 1 - (length (ar) mod items)
               : length (car) mod items
                 ? (length (strtok (strjoin (car, " "))) mod items) - 1
                 : items - 1,
             length (car) >= lines
-              ? ((page) * (lines * items)) + ((lines - 1) * items) + items - 1
+              ? ((page) * (lines * items)) + ((lines - 1) * items) + items - 1 -
+                (length (ar) mod items)
               : length (ar) - 1;
           }
         else
@@ -991,7 +992,7 @@ class Rline
             0,
             (page) * ((lines - 1) * items);
           }
-        }
+      }
 
       @item = ar[index];
 
