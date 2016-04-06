@@ -28,6 +28,8 @@ class Api
   var public APPS = Assoc_Type[Assoc_Type];
   var public APPSINFO = Assoc_Type[AppInfo_Type];
 
+  subclass Eval from Api
+
   def app_table ()
     variable i;
     variable ii;
@@ -91,6 +93,4 @@ class Api
 
     This.isscreenactive = 1;
   end
-
-  fun eval ()
 end

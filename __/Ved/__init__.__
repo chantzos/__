@@ -39,6 +39,7 @@ class Ved
     rline,
     name,
     dir,
+    prev_buf_ind,
   end
 
   var vis = struct
@@ -57,6 +58,7 @@ class Ved
     };
 
   let VED_DIR = Env->TMP_PATH + "/ved/" + string (Env->PID);
+
   let EL_MAP = [902, [904:906], 908, [910:929], [931:937], [945:974]];
   let EN_MAP = [['a':'z'], ['A':'Z']];
   let MAPS   = [EL_MAP, EN_MAP];
@@ -68,22 +70,25 @@ class Ved
   var public VED_INFOCLRBG = Smg->COLOR.infobg;
 
   var VED_PROMPTCLR = Smg->COLOR.prompt;
+
+  subclass Prev from Api
+
   var VED_PREV_WIND;
-  var VED_PREV_BUFINDEX;
   var MARKS  = Assoc_Type[Pos_Type];
 
-  var public VED_WIND = Assoc_Type[Wind_Type];
-  var public FTYPES = Assoc_Type[Integer_Type];
-  var public REG    = Assoc_Type[String_Type];
-  var public VED_ROWS = [1:LINES - 3];
-  var public VED_MODIFIED = 0x01;
-  var public VED_ONDISKMODIFIED = 0x02;
-  var public VED_RDONLY = 0x04;
+  var public VED_WIND     = Assoc_Type[Wind_Type];
+  var public FTYPES       = Assoc_Type[Integer_Type];
+  var public REG          = Assoc_Type[String_Type];
   var public VED_CUR_WIND = NULL;
-  var public VED_ISONLYPAGER = 0;
-  var public VED_RLINE = 1;
-  var public UNDELETABLE = String_Type[0];
-  var public SPECIAL = String_Type[0];
+  var public UNDELETABLE  = String_Type[0];
+  var public SPECIAL      = String_Type[0];
+  var public VED_ROWS     = [1:LINES - 3];
+
+  var public VED_MODIFIED       = 0x01;
+  var public VED_ONDISKMODIFIED = 0x02;
+  var public VED_RDONLY         = 0x04;
+  var public VED_ISONLYPAGER    = 0;
+  var public VED_RLINE          = 1;
 
   beg
     Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
@@ -726,6 +731,7 @@ class Ved
     VED_WIND[name].cur_frame = 0;
     VED_WIND[name].buffers = Assoc_Type[Ftype_Type];
     VED_WIND[name].bufnames = String_Type[0];
+    VED_WIND[name].prev_buf_ind = -1;
 
     if (qualifier_exists ("on_wind_new"))
       on_wind_new (VED_WIND[name]);
@@ -794,9 +800,9 @@ class Ved
 
     assoc_delete_key (w.buffers, bufname);
 
-    variable index = wherefirst (bufname == w.bufnames);
+    variable i = wherefirst (bufname == w.bufnames);
 
-    w.bufnames[index] = NULL;
+    w.bufnames[i] = NULL;
     w.bufnames = w.bufnames[wherenot (_isnull (w.bufnames))];
 
     variable winds = assoc_get_keys (VED_WIND);
@@ -822,9 +828,28 @@ class Ved
 
     if (iscur)
       {
-      index = index ? index - 1 : length (w.bufnames) - 1;
+      variable notfound = 1;
 
-      Ved.setbuf (w.bufnames[index]);
+      loop (length (w.bufnames))
+        {
+        i = i ? i - 1 : length (w.bufnames) - 1;
+        if (any (w.bufnames[i] == SPECIAL))
+          continue;
+
+        notfound--;
+        break;
+        }
+
+      if (notfound)
+        {
+        Smg.send_msg_dr ("There is no normal buffer loaded, press q to exit",
+          1, NULL, NULL);
+
+        if ('q' == Input.getch ())
+          exit_me (0);
+        }
+
+      Ved.setbuf (w.bufnames[i]);
 
       s = Ved.get_cur_buf ();
       s.draw ();

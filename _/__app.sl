@@ -116,7 +116,6 @@ public variable GREPFILE   = This.tmpdir + "/__GREP__.list";
 public variable BGDIR      = This.tmpdir + "/__PROCS__";
 public variable RDFIFO     = This.tmpdir + "/__SRV_FIFO__.fifo";
 public variable WRFIFO     = This.tmpdir + "/__CLNT_FIFO__.fifo";
-public variable HIST_EVAL  = Env->USER_DATA_PATH + "/.__" + Env->USER + "_EVAL__";
 public variable SCRATCHFD  = IO.open_fn (SCRATCH);
 public variable STDOUTFDBG = IO.open_fn (STDOUTBG);
 public variable BGPIDS     = Assoc_Type[Struct_Type];
@@ -1371,7 +1370,7 @@ private define __kill_bg_job__ (argv)
 
 public define __eval ()
 {
-  Api.eval (;;__qualifiers ());
+  Api.Eval.run (;;__qualifiers ());
 }
 
 public define init_functions ()

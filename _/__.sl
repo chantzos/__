@@ -1135,11 +1135,16 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
     methods = [methods, tokens[0]];
     }
 
-  variable my_funs = Assoc_Type[Fun_Type];
-  variable sub_buf = "";
-  variable sub_cname = cname + as;
-  variable sub_classpath = path_dirname (from);
-  variable i;
+  variable
+    i,
+    my_funs       = Assoc_Type[Fun_Type],
+    sub_buf       = "",
+    sub_cname     = cname + as,
+    sub_classpath = path_dirname (from);
+
+    sub_buf += "$8 = current_namespace;\n" +
+      "__use_namespace  (\"" + sub_cname + "\");\n" +
+      "static variable THIS;\n";
 
   parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;
     add_meth_decl, cname = as + "_");
@@ -1167,6 +1172,9 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
 
   sub_buf += "\n" + `set_struct_field (__->__ ("` + cname + `", "Class::getself"), ` +
    `"` + as + `", ` + as + `("` + cname + `"));`;
+
+  sub_buf += "\n  __use_namespace ((strlen ($8) ? $8 : " + "\"" + cname + "\"));\n" +
+    "__uninitialize (&$8);\n";
 
   @eval_buf = "" + cname + as + " = __->__ (\"" + cname + as + "\", \"" + cname + "\", \"" +
     sub_classpath + "\", 1, [\"" + strjoin (__funs__methods, "\",\n \"") +
@@ -1297,9 +1305,8 @@ private define __Class_From_Init__ (classpath)
     ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
       throw ClassError, "Class::__INIT__::" + cname + " is already defined";
 
-  variable funs = Assoc_Type[Fun_Type];
+  variable funs     = Assoc_Type[Fun_Type];
   variable sub_funs = String_Type[0];
-
   variable eval_buf = "";
 
   funs["let"] = @Fun_Type;

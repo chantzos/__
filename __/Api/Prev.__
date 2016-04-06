@@ -1,0 +1,9 @@
+subclass Prev
+  __init__
+    menu
+  end
+
+  def menu ()
+    Smg.send_msg_dr ("woueiiii", 1, NULL, NULL);
+  end
+end

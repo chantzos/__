@@ -44,6 +44,9 @@ is written using a language agnostic manner by incorporating,
 mature (nowdays) syntax (especially in declarations) (settled
 atfer a 50 years of programming experience) and 
 with an expressional style towards the resemblance of human thinking.
+  -- dev --
+that will make (probably) easy to write code
+  -- end --
 The other part of course it is written in S-Lang, which its syntax is
 exactly like C's, with very few differences, mainly in functions and
 variable declarations with the significant difference that S-Lang
@@ -58,10 +61,8 @@ or
    
   fprintf (stdout, "%s\n", some_stuff); pop ();
 ```
-and there is an aim to continue to integrate more code written
+
 
 __ DEV --
 source and execution namespace are intercheangable and have direct
 relation to each other
-
-
