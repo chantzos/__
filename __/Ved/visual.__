@@ -400,7 +400,7 @@ beg
 
         s.st_.st_size = Array.getsize (s.lines);
         set_modified (s);
-        Vundo.set (s, vs.lines, vs.lnrs;deleted);
+        Ved.Vundo.set (s, vs.lines, vs.lnrs;deleted);
         s.draw ();
         Smg.send_msg ("deleted", 1);
         return;
@@ -659,7 +659,7 @@ beg
         set_modified (s);
 
         waddline (s, __vgetlinestr (s, s.lines[vs.startlnr], 1), 0, s.ptr[0]);
-        Vundo.set (s, [s.lines[vs.startlnr]], [vs.startlnr]);
+        Ved.Vundo.set (s, [s.lines[vs.startlnr]], [vs.startlnr]);
         __vdraw_tail (s);
         Smg.send_msg ("deleted", 1);
         return;
@@ -884,7 +884,7 @@ beg
         sel = strjoin (vs.sel, "\n");
         _set_reg_ ("\"", sel);
         seltoX (sel);
-        Vundo.set (s, vs.lines, vs.lnrs;blwise);
+        Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
 
         _for i (0, length (vs.lnrs) - 1)
           {
@@ -913,7 +913,7 @@ beg
         sel = strjoin (vs.sel, "\n");
         _set_reg_ ("\"", sel);
         seltoX (sel);
-        Vundo.set (s, vs.lines, vs.lnrs;blwise);
+        Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
         variable txt = Rline.__gettxt ("", vs.vlins[0] - 1, vs.startcol)._lin;
 
         _for i (0, length (vs.lnrs) - 1)
@@ -975,7 +975,7 @@ beg
           s.lines[lnr] = line;
           }
 
-        Vundo.set (s, vs.lines, vs.lnrs;blwise);
+        Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
         set_modified (s);
         break;
         }

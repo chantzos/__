@@ -120,7 +120,7 @@ beg
         word += char (ar[ii]);
 
     ifnot (orig == word)
-      Vundo.set (s, line, i);
+      Ved.Vundo.set (s, line, i);
 
     line = sprintf ("%s%s%s", substr (line, 1, start), word, substr (line, end + 2, -1));
     s.lins[s.ptr[0] - s.rows[0]] = line;

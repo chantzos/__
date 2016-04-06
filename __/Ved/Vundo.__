@@ -1,4 +1,10 @@
-class Vundo
+subclass Vundo
+  __init__
+    redo
+    undo
+    set
+  end
+
   var Rec = Struct_Type[3];
   var Redo = NULL;
   var Level = 0;

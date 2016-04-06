@@ -1,4 +1,8 @@
-beg
+subclass Insert
+  __init__
+    mode
+  end
+
   var lang = Input.getmapname ();
 
   def ins_tab (is, s, line) proc
@@ -564,7 +568,7 @@ beg
 
       lang = Input.getmapname ();
 
-      insert (s, line, is.lnr + 1, prev_l, next_l;modified, dont_draw_tail);
+      Ved.Insert.mode (s, line, is.lnr + 1, prev_l, next_l;modified, dont_draw_tail);
       }
   end
 
@@ -602,7 +606,7 @@ beg
       index = 1,
       origlen = strlen (@line),
       col = s._index - 1,
-      iwchars = [MAPS, ['0':'9'], '_'];
+      iwchars = [Ved->MAPS, ['0':'9'], '_'];
 
     if (any (["ins_linecompletion", "blockcompletion"] == type))
       {
@@ -787,7 +791,7 @@ beg
     do
       {
       c = substr (str, @i, 1);
-      if (any (inv == c[0]) || (c[0] > 122 && 0 == any (c[0] == EL_MAP)))
+      if (any (inv == c[0]) || (c[0] > 122 && 0 == any (c[0] == Ved->EL_MAP)))
         break;
 
       fn = c + fn;
@@ -1063,7 +1067,7 @@ beg
       }
   end
 
-  def insert (s, line, lnr, prev_l, next_l) proc
+  def mode (s, line, lnr, prev_l, next_l)
     Input.setlang (lang);
 
     variable save_st_line = s.opt_show_status_line;

@@ -121,7 +121,7 @@ beg
     if (s._i > s._len)
       s._i = s._len;
 
-    Vundo.set (s, strtok (strtrim_end (_get_reg_ (reg)), "\n"), [i];_i = s._i, deleted);
+    Ved.Vundo.set (s, strtok (strtrim_end (_get_reg_ (reg)), "\n"), [i];_i = s._i, deleted);
 
     set_modified (s;_i = s._i);
 
@@ -146,7 +146,7 @@ beg
 
     _set_reg_ (reg, word);
 
-    Vundo.set (s, line, i);
+    Ved.Vundo.set (s, line, i);
 
     line = sprintf ("%s%s", substr (line, 1, start), substr (line, end + 2, -1));
 
@@ -317,7 +317,7 @@ beg
     s.ptr[1] = start;
     s._index = start;
 
-    insert (s, &line, lnr, prev_l, next_l;modified);
+    Ved.Insert.mode (s, &line, lnr, prev_l, next_l;modified);
   end
 
   def ed_change (s) proc
@@ -392,7 +392,7 @@ beg
       s.lines[i] = line;
       s.lins[s.ptr[0] - s.rows[0]] = line;
 
-      Vundo.set (s, [_get_reg_ (reg)], [i]);
+      Ved.Vundo.set (s, [_get_reg_ (reg)], [i]);
       set_modified (s);
 
       s.st_.st_size = Array.getsize (s.lines);
@@ -417,7 +417,7 @@ beg
     s.ptr[1]--;
     s._index--;
 
-    Vundo.set (s, [_get_reg_ (reg)], [i]);
+    Ved.Vundo.set (s, [_get_reg_ (reg)], [i]);
 
     set_modified (s);
 
@@ -447,7 +447,7 @@ beg
 
     if ('C' == s._chr)
       {
-      Vundo.set (s, [line], [lnr]);
+      Ved.Vundo.set (s, [line], [lnr]);
       line = substr (line, 1, s._index);
       }
     else if ('a' == s._chr && len)
@@ -473,9 +473,9 @@ beg
       }
 
     if ('C' == s._chr) % add to register? not really usefull
-      insert (s, &line, lnr, prev_l, next_l;modified);
+      Ved.Insert.mode (s, &line, lnr, prev_l, next_l;modified);
     else
-      insert (s, &line, lnr, prev_l, next_l);
+      Ved.Insert.mode (s, &line, lnr, prev_l, next_l);
   end
 
   def ed_newline (s) proc
@@ -531,7 +531,7 @@ beg
     s.draw (;dont_draw);
 
     line = newline_str (s, &indent, line);
-    insert (s, &line, "next" == dir ? lnr + 1 : lnr, prev_l, next_l;;__qualifiers ());
+    Ved.Insert.mode (s, &line, "next" == dir ? lnr + 1 : lnr, prev_l, next_l;;__qualifiers ());
   end
 
   def ed_Put (s) proc

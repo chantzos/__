@@ -213,7 +213,6 @@ private define __eval_method__ (cname, funname, nargs)
       funname + `::@method@";;__qualifiers);`;
     }
 
-   variable err_buf;
    variable eval_buf = "\n" + `private define ` + cname + "_"
      + funname + ` (` + def_args + `)` + "\n" +
     `{` + def_body + "\n}\n" +
@@ -253,7 +252,6 @@ private define __initfun__ (cl, funname, funcref)
   variable c = qualifier ("class", __getclass__ (cl, 0));
   variable f = c["__FUN__"];
   variable eval_buf;
-  variable err_buf;
 
   variable nargs = (nargs = qualifier ("nargs"),
     NULL == nargs
@@ -468,6 +466,7 @@ public define struct_tostring ()
 
   variable fields = get_struct_field_names (s);
   variable fmt = "";
+
   loop (length (fields))
     fmt += "%S : %%S\n";
 
@@ -571,14 +570,14 @@ private define addFun ()
     funname = ();
     self = ();
     }
- else if (_NARGS == 2)
+  else if (_NARGS == 2)
     {
     funcref = NULL;
     funname = ();
     self = ();
     }
- else
-   throw ClassError, "addFun::NumArgsError::should be one or two";
+  else
+    throw ClassError, "addFun::NumArgsError::should be one or two";
 
   __initfun__ (self.__name, funname, funcref;;__qualifiers);
 }
@@ -731,11 +730,12 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
   if (1 == length (tokens))
     throw ClassError, "Class::__INIT__::" + tokens[0] + " statement needs an argument";
 
-  variable lcname = tokens[1];
-  variable lfrom = lcname;
-  variable lclasspath = CLASSPATH + "/" + lcname;
-  variable lfile = lclasspath + "/__init__.__";
-  variable cont = 0;
+  variable
+    lcname     = tokens[1],
+    lfrom      = lcname,
+    lclasspath = CLASSPATH + "/" + lcname,
+    lfile      = lclasspath + "/__init__.__",
+    cont       = 0;
 
   ifnot (2 == length (tokens))
     ifnot ("from" == tokens[2])
@@ -1063,6 +1063,7 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
 
   variable from = NULL;
   variable as = tokens[1];
+
   ifnot (2 == length (tokens))
     ifnot (4 <= length (tokens))
       throw ClassError, "Class::__INIT__::subclass, expects at least four args";
@@ -1108,8 +1109,8 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
       }
 
   if (-1 == fgets (&line, fp))
-     throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
-       " from " + lfrom;
+    throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
+      " from " + lfrom;
 
   tokens = strtok (line);
   if (0 == length (tokens) || tokens[0] != "__init__")
@@ -1244,7 +1245,7 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
       continue;
       }
 
-    if ("let" == tokens[0] || "let!" == tokens[0])
+    if (any (["let", "let!"] == tokens[0]))
       {
       parse_let (cname, eval_buf, tokens, line, fp, &found);
       continue;
@@ -1332,7 +1333,6 @@ private define __Class_From_Init__ (classpath)
       "\"], \"Class::classnew::" + cname + "\");\n\n" + eval_buf;
 
   eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
-
   eval_buf += cname + ".let = Class.let;\n";
   eval_buf += cname + ".fun = Class.fun;\n";
   eval_buf += "__uninitialize (&$9);";

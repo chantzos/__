@@ -1,6 +1,4 @@
 class Ved
-  var public Vundo;
-
   typedef Ftype
     _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
     _linlen,_avlins,_findex,_index,_shiftwidth,_expandtab,_undolevel,
@@ -1195,11 +1193,11 @@ class Ved
   end
 
   def __undo__ (s) proc
-    Vundo.undo (s);
+    Ved.Vundo.undo (s);
   end
 
   def __redo__ (s) proc
-    Vundo.redo (s);
+    Ved.Vundo.redo (s);
   end
 
   def v_lastvi () proc
@@ -1208,7 +1206,10 @@ class Ved
   include pager from Ved as Ved
   include ed     from Ved as Ved
   include search from Ved as Ved
-  include insert from Ved as Ved
+
+  subclass Insert from Ved
+  subclass Vundo from Ved
+
   include visual from Ved as Ved
 
   def _register_ (s) proc
@@ -1502,8 +1503,6 @@ class Ved
     variable b = Ved.get_cur_buf ();
     Smg.send_msg_dr (msg, 1, b.ptr[0], b.ptr[1]);
   end
-
-  load Vundo from Ved
 
   beg
     new_wind ();

@@ -12,9 +12,8 @@
     and I would probably still use Musca, if it hadn't refuced to compile  
     with new C compilers a couple of years ago (never tried again to be  
     honest)... but the author dont't spend his time anymore (atleast at this time  
-    of writting (31 March 2016)) building software (like he used to do, during  
-    LFS era (January 2006-January 2010))  (where he wish to find a chance  
-    to start `do it again' and can't wait for it, but!!! he should wait)...  
+    of writting (31 March 2016)) building softwaree (like he used to do, during  
+    LFS era (January 2006-January 2010))...
     so for these couple of years I'm working with herbst(client|luftwm).  
 			     In fact one of the reasons of writting this app, is just to have control  
    over my environment, by giving total focus to what I'm currently doing  
@@ -39,7 +38,7 @@ slsh ___.sl --verbose
 ## NOTES
 
 The code was written using the S-Lang programming language, but
-some part of it (and there is a continuesly aim for this),
+some part of it (and there is a continuously aim for this),
 is written using a language agnostic manner by incorporating,
 mature (nowdays) syntax (especially in declarations) (settled
 atfer a 50 years of programming experience) and 
