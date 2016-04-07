@@ -1,18 +1,16 @@
 __use_namespace ("__");
 
 private variable __CLASS__ = Assoc_Type[Any_Type];
-private variable __V__ = Assoc_Type[Any_Type, NULL];
-private variable VARARGS = '?';
+private variable __V__     = Assoc_Type[Any_Type, NULL];
 
 private define __initclass__ (cname)
 {
   __CLASS__[cname] = Assoc_Type[Any_Type];
-  __CLASS__[cname]["__FUN__"] = Assoc_Type[Fun_Type];
-  __CLASS__[cname]["__R__"] = @Class_Type;
+  __V__[cname]     = Assoc_Type[Var_Type];
+  __CLASS__[cname]["__FUN__"]  = Assoc_Type[Fun_Type];
+  __CLASS__[cname]["__R__"]    = @Class_Type;
   __CLASS__[cname]["__SELF__"] = @Self_Type;
-  __CLASS__[cname]["__SUB__"] = String_Type[0];
-
-  __V__[cname] = Assoc_Type[Var_Type];
+  __CLASS__[cname]["__SUB__"]  = String_Type[0];
 }
 
 private define __getclass__ (cname, init)
@@ -52,10 +50,7 @@ private define __eval__ (__buf__, __ns__)
 
 private define __vset__ (cname, varname, varval)
 {
-  ifnot (String_Type == typeof (varname))
-    throw ClassError, "vset::argument should be of String_Type";
-
-  ifnot (String_Type == typeof (cname))
+  ifnot (all (String_Type == [typeof (varname), typeof (cname)]))
     throw ClassError, "vset::argument should be of String_Type";
 
   variable v = __V__[cname];
@@ -103,7 +98,6 @@ private define __vset__ (cname, varname, varval)
         string (__V__[cname][varname].type);
 
   __V__[cname][varname].val = varval;
-
   __V__[cname][varname].const = (t = qualifier ("const"),
     NULL == t
       ? strup (varname) == varname
@@ -116,10 +110,7 @@ private define __vset__ (cname, varname, varval)
 
 private define __vget__ (cname, varname)
 {
-  ifnot (String_Type == typeof (varname))
-    throw ClassError, "vget::argument should be of String_Type";
-
-  ifnot (String_Type == typeof (cname))
+  ifnot (all (String_Type == [typeof (varname), typeof (cname)]))
     throw ClassError, "vget::argument should be of String_Type";
 
   variable v = __V__[cname];
@@ -195,7 +186,7 @@ private define __eval_method__ (cname, funname, nargs)
 {
   variable def_body, def_args, i;
 
-  if (nargs == VARARGS)
+  if (nargs == '?')
     {
     def_body = "\n" + `  variable args = __pop_list (_NARGS);` + "\n" +
     `  list_append (args, "` + qualifier ("as", cname) + `::` + funname
@@ -236,8 +227,7 @@ private define __my_read__ (fname)
   if (NULL == fd)
     throw ClassError, sprintf ("IO::read file descriptor: %S", errno_string (errno));
 
-  variable buf;
-  variable str = "";
+  variable buf, str = "";
 
   () = lseek (fd, qualifier ("offset", 0), qualifier ("seek_pos", SEEK_SET));
 
@@ -249,14 +239,15 @@ private define __my_read__ (fname)
 
 private define __initfun__ (cl, funname, funcref)
 {
-  variable c = qualifier ("class", __getclass__ (cl, 0));
-  variable f = c["__FUN__"];
-  variable eval_buf;
+  variable
+    eval_buf,
+    c = qualifier ("class", __getclass__ (cl, 0)),
+    f = c["__FUN__"];
 
   variable nargs = (nargs = qualifier ("nargs"),
     NULL == nargs
       ? funname[-1] == '?'
-        ? (funname = strtrim_end (funname, "?"), VARARGS)
+        ? (funname = strtrim_end (funname, "?"), '?')
         : any (['0':'9'] == funname[-1])
           ? (nargs = funname[-1] - '0', funname = substr (funname, 1, strlen (funname) - 1), nargs)
           : NULL
@@ -323,10 +314,13 @@ private define __initfun__ (cl, funname, funcref)
 
     if (NULL == nargs)
       {
-      variable fa = strtok (eval_buf, "\n");
-      variable p = "private define " + funcrefname + " (";
-      variable l = strlen (p);
-      variable i, found = 0;
+      variable
+        i,
+        fa = strtok (eval_buf, "\n"),
+        p  = "private define " + funcrefname + " (",
+        l  = strlen (p),
+        found = 0;
+
       _for i (0, length (fa) - 2)
         ifnot (strncmp (fa[i], p, l))
           {
@@ -350,7 +344,7 @@ private define __initfun__ (cl, funname, funcref)
         throw ClassError, "__initfun__::" + funcrefname + ", can not determinate nargs";
 
       ifnot (nargs)
-        nargs = VARARGS;
+        nargs = '?';
       }
 
     eval_buf += "\n" + `__->__ ("` + c["__R__"].name + `", "` + funname +
@@ -388,9 +382,10 @@ private define __setself__ (c, methods)
 
   methods = [methods, get_struct_field_names (c["__SELF__"])];
 
-  variable k = assoc_get_keys (f);
-  variable handler = c["__SELF__"].err_handler;
-  variable i;
+  variable
+    i,
+    k = assoc_get_keys (f),
+    handler = c["__SELF__"].err_handler;
 
   _for i (0, length (k) - 1)
     if (NULL != f[k[i]].funcref || any (k[i] == c["__SUB__"]))
@@ -415,8 +410,9 @@ private define __setself__ (c, methods)
 
 private define __classnew__ (cname, super, classpath, isself, methods)
 {
-  variable c = __getclass__ (cname, 1);
-  variable r = c ["__R__"];
+  variable
+    c = __getclass__ (cname, 1),
+    r = c ["__R__"];
 
   ifnot (NULL == r.name)
     ifnot (r.super == r.name)
@@ -448,8 +444,7 @@ private define push_array (a)
 
 private define stk_reverse ()
 {
-  variable args = __pop_list (_NARGS);
-  variable i;
+  variable i, args = __pop_list (_NARGS);
   _for i (length (args) - 1, 0, -1)
     args[i];
 }
@@ -671,8 +666,7 @@ private define parse_class ();
 
 private define parse_block (eval_buf, tokens, line, fp)
 {
-  variable open_block = 1;
-  variable block_buf = "";
+  variable open_block = 1, block_buf = "";
 
   while (-1 != fgets (&line, fp))
     {
@@ -790,8 +784,9 @@ private define parse_import (eval_buf, tokens)
   if (1 == length (tokens))
     throw ClassError, "Class::__INIT__::import statement needs an argument";
 
-  variable module = tokens[1];
-  variable ns = length (tokens) > 2 ? tokens[2] : NULL;
+  variable
+    module = tokens[1],
+    ns     = length (tokens) > 2 ? tokens[2] : NULL;
 
   if ("NULL" == ns)
     ns = NULL;
@@ -807,7 +802,7 @@ private define parse_typedef (eval_buf, tokens, line, fp, found)
 
   variable
     type = tokens[1],
-    tmp = strchop (type, '_', 0);
+    tmp  = strchop (type, '_', 0);
 
   if (1 == length (tmp) || "Type" != tmp[1])
     type += "_Type";
@@ -1061,8 +1056,9 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
   if (2 > length (tokens))
     throw ClassError, "Class::__INIT__::subclass declaration, missing subname";
 
-  variable from = NULL;
-  variable as = tokens[1];
+  variable
+    from = NULL,
+    as   = tokens[1];
 
   ifnot (2 == length (tokens))
     ifnot (4 <= length (tokens))
@@ -1143,22 +1139,23 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
     sub_cname     = cname + as,
     sub_classpath = path_dirname (from);
 
-    sub_buf += "$8 = current_namespace;\n" +
+  sub_buf += "$8 = current_namespace;\n" +
       "__use_namespace  (\"" + sub_cname + "\");\n" +
       "static variable THIS;\n";
 
   parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;
     add_meth_decl, cname = as + "_");
 
-  variable __funs__ = assoc_get_keys (my_funs);
-  variable __funs__methods = @__funs__;
+  variable
+    __funs__   = assoc_get_keys (my_funs),
+    __fmethods = @__funs__;
 
   _for i (0, length (__funs__) - 1)
-    __funs__methods[i] =  strjoin (strchop (__funs__[i], '_', 0)[[1:]], "_");
+    __fmethods[i] =  strjoin (strchop (__funs__[i], '_', 0)[[1:]], "_");
 
   _for i (0, length (__funs__) - 1)
     sub_buf += __eval_method__ (cname, __funs__[i], my_funs[__funs__[i]].nargs;
-      return_buf, method_name = __funs__methods[i], as = sub_cname);
+      return_buf, method_name = __fmethods[i], as = sub_cname);
 
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
     "  struct {";
@@ -1178,7 +1175,7 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
     "__uninitialize (&$8);\n";
 
   @eval_buf = "" + cname + as + " = __->__ (\"" + cname + as + "\", \"" + cname + "\", \"" +
-    sub_classpath + "\", 1, [\"" + strjoin (__funs__methods, "\",\n \"") +
+    sub_classpath + "\", 1, [\"" + strjoin (__fmethods, "\",\n \"") +
       "\"], \"Class::classnew::subclass__from__" + cname + "__as__" + as +
         "\");\n\n" + @eval_buf;
 
@@ -1187,8 +1184,7 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
 
 private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 {
-  variable ot_class = 1;
-  variable found, line, tokens;
+  variable ot_class = 1, found, line, tokens;
 
   while (-1 != fgets (&line, fp))
     {
@@ -1306,9 +1302,10 @@ private define __Class_From_Init__ (classpath)
     ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
       throw ClassError, "Class::__INIT__::" + cname + " is already defined";
 
-  variable funs     = Assoc_Type[Fun_Type];
-  variable sub_funs = String_Type[0];
-  variable eval_buf = "";
+  variable
+    funs     = Assoc_Type[Fun_Type],
+    sub_funs = String_Type[0],
+    eval_buf = "";
 
   funs["let"] = @Fun_Type;
   funs["let"].nargs = 2;

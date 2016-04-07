@@ -1,0 +1,342 @@
+class Com
+  subclass Fork from Com
+
+  def pre_com ()
+    ICOM++;
+    ERR_VED.st_.st_size = fstat (This.stderrFd).st_size;
+  end
+
+  def pre_header (argv)
+    IARG++;
+    if (This.shell)
+      IO.tostdout (strjoin (argv, " "));
+    else
+      toscratch (strjoin (argv, " ") + "\n");
+  end
+
+  def post_header ()
+    if (This.shell)
+      IO.tostdout (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS); n);
+    else
+      toscratch (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS));
+  end
+
+  def post_exec (header)
+    if (qualifier_exists ("draw") && qualifier ("draw") == 0)
+      return;
+
+    if (header)
+      self.post_header ();
+
+    if (NEEDSWINDDRAW)
+      {
+      Ved.draw_wind ();
+      NEEDSWINDDRAW = 0;
+      }
+    else
+      draw (Ved.get_cur_buf ());
+  end
+
+  def pre_exec (argv, header, issu, env)
+    self.pre_com ();
+
+    @header = strlen (argv[0]) > 1 && 0 == qualifier_exists ("no_header");
+    @issu = qualifier ("issu");
+    @env = [Env.defenv (), "PPID=" + string (Env->PID), "CLNT_FIFO=" + RDFIFO,
+      "SRV_FIFO=" + WRFIFO];
+
+    variable p = Proc.init (@issu, 0, 0);
+
+    p.issu = 0 == @issu;
+
+    if (@header)
+      self.pre_header (argv);
+
+    if ('!' == argv[0][0])
+      argv[0] = substr (argv[0], 2, -1);
+
+    argv = [Sys->SLSH_BIN, Env->STD_LIB_PATH + "/proc/loadcommand.slc", argv];
+
+    if (@issu)
+      {
+      p.stdin.in = qualifier ("passwd");
+      if (NULL == p.stdin.in)
+        {
+        EXITSTATUS = 1;
+
+        if (@header)
+          self.post_header ();
+
+        return NULL;
+        }
+
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
+      }
+
+    argv, p;
+  end
+
+  def sig_send (sig, pid, passwd)
+    variable p = Proc.init (1, 0, 0);
+    p.stdin.in = passwd;
+
+    () = p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
+      Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", sig, pid], NULL);
+  end
+
+  def get_bgstatus (pid)
+    variable pidfile = BGDIR + "/" + pid + ".WAIT";
+    variable force = qualifier_exists ("force");
+    variable isnotsu = BGPIDS[pid].issu;
+
+    if (-1 == access (pidfile, F_OK))
+      ifnot (force)
+        return;
+      else
+        pidfile = BGDIR + "/" + pid + ".RUNNING";
+
+    if (0 == isnotsu && Env->UID)
+      {
+      variable passwd = Os.__getpasswd ();
+      if (NULL == passwd)
+        return;
+
+      self.sig_send (string (SIGKILL), pid, passwd);
+      }
+    else
+      if (-1 == kill (atoi (pid), SIGALRM))
+        {
+        IO.tostderr (pid + ": " + errno_string (errno));
+        return;
+        }
+
+    if (isnotsu || (isnotsu == 0 == Env->UID))
+      {
+      variable rdfd = open (RDFIFO, O_RDONLY);
+      variable buf = Sock.get_str (rdfd);
+
+      buf = strtrim_end (buf);
+
+      ifnot ("exit" == buf)
+        return;
+      }
+
+    variable status = waitpid (atoi (pid), 0);
+
+    variable out = File.read (STDOUTFDBG;offset = OUTBG_VED.st_.st_size);
+
+    if (strbytelen (out))
+      out = strjoin (strtok (out, "\n"), "\n");
+
+    ifnot (NULL == out)
+      if (This.shell)
+        IO.tostdout ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
+      else
+        toscratch ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
+
+    ifnot (force)
+      if (This.shell)
+        IO.tostdout (pid + ": exit status " + string (status.exit_status));
+      else
+        toscratch (pid + ": exit status " + string (status.exit_status) + "\n");
+
+    BGPIDS[pid].atexit ();
+
+    assoc_delete_key (BGPIDS, pid);
+
+    () = remove (pidfile);
+  end
+
+  def get_bgjobs ()
+    variable pids = assoc_get_keys (BGPIDS);
+
+    ifnot (length (pids))
+      return;
+
+    variable i;
+
+    _for i (0, length (pids) - 1)
+      self.get_bgstatus (pids[i]);
+  end
+
+  def kill_bg_job (argv)
+    self.pre_header (argv);
+
+    if (1 == length (argv))
+      {
+      self.post_header ();
+      draw (Ved.get_cur_buf ());
+      return;
+      }
+
+    variable pid = argv[1];
+
+    ifnot (assoc_key_exists (BGPIDS, pid))
+      {
+      self.post_header ();
+      draw (Ved.get_cur_buf ());
+      return;
+      }
+
+    self.get_bgstatus (pid;force);
+
+    if (This.shell)
+      IO.tostdout (pid + ": killed");
+    else
+      Smg.send_msg_dr (pid + ": killed", 0, PROMPTROW, 1);
+
+    self.post_header ();
+    draw (Ved.get_cur_buf ());
+  end
+
+  def list_bg_jobs (argv)
+    self.pre_header (argv);
+
+    variable ar = String_Type[0];
+    variable i;
+    variable pids = assoc_get_keys (BGPIDS);
+
+    ifnot (length (pids))
+      {
+      self.post_header ();
+      draw (Ved.get_cur_buf ());
+      return;
+      }
+
+    _for i (0, length (pids) - 1)
+      ar = [ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n"];
+
+    IO.tostdout (ar);
+
+    self.post_header ();
+
+    draw (Ved.get_cur_buf ());
+  end
+
+  def pre_builtin (argv)
+    EXITSTATUS = 0;
+    self.pre_com ();
+    self.pre_header (argv);
+  end
+
+  def post_builtin ()
+    variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
+
+    ifnot (NULL == err)
+      if (This.shell)
+        IO.tostdout (err);
+      else
+        toscratch (err + "\n");
+
+    self.post_header ();
+
+    draw (Ved.get_cur_buf ());
+  end
+
+  var licom = 0;
+  var icom  = 0;
+  var redirexists = NULL;
+
+  def parse_redir (lastarg, file, flags)
+    variable index = 0;
+    variable chr = lastarg[index];
+    variable redir = chr == '>';
+
+    ifnot (redir)
+      return 0;
+
+    variable lfile;
+    variable lflags = ">";
+    variable len = strlen (lastarg);
+
+    index++;
+
+    if (len == index)
+      return 0;
+
+    chr = lastarg[index];
+
+    if (chr == '>' || chr == '|')
+      {
+      lflags += char (chr);
+      index++;
+
+      if (len == index)
+        {
+        IO.tostderr ("There is no file to redirect output");
+        return -1;
+        }
+      }
+
+    chr = lastarg[index];
+
+    if (chr == '|')
+      {
+      lflags += char (chr);
+      index++;
+
+      if (len == index)
+        {
+        IO.tostderr ("There is no file to redirect output");
+        return -1;
+        }
+      }
+
+    lfile = substr (lastarg, index + 1, -1);
+
+    ifnot (access (lfile, F_OK))
+      {
+      ifnot ('|' == lflags[-1])
+        if (NULL == redirexists || (NULL != redirexists && licom + 1 != icom))
+          {
+          if (">" == lflags)
+            {
+            licom = icom;
+            redirexists = 1;
+            IO.tostderr (lfile + ": file exists, use >|");
+            return -1;
+            }
+          }
+        else
+          if (">" == lflags)
+            {
+            redirexists = NULL;
+            licom = 0;
+            lflags = ">|";
+            }
+
+      if (-1 == access (lfile, W_OK))
+        {
+        IO.tostderr (lfile + ": is not writable");
+        return -1;
+        }
+
+      ifnot (File.is_reg (lfile))
+        {
+        IO.tostderr (lfile + ": is not a regular file");
+        return -1;
+        }
+      }
+
+    @flags = lflags;
+    @file = lfile;
+    1;
+  end
+
+  def parse_argv (argv, isbg)
+    variable flags = ">>|";
+    variable file = @isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
+    variable lfile = file;
+
+    variable retval = self.parse_redir (argv[-1], &file, &flags);
+
+    if (lfile == file && file == SCRATCH)
+      if (NULL == This.shell || 0 == This.shell)
+        {
+        flags = ">|";
+        @isbg = 0;
+        }
+
+    file, flags, retval;
+  end
+end

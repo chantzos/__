@@ -1,0 +1,174 @@
+subclass Fork
+  __init__
+    ask
+    send_msgdr
+    restorestate
+    wait
+    waitpid
+    tofg
+    tobg
+  end
+
+  var issmg = 0;
+
+  def ask (cmp_lnrs, wrfd, rdfd)
+    variable i;
+    variable ocmp_lnrs = @cmp_lnrs;
+
+    Sock.send_int (wrfd, 1);
+
+    variable str = Sock.get_str (rdfd);
+    Sock.send_int (wrfd, 1);
+    i = Sock.get_int (rdfd);
+
+    variable hl_reg = i ? Array_Type[i] : NULL;
+
+    if (i)
+      _for i (0, i - 1)
+        {
+        Sock.send_int (wrfd, 1);
+        hl_reg[i] = Sock.get_int_ar (rdfd, wrfd);
+        }
+
+    Smg.askprintstr (str, NULL, &cmp_lnrs;hl_region = hl_reg);
+
+    Sock.send_int (wrfd, 1);
+
+    if (length (cmp_lnrs) < length (ocmp_lnrs))
+      {
+      _for i (0, length (ocmp_lnrs) - 1)
+        ifnot (any (ocmp_lnrs[i] == cmp_lnrs))
+          ocmp_lnrs[i] = -1;
+
+      ocmp_lnrs = ocmp_lnrs[wherenot (ocmp_lnrs == -1)];
+      Smg.restore (ocmp_lnrs, NULL, 1);
+      }
+
+    cmp_lnrs;
+  end
+
+  def send_msgdr (wrfd, rdfd)
+    Sock.send_int (wrfd, 1);
+
+    variable str = Sock.get_str (rdfd);
+
+    Smg.send_msg_dr (str, 0, NULL, NULL);
+
+    Sock.send_int (wrfd, 1);
+  end
+
+  def restorestate (cmp_lnrs, wrfd)
+    if (length (cmp_lnrs))
+      Smg.restore (cmp_lnrs, NULL, 1);
+
+    Sock.send_int (wrfd, 1);
+  end
+
+  def wait (wrfd, rdfd)
+    variable buf;
+    variable cmp_lnrs = Integer_Type[0];
+
+    issmg = 0;
+
+    forever
+      {
+      buf = Sock.get_str (rdfd);
+      buf = strtrim_end (buf);
+
+      if ("exit" == buf)
+        return;
+
+      if ("restorestate" == buf)
+        {
+        self.restorestate (cmp_lnrs, wrfd);
+        cmp_lnrs = Integer_Type[0];
+        continue;
+        }
+
+      if ("send_msg_dr" == buf)
+        {
+        self.send_msgdr (wrfd, rdfd);
+        continue;
+        }
+
+      if ("ask" == buf)
+        {
+        cmp_lnrs = self.ask (cmp_lnrs, wrfd, rdfd);
+        continue;
+        }
+
+      if ("close_smg" == buf)
+        {
+        ifnot (issmg)
+          {
+          Smg.suspend ();
+          issmg = 1;
+          }
+
+        Sock.send_int (wrfd, 1);
+        continue;
+        }
+
+      if ("restore_smg" == buf)
+        {
+        if (issmg)
+          {
+          Smg.resume ();
+          issmg = 0;
+          }
+
+        Sock.send_int (wrfd, 1);
+        continue;
+        }
+      }
+  end
+
+  def waitpid (p)
+    variable wrfd = open (WRFIFO, O_WRONLY);
+    variable rdfd = open (RDFIFO, O_RDONLY);
+
+    self.wait (wrfd, rdfd);
+
+    Sock.send_int (wrfd, 1);
+
+    variable status = waitpid (p.pid, 0);
+
+    p.atexit ();
+
+    EXITSTATUS = status.exit_status;
+  end
+
+  def tobg (p, argv, env)
+    env = [env, "BG=" + BGDIR];
+
+    OUTBG_VED.st_.st_size = fstat (STDOUTFDBG).st_size;
+
+    variable pid = p.execve (argv, env, 1);
+
+    ifnot (p.issu)
+      p.argv = ["sudo", argv[[7:]]];
+    else
+      p.argv = argv[[2:]];
+
+    BGPIDS[string (pid)] = p;
+
+    if (This.shell)
+      IO.tostdout ("forked " + string (pid) + " &");
+    else
+      Smg.send_msg_dr ("forked " + string (pid) + " &", 0, PROMPTROW, 1);
+  end
+
+  def tofg (p, argv, env)
+    () = p.execve (argv, env, 1);
+
+    self.waitpid (p);
+
+    variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
+
+    if (strlen (err))
+      if (This.shell)
+        IO.tostdout (strtrim_end (err));
+      else
+        toscratch (err);
+  end
+end

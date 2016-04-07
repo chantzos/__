@@ -47,7 +47,7 @@ subclass Insert
   def ins_reg (s, line) proc
     variable reg = Input.getch ();
 
-    ifnot (any ([_regs_ (), '='] == reg))
+    ifnot (any ([VedReg->REGS, '='] == reg))
       return;
 
     @line = ed_put (s;reg = char (reg), return_line);

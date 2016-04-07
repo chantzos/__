@@ -1,0 +1,39 @@
+subclass Reg
+  __init__
+    get
+    set
+  end
+
+  let RDREGS = ['*',  '/', '%', '='];
+  let REGS   = [['A':'Z'], ['a':'z'], '*', '"', '/', '%'];
+
+  def get (reg)
+    ifnot (any ([REGS, '='] == reg[0]))
+      return NULL;
+
+    if ("*" == reg)
+      return getXsel ();
+
+    if ("%" == reg)
+      return Ved.get_cur_buf ()._abspath;
+
+    if ("=" == reg)
+      return __eval (;return_str);
+
+    variable k = assoc_get_keys (REG);
+
+    ifnot (any (k == reg))
+      return NULL;
+
+    REG[reg];
+  end
+
+  def set (reg, sel)
+    variable k = assoc_get_keys (REG);
+
+    if (any (REGS == reg[0]) || 0 == any (k == reg))
+      REG[reg] = sel;
+    else
+      REG[reg] = REG[reg] + sel;
+  end
+end

@@ -69,7 +69,6 @@ class Ved
 
   var VED_PROMPTCLR = Smg->COLOR.prompt;
 
-  subclass Prev from Api
 
   var VED_PREV_WIND;
   var MARKS  = Assoc_Type[Pos_Type];
@@ -148,6 +147,9 @@ class Ved
   def insert () proc
   end
 
+  subclass Prev from Api
+  subclass Reg from Ved
+
   def toogle_infoclrbg ()
     if (VED_INFOCLRBG == Smg->NOCOLOR)
       VED_INFOCLRBG = Smg->COLOR.infobg;
@@ -204,7 +206,7 @@ class Ved
     return fwrite (line, fp);
   end
 
-  def __vgetlinestr (s, line, ind) proc
+  def __vgetlinestr (s, line, ind) public proc
     substr (line, ind + s._indent, s._linlen);
   end
 
@@ -505,6 +507,7 @@ class Ved
 
     (@[Smg.setrcdr, Smg.setrc][qualifier_exists ("dont_draw")]) (Smg, s.ptr[0], s.ptr[1]);
   end
+
 
   include self from Ved as Ved
 
@@ -854,7 +857,6 @@ class Ved
       }
   end
 
-  include reg  from Ved as Ved
   include mark from Ved as Ved
 
   def preloop (s)
@@ -1214,7 +1216,7 @@ class Ved
 
   def _register_ (s) proc
     variable reg = Input.getch ();
-    ifnot (any (_regs_ () == reg))
+    ifnot (any (VedReg->REGS == reg))
       return;
 
     reg = char (reg);
@@ -1239,7 +1241,6 @@ class Ved
     else
       ed_put (s;reg = reg);
   end
-
 
   def _askonsubst_ (s, fn, lnr, fpart, context, lpart, replace) proc
     variable cmp_lnrs = Integer_Type[0];
@@ -1497,11 +1498,6 @@ class Ved
       ifnot (NULL == Env->XAUTHORITY)
         ifnot (NULL == Sys->XCLIP_BIN)
           Load.file (Env->STD_LIB_PATH + "/X/seltoX", NULL);
-  end
-
-  def msg_handler (s, msg) proc
-    variable b = Ved.get_cur_buf ();
-    Smg.send_msg_dr (msg, 1, b.ptr[0], b.ptr[1]);
   end
 
   beg

@@ -244,7 +244,7 @@ public define rlineinit ()
     @__qualifiers
     });
 
-  (@__get_reference ("iarg")) = length (rl.history);
+  (@__get_reference ("IARG")) = length (rl.history);
 
   rl;
 }

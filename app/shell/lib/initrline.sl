@@ -60,7 +60,7 @@ public define rlineinit ()
     on_lang_args = {" -- shell --"}
     });
 
-  iarg = length (rl.history);
+  IARG = length (rl.history);
 
-  return rl;
+  rl;
 }

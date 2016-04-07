@@ -215,7 +215,7 @@ private define __commitall__ (argv)
   lines = ["\000", "-- DIFF --", lines];
   () = File.write (DIFF, lines);
 
-  () = runapp (["__ved", DIFF], [Env.defenv (), "ISACHILD=1"]);
+  () = App.run (["__ved", DIFF], [Env.defenv (), "ISACHILD=1"]);
   lines = File.readlines (DIFF);
 
   variable diffline = wherefirst ("-- DIFF --" == lines);
@@ -283,7 +283,7 @@ private define __commit__ (argv)
   lines = ["\000", "-- DIFF --", lines];
   () = File.write (DIFF, lines);
 
-  () = runapp (["__ved", DIFF], [Env.defenv (), "ISACHILD=1"]);
+  () = App.run (["__ved", DIFF], [Env.defenv (), "ISACHILD=1"]);
   lines = File.readlines (DIFF);
 
   variable diffline = wherefirst ("-- DIFF --" == lines);
@@ -673,7 +673,7 @@ public define rlineinit ()
     on_lang_args = {" -- git --"}
     });
 
-  iarg = length (rl.history);
+  IARG = length (rl.history);
 
   rl;
 }

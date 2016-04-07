@@ -217,8 +217,7 @@ class Srv
     variable env = [Env.defenv (),
       "SESSION=1", "SESSION_WRFIFO=" + SRV_FIFO, "SESSION_RDFIFO=" + clfifo];
 
-    variable clpid = (@__get_reference ("runapp"))
-      ([app], env;; struct {@__qualifiers, bg});
+    variable clpid = App.run ([app], env;; struct {@__qualifiers, bg});
 
     if (NULL == clpid)
       {

@@ -27,7 +27,7 @@ public define on_wind_new (w)
 
   topline (" -- shell --");
 
-  shell_post_header ();
+  Com.post_header ();
 
   (@__get_reference ("__initrline"));
 

@@ -1,8 +1,8 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
-public variable DEBUG = NULL;
-public variable Client, Srv;
-public variable APP_ERR;
+public variable
+  DEBUG = NULL,
+  Client, Srv, APP_ERR;
 
 public define exit_me (x)
 {
@@ -28,9 +28,9 @@ public define __err_handler__ (self, s)
 }
 
 This.err_handler = &__err_handler__;
-This.max_frames = 2;
+This.max_frames  = 2;
 This.isatsession = getenv ("SESSION");
-This.isachild = getenv ("ISACHILD");
+This.isachild    = getenv ("ISACHILD");
 
 Load.module ("socket");
 
@@ -48,6 +48,7 @@ Class.load ("Re");
 Class.load ("Subst");
 Class.load ("Ved");
 Class.load ("Api");
+Class.load ("App");
 
 ifnot (NULL == This.isachild)
   Class.load ("Child");
@@ -72,9 +73,9 @@ This.datadir  = Env->USER_DATA_PATH + "/" + This.appname;
 if (-1 == access (This.appdir, F_OK))
   if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
       This.appdir), F_OK))
-   This.__err_handler__ (This.appname, "no such application");
+    This.__err_handler__ (This.appname, "no such application");
 
-This.tmpdir   = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
+This.tmpdir     = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
 This.stdouttype = "ashell";
 
 if (-1 == access (This.appdir + "/" + This.appname + ".slc", F_OK|R_OK))
@@ -104,146 +105,17 @@ This.stderrFd = IO.open_fn (This.stderrFn);
 VED_RLINE = 0;
 VED_ISONLYPAGER = 1;
 
-public variable SCRATCH_VED;
-public variable ERR_VED;
-public variable OUT_VED;
-public variable OUTBG_VED;
-public variable SOCKET;
-public variable RLINE      = NULL;
-public variable SCRATCH    = This.tmpdir + "/__SCRATCH__.txt";
-public variable STDOUTBG   = This.tmpdir + "/__STDOUTBG__.txt";
-public variable GREPFILE   = This.tmpdir + "/__GREP__.list";
-public variable BGDIR      = This.tmpdir + "/__PROCS__";
-public variable RDFIFO     = This.tmpdir + "/__SRV_FIFO__.fifo";
-public variable WRFIFO     = This.tmpdir + "/__CLNT_FIFO__.fifo";
-public variable SCRATCHFD  = IO.open_fn (SCRATCH);
-public variable STDOUTFDBG = IO.open_fn (STDOUTBG);
-public variable BGPIDS     = Assoc_Type[Struct_Type];
 
-public variable iarg       = 0;
-public variable EXITSTATUS = 0;
-
-private variable issmg = 0;
-private variable licom = 0;
-private variable icom  = 0;
-private variable redirexists   = NULL;
-private variable NEEDSWINDDRAW = 0;
-
-public define _exit_ ()
-{
-  if (__is_initialized (&Input))
-    Input.at_exit ();
-
-  if (__is_initialized (&Smg))
-    Smg.at_exit ();
-
-  variable rl = Ved.get_cur_rline ();
-
-  ifnot (NULL == rl)
-    Rline.writehistory (rl.history, rl.histfile);
-
-  variable searchhist = (@__get_reference ("s_history"));
-
-  if (length (searchhist))
-    Rline.writehistory (list_to_array (searchhist), (@__get_reference ("s_histfile")));
-}
+SCRATCH    = This.tmpdir + "/__SCRATCH__.txt";
+STDOUTBG   = This.tmpdir + "/__STDOUTBG__.txt";
+GREPFILE   = This.tmpdir + "/__GREP__.list";
+BGDIR      = This.tmpdir + "/__PROCS__";
+RDFIFO     = This.tmpdir + "/__SRV_FIFO__.fifo";
+WRFIFO     = This.tmpdir + "/__CLNT_FIFO__.fifo";
+SCRATCHFD  = IO.open_fn (SCRATCH);
+STDOUTFDBG = IO.open_fn (STDOUTBG);
 
 This.at_exit = &_exit_;
-
-public define draw (s)
-{
-  variable st = NULL == s._fd ? lstat_file (s._abspath) : fstat (s._fd);
-
-  if (NULL == st ||
-    (s.st_.st_size && st.st_atime == s.st_.st_atime && st.st_size == s.st_.st_size))
-    {
-    s._i = s._ii;
-    s.draw ();
-    return;
-    }
-
-  s.st_ = st;
-  s.lines = Ved.getlines (s._abspath, s._indent, st);
-
-  s._len = length (s.lines) - 1;
-
-  variable _i = qualifier ("_i");
-  variable pos = qualifier ("pos");
-  variable len = length (s.rows) - 1;
-
-  ifnot (NULL == pos)
-    (s.ptr[0] = pos[0], s.ptr[1] = pos[1]);
-  else
-    (s.ptr[1] = 0, s.ptr[0] = s._len + 1 <= len ? s.rows[0] : s.rows[-2]);
-
-  ifnot (NULL == _i)
-    s._i = _i;
-  else
-    s._i = s._len + 1 <= len ? 0 : s._len + 1 - len;
-
-  s.draw ();
-}
-
-public define viewfile (s, type, pos, _i)
-{
-  variable ismsg = 0;
-  Ved.setbuf (s._abspath);
-
-  topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
-
-  draw (s;pos = pos, _i = _i);
-
-  forever
-    {
-    VEDCOUNT = -1;
-    s._chr = Input.getch (;disable_langchange);
-
-    if ('1' <= s._chr <= '9')
-      {
-      VEDCOUNT = "";
-
-      while ('0' <= s._chr <= '9')
-        {
-        VEDCOUNT += char (s._chr);
-        s._chr = Input.getch (;disable_langchange);
-        }
-
-      try
-        VEDCOUNT = integer (VEDCOUNT);
-      catch SyntaxError:
-        {
-        ismsg = 1;
-        Smg.send_msg_dr ("count: too many digits >= " +
-          string (256 * 256 * 256 * 128), 1, s.ptr[0], s.ptr[1]);
-        continue;
-        }
-      }
-
-    s.vedloopcallback ();
-
-    if (ismsg)
-      {
-      Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
-      ismsg = 0;
-      }
-
-    if (any ([':', 'q'] == s._chr))
-      break;
-    }
-}
-
-public define wind_mang (s)
-{
-  (@__get_reference ("handle_w")) (Ved.get_cur_buf ());
-  Rline.set (s);
-  Rline.prompt (s, s._lin, s._col);
-}
-
-public define toscratch (str)
-{
-  () = lseek (SCRATCHFD, 0, SEEK_END);
-  () = write (SCRATCHFD, str);
-}
 
 SCRATCH_VED     = Ved.init_ftype ("txt");
 ERR_VED         = Ved.init_ftype ("txt");
@@ -281,550 +153,9 @@ if (-1 == mkfifo (RDFIFO, 0644))
 if (-1 == mkfifo (WRFIFO, 0644))
   This.err_handler (WRFIFO + ": cannot create, " + errno_string (errno));
 
-private define precom ()
-{
-  icom++;
-  ERR_VED.st_.st_size = fstat (This.stderrFd).st_size;
-}
+Class.load ("Com");
 
-public define shell_pre_header (argv)
-{
-  iarg++;
-  if (This.shell)
-    IO.tostdout (strjoin (argv, " "));
-  else
-    toscratch (strjoin (argv, " ") + "\n");
-}
-
-public define shell_post_header ()
-{
-  if (This.shell)
-    IO.tostdout (sprintf ("[%d](%s)[%d]$ ", iarg, getcwd, EXITSTATUS); n);
-  else
-    toscratch (sprintf ("[%d](%s)[%d]$ ", iarg, getcwd, EXITSTATUS));
-}
-
-private define _scratch_ (ved)
-{
-  if (qualifier_exists ("draw") && qualifier ("draw") == 0)
-    return;
-
-  viewfile (SCRATCH_VED, "SCRATCH", [1, 0], 0);
-  Ved.setbuf (ved._abspath);
-  ved.draw ();
-
-  NEEDSWINDDRAW = 1;
-}
-
-public define runapp (argv, env)
-{
-  APP_ERR = 0;
-
-  if (strncmp (argv[0], "__", 2))
-    argv[0] = "__" + argv[0];
-
-  argv[0] = Env->BIN_PATH + "/" + argv[0];
-
-  if (-1 == access (argv[0], F_OK|X_OK))
-    {
-    IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
-    APP_ERR = 1;
-    return NULL;
-    }
-
-  variable issu = qualifier ("issu");
-  variable passwd = qualifier ("passwd");
-
-  variable p = Proc.init (issu, 0, 0);
-
-  if (issu)
-    {
-    if (NULL == passwd)
-      {
-      variable isgoingtoreset = 0;
-      ifnot (This.isscreenactive)
-        {
-        Api.restore_screen ();
-        isgoingtoreset = 1;
-        }
-
-        passwd = Os.__getpasswd ();
-
-        if (isgoingtoreset)
-          Api.reset_screen ();
-
-        if (NULL == passwd)
-          {
-          APP_ERR = 1;
-          return NULL;
-          }
-        }
-
-    p.stdin.in = passwd;
-
-    argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
-    }
-
-  Api.reset_screen ();
-
-  variable status;
-  variable bg = qualifier_exists ("bg") ? 1 : NULL;
-
-  ifnot (NULL == env)
-    status = p.execve (argv, env, bg);
-  else
-    status = p.execv (argv, bg);
-
-  if (NULL == bg)
-    Api.restore_screen ();
-
-  status;
-}
-
-private define _tabcallback (rl)
-{
-}
-
-private define _assign_ (line)
-{
-  variable retval = NULL, _v_ = strchop (line, '=', 0);
-
-  if (1 == length (_v_))
-    return retval;
-
-  _v_ = _v_[0];
-
-  try
-    {
-    eval (line);
-    Smg.send_msg (string (eval (string (_v_))), 0); % split and return the var?
-    retval = 1;
-    }
-  catch AnyError:
-    Smg.send_msg (__get_exception_info.message, 0);
-
-  retval;
-}
-
-private define _postexec_ (header)
-{
-  if (qualifier_exists ("draw") && qualifier ("draw") == 0)
-    return;
-
-  if (header)
-    shell_post_header ();
-
-  if (NEEDSWINDDRAW)
-    {
-    Ved.draw_wind ();
-    NEEDSWINDDRAW = 0;
-    }
-  else
-    draw (Ved.get_cur_buf ());
-}
-
-private define _ask_ (cmp_lnrs, wrfd, rdfd)
-{
-  variable i;
-  variable ocmp_lnrs = @cmp_lnrs;
-
-  Sock.send_int (wrfd, 1);
-
-  variable str = Sock.get_str (rdfd);
-  Sock.send_int (wrfd, 1);
-  i = Sock.get_int (rdfd);
-
-  variable hl_reg = i ? Array_Type[i] : NULL;
-
-  if (i)
-    _for i (0, i - 1)
-      {
-      Sock.send_int (wrfd, 1);
-      hl_reg[i] = Sock.get_int_ar (rdfd, wrfd);
-      }
-
-  Smg.askprintstr (str, NULL, &cmp_lnrs;hl_region = hl_reg);
-
-  Sock.send_int (wrfd, 1);
-
-  if (length (cmp_lnrs) < length (ocmp_lnrs))
-    {
-    _for i (0, length (ocmp_lnrs) - 1)
-      ifnot (any (ocmp_lnrs[i] == cmp_lnrs))
-        ocmp_lnrs[i] = -1;
-
-    ocmp_lnrs = ocmp_lnrs[wherenot (ocmp_lnrs == -1)];
-    Smg.restore (ocmp_lnrs, NULL, 1);
-    }
-
-  cmp_lnrs;
-}
-
-private define _sendmsgdr_ (wrfd, rdfd)
-{
-  Sock.send_int (wrfd, 1);
-
-  variable str = Sock.get_str (rdfd);
-
-  Smg.send_msg_dr (str, 0, NULL, NULL);
-
-  Sock.send_int (wrfd, 1);
-}
-
-private define _restorestate_ (cmp_lnrs, wrfd)
-{
-  if (length (cmp_lnrs))
-    Smg.restore (cmp_lnrs, NULL, 1);
-
-  Sock.send_int (wrfd, 1);
-}
-
-private define _waitfunc_ (wrfd, rdfd)
-{
-  variable buf;
-  variable cmp_lnrs = Integer_Type[0];
-
-  issmg = 0;
-
-  forever
-    {
-    buf = Sock.get_str (rdfd);
-    buf = strtrim_end (buf);
-
-    if ("exit" == buf)
-      return;
-
-    if ("restorestate" == buf)
-      {
-      _restorestate_ (cmp_lnrs, wrfd);
-      cmp_lnrs = Integer_Type[0];
-      continue;
-      }
-
-    if ("send_msg_dr" == buf)
-      {
-      _sendmsgdr_ (wrfd, rdfd);
-      continue;
-      }
-
-    if ("ask" == buf)
-      {
-      cmp_lnrs = _ask_ (cmp_lnrs, wrfd, rdfd);
-      continue;
-      }
-
-    if ("close_smg" == buf)
-      {
-      ifnot (issmg)
-        {
-        Smg.suspend ();
-        issmg = 1;
-        }
-
-      Sock.send_int (wrfd, 1);
-      continue;
-      }
-
-    if ("restore_smg" == buf)
-      {
-      if (issmg)
-        {
-        Smg.resume ();
-        issmg = 0;
-        }
-
-      Sock.send_int (wrfd, 1);
-      continue;
-      }
-    }
-}
-
-private define _waitpid_ (p)
-{
-  variable wrfd = open (WRFIFO, O_WRONLY);
-  variable rdfd = open (RDFIFO, O_RDONLY);
-
-  _waitfunc_ (wrfd, rdfd);
-
-  Sock.send_int (wrfd, 1);
-
-  variable status = waitpid (p.pid, 0);
-
-  p.atexit ();
-
-  EXITSTATUS = status.exit_status;
-}
-
-private define _preexec_ (argv, header, issu, env)
-{
-  precom ();
-
-  @header = strlen (argv[0]) > 1 && 0 == qualifier_exists ("no_header");
-  @issu = qualifier ("issu");
-  @env = [Env.defenv (), "PPID=" + string (Env->PID), "CLNT_FIFO=" + RDFIFO,
-    "SRV_FIFO=" + WRFIFO];
-
-  variable p = Proc.init (@issu, 0, 0);
-
-  p.issu = 0 == @issu;
-
-  if (@header)
-    shell_pre_header (argv);
-
-  if ('!' == argv[0][0])
-    argv[0] = substr (argv[0], 2, -1);
-
-  argv = [Sys->SLSH_BIN, Env->STD_LIB_PATH + "/proc/loadcommand.slc", argv];
-
-  if (@issu)
-    {
-    p.stdin.in = qualifier ("passwd");
-    if (NULL == p.stdin.in)
-      {
-      EXITSTATUS = 1;
-
-      if (@header)
-        shell_post_header ();
-
-      return NULL;
-      }
-
-    argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
-    }
-
-  argv, p;
-}
-
-private define _parse_redir_ (lastarg, file, flags)
-{
-  variable index = 0;
-  variable chr = lastarg[index];
-  variable redir = chr == '>';
-
-  ifnot (redir)
-    return 0;
-
-  variable lfile;
-  variable lflags = ">";
-  variable len = strlen (lastarg);
-
-  index++;
-
-  if (len == index)
-    return 0;
-
-  chr = lastarg[index];
-
-  if (chr == '>' || chr == '|')
-    {
-    lflags += char (chr);
-    index++;
-
-    if (len == index)
-      {
-      IO.tostderr ("There is no file to redirect output");
-      return -1;
-      }
-    }
-
-  chr = lastarg[index];
-
-  if (chr == '|')
-    {
-    lflags += char (chr);
-    index++;
-
-    if (len == index)
-      {
-      IO.tostderr ("There is no file to redirect output");
-      return -1;
-      }
-    }
-
-  lfile = substr (lastarg, index + 1, -1);
-
-  ifnot (access (lfile, F_OK))
-    {
-    ifnot ('|' == lflags[-1])
-      if (NULL == redirexists || (NULL != redirexists && licom + 1 != icom))
-        {
-        if (">" == lflags)
-          {
-          licom = icom;
-          redirexists = 1;
-          IO.tostderr (lfile + ": file exists, use >|");
-          return -1;
-          }
-        }
-      else
-        if (">" == lflags)
-          {
-          redirexists = NULL;
-          licom = 0;
-          lflags = ">|";
-          }
-
-    if (-1 == access (lfile, W_OK))
-      {
-      IO.tostderr (lfile + ": is not writable");
-      return -1;
-      }
-
-    ifnot (File.is_reg (lfile))
-      {
-      IO.tostderr (lfile + ": is not a regular file");
-      return -1;
-      }
-    }
-
-  @flags = lflags;
-  @file = lfile;
-  1;
-}
-
-private define _parse_argv_ (argv, isbg)
-{
-  variable flags = ">>|";
-  variable file = @isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
-  variable lfile = file;
-
-  variable retval = _parse_redir_ (argv[-1], &file, &flags);
-
-  if (lfile == file && file == SCRATCH)
-    if (NULL == This.shell || 0 == This.shell)
-      {
-      flags = ">|";
-      @isbg = 0;
-      }
-
-  file, flags, retval;
-}
-
-private define _sendsig_ (sig, pid, passwd)
-{
-  variable p = Proc.init (1, 0, 0);
-  p.stdin.in = passwd;
-
-  () = p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
-    Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", sig, pid], NULL);
-}
-
-private define _getbgstatus_ (pid)
-{
-  variable pidfile = BGDIR + "/" + pid + ".WAIT";
-  variable force = qualifier_exists ("force");
-  variable isnotsu = BGPIDS[pid].issu;
-
-  if (-1 == access (pidfile, F_OK))
-    ifnot (force)
-      return;
-    else
-      pidfile = BGDIR + "/" + pid + ".RUNNING";
-
-  if (0 == isnotsu && Env->UID)
-    {
-    variable passwd = Os.__getpasswd ();
-    if (NULL == passwd)
-      return;
-
-    _sendsig_ (string (SIGKILL), pid, passwd);
-    }
-  else
-    if (-1 == kill (atoi (pid), SIGALRM))
-      {
-      IO.tostderr (pid + ": " + errno_string (errno));
-      return;
-      }
-
-  if (isnotsu || (isnotsu == 0 == Env->UID))
-    {
-    variable rdfd = open (RDFIFO, O_RDONLY);
-    variable buf = Sock.get_str (rdfd);
-
-    buf = strtrim_end (buf);
-
-    ifnot ("exit" == buf)
-      return;
-    }
-
-  variable status = waitpid (atoi (pid), 0);
-
-  variable out = File.read (STDOUTFDBG;offset = OUTBG_VED.st_.st_size);
-
-  if (strbytelen (out))
-    out = strjoin (strtok (out, "\n"), "\n");
-
-  ifnot (NULL == out)
-    if (This.shell)
-      IO.tostdout ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
-    else
-      toscratch ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
-
-  ifnot (force)
-    if (This.shell)
-      IO.tostdout (pid + ": exit status " + string (status.exit_status));
-    else
-      toscratch (pid + ": exit status " + string (status.exit_status) + "\n");
-
-  BGPIDS[pid].atexit ();
-
-  assoc_delete_key (BGPIDS, pid);
-
-  () = remove (pidfile);
-}
-
-private define _getbgjobs_ ()
-{
-  variable pids = assoc_get_keys (BGPIDS);
-
-  ifnot (length (pids))
-    return;
-
-  variable i;
-
-  _for i (0, length (pids) - 1)
-    _getbgstatus_ (pids[i]);
-}
-
-private define _forkbg_ (p, argv, env)
-{
-  env = [env, "BG=" + BGDIR];
-
-  OUTBG_VED.st_.st_size = fstat (STDOUTFDBG).st_size;
-
-  variable pid = p.execve (argv, env, 1);
-
-  ifnot (p.issu)
-    p.argv = ["sudo", argv[[7:]]];
-  else
-    p.argv = argv[[2:]];
-
-  BGPIDS[string (pid)] = p;
-
-  if (This.shell)
-    IO.tostdout ("forked " + string (pid) + " &");
-  else
-    Smg.send_msg_dr ("forked " + string (pid) + " &", 0, PROMPTROW, 1);
-}
-
-private define _fork_ (p, argv, env)
-{
-%  variable errfd = @FD_Type (_fileno (This.stderrFd));
-
-  () = p.execve (argv, env, 1);
-
-  _waitpid_ (p);
-
-  variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
-
-  if (strlen (err))
-    if (This.shell)
-      IO.tostdout (strtrim_end (err));
-    else
-      toscratch (err);
-}
-
-private define _execute_ (argv)
+private define com_execute (argv)
 {
   variable isbg = 0;
   if (argv[-1] == "&")
@@ -841,7 +172,7 @@ private define _execute_ (argv)
 
   variable header, issu, env, stdoutfile, stdoutflags;
 
-  variable p = _preexec_ (argv, &header, &issu, &env;;__qualifiers ());
+  variable p = Com.pre_exec (argv, &header, &issu, &env;;__qualifiers ());
 
   if (NULL == p)
     return;
@@ -861,7 +192,7 @@ private define _execute_ (argv)
   else
     {
     variable file, flags, retval;
-    (file, flags, retval) = _parse_argv_ (argv, &isbg);
+    (file, flags, retval) = Com.parse_argv (argv, &isbg);
 
     if (-1 == retval)
       {
@@ -874,7 +205,7 @@ private define _execute_ (argv)
 
       ERR_VED.st_.st_size += strbytelen (err) + 1;
       EXITSTATUS = 1;
-      _postexec_ (header);
+      Com.post_exec (header);
       return;
       }
 
@@ -902,49 +233,27 @@ private define _execute_ (argv)
    "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
 
   ifnot (isbg)
-    _fork_ (p, argv, env);
+    Com.Fork.tofg (p, argv, env);
   else
     {
-    _forkbg_ (p, argv, env);
+    Com.Fork.tobg (p, argv, env);
     isscratch = NULL;
     }
 
   if ((NULL != isscratch || 0 == This.shell) &&
     0 == EXITSTATUS &&
     0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
-        _scratch_ (Ved.get_cur_buf ());
+        App.scratch (Ved.get_cur_buf ());
 
   ifnot (isbg)
-    _getbgjobs_ ();
+    Com.get_bgjobs ();
 
   % (ugly) hack to fix the err messages from sudo to mess the screen
   % since we don't open the stderr stream in the process
   if (issu)
     Smg.clear_and_redraw ();
 
-  _postexec_ (header;;__qualifiers ());
-}
-
-private define _builtinpre_ (argv)
-{
-  EXITSTATUS = 0;
-  precom ();
-  shell_pre_header (argv);
-}
-
-private define _builtinpost_ ()
-{
-  variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
-
-  ifnot (NULL == err)
-    if (This.shell)
-      IO.tostdout (err);
-    else
-      toscratch (err + "\n");
-
-  shell_post_header ();
-
-  draw (Ved.get_cur_buf ());
+  Com.post_exec (header;;__qualifiers ());
 }
 
 private define _build_comlist_ (a)
@@ -969,23 +278,9 @@ private define _build_comlist_ (a)
         {
         a[(ex ? "!" : "") + c[ii]] = @Argvlist_Type;
         a[(ex ? "!" : "") + c[ii]].dir = d[i] + "/" + c[ii];
-        a[(ex ? "!" : "") + c[ii]].func = &_execute_;
+        a[(ex ? "!" : "") + c[ii]].func = &com_execute;
         }
     }
-}
-
-public define runcom (argv, issu)
-{
-  variable rl = Ved.get_cur_rline ();
-
-  ifnot (any (assoc_get_keys (rl.argvlist) == argv[0]))
-    {
-    IO.tostderr (argv[0] + ": no such command");
-    return;
-    }
-
-  rl.argv = argv;
-  (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});
 }
 
 private define __rehash__ ();
@@ -1028,7 +323,7 @@ public define __scratch (argv)
 {
   variable ved = @Ved.get_cur_buf ();
 
-  _scratch_ (ved);
+  App.scratch (ved);
 
   NEEDSWINDDRAW = 0;
   Ved.draw_wind ();
@@ -1036,7 +331,7 @@ public define __scratch (argv)
 
 private define __echo__ (argv)
 {
-  _builtinpre_ (argv);
+  Com.pre_builtin (argv);
 
   argv = argv[[1:]];
 
@@ -1067,7 +362,7 @@ private define __echo__ (argv)
     if ('>' == argv[0][0])
       {
       EXITSTATUS = 1;
-      _builtinpost_ ();
+      Com.post_builtin ();
       return;
       }
 
@@ -1082,19 +377,19 @@ private define __echo__ (argv)
   else
     {
     variable file, flags, retval, isbg = 0;
-    (file, flags, retval) = _parse_argv_ (argv, &isbg);
+    (file, flags, retval) = Com.parse_argv (argv, &isbg);
 
     if (-1 == retval)
       {
       EXITSTATUS = 1;
-      _builtinpost_ ();
+      Com.post_builtin ();
       return;
       }
 
     ifnot (retval)
       {
       (@tostd) (__push_list (args), strjoin (argv, " ");;s);
-      _builtinpost_ ();
+      Com.post_builtin ();
       return;
       }
 
@@ -1129,7 +424,7 @@ private define __echo__ (argv)
       }
     }
 
-  _builtinpost_ ();
+  Com.post_builtin ();
 }
 
 private define __cd__ (argv)
@@ -1150,16 +445,16 @@ private define __cd__ (argv)
         }
     }
 
-  _builtinpost_ ();
+  Com.post_builtin ();
 }
 
 private define __search__ (argv)
 {
-  precom ();
+  Com.pre_com ();
 
   variable header, issu, env, stdoutfile, stdoutflags;
 
-  variable p = _preexec_ (argv, &header, &issu, &env;;__qualifiers ());
+  variable p = Com.pre_exec (argv, &header, &issu, &env;;__qualifiers ());
 
   if (NULL == p)
     return;
@@ -1168,29 +463,27 @@ private define __search__ (argv)
 
   stdoutfile = GREPFILE;
   stdoutflags = ">|";
-%  p.stderr.file = This.stderrFn;
-%  p.stderr.wr_flags = ">>|";
 
   env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
     "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
 
-  _fork_ (p, argv, env);
+  Com.Fork.tofg (p, argv, env);
 
   ifnot (EXITSTATUS)
-    () = runapp (["__ved", GREPFILE], [Env.defenv (), "ISACHILD=1"]);
+    () = App.run (["__ved", GREPFILE], [Env.defenv (), "ISACHILD=1"]);
 
-  shell_post_header ();
+  Com.post_header ();
   draw (Ved.get_cur_buf ());
 }
 
 private define __which__ (argv)
 {
-  _builtinpre_ (argv);
+  Com.pre_builtin (argv);
 
   if (1 == length (argv))
     {
     IO.tostderr ("argument is required");
-    _builtinpost_ ();
+    Com.post_builtin ();
     return;
     }
 
@@ -1207,7 +500,7 @@ private define __which__ (argv)
 
   EXITSTATUS = NULL == path;
 
-  _builtinpost_ ();
+  Com.post_builtin ();
 }
 
 private define __write__ (argv)
@@ -1270,18 +563,18 @@ public define __messages ()
 
 private define __ved__ (argv)
 {
-  precom ();
+  Com.pre_com ();
 
   variable fname = 1 == length (argv) ? SCRATCH : argv[1];
 
   if ("-" == fname)
     fname = This.stdoutFn;
 
-  shell_pre_header ("ved " + fname);
+  Com.pre_header ("ved " + fname);
 
-  () = runapp (["__ved", fname], [Env.defenv (), "ISACHILD=1"];;__qualifiers ());
+  () = App.run (["__ved", fname], [Env.defenv (), "ISACHILD=1"];;__qualifiers ());
 
-  shell_post_header ();
+  Com.post_header ();
 
   draw (Ved.get_cur_buf ());
 }
@@ -1312,65 +605,14 @@ private define __lock__ (argv)
   Ved.draw_wind ();
 }
 
-private define __list_bg_jobs__ (argv)
+private define list_bg_jobs (argv)
 {
-  shell_pre_header (argv);
-
-  variable ar = String_Type[0];
-  variable i;
-  variable pids = assoc_get_keys (BGPIDS);
-
-  ifnot (length (pids))
-    {
-    shell_post_header ();
-    draw (Ved.get_cur_buf ());
-    return;
-    }
-
-  _for i (0, length (pids) - 1)
-    ar = [ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n"];
-
-  IO.tostdout (ar);
-
-  shell_post_header ();
-
-  draw (Ved.get_cur_buf ());
+  Com.list_bg_jobs (argv);
 }
 
-private define __kill_bg_job__ (argv)
+private define kill_bg_job (argv)
 {
-  shell_pre_header (argv);
-
-  if (1 == length (argv))
-    {
-    shell_post_header ();
-    draw (Ved.get_cur_buf ());
-    return;
-    }
-
-  variable pid = argv[1];
-
-  ifnot (assoc_key_exists (BGPIDS, pid))
-    {
-    shell_post_header ();
-    draw (Ved.get_cur_buf ());
-    return;
-    }
-
-  _getbgstatus_ (pid;force);
-
-  if (This.shell)
-    IO.tostdout (pid + ": killed");
-  else
-    Smg.send_msg_dr (pid + ": killed", 0, PROMPTROW, 1);
-
-  shell_post_header ();
-  draw (Ved.get_cur_buf ());
-}
-
-public define __eval ()
-{
-  Api.Eval.run (;;__qualifiers ());
+  Com.kill_bg_job (argv);
 }
 
 public define init_functions ()
@@ -1437,10 +679,10 @@ public define init_commands ()
   a["w!"] = a["w"];
 
   a["bgjobs"] = @Argvlist_Type;
-  a["bgjobs"].func = &__list_bg_jobs__;
+  a["bgjobs"].func = &list_bg_jobs;
 
   a["killbgjob"] = @Argvlist_Type;
-  a["killbgjob"].func = &__kill_bg_job__;
+  a["killbgjob"].func = &kill_bg_job;
 
   a["q"] = @Argvlist_Type;
   a["q"].func = &exit_me;

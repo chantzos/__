@@ -22,10 +22,11 @@ private variable DEB_FLAGS =
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
 private variable CLASSES = [
-  "Input",  "Smg",    "Rand",  "Crypt",  "Os",   "Opt",
-  "String", "Rline",  "Re",    "Diff",   "Proc", "Sock",
-  "Subst",  "Sync",   "Ved",   "Api",    "Curl", "Json",
-  "Time",   "Scm",    "Srv",   "Client", "Child"];
+  "Input",  "Smg",    "Rand",  "Crypt",  "Os",    "Opt",
+  "String", "Rline",  "Re",    "Diff",   "Proc",  "Sock",
+  "Subst",  "Sync",   "Ved",   "Api",    "Curl",  "Json",
+  "Time",   "Scm",    "Srv",   "Client", "Child", "App",
+  "Com"];
 
 private variable THESE = Assoc_Type[String_Type];
 
@@ -54,6 +55,7 @@ private define at_exit (self)
 
 public variable DEBUG = NULL;
 public variable APP_ERR;
+public variable App;
 
 public define send_msg_dr ();
 

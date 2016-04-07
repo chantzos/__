@@ -516,7 +516,7 @@ beg
       reg = qualifier ("reg", "\""),
       line = __vline (s, '.');
 
-    _set_reg_ (reg, line + "\n");
+    Ved.Reg.set (reg, line + "\n");
     seltoX (line + "\n");
     Smg.send_msg_dr ("yanked", 1, s.ptr[0], s.ptr[1]);
   end

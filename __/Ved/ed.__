@@ -101,7 +101,7 @@ beg
         return 0;
         }
 
-    _set_reg_ (reg, s.lines[i] + "\n");
+    Ved.Reg.set (reg, s.lines[i] + "\n");
 
     s.lines[i] = NULL;
     s.lines = s.lines[wherenot (_isnull (s.lines))];
@@ -121,7 +121,7 @@ beg
     if (s._i > s._len)
       s._i = s._len;
 
-    Ved.Vundo.set (s, strtok (strtrim_end (_get_reg_ (reg)), "\n"), [i];_i = s._i, deleted);
+    Ved.Vundo.set (s, strtok (strtrim_end (Ved.Reg.get (reg)), "\n"), [i];_i = s._i, deleted);
 
     set_modified (s;_i = s._i);
 
@@ -144,7 +144,7 @@ beg
 
     word = (@func) (s, line, col, &start, &end);
 
-    _set_reg_ (reg, word);
+    Ved.Reg.set (reg, word);
 
     Ved.Vundo.set (s, line, i);
 
@@ -232,7 +232,7 @@ beg
 
     if (any (['x', Input->rmap.delete] == chr))
       {
-      _set_reg_ (reg, substr (line, col + 1, 1));
+      Ved.Reg.set (reg, substr (line, col + 1, 1));
       line = substr (line, 1, col) + substr (line, col + 2, - 1);
       if (s._index == strlen (line))
         {
@@ -243,7 +243,7 @@ beg
     else
       if (0 < s.ptr[1] - s._indent)
         {
-        _set_reg_ (reg, substr (line, col, 1));
+        Ved.Reg.set (reg, substr (line, col, 1));
         line = substr (line, 1, col - 1) + substr (line, col + 1, - 1);
         s.ptr[1]--;
         s._index--;
@@ -289,7 +289,7 @@ beg
 
     word = (@func) (s, line, col, &start, &end);
 
-    _set_reg_ (reg, word);
+    Ved.Reg.set (reg, word);
 
     line = sprintf ("%s%s", substr (line, 1, start), substr (line, end + 2, -1));
 
@@ -382,7 +382,7 @@ beg
     ifnot (s.ptr[1] - s._indent)
       {
       if (strlen (line))
-       _set_reg_ (reg, line);
+       Ved.Reg.set (reg, line);
 
       line = __get_null_str (s._indent);
 
@@ -392,7 +392,7 @@ beg
       s.lines[i] = line;
       s.lins[s.ptr[0] - s.rows[0]] = line;
 
-      Ved.Vundo.set (s, [_get_reg_ (reg)], [i]);
+      Ved.Vundo.set (s, [Ved.Reg.get (reg)], [i]);
       set_modified (s);
 
       s.st_.st_size = Array.getsize (s.lines);
@@ -405,7 +405,7 @@ beg
       }
 
     if (strlen (line))
-      _set_reg_ (reg, substr (line, col, -1));
+      Ved.Reg.set (reg, substr (line, col, -1));
 
     line = substr (line, 1, col);
 
@@ -417,7 +417,7 @@ beg
     s.ptr[1]--;
     s._index--;
 
-    Ved.Vundo.set (s, [_get_reg_ (reg)], [i]);
+    Ved.Vundo.set (s, [Ved.Reg.get (reg)], [i]);
 
     set_modified (s);
 
@@ -535,7 +535,7 @@ beg
   end
 
   def ed_Put (s) proc
-    variable reg = _get_reg_ (qualifier ("reg", "\""));
+    variable reg = Ved.Reg.get (qualifier ("reg", "\""));
     variable lnr = __vlnr (s, '.');
 
     if (NULL == reg)
@@ -575,7 +575,7 @@ beg
   end
 
   def ed_put (s) proc
-    variable reg = _get_reg_ (qualifier ("reg", "\""));
+    variable reg = Ved.Reg.get (qualifier ("reg", "\""));
     variable lnr = __vlnr (s, '.');
 
     if (NULL == reg)

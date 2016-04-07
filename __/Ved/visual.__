@@ -284,10 +284,10 @@ beg
         else
           {
           reg = Input.getch ();
-          ifnot (any (_regs_ () == reg))
+          ifnot (any (VedReg->REGS == reg))
             return;
 
-          if (any (_rdregs_ == reg))
+          if (any (VedReg->RDREGS == reg))
             return;
 
           reg = char (reg);
@@ -334,7 +334,7 @@ beg
 
       if ('y' == chr)
         {
-        _set_reg_ (reg, strjoin (vs.lines, "\n") + "\n");
+        Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n");
         seltoX (strjoin (vs.lines, "\n") + "\n");
         Smg.send_msg ("yanked", 1);
         break;
@@ -380,7 +380,7 @@ beg
 
       if ('d' == chr)
         {
-        _set_reg_ (reg, strjoin (vs.lines, "\n") + "\n");
+        Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n");
         seltoX (strjoin (vs.lines, "\n") + "\n");
         s.lines[vs.lnrs] = NULL;
         s.lines = s.lines[wherenot (_isnull (s.lines))];
@@ -590,10 +590,10 @@ beg
         else
           {
           reg = Input.getch ();
-          ifnot (any (_regs_ () == reg))
+          ifnot (any (VedReg->REGS == reg))
             return;
 
-          if (any (_rdregs_ == reg))
+          if (any (VedReg->RDREGS == reg))
             return;
 
           reg = char (reg);
@@ -615,7 +615,7 @@ beg
       if ('y' == chr)
         {
         sel = strjoin (vs.sel, "\n");
-        _set_reg_ (reg, sel);
+        Ved.Reg.set (reg, sel);
         seltoX (sel);
         Smg.send_msg ("yanked", 1);
         break;
@@ -628,7 +628,7 @@ beg
           return;
 
         sel = strjoin (vs.sel, "\n");
-        _set_reg_ (reg, sel);
+        Ved.Reg.set (reg, sel);
         seltoX (sel);
 
         variable line = s.lines[vs.startlnr];
@@ -882,7 +882,7 @@ beg
       if (any (['d', 'x'] == chr))
         {
         sel = strjoin (vs.sel, "\n");
-        _set_reg_ ("\"", sel);
+        Ved.Reg.set ("\"", sel);
         seltoX (sel);
         Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
 
@@ -911,7 +911,7 @@ beg
       if (any (['r', 'c'] == chr))
         {
         sel = strjoin (vs.sel, "\n");
-        _set_reg_ ("\"", sel);
+        Ved.Reg.set ("\"", sel);
         seltoX (sel);
         Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
         variable txt = Rline.__gettxt ("", vs.vlins[0] - 1, vs.startcol)._lin;
@@ -945,7 +945,7 @@ beg
       if ('y' == chr)
         {
         sel = strjoin (vs.sel, "\n");
-        _set_reg_ ("\"", sel);
+        Ved.Reg.set ("\"", sel);
         seltoX (sel);
         break;
         }

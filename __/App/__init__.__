@@ -1,0 +1,223 @@
+class App
+  var public SCRATCH_VED;
+  var public ERR_VED;
+  var public OUT_VED;
+  var public OUTBG_VED;
+  var public SOCKET;
+  var public SCRATCH;
+  var public STDOUTBG;
+  var public GREPFILE;
+  var public BGDIR;
+  var public RDFIFO;
+  var public WRFIFO;
+  var public SCRATCHFD;
+  var public STDOUTFDBG;
+  var public RLINE = NULL;
+  var public BGPIDS = Assoc_Type[Struct_Type];
+
+  var public IARG = 0;
+  var public ICOM = 0;
+  var public NEEDSWINDDRAW = 0;
+  var public EXITSTATUS = 0;
+
+  def _exit_ () public proc
+    if (__is_initialized (&Input))
+      Input.at_exit ();
+
+    if (__is_initialized (&Smg))
+      Smg.at_exit ();
+
+    variable rl = Ved.get_cur_rline ();
+
+    ifnot (NULL == rl)
+      Rline.writehistory (rl.history, rl.histfile);
+
+    variable searchhist = (@__get_reference ("s_history"));
+
+    if (length (searchhist))
+      Rline.writehistory (list_to_array (searchhist), (@__get_reference ("s_histfile")));
+  end
+
+  def draw (s) public proc
+    variable st = NULL == s._fd ? lstat_file (s._abspath) : fstat (s._fd);
+
+    if (NULL == st ||
+      (s.st_.st_size && st.st_atime == s.st_.st_atime && st.st_size == s.st_.st_size))
+      {
+      s._i = s._ii;
+      s.draw ();
+      return;
+      }
+
+    s.st_ = st;
+    s.lines = Ved.getlines (s._abspath, s._indent, st);
+
+    s._len = length (s.lines) - 1;
+
+    variable _i = qualifier ("_i");
+    variable pos = qualifier ("pos");
+    variable len = length (s.rows) - 1;
+
+    ifnot (NULL == pos)
+      (s.ptr[0] = pos[0], s.ptr[1] = pos[1]);
+    else
+      (s.ptr[1] = 0, s.ptr[0] = s._len + 1 <= len ? s.rows[0] : s.rows[-2]);
+
+    ifnot (NULL == _i)
+      s._i = _i;
+    else
+      s._i = s._len + 1 <= len ? 0 : s._len + 1 - len;
+
+    s.draw ();
+  end
+
+  def viewfile (s, type, pos, _i) public proc
+    variable ismsg = 0;
+    Ved.setbuf (s._abspath);
+
+    topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
+
+    draw (s;pos = pos, _i = _i);
+
+    forever
+      {
+      VEDCOUNT = -1;
+      s._chr = Input.getch (;disable_langchange);
+
+      if ('1' <= s._chr <= '9')
+        {
+        VEDCOUNT = "";
+
+        while ('0' <= s._chr <= '9')
+          {
+          VEDCOUNT += char (s._chr);
+          s._chr = Input.getch (;disable_langchange);
+          }
+
+        try
+          VEDCOUNT = integer (VEDCOUNT);
+        catch SyntaxError:
+          {
+          ismsg = 1;
+          Smg.send_msg_dr ("count: too many digits >= " +
+            string (256 * 256 * 256 * 128), 1, s.ptr[0], s.ptr[1]);
+          continue;
+          }
+        }
+
+      s.vedloopcallback ();
+
+      if (ismsg)
+        {
+        Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
+        ismsg = 0;
+        }
+
+      if (any ([':', 'q'] == s._chr))
+        break;
+      }
+  end
+
+  def wind_mang (s) public proc
+    (@__get_reference ("handle_w")) (Ved.get_cur_buf ());
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+  end
+
+  def toscratch (str) public proc
+    () = lseek (SCRATCHFD, 0, SEEK_END);
+    () = write (SCRATCHFD, str);
+  end
+
+  def run (argv, env)
+    APP_ERR = 0;
+
+    if (strncmp (argv[0], "__", 2))
+      argv[0] = "__" + argv[0];
+
+    argv[0] = Env->BIN_PATH + "/" + argv[0];
+
+    if (-1 == access (argv[0], F_OK|X_OK))
+      {
+      IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
+      APP_ERR = 1;
+      return NULL;
+      }
+
+    variable issu = qualifier ("issu");
+    variable passwd = qualifier ("passwd");
+
+    variable p = Proc.init (issu, 0, 0);
+
+    if (issu)
+      {
+      if (NULL == passwd)
+        {
+        variable isgoingtoreset = 0;
+        ifnot (This.isscreenactive)
+          {
+          Api.restore_screen ();
+          isgoingtoreset = 1;
+          }
+
+          passwd = Os.__getpasswd ();
+
+          if (isgoingtoreset)
+            Api.reset_screen ();
+
+          if (NULL == passwd)
+            {
+            APP_ERR = 1;
+            return NULL;
+            }
+          }
+
+      p.stdin.in = passwd;
+
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
+      }
+
+    Api.reset_screen ();
+
+    variable status;
+    variable bg = qualifier_exists ("bg") ? 1 : NULL;
+
+    ifnot (NULL == env)
+      status = p.execve (argv, env, bg);
+    else
+      status = p.execv (argv, bg);
+
+    if (NULL == bg)
+      Api.restore_screen ();
+
+    status;
+  end
+
+  def __eval () public proc
+    Api.Eval.run (;;__qualifiers ());
+  end
+
+  def runcom (argv, issu) public proc
+    variable rl = Ved.get_cur_rline ();
+
+    ifnot (any (assoc_get_keys (rl.argvlist) == argv[0]))
+      {
+      IO.tostderr (argv[0] + ": no such command");
+      return;
+      }
+
+    rl.argv = argv;
+    (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});
+  end
+
+  def scratch (ved)
+    if (qualifier_exists ("draw") && qualifier ("draw") == 0)
+    return;
+
+    viewfile (SCRATCH_VED, "SCRATCH", [1, 0], 0);
+    Ved.setbuf (ved._abspath);
+    ved.draw ();
+
+    NEEDSWINDDRAW = 1;
+  end
+end

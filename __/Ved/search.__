@@ -31,7 +31,7 @@ beg
       if (NULL == s_histindex)
         s_histindex = 0;
 
-      _set_reg_ ("/", pat);
+      Ved.Reg.set ("/", pat);
       }
 
     if (draw)
@@ -390,7 +390,7 @@ beg
   end
 
   def s_backslash_reg_ (s) proc
-    variable reg = _get_reg_ ("/");
+    variable reg = Ved.Reg.get ("/");
     if (NULL == reg)
       return;
 

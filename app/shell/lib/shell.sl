@@ -23,7 +23,7 @@ public define shell ()
 
   topline (" -- shell --");
 
-  shell_post_header ();
+  Com.post_header ();
 
   draw (OUT_VED);
 
@@ -37,7 +37,7 @@ public define __err_handler__ (__r__)
 
   EXITSTATUS = 1;
 
-  shell_post_header ();
+  Com.post_header ();
 
   draw (Ved.get_cur_buf ());
 

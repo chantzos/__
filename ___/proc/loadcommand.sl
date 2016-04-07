@@ -78,7 +78,8 @@ public define exit_me (x)
 {
   Input.at_exit ();
 
-  (@__get_reference ("send_msg_dr")) (" ");
+  if (NULL == BG)
+    (@__get_reference ("send_msg_dr")) (" ");
 
   at_exit (;;__qualifiers);
 
@@ -246,10 +247,10 @@ public define to_tty ()
   Input.at_exit ();
 }
 
-%public define restore_screen ()
-%{
-%  restore_smg ();
-%}
+public define restore_screen ()
+{
+  restore_smg ();
+}
 
 public define editfile (file)
 {
@@ -375,6 +376,9 @@ public define ask (questar, charar)
 
   chr;
 }
+
+ifnot (NULL == BG)
+  Load.file (path_dirname (__FILE__) + "/bgdefs");
 
 try
   {
