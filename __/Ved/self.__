@@ -1,4 +1,9 @@
 beg
+  def newline_str (s, indent, line)
+    s.autoindent (indent, line);
+    repeat (" ", @indent);
+  end
+
   def storePos (v, pos)
     pos._i = qualifier ("_i", v._ii);
     pos.ptr = @v.ptr;

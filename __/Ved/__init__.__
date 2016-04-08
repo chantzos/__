@@ -864,7 +864,7 @@ class Ved
   end
 
   var ERR_STACK = 0;
-  def __err_handler__ (t, _s_) proc
+  def ved_err_handler (t, _s_) proc
     ERR_STACK++;
 
     variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["PUBLIC"]);
@@ -883,7 +883,7 @@ class Ved
   end
 
   beg
-    This.err_handler = &__err_handler__;
+    This.err_handler = &ved_err_handler;
   end
 
   def __hl_groups (lines, vlines, colors, regexps) public proc
@@ -1206,9 +1206,9 @@ class Ved
   end
 
   include pager from Ved as Ved
-  include ed     from Ved as Ved
   include search from Ved as Ved
 
+  subclass Ed from Ved
   subclass Insert from Ved
   subclass Vundo from Ved
 
@@ -1227,19 +1227,19 @@ class Ved
       return;
 
     if (any (['x', 'X', Input->rmap.delete] == chr))
-      ed_del_chr (s;reg = reg, chr = chr);
+      Ved.Ed.del_chr (s;reg = reg, chr = chr);
     else if ('Y' == chr)
       pg_Yank (s;reg = reg);
     else if ('d' == chr)
-      ed_del (s;reg = reg);
+      Ved.Ed.del (s;reg = reg);
     else if ('c' == chr)
-      ed_change (s;reg = reg);
+      Ved.Ed_change (s;reg = reg);
     else if ('D' == chr)
-      ed_del_to_end (s;reg = reg);
+      Ved.Ed.del_to_end (s;reg = reg);
     else if ('P' == chr)
-      ed_Put (s;reg = reg);
+      Ved.Ed.Put (s;reg = reg);
     else
-      ed_put (s;reg = reg);
+      Ved.Ed.Put (s;reg = reg);
   end
 
   def _askonsubst_ (s, fn, lnr, fpart, context, lpart, replace) proc
@@ -1423,6 +1423,62 @@ class Ved
     Ved.draw_wind ();
   end
 
+  def __indent_in__ (s) proc
+    Ved.Ed.indent_in (s);
+  end
+
+  def __indent_out__ (s) proc
+    Ved.Ed.indent_out (s);
+  end
+
+  def __join_line__ (s) proc
+    Ved.Ed.join_line (s);
+  end
+
+  def __del_to_end__ (s) proc
+    Ved.Ed.del_to_end (s);
+  end
+
+  def __change_chr__ (s) proc
+    Ved.Ed.change_chr (s);
+  end
+
+  def __del_trail_ws__ (s) proc
+    Ved.Ed.del_trail_ws (s);
+  end
+
+  def __del_chr__ (s) proc
+    Ved.Ed.del_chr (s);
+  end
+
+  def __toggle_case__ (s) proc
+    Ved.Ed.toggle_case (s);
+  end
+
+  def __del__ (s) proc
+    Ved.Ed.del (s);
+  end
+
+  def __change__ (s) proc
+    Ved.Ed.change (s);
+  end
+
+  def __put__ (s) proc
+    Ved.Ed.put (s);
+  end
+
+  def __Put__ (s) proc
+    Ved.Ed.Put (s);
+  end
+
+  def __newline__ (s) proc
+    Ved.Ed.newline (s);
+  end
+
+  def __editline__ (s) proc
+    Ved.Ed.editline (s);
+  end
+
   beg
     VED_PAGER[string (Input->F3)]      = &next_wind;
     VED_PAGER[string (',')]            = &handle_comma;
@@ -1470,29 +1526,29 @@ class Ved
     VED_PAGER[string ('N')]            = &s_backslash_reg_;
     VED_PAGER[string ('v')]            = &vis_mode;
     VED_PAGER[string ('V')]            = &vis_mode;
-    VED_PAGER[string ('~')]            = &ed_toggle_case;
-    VED_PAGER[string ('P')]            = &ed_Put;
-    VED_PAGER[string ('p')]            = &ed_put;
-    VED_PAGER[string ('o')]            = &ed_newline;
-    VED_PAGER[string ('O')]            = &ed_newline;
-    VED_PAGER[string ('c')]            = &ed_change;
-    VED_PAGER[string ('d')]            = &ed_del;
-    VED_PAGER[string ('D')]            = &ed_del_to_end;
-    VED_PAGER[string ('C')]            = &ed_editline;
-    VED_PAGER[string ('i')]            = &ed_editline;
-    VED_PAGER[string ('a')]            = &ed_editline;
-    VED_PAGER[string ('A')]            = &ed_editline;
-    VED_PAGER[string ('r')]            = &ed_chang_chr;
-    VED_PAGER[string ('J')]            = &ed_join_line;
-    VED_PAGER[string ('>')]            = &ed_indent_out;
-    VED_PAGER[string ('<')]            = &ed_indent_in;
-    VED_PAGER[string ('x')]            = &ed_del_chr;
-    VED_PAGER[string ('X')]            = &ed_del_chr;
+    VED_PAGER[string ('C')]            = &__editline__;
+    VED_PAGER[string ('i')]            = &__editline__;
+    VED_PAGER[string ('a')]            = &__editline__;
+    VED_PAGER[string ('A')]            = &__editline__;
+    VED_PAGER[string ('o')]            = &__newline__;
+    VED_PAGER[string ('O')]            = &__newline__;
+    VED_PAGER[string ('P')]            = &__Put__;
+    VED_PAGER[string ('p')]            = &__put__;
+    VED_PAGER[string ('c')]            = &__change__;
+    VED_PAGER[string ('r')]            = &__change_chr__;
+    VED_PAGER[string ('~')]            = &__toggle_case__;
+    VED_PAGER[string ('J')]            = &__join_line__;
+    VED_PAGER[string ('d')]            = &__del__;
+    VED_PAGER[string ('D')]            = &__del_to_end__;
+    VED_PAGER[string ('x')]            = &__del_chr__;
+    VED_PAGER[string ('X')]            = &__del_chr__;
+    VED_PAGER[string ('>')]            = &__indent_out__;
+    VED_PAGER[string ('<')]            = &__indent_in__;
     VED_PAGER[string (Input->F12)]     = &paste_xsel;
-    VED_PAGER[string (Input->rmap.delete[0])]    = &ed_del_chr;
-    VED_PAGER[string (Input->rmap.backspace[0])] = &ed_del_trailws;
-    VED_PAGER[string (Input->rmap.backspace[1])] = &ed_del_trailws;
-    VED_PAGER[string (Input->rmap.backspace[2])] = &ed_del_trailws;
+    VED_PAGER[string (Input->rmap.delete[0])]    = &__del_chr__;
+    VED_PAGER[string (Input->rmap.backspace[0])] = &__del_trail_ws__;
+    VED_PAGER[string (Input->rmap.backspace[1])] = &__del_trail_ws__;
+    VED_PAGER[string (Input->rmap.backspace[2])] = &__del_trail_ws__;
 
     ifnot (NULL == Env->DISPLAY)
       ifnot (NULL == Env->XAUTHORITY)

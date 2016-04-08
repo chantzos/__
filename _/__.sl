@@ -1158,7 +1158,7 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
       return_buf, method_name = __fmethods[i], as = sub_cname);
 
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
-   "  self = __->__ (\"" + cname + "\", \"Class::getself\");" +
+   "  self = __->__ (\"" + cname + "\", \"Class::getself\");\n" +
     "  struct {@self,";
 
   _for i (0, length (methods) - 1)

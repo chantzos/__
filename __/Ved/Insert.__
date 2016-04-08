@@ -50,7 +50,7 @@ subclass Insert
     ifnot (any ([VedReg->REGS, '='] == reg))
       return;
 
-    @line = ed_put (s;reg = char (reg), return_line);
+    @line = Ved.Ed.put (s;reg = char (reg), return_line);
   end
 
   def ins_char (is, s, line) proc
@@ -531,7 +531,7 @@ subclass Insert
       {
       lline = 0 == s._index - s._indent ? " " : substr (@line, 1, s._index);
       variable indent = 0;
-      @line =  newline_str (s, &indent, @line) + substr (@line, s._index + 1, -1);
+      @line =  Ved.newline_str (s, &indent, @line) + substr (@line, s._index + 1, -1);
 
       prev_l = lline;
 
@@ -914,11 +914,11 @@ subclass Insert
   end
 
   def paste_xsel (s) proc
-    ed_Put (s;reg = "*");
+    Ved.Ed.Put (s;reg = "*");
   end
 
   def ins_paste_xsel (is, s, line) proc
-    @line = ed_Put (s;reg = "*", return_line);
+    @line = Ved.Ed.Put (s;reg = "*", return_line);
   end
 
   def ins_getline (is, s, line) proc
