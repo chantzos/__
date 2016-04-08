@@ -15,13 +15,12 @@ private define my_commands ()
 
 private define filtercommands (s, ar)
 {
-  ar = ar[where (1 < strlen (ar))];
-  return ar;
+  ar[where (1 < strlen (ar))];
 }
 
 private define filterargs (s, args, type, desc)
 {
-  return [args, "--su", "--pager"], [type, "void", "void"],
+  [args, "--su", "--pager"], [type, "void", "void"],
     [desc, "execute command as superuser", "viewoutput in a scratch buffer"];
 }
 

@@ -20,7 +20,7 @@ public define exit_me (x)
   exit (x);
 }
 
-public define __err_handler__ (self, s)
+private define __err_handler__ (self, s)
 {
   self.at_exit ();
   IO.tostderr (s);
@@ -50,6 +50,8 @@ Class.load ("Ved");
 Class.load ("Api");
 Class.load ("App");
 
+This.at_exit = &_exit_;
+
 ifnot (NULL == This.isachild)
   Class.load ("Child");
 else
@@ -66,28 +68,20 @@ ifnot (NULL == DEBUG)
   This.argv = This.argv[wherenot (_isnull (This.argv))];
   }
 
-This.appname  = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
-This.appdir   = Env->STD_APP_PATH + "/" + This.appname;
-This.datadir  = Env->USER_DATA_PATH + "/" + This.appname;
+This.appname    = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
+This.appdir     = Env->STD_APP_PATH + "/" + This.appname;
+This.datadir    = Env->USER_DATA_PATH + "/" + This.appname;
+This.tmpdir     = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
+This.stdouttype = "ashell";
 
 if (-1 == access (This.appdir, F_OK))
   if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
       This.appdir), F_OK))
     This.__err_handler__ (This.appname, "no such application");
 
-This.tmpdir     = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
-This.stdouttype = "ashell";
-
 if (-1 == access (This.appdir + "/" + This.appname + ".slc", F_OK|R_OK))
   if (-1 == access (This.appdir + "/" + This.appname + ".sl", F_OK|R_OK))
     This.err_handler ("Couldn't find application " + This.appname);
-
-Load.file (This.appdir + "/" + This.appname);
-
-This.stderrFn = This.tmpdir + "/__STDERR__" + string (_time)[[5:]] +
-  ".txt";
-This.stdoutFn = This.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
-  "." + This.stdouttype;
 
 if (-1 == Dir.make_parents (This.tmpdir, File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.tmpdir);
@@ -99,33 +93,31 @@ if (-1 == Dir.make_parents (strreplace (This.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.datadir + "/config");
 
-This.stdoutFd = IO.open_fn (This.stdoutFn);
-This.stderrFd = IO.open_fn (This.stderrFn);
+Load.file (This.appdir + "/" + This.appname);
 
-VED_RLINE = 0;
+VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
-
-
-SCRATCH    = This.tmpdir + "/__SCRATCH__.txt";
-STDOUTBG   = This.tmpdir + "/__STDOUTBG__.txt";
-GREPFILE   = This.tmpdir + "/__GREP__.list";
-BGDIR      = This.tmpdir + "/__PROCS__";
-RDFIFO     = This.tmpdir + "/__SRV_FIFO__.fifo";
-WRFIFO     = This.tmpdir + "/__CLNT_FIFO__.fifo";
-SCRATCHFD  = IO.open_fn (SCRATCH);
-STDOUTFDBG = IO.open_fn (STDOUTBG);
-
-This.at_exit = &_exit_;
-
+This.stderrFn   = This.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
+This.stdoutFn   = This.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.stdouttype;
+This.stdoutFd   = IO.open_fn (This.stdoutFn);
+This.stderrFd   = IO.open_fn (This.stderrFn);
+SCRATCH         = This.tmpdir + "/__SCRATCH__.txt";
+STDOUTBG        = This.tmpdir + "/__STDOUTBG__.txt";
+GREPFILE        = This.tmpdir + "/__GREP__.list";
+BGDIR           = This.tmpdir + "/__PROCS__";
+RDFIFO          = This.tmpdir + "/__SRV_FIFO__.fifo";
+WRFIFO          = This.tmpdir + "/__CLNT_FIFO__.fifo";
+SCRATCHFD       = IO.open_fn (SCRATCH);
+STDOUTFDBG      = IO.open_fn (STDOUTBG);
 SCRATCH_VED     = Ved.init_ftype ("txt");
 ERR_VED         = Ved.init_ftype ("txt");
 OUT_VED         = Ved.init_ftype (This.stdouttype);
 OUTBG_VED       = Ved.init_ftype (This.stdouttype);
-
 SCRATCH_VED._fd = SCRATCHFD;
 OUTBG_VED._fd   = STDOUTFDBG;
 ERR_VED._fd     = This.stderrFd;
 OUT_VED._fd     = This.stdoutFd;
+SPECIAL         = [SPECIAL, SCRATCH, This.stderrFn, This.stdoutFn, STDOUTBG];
 
 txt_settype  (SCRATCH_VED, SCRATCH, VED_ROWS, NULL;_autochdir = 0);
 txt_settype  (ERR_VED, This.stderrFn, VED_ROWS, NULL;_autochdir = 0);
@@ -134,10 +126,8 @@ txt_settype  (ERR_VED, This.stderrFn, VED_ROWS, NULL;_autochdir = 0);
 (@__get_reference (This.stdouttype + "_settype"))
   (OUTBG_VED, STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
 
-SPECIAL = [SPECIAL, SCRATCH, This.stderrFn, This.stdoutFn, STDOUTBG];
-
 if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
-  This.exit (1);
+  This.err_handler ("cannot create directory", BGDIR);
 
 ifnot (access (RDFIFO, F_OK))
   if (-1 == remove (RDFIFO))
@@ -157,103 +147,7 @@ Class.load ("Com");
 
 private define com_execute (argv)
 {
-  variable isbg = 0;
-  if (argv[-1] == "&")
-    {
-    isbg = 1;
-    argv = argv[[:-2]];
-    }
-
-  if (argv[-1][-1] == '&')
-    {
-    isbg = 1;
-    argv[-1] = substr (argv[-1], 1, strlen (argv[-1]) - 1);
-    }
-
-  variable header, issu, env, stdoutfile, stdoutflags;
-
-  variable p = Com.pre_exec (argv, &header, &issu, &env;;__qualifiers ());
-
-  if (NULL == p)
-    return;
-
-  argv = ();
-
-  variable isscratch = Opt.Arg.exists ("--pager", argv);
-
-  ifnot (NULL == isscratch)
-    {
-    isbg = 0;
-    argv[isscratch] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
-    stdoutfile = SCRATCH;
-    stdoutflags = ">|";
-    }
-  else
-    {
-    variable file, flags, retval;
-    (file, flags, retval) = Com.parse_argv (argv, &isbg);
-
-    if (-1 == retval)
-      {
-      variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
-
-      if (This.shell)
-        IO.tostdout (err);
-      else
-        toscratch (err + "\n");
-
-      ERR_VED.st_.st_size += strbytelen (err) + 1;
-      EXITSTATUS = 1;
-      Com.post_exec (header);
-      return;
-      }
-
-    if (1 == retval)
-      {
-      argv[-1] = NULL;
-      argv = argv[wherenot (_isnull (argv))];
-      }
-
-    stdoutfile = file;
-    stdoutflags = flags;
-    }
-
-  if (NULL == isscratch &&
-  %%% CARE FOR CHANGES argv-index
-    (any (argv[2] == ["man"]) && NULL == Opt.Arg.exists ("--buildcache", argv)))
-    {
-    isbg = 0;
-    stdoutfile = SCRATCH;
-    stdoutflags = ">|";
-    isscratch = 1;
-    }
-
-  env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
-   "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
-
-  ifnot (isbg)
-    Com.Fork.tofg (p, argv, env);
-  else
-    {
-    Com.Fork.tobg (p, argv, env);
-    isscratch = NULL;
-    }
-
-  if ((NULL != isscratch || 0 == This.shell) &&
-    0 == EXITSTATUS &&
-    0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
-        App.scratch (Ved.get_cur_buf ());
-
-  ifnot (isbg)
-    Com.get_bgjobs ();
-
-  % (ugly) hack to fix the err messages from sudo to mess the screen
-  % since we don't open the stderr stream in the process
-  if (issu)
-    Smg.clear_and_redraw ();
-
-  Com.post_exec (header;;__qualifiers ());
+  Com.execute (argv;;__qualifiers);
 }
 
 private define _build_comlist_ (a)
@@ -295,12 +189,6 @@ private define draw_wind (argv)
   Ved.draw_wind ();
 }
 
-% needed by File.copy, but it will be moved from this file
-public define send_msg_dr (msg)
-{
-  Smg.send_msg_dr (msg, 0, NULL, NULL);
-}
-
 private define scratch_to_stdout (argv)
 {
   File.copy (SCRATCH, This.stdoutFn;flags = "ab", verbose = 1);
@@ -317,16 +205,6 @@ private define __clear__ (argv)
     fn = This.stderrFn;
 
   () = File.write (fn, "\000");
-}
-
-public define __scratch (argv)
-{
-  variable ved = @Ved.get_cur_buf ();
-
-  App.scratch (ved);
-
-  NEEDSWINDDRAW = 0;
-  Ved.draw_wind ();
 }
 
 private define __echo__ (argv)
@@ -550,17 +428,6 @@ private define __edit__ (argv)
   s.vedloop ();
 }
 
-public define __messages ()
-{
-  loop (_NARGS) pop ();
-  variable ved = @Ved.get_cur_buf ();
-
-  viewfile (ERR_VED, "MSG", NULL, NULL);
-  Ved.setbuf (ved._abspath);
-
-  Ved.draw_wind ();
-}
-
 private define __ved__ (argv)
 {
   Com.pre_com ();
@@ -579,7 +446,7 @@ private define __ved__ (argv)
   draw (Ved.get_cur_buf ());
 }
 
-public define __idle__ (argv)
+private define __idle__ (argv)
 {
   Api.reset_screen ();
 
@@ -708,7 +575,7 @@ public define init_commands ()
   a;
 }
 
-public define filterexcom (s, ar)
+private define filterexcom (s, ar)
 {
   ifnot ('!' == s._chr)
     ifnot (strlen (s.argv[0]))
@@ -717,7 +584,7 @@ public define filterexcom (s, ar)
   ar;
 }
 
-public define filterexargs (s, args, type, desc)
+private define filterexargs (s, args, type, desc)
 {
   if (s._ind && '!' == s.argv[0][0])
     return [args, "--su", "--pager"], [type, "void", "void"],
@@ -758,8 +625,8 @@ public define __initrline ()
     osappnew = __get_reference ("app_new"),
     osapprec = __get_reference ("app_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
-    filterargs = __get_reference ("filterexargs"),
-    filtercommands = __get_reference ("filterexcom"));
+    filterargs = &filterexargs,
+    filtercommands = &filterexcom);
 }
 
 private define __rehash__ ()

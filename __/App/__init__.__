@@ -14,7 +14,6 @@ class App
   var public STDOUTFDBG;
   var public RLINE = NULL;
   var public BGPIDS = Assoc_Type[Struct_Type];
-
   var public IARG = 0;
   var public ICOM = 0;
   var public NEEDSWINDDRAW = 0;
@@ -219,5 +218,28 @@ class App
     ved.draw ();
 
     NEEDSWINDDRAW = 1;
+  end
+
+  def send_msg_dr (msg) public proc
+    Smg.send_msg_dr (msg, 0, NULL, NULL);
+  end
+
+  def __scratch (argv) public proc
+    variable ved = @Ved.get_cur_buf ();
+
+    App.scratch (ved);
+
+    NEEDSWINDDRAW = 0;
+    Ved.draw_wind ();
+  end
+
+  def __messages () public proc
+    loop (_NARGS) pop ();
+    variable ved = @Ved.get_cur_buf ();
+
+    viewfile (ERR_VED, "MSG", NULL, NULL);
+    Ved.setbuf (ved._abspath);
+
+    Ved.draw_wind ();
   end
 end

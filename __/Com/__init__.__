@@ -339,4 +339,104 @@ class Com
 
     file, flags, retval;
   end
+
+  def execute (argv)
+    variable isbg = 0;
+    if (argv[-1] == "&")
+      {
+      isbg = 1;
+      argv = argv[[:-2]];
+      }
+
+    if (argv[-1][-1] == '&')
+      {
+      isbg = 1;
+      argv[-1] = substr (argv[-1], 1, strlen (argv[-1]) - 1);
+      }
+
+    variable header, issu, env, stdoutfile, stdoutflags;
+
+    variable p = self.pre_exec (argv, &header, &issu, &env;;__qualifiers ());
+
+    if (NULL == p)
+      return;
+
+    argv = ();
+
+    variable isscratch = Opt.Arg.exists ("--pager", argv);
+
+    ifnot (NULL == isscratch)
+      {
+      isbg = 0;
+      argv[isscratch] = NULL;
+      argv = argv[wherenot (_isnull (argv))];
+      stdoutfile = SCRATCH;
+      stdoutflags = ">|";
+      }
+    else
+      {
+      variable file, flags, retval;
+      (file, flags, retval) = self.parse_argv (argv, &isbg);
+
+      if (-1 == retval)
+        {
+        variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
+
+        if (This.shell)
+          IO.tostdout (err);
+        else
+          toscratch (err + "\n");
+
+        ERR_VED.st_.st_size += strbytelen (err) + 1;
+        EXITSTATUS = 1;
+        self.post_exec (header);
+        return;
+        }
+
+      if (1 == retval)
+        {
+        argv[-1] = NULL;
+        argv = argv[wherenot (_isnull (argv))];
+        }
+
+      stdoutfile = file;
+      stdoutflags = flags;
+      }
+
+    if (NULL == isscratch &&
+    %%% CARE FOR CHANGES argv-index
+      (any (argv[2] == ["man"]) && NULL == Opt.Arg.exists ("--buildcache", argv)))
+      {
+      isbg = 0;
+      stdoutfile = SCRATCH;
+      stdoutflags = ">|";
+      isscratch = 1;
+      }
+
+    env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
+     "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
+
+    ifnot (isbg)
+      self.Fork.tofg (p, argv, env);
+    else
+      {
+      self.Fork.tobg (p, argv, env);
+      isscratch = NULL;
+      }
+
+    if ((NULL != isscratch || 0 == This.shell) &&
+      0 == EXITSTATUS &&
+      0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
+          App.scratch (Ved.get_cur_buf ());
+
+    ifnot (isbg)
+      self.get_bgjobs ();
+
+    % (ugly) hack to fix the err messages from sudo to mess the screen
+    % since we don't open the stderr stream in the process
+    if (issu)
+      Smg.clear_and_redraw ();
+
+    self.post_exec (header;;__qualifiers ());
+  end
 end
