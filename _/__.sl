@@ -485,31 +485,22 @@ private define err_handler (e, s)
 
   s.exc = e;
 
-  variable handler = qualifier ("err_handler");
+  variable handler, args = {s};
 
-  if (NULL == handler)
-    ifnot (NULL == s.class["__SELF__"].err_handler)
-      if (Ref_Type == typeof (s.class["__SELF__"].err_handler))
-        if (__is_callable (s.class["__SELF__"].err_handler))
-          handler = s.class["__SELF__"].err_handler;
-
-  variable args = {s};
-
-  if (NULL == handler)
-    if (is_defined (s.class["__R__"].name + "->err_handler"))
-      handler = __get_reference (s.class["__R__"].name + "->err_handler");
-    else if (is_defined (current_namespace + "->err_handler"))
-      handler = __get_reference (current_namespace + "->err_handler");
-    else if (is_defined ("Err_Handler"))
-      handler = __get_reference ("Err_Handler");
-    else if (NULL != This.err_handler)
-      {
-      handler = This.err_handler;
-      list_insert (args, This);
-      }
+  if (NULL == (handler = qualifier ("err_handler"), handler))
+    if (NULL == (handler = s.class["__SELF__"].err_handler, handler))
+      if (NULL == (handler = __get_reference (s.class["__R__"].name + "->err_handler"), handler))
+        if (NULL == (handler = __get_reference (current_namespace + "->err_handler"), handler))
+          if (NULL == (handler = __get_reference ("Error_Handler"), handler))
+            {
+            handler = This.err_handler;
+            list_insert (args, This);
+            }
 
   ifnot (NULL == handler)
-    (@handler) (__push_list (args);;__qualifiers);
+    if (Ref_Type == typeof (handler))
+      if (__is_callable (handler))
+        (@handler) (__push_list (args);;__qualifiers);
 }
 
 private define err_class_type ()
@@ -1158,8 +1149,7 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
       return_buf, method_name = __fmethods[i], as = sub_cname);
 
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
-   "  self = __->__ (\"" + cname + "\", \"Class::getself\");\n" +
-    "  struct {@self,";
+    "  struct {";
 
   _for i (0, length (methods) - 1)
     sub_buf += methods[i] + "= &" + cname + "_" + as + "_" + methods[i] + ",\n";

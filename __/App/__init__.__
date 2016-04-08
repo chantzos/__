@@ -31,10 +31,10 @@ class App
     ifnot (NULL == rl)
       Rline.writehistory (rl.history, rl.histfile);
 
-    variable searchhist = (@__get_reference ("s_history"));
+    variable searchhist = (@__get_reference ("SEARCH_HISTORY"));
 
     if (length (searchhist))
-      Rline.writehistory (list_to_array (searchhist), (@__get_reference ("s_histfile")));
+      Rline.writehistory (list_to_array (searchhist), (@__get_reference ("SEARCH_HISTFILE")));
   end
 
   def draw (s) public proc

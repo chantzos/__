@@ -1,24 +1,15 @@
-beg
+subclass Search
+  __init__
+    word
+    run
+    last
+  end
+
   var s_col;
   var s_fcol;
   var s_lnr;
   var s_found;
   var s_ltype;
-
-  def _init_search_hist_ () proc
-    variable ar = NULL;
-    ifnot (access (s_histfile, F_OK|R_OK))
-      ar = File.readlines (s_histfile);
-    if (NULL != ar && length (ar))
-      {
-      array_map (&list_append, s_history, ar);
-      s_histindex = 0;
-      }
-  end
-
-  beg
-    _init_search_hist_ ();
-  end
 
   def s_exit_rout (s, pat, draw, cur_lang) proc
     ifnot (NULL == cur_lang)
@@ -27,9 +18,9 @@ beg
 
     if (s_found && pat != NULL)
       {
-      list_insert (s_history, pat);
-      if (NULL == s_histindex)
-        s_histindex = 0;
+      list_insert (SEARCH_HISTORY, pat);
+      if (NULL == SEARCH_HISTINDEX)
+        SEARCH_HISTINDEX = 0;
 
       Ved.Reg.set ("/", pat);
       }
@@ -37,7 +28,7 @@ beg
     if (draw)
       if (s_found)
         {
-        markbacktick (s);
+        Ved.Mark.backtick (s);
         s_fcol = s_fcol > s._maxlen ? s._indent : s_fcol;
 
         if (s_lnr < s._avlins)
@@ -64,7 +55,7 @@ beg
     __vdraw_tail (s);
   end
 
-  def search_backward (s, str) proc
+  def s_backward (s, str) proc
     variable
       i,
       ar,
@@ -135,7 +126,7 @@ beg
     Smg.send_msg_dr ("Nothing found", 0, PROMPTROW, s_col);
   end
 
-  def search_forward (s, str) proc
+  def s_forward (s, str) proc
     variable
       i,
       ar,
@@ -207,14 +198,14 @@ beg
     Smg.send_msg_dr ("Nothing found", 0, PROMPTROW, s_col);
   end
 
-  def search (s) proc
+  def run (s)
     variable
       chr,
       origlnr,
       dothesearch = qualifier_exists ("dothesearch"),
       cur_lang = Input.getmapname (),
       type = qualifier ("type", Input->BSLASH == s._chr ? "forward" : "backward"),
-      typesearch = type == "forward" ? &search_forward : &search_backward,
+      typesearch = type == "forward" ? &s_forward : &s_backward,
       pchr = type == "forward" ? "/" : "?",
       pat = qualifier ("pat",  ""),
       str = pchr + pat;
@@ -234,8 +225,8 @@ beg
 
     origlnr = s_lnr;
 
-    if (length (s_history))
-      s_histindex = 0;
+    if (length (SEARCH_HISTORY))
+      SEARCH_HISTINDEX = 0;
 
     Ved.write_prompt (str, s_col);
 
@@ -299,13 +290,13 @@ beg
         }
 
       if (chr == Input->UP)
-        ifnot (NULL == s_histindex)
+        ifnot (NULL == SEARCH_HISTINDEX)
           {
-          pat = s_history[s_histindex];
-          if (s_histindex == length (s_history) - 1)
-            s_histindex = 0;
+          pat = SEARCH_HISTORY[SEARCH_HISTINDEX];
+          if (SEARCH_HISTINDEX == length (SEARCH_HISTORY) - 1)
+            SEARCH_HISTINDEX = 0;
           else
-            s_histindex++;
+            SEARCH_HISTINDEX++;
 
           s_col = strlen (pat) + 1;
           str = pchr + pat;
@@ -315,13 +306,13 @@ beg
           }
 
       if (chr == Input->DOWN)
-        ifnot (NULL == s_histindex)
+        ifnot (NULL == SEARCH_HISTINDEX)
           {
-          pat = s_history[s_histindex];
-          ifnot (s_histindex)
-            s_histindex = length (s_history) - 1;
+          pat = SEARCH_HISTORY[SEARCH_HISTINDEX];
+          ifnot (SEARCH_HISTINDEX)
+            SEARCH_HISTINDEX = length (SEARCH_HISTORY) - 1;
           else
-            s_histindex--;
+            SEARCH_HISTINDEX--;
 
           s_col = strlen (pat) + 1;
           str = pchr + pat;
@@ -348,7 +339,7 @@ beg
 
       if (chr == Input->CTRL_p)
         {
-        typesearch = type == "forward" ? &search_backward : &search_forward;
+        typesearch = type == "forward" ? &s_backward : &s_forward;
         if (type == "backward")
           if (s_lnr == s._len)
             s_lnr = 0;
@@ -361,7 +352,7 @@ beg
             s_lnr--;
 
         (@typesearch) (s, pat);
-        typesearch = type == "forward" ? &search_forward : &search_backward;
+        typesearch = type == "forward" ? &s_forward : &s_backward;
         }
 
       str = pchr + pat;
@@ -389,7 +380,7 @@ beg
     lnr;
   end
 
-  def s_backslash_reg_ (s) proc
+  def last (s)
     variable reg = Ved.Reg.get ("/");
     if (NULL == reg)
       return;
@@ -400,13 +391,13 @@ beg
       s_ltype = (ltype == "forward") ? "backward" : "forward";
       }
 
-    search (s;pat = reg, type = s_ltype, lnr = s_getlnr (s), dothesearch);
+    self.run (s;pat = reg, type = s_ltype, lnr = s_getlnr (s), dothesearch);
 
     if (s._chr == 'N')
       s_ltype = ltype;
   end
 
-  def s_search_word_ (s) proc
+  def word (s)
     variable
       str,
       pat,
@@ -426,7 +417,7 @@ beg
     type = '*' == s._chr ? "forward" : "backward";
     s_ltype = type;
 
-    typesearch = type == "forward" ? &search_forward : &search_backward;
+    typesearch = type == "forward" ? &s_forward : &s_backward;
 
     if (type == "forward")
       if (s_lnr == s._len)

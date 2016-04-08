@@ -483,6 +483,28 @@ VED_CLINE["wq"]  =      &write_quit;
 VED_CLINE["Wq"]  =      &write_quit;
 VED_CLINE["messages"] = &__vmessages;
 
+private variable ERR_STACK = 0;
+private define ved_err_handler (t, _s_)
+{
+  ERR_STACK++;
+
+  variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["PUBLIC"]);
+  () = lseek (fd, 0, SEEK_END);
+  IO.tostdout (Ved.__HLINE__ ();fd = fd);
+  IO.tostdout (Env->PID, ERR_STACK;fd = fd);
+  IO.tostdout (t;fd = fd);
+  IO.tostdout (Struct.to_string (_s_);fd = fd);
+  if (ERR_STACK > 4)
+    exit_me (1);
+
+  (@__get_reference ("__vmessages"));
+  variable s = Ved.get_cur_buf ();
+  Ved.draw_wind ();
+  s.vedloop ();
+}
+
+This.err_handler = &ved_err_handler;
+
 public define init_ved ()
 {
   variable __stdin = any (This.argv == "-");

@@ -40,39 +40,15 @@ class Ved
     prev_buf_ind,
   end
 
-  var vis = struct
-    {
-    _i,cur,ptr,mode,
-    clr = Smg->COLOR.visual,
-    l_mode,l_down,l_up,l_page_up,l_page_down,
-    l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', Input->DOWN, Input->UP,
-      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b],
-    c_mode,c_left,c_right,
-    c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT],
-    bw_mode,bw_down,bw_up,bw_left,bw_right,bw_maxlen,
-    bw_keys = ['x', 'I', 'i', 'd', 'y', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
-    needsdraw,startrow,startlnr,startcol,startindex,
-    vlins,lnrs,linlen,lines,sel,at_exit,
-    };
-
   let VED_DIR = Env->TMP_PATH + "/ved/" + string (Env->PID);
-
-  let EL_MAP = [902, [904:906], 908, [910:929], [931:937], [945:974]];
-  let EN_MAP = [['a':'z'], ['A':'Z']];
-  let MAPS   = [EL_MAP, EN_MAP];
-  let WCHARS = array_map (String_Type, &char, [['0':'9'], EN_MAP, EL_MAP, '_']);
+  let EL_MAP  = [902, [904:906], 908, [910:929], [931:937], [945:974]];
+  let EN_MAP  = [['a':'z'], ['A':'Z']];
+  let MAPS    = [EL_MAP, EN_MAP];
+  let WCHARS  = array_map (String_Type, &char, [['0':'9'], EN_MAP, EL_MAP, '_']);
   let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':'];
   let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';'];
 
-  var public VED_INFOCLRFG = Smg->COLOR.infofg;
-  var public VED_INFOCLRBG = Smg->COLOR.infobg;
-
-  var VED_PROMPTCLR = Smg->COLOR.prompt;
-
-
-  var VED_PREV_WIND;
-  var MARKS  = Assoc_Type[Pos_Type];
-
+  var public MARKS        = Assoc_Type[Pos_Type];
   var public VED_WIND     = Assoc_Type[Wind_Type];
   var public FTYPES       = Assoc_Type[Integer_Type];
   var public REG          = Assoc_Type[String_Type];
@@ -80,26 +56,25 @@ class Ved
   var public UNDELETABLE  = String_Type[0];
   var public SPECIAL      = String_Type[0];
   var public VED_ROWS     = [1:LINES - 3];
-
   var public VED_MODIFIED       = 0x01;
   var public VED_ONDISKMODIFIED = 0x02;
   var public VED_RDONLY         = 0x04;
   var public VED_ISONLYPAGER    = 0;
   var public VED_RLINE          = 1;
+  var public SEARCH_HISTFILE    = Env->USER_DATA_PATH + "/.__" + Env->USER + "_ved_search_history";
+  var public SEARCH_HISTINDEX   = NULL;
+  var public SEARCH_HISTORY     = {};
 
-  beg
-    Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
-  end
+  var VED_INFOCLRFG = Smg->COLOR.infofg;
+  var VED_INFOCLRBG = Smg->COLOR.infobg;
+  var VED_PROMPTCLR = Smg->COLOR.prompt;
+  var VED_PREV_WIND;
 
-  var public s_histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_ved_search_history";
-  var public s_histindex = NULL;
-  var public s_history = {};
-
-  def _invalid () proc
+  def __invalid__ () proc
     pop ();
   end
 
-  var public VED_PAGER = Assoc_Type[Ref_Type, &_invalid];
+  var public VED_PAGER = Assoc_Type[Ref_Type, &__invalid__];
   var public VEDCOUNT;
 
   def build_ftype_table () proc
@@ -121,6 +96,7 @@ class Ved
   end
 
   beg
+    Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
     build_ftype_table ();
 
     if (-1 == Dir.make_parents (VED_DIR, File->PERM["PRIVATE"]))
@@ -144,9 +120,6 @@ class Ved
   def __eval () public proc
   end
 
-  def insert () proc
-  end
-
   subclass Prev from Api
   subclass Reg from Ved
 
@@ -162,6 +135,99 @@ class Ved
       VED_INFOCLRFG = Smg->COLOR.infofg;
     else
       VED_INFOCLRFG = Smg->NOCOLOR;
+  end
+
+  def __define_case__ (chr) proc
+    ifnot (any (@chr == [DEFINED_LOWER_CASE, DEFINED_UPPER_CASE]))
+      return 0;
+
+    variable low = 1;
+    variable ind = wherefirst_eq (DEFINED_LOWER_CASE, @chr);
+    if (NULL == ind)
+      {
+      ind = wherefirst_eq (DEFINED_UPPER_CASE, @chr);
+      low = 0;
+      }
+
+    @chr = low ? DEFINED_UPPER_CASE[ind] : DEFINED_LOWER_CASE[ind];
+
+    1;
+  end
+
+  def __indent_In__ (s, line, i_) proc
+    ifnot (strlen (line) - s._indent)
+      return NULL;
+
+    ifnot (isblank (line[s._indent]))
+      return NULL;
+
+    while (isblank (line[@i_]) && @i_ < s._shiftwidth + s._indent)
+      @i_++;
+
+    substr (line, @i_ + 1 - s._indent, -1);
+  end
+
+  def __left (s) proc
+    ifnot (s.ptr[1] - s._indent)
+      ifnot (s._is_wrapped_line)
+        return -1;
+
+    s._index--;
+
+    if (s._is_wrapped_line && 0 == s.ptr[1] - s._indent)
+      {
+      s._findex--;
+
+      ifnot (s._findex)
+        s._is_wrapped_line = 0;
+
+      return 1;
+      }
+
+    s.ptr[1]--;
+
+    0;
+  end
+
+  def __right (s, linlen) proc
+    if (s._index - s._indent == linlen - 1 || 0 == linlen)
+      return -1;
+
+    if (s.ptr[1] < s._maxlen - 1)
+      {
+      s.ptr[1]++;
+      s._index++;
+      return 0;
+      }
+
+    s._index++;
+    s._findex++;
+
+    1;
+  end
+
+  def __adjust_col (s, linlen, plinlen) proc
+    if (linlen == 0 || 0 == s.ptr[1] - s._indent)
+      {
+      s.ptr[1] = s._indent;
+      s._findex = s._indent;
+      s._index = s._indent;
+      }
+    else if (linlen > s._linlen && s.ptr[1] + 1 == s._maxlen ||
+      (s.ptr[1] - s._indent == plinlen - 1 && linlen > s._linlen))
+        {
+        s.ptr[1] = s._maxlen - 1;
+        s._findex = s._indent;
+        s._index = s._linlen - 1 + s._indent;
+        }
+    else if ((0 != plinlen && s.ptr[1] - s._indent == plinlen - 1 && (
+        linlen < s.ptr[1] || linlen < s._linlen))
+       || (s.ptr[1] - s._indent && s.ptr[1] - s._indent >= linlen))
+        {
+        s.ptr[1] = linlen - 1 + s._indent;
+        s._index = linlen - 1 + s._indent;
+        s._findex = s._indent;
+        }
   end
 
   def set_modified (s) public proc
@@ -201,7 +267,7 @@ class Ved
     sprintf ("%s\000", repeat (" ", indent));
   end
 
-  def write_line (fp, line, indent) proc
+  def __write_line (fp, line, indent) proc
     line = substr (line, indent + 1, -1);
     return fwrite (line, fp);
   end
@@ -220,7 +286,7 @@ class Ved
       return errno;
 
     _for i (0, length (lines) - 1)
-      if (retval = write_line (fp, lines[i] + "\n", indent), retval == -1)
+      if (retval = __write_line (fp, lines[i] + "\n", indent), retval == -1)
         return errno;
       else
         @bts += retval;
@@ -231,7 +297,7 @@ class Ved
     0;
   end
 
-  def _initrowsbuffvars_ (s) proc
+  def __initrowsbuffvars__ (s) proc
     s.cols = Integer_Type[length (s.rows)];
     s.cols[*] = 0;
 
@@ -242,7 +308,7 @@ class Ved
     s._avlins = length (s.rows) - 2;
   end
 
-  def _addbuf_ (s) proc
+  def __addbuf__ (s) proc
     ifnot (path_is_absolute (s._fname))
       s._abspath = getcwd () + s._fname;
     else
@@ -268,7 +334,7 @@ class Ved
     s.lexicalhl ([line], [row]);
   end
 
-  def _set_clr_ (s, clr, set) proc
+  def __set_clr__ (s, clr, set) proc
     s.clrs[-1] = clr;
     Smg->IMG[s.rows[-1]][1] = clr;
     if (set)
@@ -276,11 +342,11 @@ class Ved
   end
 
   def __vset_clr_fg (s, set) public proc
-    _set_clr_ (s, VED_INFOCLRFG, set);
+    __set_clr__ (s, VED_INFOCLRFG, set);
   end
 
   def __vset_clr_bg (s, set) public proc
-    _set_clr_ (s, VED_INFOCLRBG, set);
+    __set_clr__ (s, VED_INFOCLRBG, set);
   end
 
   def framesize (frames) proc
@@ -414,24 +480,11 @@ class Ved
     s.lnrs[r];
   end
 
-  def __vtail (s) proc
-    variable
-      lnr = __vlnr (s, '.') + 1,
-      line = __vline (s, '.');
-
-    sprintf (
-      "[%s] (row:%d col:%d lnr:%d/%d %.0f%% strlen:%d chr:%d) undo %d/%d",
-      path_basename (s._fname), s.ptr[0], s.ptr[1] - s._indent + 1, lnr,
-      s._len + 1, (100.0 / s._len) * (lnr - 1), __vlinlen (s, '.'),
-      qualifier ("chr", String.decode (substr (line, s._index + 1, 1))[0]),
-      s._undolevel, length (s.undo));
-  end
-
   def __vdraw_tail (s) proc
     if (s._is_wrapped_line)
       Smg.hlregion (1, s.ptr[0], COLUMNS - 2, 1, 2);
 
-    Smg.atrcaddnstrdr (__vtail (s;;__qualifiers ()),
+    Smg.atrcaddnstrdr (Ved.tail (s;;__qualifiers ()),
       (s.opt_show_status_line ? VED_INFOCLRFG : Smg->NOCOLOR),
       s.rows[-1], 0, s.ptr[0], s.ptr[1], COLUMNS);
   end
@@ -444,7 +497,7 @@ class Ved
       s.lnrs = [0];
       s._ii = 0;
 
-      Smg.aratrcaddnstrdr ([repeat (" ", COLUMNS), __vtail (s)],
+      Smg.aratrcaddnstrdr ([repeat (" ", COLUMNS), Ved.vtail (s)],
         [0, s.opt_show_status_line ? VED_INFOCLRFG : Smg->NOCOLOR],
         [s.rows[0], s.rows[-1]], [0, 0], s.rows[0], 0, COLUMNS);
 
@@ -495,7 +548,7 @@ class Ved
       ar = [ar, t];
       }
 
-    ar = [ar, __vtail (s;;__qualifiers ())];
+    ar = [ar, Ved.tail (s;;__qualifiers ())];
 
     clrs[-1] = s.opt_show_status_line ? VED_INFOCLRFG : Smg->NOCOLOR;
 
@@ -857,33 +910,14 @@ class Ved
       }
   end
 
-  include mark from Ved as Ved
-
-  def preloop (s)
-    markbacktick (s);
-  end
-
-  var ERR_STACK = 0;
-  def ved_err_handler (t, _s_) proc
-    ERR_STACK++;
-
-    variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["PUBLIC"]);
-    () = lseek (fd, 0, SEEK_END);
-    IO.tostdout (Ved.__HLINE__ ();fd = fd);
-    IO.tostdout (Env->PID, ERR_STACK;fd = fd);
-    IO.tostdout (t;fd = fd);
-    IO.tostdout (Struct.to_string (_s_);fd = fd);
-    if (ERR_STACK > 4)
-      exit_me (1);
-
-    (@__get_reference ("__vmessages"));
-    variable s = Ved.get_cur_buf ();
-    Ved.draw_wind ();
-    s.vedloop ();
-  end
+  subclass Mark from Ved
 
   beg
-    This.err_handler = &ved_err_handler;
+    MARKS[string ('`')] = @Pos_Type;
+  end
+
+  def preloop (s)
+    Ved.Mark.backtick (s);
   end
 
   def __hl_groups (lines, vlines, colors, regexps) public proc
@@ -1071,15 +1105,15 @@ class Ved
   def __pg_on_carriage_return (s) public proc
   end
 
-  def pg_write_on_esc (s) proc
+  def __write_on_esc__ (s) proc
     Ved.writefile (s, NULL, s.ptr, NULL, NULL);
     Smg.send_msg_dr ("", 14, NULL, NULL);
     sleep (0.001);
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
   end
 
-  def pg_gotomark (s) proc
-    variable m = mark_get ();
+  def __gotomark__ (s) proc
+    variable m = Ved.Mark.get ();
 
     if (NULL == m)
       return;
@@ -1087,7 +1121,7 @@ class Ved
     if (m._i > s._len)
       return;
 
-    markbacktick (s);
+    Ved.Mark.backtick (s);
 
     s._i = m._i;
     s.ptr = m.ptr;
@@ -1202,19 +1236,39 @@ class Ved
     Ved.Vundo.redo (s);
   end
 
-  def v_lastvi () proc
-  end
-
-  include pager from Ved as Ved
-  include search from Ved as Ved
-
+  subclass Pager from Ved
+  subclass Search from Ved
   subclass Ed from Ved
   subclass Insert from Ved
   subclass Vundo from Ved
+  subclass Visual from Ved
 
-  include visual from Ved as Ved
+  def init_search_hist () proc
+    variable ar = NULL;
+    ifnot (access (SEARCH_HISTFILE, F_OK|R_OK))
+      ar = File.readlines (SEARCH_HISTFILE);
+    if (NULL != ar && length (ar))
+      {
+      array_map (&list_append, SEARCH_HISTORY, ar);
+      SEARCH_HISTINDEX = 0;
+      }
+  end
 
-  def _register_ (s) proc
+  beg
+    init_search_hist ();
+  end
+
+  def __Yank__ (s) proc
+    variable
+      reg = qualifier ("reg", "\""),
+      line = __vline (s, '.');
+
+    Ved.Reg.set (reg, line + "\n");
+    seltoX (line + "\n");
+    Smg.send_msg_dr ("yanked", 1, s.ptr[0], s.ptr[1]);
+  end
+
+  def __register__ (s) proc
     variable reg = Input.getch ();
     ifnot (any (VedReg->REGS == reg))
       return;
@@ -1229,7 +1283,7 @@ class Ved
     if (any (['x', 'X', Input->rmap.delete] == chr))
       Ved.Ed.del_chr (s;reg = reg, chr = chr);
     else if ('Y' == chr)
-      pg_Yank (s;reg = reg);
+      __Yank__ (s;reg = reg);
     else if ('d' == chr)
       Ved.Ed.del (s;reg = reg);
     else if ('c' == chr)
@@ -1242,7 +1296,7 @@ class Ved
       Ved.Ed.Put (s;reg = reg);
   end
 
-  def _askonsubst_ (s, fn, lnr, fpart, context, lpart, replace) proc
+  def __askonsubst__ (s, fn, lnr, fpart, context, lpart, replace) proc
     variable cmp_lnrs = Integer_Type[0];
     variable ar =
       ["@" + fn + " linenr: " + string (lnr+1),
@@ -1309,7 +1363,8 @@ class Ved
       }
 
     variable s = Subst.new (pat, sub;
-      fname = buf._abspath, global = global, askwhensubst = ask, askonsubst = &_askonsubst_);
+      fname = buf._abspath, global = global, askwhensubst = ask,
+      askonsubst = &__askonsubst__);
 
     if (NULL == s)
       {
@@ -1479,53 +1534,147 @@ class Ved
     Ved.Ed.editline (s);
   end
 
+  def __mark__ (s) proc
+    Ved.Mark.set (s);
+  end
+
+  def __search__ (s) proc
+    Ved.Search.run (s);
+  end
+
+  def __search_word__ (s) proc
+    Ved.Search.word (s);
+  end
+
+  def __search_last__ (s) proc
+    Ved.Search.last (s);
+  end
+
+  def __visual__ (s) proc
+    Ved.Visual.mode (s);
+  end
+
+  def handle_comma (s) public proc
+    variable chr = Input.getch ();
+
+    ifnot (any (['p'] == chr))
+      return;
+
+    if ('p' == chr)
+      seltoX (Ved.get_cur_buf ()._abspath);
+  end
+
+  def __up__ (s) proc
+    Ved.Pager.up (s);
+  end
+
+  def __down__ (s) proc
+    Ved.Pager.down (s);
+  end
+
+  def __left__ (s) proc
+    Ved.Pager.left (s);
+  end
+
+  def __right__ (s) proc
+    Ved.Pager.right (s);
+  end
+
+  def __bol__ (s) proc
+    Ved.Pager.bol (s);
+  end
+
+  def __bof__ (s) proc
+    Ved.Pager.bof (s);
+  end
+
+  def __eol__ (s) proc
+    Ved.Pager.eol (s);
+  end
+
+  def __eos__ (s) proc
+    Ved.Pager.eos (s);
+  end
+
+  def __eof__ (s) proc
+    Ved.Pager.eof (s);
+  end
+
+  def __bolnblnk__ (s) proc
+    Ved.Pager.bolnblnk (s);
+  end
+
+  def __g__ (s) proc
+    Ved.Pager.g (s);
+  end
+
+  def __gotoline__ (s) proc
+    Ved.Pager.gotoline (s);
+  end
+
+  def __word_change_case__ (s) proc
+    Ved.Pager.word_change_case (s);
+  end
+
+  def __end_word__ (s) proc
+    Ved.Pager.end_word (s);
+  end
+
+  def __page_up__ (s) proc
+    Ved.Pager.page_up (s);
+  end
+
+  def __page_down__ (s) proc
+    Ved.Pager.page_down (s);
+  end
+
   beg
     VED_PAGER[string (Input->F3)]      = &next_wind;
     VED_PAGER[string (',')]            = &handle_comma;
-    VED_PAGER[string ('"')]            = &_register_;
+    VED_PAGER[string ('"')]            = &__register__;
     VED_PAGER[string (Input->CTRL_a)]  = &_incr_nr_;
     VED_PAGER[string (Input->CTRL_x)]  = &_decr_nr_;
     VED_PAGER[string (Input->CTRL_l)]  = &__vreread;
-    VED_PAGER[string (Input->UP)]      = &pg_up;
-    VED_PAGER[string (Input->DOWN)]    = &pg_down;
-    VED_PAGER[string (Input->ESC_esc)] = &pg_write_on_esc;
-    VED_PAGER[string (Input->HOME)]    = &pg_bof;
-    VED_PAGER[string (Input->NPAGE)]   = &pg_page_down;
-    VED_PAGER[string (Input->CTRL_f)]  = &pg_page_down;
-    VED_PAGER[string (Input->CTRL_b)]  = &pg_page_up;
-    VED_PAGER[string (Input->PPAGE)]   = &pg_page_up;
-    VED_PAGER[string (Input->RIGHT)]   = &pg_right;
-    VED_PAGER[string (Input->LEFT)]    = &pg_left;
-    VED_PAGER[string (Input->END)]     = &pg_eol;
+    VED_PAGER[string (Input->UP)]      = &__up__;
+    VED_PAGER[string (Input->DOWN)]    = &__down__;
+    VED_PAGER[string (Input->ESC_esc)] = &__write_on_esc__;
+    VED_PAGER[string (Input->HOME)]    = &__bof__;
+    VED_PAGER[string (Input->NPAGE)]   = &__page_down__;
+    VED_PAGER[string (Input->CTRL_f)]  = &__page_down__;
+    VED_PAGER[string (Input->CTRL_b)]  = &__page_up__;
+    VED_PAGER[string (Input->PPAGE)]   = &__page_up__;
+    VED_PAGER[string (Input->RIGHT)]   = &__right__;
+    VED_PAGER[string (Input->LEFT)]    = &__left__;
+    VED_PAGER[string (Input->END)]     = &__eol__;
     VED_PAGER[string (Input->CTRL_w)]  = &handle_w;
     VED_PAGER[string (Input->CTRL_r)]  = &__redo__;
-    VED_PAGER[string (Input->BSLASH)]  = &search;
-    VED_PAGER[string (Input->QMARK)]   = &search;
-    VED_PAGER[string (Input->CTRL_v)]  = &vis_mode;
+    VED_PAGER[string (Input->CTRL_v)]  = &__visual__;
+    VED_PAGER[string (Input->BSLASH)]  = &__search__;
+    VED_PAGER[string (Input->QMARK)]   = &__search__;
+    VED_PAGER[string ('#')]            = &__search_word__;
+    VED_PAGER[string ('*')]            = &__search_word__;
+    VED_PAGER[string ('n')]            = &__search_last__;
+    VED_PAGER[string ('N')]            = &__search_last__;
     VED_PAGER[string (033)]            = &pag_completion;
     VED_PAGER[string ('\r')]           = &__pg_on_carriage_return;
-    VED_PAGER[string ('m')]            = &mark;
-    VED_PAGER[string ('`')]            = &pg_gotomark;
-    VED_PAGER[string ('Y')]            = &pg_Yank;
-    VED_PAGER[string ('j')]            = &pg_down;
-    VED_PAGER[string ('k')]            = &pg_up;
-    VED_PAGER[string ('G')]            = &pg_eof;
-    VED_PAGER[string ('g')]            = &pg_g;
-    VED_PAGER[string (' ')]            = &pg_page_down;
-    VED_PAGER[string ('e')]            = &pg_end_word;
-    VED_PAGER[string ('l')]            = &pg_right;
-    VED_PAGER[string ('h')]            = &pg_left;
-    VED_PAGER[string ('-')]            = &pg_eos;
-    VED_PAGER[string ('$')]            = &pg_eol;
-    VED_PAGER[string ('^')]            = &pg_bolnblnk;
-    VED_PAGER[string ('0')]            = &pg_bol;
+    VED_PAGER[string ('`')]            = &__gotomark__;
+    VED_PAGER[string ('Y')]            = &__Yank__;
+    VED_PAGER[string ('j')]            = &__down__;
+    VED_PAGER[string ('k')]            = &__up__;
+    VED_PAGER[string ('G')]            = &__eof__;
+    VED_PAGER[string ('g')]            = &__g__;
+    VED_PAGER[string (' ')]            = &__page_down__;
+    VED_PAGER[string ('e')]            = &__end_word__;
+    VED_PAGER[string ('l')]            = &__right__;
+    VED_PAGER[string ('h')]            = &__left__;
+    VED_PAGER[string ('-')]            = &__eos__;
+    VED_PAGER[string ('$')]            = &__eol__;
+    VED_PAGER[string ('^')]            = &__bolnblnk__;
+    VED_PAGER[string ('0')]            = &__bol__;
     VED_PAGER[string ('u')]            = &__undo__;
-    VED_PAGER[string ('#')]            = &s_search_word_;
-    VED_PAGER[string ('*')]            = &s_search_word_;
-    VED_PAGER[string ('n')]            = &s_backslash_reg_;
-    VED_PAGER[string ('N')]            = &s_backslash_reg_;
-    VED_PAGER[string ('v')]            = &vis_mode;
-    VED_PAGER[string ('V')]            = &vis_mode;
+    VED_PAGER[string ('v')]            = &__visual__;
+    VED_PAGER[string ('V')]            = &__visual__;
+    VED_PAGER[string ('m')]            = &__mark__;
     VED_PAGER[string ('C')]            = &__editline__;
     VED_PAGER[string ('i')]            = &__editline__;
     VED_PAGER[string ('a')]            = &__editline__;

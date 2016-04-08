@@ -1,4 +1,24 @@
-beg
+subclass Visual
+  __init__
+    mode
+    last
+  end
+
+  var vis = struct
+    {
+    _i,cur,ptr,mode,
+    clr = Smg->COLOR.visual,
+    l_mode,l_down,l_up,l_page_up,l_page_down,
+    l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', Input->DOWN, Input->UP,
+      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b],
+    c_mode,c_left,c_right,
+    c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT],
+    bw_mode,bw_down,bw_up,bw_left,bw_right,bw_maxlen,
+    bw_keys = ['x', 'I', 'i', 'd', 'y', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
+    needsdraw,startrow,startlnr,startcol,startindex,
+    vlins,lnrs,linlen,lines,sel,at_exit,
+    };
+
   def v_unhl_line (vs, s, index) proc
     Smg.hlregion (0, vs.vlins[index], 0, 1, s._maxlen);
   end
@@ -362,7 +382,7 @@ beg
           _for i (0, length (vs.lnrs) - 1)
             {
             variable i_ = s._indent;
-            variable l = _indent_in_ (s, s.lines[vs.lnrs[i]], &i_);
+            variable l = __indent_In__ (s, s.lines[vs.lnrs[i]], &i_);
             if (NULL == l)
               continue;
 
@@ -453,7 +473,7 @@ beg
   end
 
   def v_c_left (vs, s, cur) proc
-    variable retval = __pg_left (s);
+    variable retval = __left (s);
 
     if (-1 == retval)
       return;
@@ -534,7 +554,7 @@ beg
   end
 
   def v_c_right (vs, s, cur) proc
-    variable retval = __pg_right (s, vs.linlen[-1]);
+    variable retval = __right (s, vs.linlen[-1]);
 
     if (-1 == retval)
       return;
@@ -990,7 +1010,7 @@ beg
 
   var LastVi = NULL;
 
-  def v_lastvi (s) proc
+  def last (s)
     variable vs = LastVi;
 
     if (NULL == vs)
@@ -1090,7 +1110,7 @@ beg
       };
   end
 
-  def vis_mode (s) proc
+  def mode (s)
     variable
       mode = ["bw", "lw", "cw"],
       vs = v_init (s);
