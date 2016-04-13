@@ -580,7 +580,8 @@ private define vlet (self, varname, varval)
   __eval__ (eval_buf, self.__name);
 }
 
-private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, scope)
+private define __get_fun_head__ (
+  tokens, funname, nargs, args, const, isproc, issubproc, scope)
 {
   @funname = tokens[1];
   @const = '!' != tokens[0][-1];
@@ -635,16 +636,13 @@ private define __get_fun_head__ (tokens, funname, nargs, args, const, isproc, sc
     }
 
   _for i (ind, length (tokens) - 1)
-    if ("muttable" == tokens[i])
-      @const = 0;
-    else if ("proc" == tokens[i])
-      @isproc = 1;
-    else if ("public" == tokens[i])
-      @scope = "public";
-    else if ("static" == tokens[i])
-      @scope = "private";
-    else
-      throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";
+    switch (tokens[i])
+      { case "proc"     : @isproc = 1 }
+      { case "subproc"  : @issubproc = 1 }
+      { case "public"   : @scope  = "public" }
+      { case "muttable" : @const  = 0 }
+      { case "static"   : @scope = "private" }
+      { throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword"}
 
   if (qualifier_exists ("add_meth_decl"))
     ifnot (@isproc)
@@ -764,7 +762,7 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
     if (strncmp (line, "beg", 3))
       throw ClassError, "Class::__INIT__::include " + lfile + " `beg' keyword is missing";
 
-    parse_class (lcname, lclasspath, eval_buf, funs, sub_funs, lfp);
+    parse_class (lcname, lclasspath, eval_buf, funs, sub_funs, lfp;;__qualifiers);
     }
   else
     @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
@@ -913,13 +911,13 @@ private define parse_beg_block (eval_buf, tokens, line, fp, found)
 
 private define parse_fun (cname, funs, eval_buf, tokens)
 {
-  variable funname, nargs, args, const, isproc, scope;
+  variable funname, nargs, args, const, isproc, scope, issubproc;
 
   if (3 > length (tokens))
     throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
 
   __get_fun_head__ (tokens,
-    &funname, &nargs, &args, &const, &isproc, &scope;;__qualifiers);
+    &funname, &nargs, &args, &const, &isproc, &issubproc, &scope;;__qualifiers);
 
   @eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
     "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
@@ -991,10 +989,10 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
   if (3 > length (tokens))
     throw ClassError, "Class::__INIT__::def declaration needs at least 3 args";
 
-  variable funname, nargs, args, const, isproc, scope;
+  variable funname, nargs, args, const, isproc, scope, issubproc;
 
   __get_fun_head__ (tokens,
-    &funname, &nargs, &args, &const, &isproc, &scope;;__qualifiers);
+    &funname, &nargs, &args, &const, &isproc, &issubproc, &scope;;__qualifiers);
 
   args = strtrim (args, "()");
   args = strtok (args, ",");
@@ -1135,8 +1133,8 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
       "__use_namespace  (\"" + sub_cname + "\");\n" +
       "static variable THIS;\n";
 
-  parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;
-    add_meth_decl, cname = as + "_");
+  parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;;
+    struct {@__qualifiers, add_meth_decl, cname = as + "_"});
 
   variable
     __funs__   = assoc_get_keys (my_funs),
@@ -1193,31 +1191,32 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
     if ("require" == tokens[0])
       {
-      parse_require (cname, classpath, funs, eval_buf, tokens);
+      parse_require (cname, classpath, funs, eval_buf, tokens;;__qualifiers);
       continue;
       }
 
     if (any (["include", "load"] == tokens[0]))
       {
-      parse_load_include (funs, sub_funs, eval_buf, tokens, line);
+      parse_load_include (funs, sub_funs, eval_buf, tokens, line;;__qualifiers);
       continue;
       }
 
     if ("import" == tokens[0])
       {
-      parse_import (eval_buf, tokens);
+      parse_import (eval_buf, tokens;;__qualifiers);
       continue;
       }
 
     if ("typedef" == tokens[0])
       {
-      parse_typedef (eval_buf, tokens, line, fp, &found);
+      parse_typedef (eval_buf, tokens, line, fp, &found;;__qualifiers);
       continue;
       }
 
     if ("subclass" == tokens[0])
       {
-      parse_subclass (cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, &found);
+      parse_subclass (cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, &found;;
+        __qualifiers);
       continue;
       }
 
@@ -1307,7 +1306,7 @@ private define __Class_From_Init__ (classpath)
   funs["fun"].nargs = '?';
   funs["fun"].const = 1;
 
-  parse_class (cname, classpath, &eval_buf, funs, &sub_funs, fp);
+  parse_class (cname, classpath, &eval_buf, funs, &sub_funs, fp;;__qualifiers);
 
   variable __funs__ = assoc_get_keys (funs);
 
