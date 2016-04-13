@@ -15,6 +15,7 @@ Class.load ("Path");
 Class.load ("Stack");
 Class.load ("Struct");
 Class.load ("IO");
+Class.load ("Slang");
 
 Sys.let ("SLSH_BIN", Env->BIN_PATH + "/__slsh");
 Sys.let ("SUDO_BIN", Sys.which ("sudo"));

@@ -40,6 +40,11 @@ private define addfname (fname)
     s._i = s._ii;
     }
 
+  variable cb = Ved.get_cur_bufname ();
+
+  ifnot (any (cb == SPECIAL))
+    w.prev_buf_ind = wherefirst (cb == w.bufnames);
+
   Ved.setbuf (s._abspath);
   Ved.write_prompt (" ", 0);
   s.draw (;dont_draw);
@@ -83,13 +88,11 @@ private define _edit_other ()
 
 private define _buffer_other_ ()
 {
-  variable dir = qualifier ("argv0") == "bn";
-  variable w = Ved.get_cur_wind ();
-  variable cb = Ved.get_cur_bufname ();
-  variable ar = String_Type[0];
-  variable ind;
-  variable b;
-  variable i;
+  variable ind, b, i,
+    dir = qualifier ("argv0") == "bn",
+    w   = Ved.get_cur_wind (),
+    cb  = Ved.get_cur_bufname (),
+    ar  = String_Type[0];
 
   _for i (0, length (w.bufnames) - 1)
     {
@@ -105,26 +108,25 @@ private define _buffer_other_ ()
   if (1 == length (ar))
     return;
 
-  ind = where (ar == cb)[0];
-  variable prev_ind = ind;
+  ind = wherefirst (ar == cb);
 
   ifnot (dir)
-    if (-1 != w.prev_buf_ind && w.prev_buf_ind < length (ar) && w.prev_buf_ind != ind)
-      ind = w.prev_buf_ind;
+    if (-1 != w.prev_buf_ind && w.prev_buf_ind < length (w.bufnames) &&
+        w.bufnames[w.prev_buf_ind] != ar[ind])
+      b = w.bufnames[w.prev_buf_ind];
     else
       if (0 == ind)
-        ind = length (ar) - 1;
+        b = ar[- 1];
       else
-        ind--;
+        b = ar[ind - 1];
   else
     if (ind == length (ar) - 1)
-      ind = 0;
+      b = ar[0];
     else
-      ind++;
+      b = ar[ind + 1];
 
-  w.prev_buf_ind = prev_ind;
-
-  b = ar[ind];
+  ifnot (any (cb == SPECIAL))
+    w.prev_buf_ind = wherefirst (cb == w.bufnames);
 
   b = w.buffers[b];
   b._i = b._ii;

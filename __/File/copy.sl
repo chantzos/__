@@ -29,6 +29,12 @@ private define __my_copy_verb__ (source, dest)
     written = 0.0,
     source_fp = fopen (source, "rb");
 
+  if (NULL == source_fp)
+    {
+    IO.tostderr (sprintf ("Unable to open: `%s': %s", source, errno_string (errno)));
+    return -1;
+    }
+
   if (-1 == fseek (source_fp, 0, SEEK_END))
     {
     IO.tostderr (sprintf ("%s: fseek failed: %s", dest, errno_string (errno)));

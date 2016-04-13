@@ -658,6 +658,7 @@ private define parse_class ();
 private define parse_block (eval_buf, tokens, line, fp)
 {
   variable open_block = 1, block_buf = "";
+  variable keywords = ["raise", "when", "it", "do"];
 
   while (-1 != fgets (&line, fp))
     {

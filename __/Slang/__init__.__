@@ -1,0 +1,14 @@
+class Slang
+  def compile (file)
+    try
+      byte_compile_file (file, 0);
+    catch AnyError:
+      {
+      IO.tostderr ("failed to byte compile");
+      Exc.print (__get_exception_info);
+      return -1;
+      }
+
+    0;
+  end
+end
