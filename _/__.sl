@@ -1190,7 +1190,7 @@ private define parse_subclass (
     sub_buf += __eval_method__ (cname, __funs__[i], my_funs[__funs__[i]].nargs;
       return_buf, method_name = __fmethods[i], as = sub_cname);
 
-  variable m, j, ms = assoc_get_keys (methods);
+  variable k, j, m, ms = assoc_get_keys (methods);
 
   _for i (0, length (ms) - 1)
     {
@@ -1204,20 +1204,19 @@ private define parse_subclass (
     _for j (0, length (m) - 1)
       sub_buf += m[j] + "= &" + cname + "_" + as + "_" + ms[i] + "_" + m[j] + ",\n";
 
-    variable k, mm;
     _for j (0, length (ms) - 1)
       if (ms[j] == ms[i])
         continue;
       else
         {
-        mm = methods[ms[j]];
-        ifnot (length (mm))
+        m = methods[ms[j]];
+        ifnot (length (m))
           sub_buf += ms[j] + "= &" + cname + "_" + as + "_" + ms[j] +  ",\n";
         else
           {
           sub_buf += ms[j] + " = struct {";
-          _for k (0, length (mm) - 1)
-            sub_buf += mm[k] + "= &" + cname + "_" + as + "_" + ms[j] + "_" + mm[k] + ",\n";
+          _for k (0, length (m) - 1)
+            sub_buf += m[k] + "= &" + cname + "_" + as + "_" + ms[j] + "_" + m[k] + ",\n";
           sub_buf += "},\n";
           }
         }

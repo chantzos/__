@@ -56,5 +56,14 @@ typedef struct
   isachild,
   } ThisProg_Type;
 
+typedef struct
+  {
+  null
+  } AString_Type;
+
+typedef struct
+  {
+  null
+  } AInteger_Type;
 public variable This, Smg, Input, LINES, COLUMNS;
 

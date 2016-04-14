@@ -214,10 +214,8 @@ class Srv
 
     () = mkfifo (clfifo, 0755);
 
-    variable env = [Env.defenv (),
-      "SESSION=1", "SESSION_WRFIFO=" + SRV_FIFO, "SESSION_RDFIFO=" + clfifo];
-
-    variable clpid = App.run ([app], env;; struct {@__qualifiers, bg});
+    variable clpid = App.Run.as.client ([app], SRV_FIFO, clfifo;;
+      struct {@__qualifiers, bg});
 
     if (NULL == clpid)
       {

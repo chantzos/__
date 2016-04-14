@@ -215,7 +215,7 @@ private define __commitall__ (argv)
   lines = ["\000", "-- DIFF --", lines];
   () = File.write (DIFF, lines);
 
-  () = App.run (["__ved", DIFF], [Env.defenv (), "ISACHILD=1"]);
+  () = App.Run.as.child (["__ved", DIFF]);
   lines = File.readlines (DIFF);
 
   variable diffline = wherefirst ("-- DIFF --" == lines);
@@ -287,7 +287,7 @@ private define __commit__ (argv)
   lines = ["\000", "-- DIFF --", lines];
   () = File.write (DIFF, lines);
 
-  () = App.run (["__ved", DIFF], [Env.defenv (), "ISACHILD=1"]);
+  () = App.Run.as.child (["__ved", DIFF]);
   lines = File.readlines (DIFF);
 
   variable diffline = wherefirst ("-- DIFF --" == lines);

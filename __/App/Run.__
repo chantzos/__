@@ -19,7 +19,14 @@ subclass Run
   def init_child ()
   end
 
-  def as_client ()
+  def as_client (argv, srvf, clnf)
+    variable env = [Env.defenv (),
+      __get_qualifier_as (AString_Type, "env", qualifier ("env"), String_Type[0]),
+      "SESSION=1",
+      "SESSION_WRFIFO=" + srvf,
+      "SESSION_RDFIFO=" + clnf,
+      ];
+    self.app (argv, env;;__qualifiers);
   end
 
   def as_child (argv)
