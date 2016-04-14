@@ -1177,7 +1177,7 @@ private define parse_subclass (
       "static variable THIS;\n";
 
   parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;;
-    struct {@__qualifiers, add_meth_decl, cname = as + "_"});
+    struct {@__qualifiers, add_meth_decl, cname = as + "_", forbid_subclass});
 
   variable
     __funs__   = assoc_get_keys (my_funs),
@@ -1299,6 +1299,9 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
     if ("subclass" == tokens[0])
       {
+      if (qualifier_exists ("forbid_subclass"))
+        throw ClassError, "nested subclasses are not allowed";
+
       parse_subclass (cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, &found;;
         __qualifiers);
       continue;
