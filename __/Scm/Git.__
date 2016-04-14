@@ -15,7 +15,6 @@ subclass Git
     pull
     lastlog
     diffrevision
-    logpatch
     applypatch
     merge
     generic
@@ -29,7 +28,7 @@ subclass Git
     [
     "init", "branch", "status", "log", "diff", "add", "branchnew",
     "branchdelete", "branchchange", "commit", "commitall", "pull",
-    "lastlog", "diffrevision", "logpatch", "applypatch", "merge",
+    "lastlog", "diffrevision", "applypatch", "merge",
     "generic", "get_upstream_url", "push",
     ],
     {
@@ -47,7 +46,6 @@ subclass Git
     [EXEC, "pull"],
     [EXEC, "log", "-1", "HEAD", "-p"],
     [EXEC, "log", "--no-walk", "-p"],
-    [EXEC, "log", "-p"],
     [EXEC, "apply", "-p1", "--verbose"],
     [EXEC, "merge"],
     [EXEC],
@@ -224,14 +222,6 @@ subclass Git
     variable
       status,
       p = __exec__ ([funcs["merge"], branch], &status;;__qualifiers);
-
-    __print__ (p, status;;__qualifiers);
-  end
-
-  def logpatch ()
-    variable
-      status,
-      p = __exec__ (funcs["logpatch"], &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end

@@ -30,6 +30,14 @@ private define __write_info__ (s)
   info;
 }
 
+private define viewdiff ()
+{
+  variable ved = @Ved.get_cur_buf ();
+  viewfile (DIFF_VED, "diff", [1, 0], 0);
+  Ved.setbuf (ved._abspath);
+  Ved.draw_wind ();
+}
+
 public define setrepo (repo)
 {
   if ("." == repo)
@@ -127,17 +135,6 @@ private define __status__ (argv)
     __messages;
 }
 
-private define __logpatch__ (argv)
-{
-  if (CUR_REPO == "NONE")
-    return;
-
-  ifnot (Scm.Git.logpatch (;redir_to_file = SCRATCH, flags = ">|"))
-    __scratch (NULL);
-  else
-    __messages;
-}
-
 private define __diffrevision__ (argv)
 {
   if (CUR_REPO == "NONE")
@@ -162,11 +159,13 @@ private define __log__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  variable max_count = Opt.Arg.compare ("--max-count=", argv);
+  variable
+    max_count = Opt.Arg.compare ("--max-count=", argv),
+    patch     = Opt.Arg.exists ("--patch_show", argv);
+
   if (NULL == max_count)
     argv = [argv, "--max-count=10"];
 
-  variable patch = Opt.Arg.exists ("--patch_show", argv);
   ifnot (NULL == patch)
     ifnot (any ("-p" == argv))
       argv[patch] = "-p";
@@ -189,9 +188,8 @@ private define __log__ (argv)
       ifnot (strncmp (ar[i], "commit: ", 8))
         (ia++, ar[i] += " [~" + string (ia) + "]");
 
-     () = File.write (SCRATCH, ar);
-
-    __scratch (NULL);
+     () = File.write (DIFF, ar);
+     viewdiff;
     }
   else
     __messages;
@@ -368,14 +366,7 @@ private define __diff__ (argv)
   variable args = Array.to_list (argv[[1:]]);
 
   ifnot (Scm.Git.diff (__push_list (args);redir_to_file = DIFF, flags = ">|"))
-    {
-    variable ved = @Ved.get_cur_buf ();
-    viewfile (DIFF_VED, "diff", [1, 0], 0);
-
-    Ved.setbuf (ved._abspath);
-
-    Ved.draw_wind ();
-    }
+    viewdiff;
   else
     __messages;
 }
@@ -629,12 +620,10 @@ private define my_commands ()
   a["log"] = @Argvlist_Type;
   a["log"].func = &__log__;
   a["log"].args = [
-    "--raw void add a summary of changes using the raw diff format",
+    "--raw void add a summary of changes using a raw diff format",
     "--max-count= int Limit the number of proccessing commits, default 10",
+    "--skip= int start the log after `nth' revisions",
     "--patch_show void add the unified diff to the output"];
-
-  a["logpatch"] = @Argvlist_Type;
-  a["logpatch"].func = &__logpatch__;
 
   a["setrepo"] = @Argvlist_Type;
   a["setrepo"].func = &__setrepo__;

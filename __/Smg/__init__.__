@@ -20,8 +20,8 @@ class Smg
   topline = "blackonbrown",
   infofg = "blue",
   infobg = "brown",
-  diffpl = "blackongreen",
-  diffmn = "blackoncyan",
+  diffpl = "brown",
+  diffmn = "brightred",
   visual = "blackonbrown",
   };
 
