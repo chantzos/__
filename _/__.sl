@@ -637,12 +637,12 @@ private define __get_fun_head__ (
 
   _for i (ind, length (tokens) - 1)
     switch (tokens[i])
-      { case "proc"     : @isproc = 1 }
-      { case "subproc"  : @issubproc = 1 }
-      { case "public"   : @scope  = "public" }
-      { case "muttable" : @const  = 0 }
-      { case "static"   : @scope = "private" }
-      { throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword"}
+      { case "proc"     : @isproc = 1;}
+      { case "subproc"  : @issubproc = 1;}
+      { case "public"   : @scope  = "public";}
+      { case "muttable" : @const  = 0;}
+      { case "static"   : @scope = "private";}
+      { throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";}
 
   if (qualifier_exists ("add_meth_decl"))
     ifnot (@isproc)
@@ -1041,7 +1041,71 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
     }
 }
 
-private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, found)
+private define parse_subclass_init (methods, tokens, line, fp)
+{
+  tokens = strtok (line);
+  if (0 == length (tokens) || tokens[0] != "__init__")
+    throw ClassError, "Class::__INIT__::subclass, __init__ declaration expected";
+
+  @methods = Assoc_Type[Array_Type];
+
+  if (-1 == fgets (&line, fp))
+    throw ClassError, "parse init subclass::awaiting block";
+
+  variable lindent, lline,
+    indent   = strlen (line) - strlen (strtrim_beg (line)),
+    lastm    = NULL,
+    foundend = 0,
+    op_meth  = 0;
+
+  do
+    {
+    line = strtrim_end (line);
+    lline = strtrim_beg (line);
+    lindent = strlen (line) - strlen (lline);
+
+    ifnot (strlen (lline))
+      throw ClassError, "Class::__INIT__::subclass, " +
+        "method expected in __init__";
+
+    if ("end" == lline)
+      {
+      foundend = 1;
+      break;
+      }
+
+    tokens = strtok (lline);
+    if (1 < length (tokens))
+      throw ClassError, "Class::__INIT__::subclass, " +
+        "a single method expected in __init__";
+
+    if (lindent == indent)
+      {
+      if (op_meth)
+        op_meth = 0;
+
+      (@methods)[tokens[0]] = String_Type[0];
+      }
+    else
+      if (NULL == lastm)
+        throw ClassError, "Class::parser init subclass:: " + tokens[0] +
+          " missing method definition to submethod";
+      else
+        {
+        (@methods)[lastm] = [(@methods)[lastm], tokens[0]];
+        op_meth = 1;
+        }
+
+    ifnot (op_meth)
+      lastm = tokens[0];
+    } while (-1 != fgets (&line, fp));
+
+  ifnot (foundend)
+    throw ClassError, "Class::parse subclass init::end identifier is missing";
+}
+
+private define parse_subclass (
+  cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, found)
 {
   if (2 > length (tokens))
     throw ClassError, "Class::__INIT__::subclass declaration, missing subname";
@@ -1098,29 +1162,8 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
     throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
       " from " + lfrom;
 
-  tokens = strtok (line);
-  if (0 == length (tokens) || tokens[0] != "__init__")
-    throw ClassError, "Class::__INIT__::subclass, __init__ declaration expected";
-
-  variable methods = String_Type[0];
-
-  while (-1 != fgets (&line, fp))
-    {
-    line = strtrim (line);
-    ifnot (strlen (line))
-      throw ClassError, "Class::__INIT__::subclass, " +
-        "method expected in __init__";
-
-    if ("end" == line)
-      break;
-
-    tokens = strtok (line);
-    if (1 < length (tokens))
-      throw ClassError, "Class::__INIT__::subclass, " +
-        "a single method expected in __init__";
-
-    methods = [methods, tokens[0]];
-    }
+  variable methods;
+  parse_subclass_init (&methods, tokens, line, fp);
 
   variable
     i,
@@ -1147,11 +1190,52 @@ private define parse_subclass (cname, classpath, funs, sub_funs, eval_buf, token
     sub_buf += __eval_method__ (cname, __funs__[i], my_funs[__funs__[i]].nargs;
       return_buf, method_name = __fmethods[i], as = sub_cname);
 
+  variable m, j, ms = assoc_get_keys (methods);
+
+  _for i (0, length (ms) - 1)
+    {
+    m = methods[ms[i]];
+    ifnot (length (m))
+      continue;
+
+    sub_buf += "\nprivate define " + cname + "_" + as + "_" + ms[i] + " (self)\n{\n" +
+      "struct {";
+
+    _for j (0, length (m) - 1)
+      sub_buf += m[j] + "= &" + cname + "_" + as + "_" + ms[i] + "_" + m[j] + ",\n";
+
+    variable k, mm;
+    _for j (0, length (ms) - 1)
+      if (ms[j] == ms[i])
+        continue;
+      else
+        {
+        mm = methods[ms[j]];
+        ifnot (length (mm))
+          sub_buf += ms[j] + "= &" + cname + "_" + as + "_" + ms[j] +  ",\n";
+        else
+          {
+          sub_buf += ms[j] + " = struct {";
+          _for k (0, length (mm) - 1)
+            sub_buf += mm[k] + "= &" + cname + "_" + as + "_" + ms[j] + "_" + mm[k] + ",\n";
+          sub_buf += "},\n";
+          }
+        }
+
+    sub_buf += "};\n}\n";
+    }
+
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
     "  struct {";
 
-  _for i (0, length (methods) - 1)
-    sub_buf += methods[i] + "= &" + cname + "_" + as + "_" + methods[i] + ",\n";
+  _for i (0, length (ms) - 1)
+    {
+    m = methods[ms[i]];
+    ifnot (length (m))
+      sub_buf += ms[i] + " = &" + cname + "_" + as + "_" + ms[i] + ",\n";
+    else
+      sub_buf += ms[i] + " = " + cname + "_" + as + "_" + ms[i] + " (self),\n";
+    }
 
   sub_buf += "};\n}\n" +
    `__->__ ("` + cname + `", "` + as +
