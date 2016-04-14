@@ -265,6 +265,10 @@ private define __commit__ (argv)
     return;
     }
 
+  argv = argv[[1:]];
+
+  variable l = Array.to_list (argv);
+
   variable file = DIFF;
 
   if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">|"))
@@ -273,7 +277,7 @@ private define __commit__ (argv)
     return;
     }
 
-  if (Scm.Git.diff (;redir_to_file = SCRATCH, flags = ">>"))
+  if (Scm.Git.diff (__push_list (l);redir_to_file = SCRATCH, flags = ">>"))
     {
     __messages;
     return;
@@ -303,10 +307,6 @@ private define __commit__ (argv)
     IO.tostderr ("Aborted due to empty message");
     return;
     }
-
-  argv = argv[[1:]];
-
-  variable l = Array.to_list (argv);
 
   ifnot (Scm.Git.commit (__push_list (l), strjoin (lines, "\n");redir_to_file = DIFF,
       flags = ">|"))
@@ -365,7 +365,9 @@ private define __diff__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  ifnot (Scm.Git.diff (;redir_to_file = DIFF, flags = ">|"))
+  variable args = Array.to_list (argv[[1:]]);
+
+  ifnot (Scm.Git.diff (__push_list (args);redir_to_file = DIFF, flags = ">|"))
     {
     variable ved = @Ved.get_cur_buf ();
     viewfile (DIFF_VED, "diff", [1, 0], 0);

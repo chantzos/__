@@ -124,19 +124,22 @@ subclass Git
     __print__ (p, status;;__qualifiers);
   end
 
-  def diff ()
+  def diff (?)
     variable
       status,
-      p = __exec__ (funcs["diff"], &status;;__qualifiers);
+      args = __pop_list (_NARGS - 1),
+      argv = [@funcs["diff"], list_to_array (args, String_Type)],
+      p    = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
 
-  def add (file)
+  def add (?)
     variable
       status,
-      argv = [funcs["add"], file],
-      p = __exec__ (argv, &status;;__qualifiers);
+      files = __pop_list (_NARGS - 1),
+      argv  = [@funcs["add"], list_to_array (files, String_Type)],
+      p     = __exec__ (argv, &status;;__qualifiers);
 
     __print__ (p, status;;__qualifiers);
   end
