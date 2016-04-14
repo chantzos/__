@@ -348,7 +348,7 @@ private define __search__ (argv)
   Com.Fork.tofg (p, argv, env);
 
   ifnot (EXITSTATUS)
-    () = App.run (["__ved", GREPFILE], [Env.defenv (), "ISACHILD=1"]);
+    () = App.Run.as.child (["__ved", GREPFILE]);
 
   Com.post_header ();
   draw (Ved.get_cur_buf ());
@@ -439,7 +439,7 @@ private define __ved__ (argv)
 
   Com.pre_header ("ved " + fname);
 
-  () = App.run (["__ved", fname], [Env.defenv (), "ISACHILD=1"];;__qualifiers ());
+  () = App.Run.as.child (["__ved", fname];;__qualifiers ());
 
   Com.post_header ();
 
