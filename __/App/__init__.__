@@ -19,6 +19,8 @@ class App
   var public NEEDSWINDDRAW = 0;
   var public EXITSTATUS = 0;
 
+  subclass Run from App
+
   def _exit_ () public proc
     if (__is_initialized (&Input))
       Input.at_exit ();

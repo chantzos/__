@@ -1,0 +1,95 @@
+subclass Run
+  __init__
+    init
+      srv
+      client
+      child
+    as
+      client
+      child
+    app
+  end
+
+  def init_srv ()
+  end
+
+  def init_client ()
+  end
+
+  def init_child ()
+  end
+
+  def as_client ()
+  end
+
+  def as_child (argv)
+    variable env = [Env.defenv (),
+      __get_qualifier_as (AString_Type, "env", qualifier ("env"), String_Type[0]),
+      "ISACHILD=1"];
+    self.app (argv, env;;__qualifiers);
+  end
+
+  def app (argv, env)
+    APP_ERR = 0;
+
+    if (strncmp (argv[0], "__", 2))
+      argv[0] = "__" + argv[0];
+
+    argv[0] = Env->BIN_PATH + "/" + argv[0];
+
+    if (-1 == access (argv[0], F_OK|X_OK))
+      {
+      IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
+      APP_ERR = 1;
+      return NULL;
+      }
+
+    variable issu = qualifier ("issu");
+    variable passwd = qualifier ("passwd");
+
+    variable p = Proc.init (issu, 0, 0);
+
+    if (issu)
+      {
+      if (NULL == passwd)
+        {
+        variable isgoingtoreset = 0;
+        ifnot (This.isscreenactive)
+          {
+          Api.restore_screen ();
+          isgoingtoreset = 1;
+          }
+
+          passwd = Os.__getpasswd ();
+
+          if (isgoingtoreset)
+            Api.reset_screen ();
+
+          if (NULL == passwd)
+            {
+            APP_ERR = 1;
+            return NULL;
+            }
+          }
+
+      p.stdin.in = passwd;
+
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
+      }
+
+    Api.reset_screen ();
+
+    variable status;
+    variable bg = qualifier_exists ("bg") ? 1 : NULL;
+
+    ifnot (NULL == env)
+      status = p.execve (argv, env, bg);
+    else
+      status = p.execv (argv, bg);
+
+    if (NULL == bg)
+      Api.restore_screen ();
+
+    status;
+  end
+end
