@@ -10,3 +10,4 @@ public variable Git_Type = struct
 public variable REPOS = Assoc_Type[Struct_Type];
 public variable W_REPOS = Assoc_Type[String_Type];
 public variable CUR_REPO = "NONE";
+public variable PREV_REPO = NULL;

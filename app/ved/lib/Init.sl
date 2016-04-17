@@ -62,7 +62,7 @@ private define _edit_other ()
 
   variable args = list_to_array (__pop_list (_NARGS));
 
-  variable ft = NULL, ind = Opt.Arg.compare ("--ftype=", args);
+  variable ft = NULL, ind = Opt.Arg.compare ("--ftype=", &args);
   ifnot (NULL == ind)
     {
     if (1 == _NARGS) % code needs to be written (change the filetype) 
@@ -512,7 +512,7 @@ public define init_ved ()
   variable __stdin = any (This.argv == "-");
   variable fn;
   variable pj;
-  variable ft = Opt.Arg.compare ("--ftype=", This.argv);
+  variable ft = Opt.Arg.compare ("--ftype=", &This.argv);
 
   ifnot (NULL == ft)
     {
@@ -551,7 +551,7 @@ public define init_ved ()
     This.exit (0);
     }
 
-  pj = Opt.Arg.compare ("--pj=", This.argv);
+  pj = Opt.Arg.compare ("--pj=", &This.argv);
 
   ifnot (NULL == pj)
     {

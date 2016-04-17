@@ -88,6 +88,10 @@ public define setrepo (repo)
   variable w = Ved.get_cur_wind ();
 
   w.dir = repo;
+
+  ifnot ("NONE" == CUR_REPO)
+    PREV_REPO = CUR_REPO;
+
   CUR_REPO = path_basename (repo);
   W_REPOS[w.name] = CUR_REPO;
 
@@ -159,13 +163,12 @@ private define __log__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  variable
-    max_count = Opt.Arg.compare ("--max-count=", argv),
-    patch     = Opt.Arg.exists ("--patch_show", argv);
+  variable max_count = Opt.Arg.compare ("--max-count=", &argv);
 
   if (NULL == max_count)
-    argv = [argv, "--max-count=10"];
+    argv = [argv[0], "--max-count=10", argv[[1:]]];
 
+  variable patch = Opt.Arg.exists ("--patch_show", argv);
   ifnot (NULL == patch)
     ifnot (any ("-p" == argv))
       argv[patch] = "-p";
@@ -376,10 +379,11 @@ private define __branch__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  ifnot (Scm.Git.branch (;redir_to_file = SCRATCH, flags = ">|"))
-    __scratch (NULL);
-  else
-    __messages;
+  variable s = Scm.Git.branches ();
+
+  REPOS[CUR_REPO].branches = s.branches;
+  REPOS[CUR_REPO].cur_branch = s.cur;
+  draw (__write_info__ (REPOS[CUR_REPO]));
 }
 
 private define __branchnew__ (argv)
@@ -595,9 +599,96 @@ private define __init__ (argv)
   () = setrepo (".");
 }
 
+private define __clone__ (argv)
+{
+  variable cur_dir = getcwd;
+  variable dir = Opt.Arg.compare ("--dir=", &argv);
+
+  ifnot (NULL == dir)
+    {
+    variable t = strtok (argv[dir], "=");
+    argv[dir] = NULL;
+    argv = argv[wherenot (_isnull (argv))];
+
+    ifnot (2 == length (t))
+      dir = NULL;
+    else
+      dir = t[1];
+    }
+
+  if (NULL == dir)
+    dir = getcwd;
+
+  ifnot (Dir.isdirectory (dir))
+    {
+    IO.tostderr (dir, "not a directory");
+    __messages;
+    return;
+    }
+
+  if (-1 == chdir (dir))
+    {
+    IO.tostderr ("couldn't change directory", errno_string (errno));
+    __messages;
+    return;
+    }
+
+  variable switch_to = Opt.Arg.exists ("--switch", argv);
+  ifnot (NULL == switch_to)
+    {
+    argv[switch_to] = NULL;
+    argv = argv[wherenot (_isnull (argv))];
+    }
+
+  variable as = Opt.Arg.compare ("--as=", &argv);
+
+  ifnot (NULL == as)
+    {
+    t = strchop (argv[as], '=', 0);
+    argv[as] = NULL;
+    argv = argv[wherenot (_isnull (argv))];
+
+    ifnot (2 == length (t))
+      as = NULL;
+    else
+      as = t[1];
+    }
+
+  variable rem_repo = argv[1];
+  if (NULL == as)
+    as = path_basename_sans_extname (rem_repo);
+
+  variable l = {rem_repo, as};
+
+  if (Scm.Git.clone (__push_list (l);redir_to_file = SCRATCH, flags = ">|"))
+    {
+    () = chdir (cur_dir);
+    __messages;
+    return;
+    }
+  else
+    __scratch (NULL);
+
+  if (switch_to)
+    __init__ ([NULL, dir + "/" + as]);
+  else
+    {
+    __scratch (NULL);
+    () = chdir (cur_dir);
+    }
+}
+
 private define my_commands ()
 {
   variable a = init_commands ();
+
+  a["clone"] = @Argvlist_Type;
+  a["clone"].func = &__clone__;
+  a["clone"].args = [
+    "--dir= directory clone repository in 'directory'",
+    "--as= string save repository as 'name'",
+    "--switch void switch to that repository after cloning"
+    ];
 
   a["init"] = @Argvlist_Type;
   a["init"].func = &__init__;

@@ -2,7 +2,6 @@ subclass Arg
   __init__
     replace
     compare
-    delete
     exists
   end
 
@@ -11,16 +10,28 @@ subclass Arg
   end
 
   def compare (arg, argv)
-    variable index = wherenot (strncmp (argv, arg, strlen (arg)));
-    length (index) ? index[0] : NULL;
+    variable index = wherenot (strncmp (@argv, arg, strlen (arg)));
+    ifnot (length (index))
+      return NULL;
+
+    variable del = qualifier_exists ("del_arg");
+    variable ret = qualifier_exists ("ret_arg");
+
+    if (ret)
+      ret = @argv[index[0]];
+    else
+      ret = NULL;
+
+    if (del)
+      Array.delete_at (argv, index[0]);
+
+    ifnot (NULL == ret)
+      ret;
+
+    index[0];
   end
 
   def replace (argv, atindex, witharg)
     (@argv)[atindex] = witharg;
-  end
-
-  def delete (argv, atindex)
-    (@argv)[atindex] = NULL;
-    @argv = (@argv)[wherenot (_isnull (@argv))];
   end
 end
