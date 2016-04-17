@@ -950,11 +950,26 @@ class Ved
         if (ii && iscomment)
           break;
 
+          %!  invalid index - check arrays for NULL
         while (subs = pcre_exec (regexp, line, col), subs > 1)
           {
           match = pcre_nth_match (regexp, 1);
+          % revailed by (see) diff.syntax
+          % maybe add a check for NULL
+          % my opinion is that the check hides the code mistake
+          % somewhere in the pattern related code, independently
+          % of the designed highliting implementation (which in that
+          % state needs improvement),   the code should provide expected
+          % results, (assuming the toolchain has no weakness, (which in that
+          % case it has (and I have to find why (and I'm boring for that
+          % kind of thing (...
           col = match[0];
           context = match[1] - col;
+          %% subs > 1 (in that case four),
+          % but match is NULL (though changing from
+          % 1 (the first submatch) to either the rest of the three succeeds,
+          % so we end up with an invalid index
+          %.
           Smg.hlregion (color, vlines[i], col, 1, context);
           col += context;
           }
@@ -1326,11 +1341,11 @@ class Ved
 
     args = list_to_array (args, String_Type);
 
-    ind = Opt.Arg.compare ("--pat=", args);
+    ind = Opt.Arg.compare ("--pat=", &args);
     ifnot (NULL == ind)
       pat = substr (args[ind], strlen ("--pat=") + 1, -1);
 
-    ind = Opt.Arg.compare ("--sub=", args);
+    ind = Opt.Arg.compare ("--sub=", &args);
     ifnot (NULL == ind)
       sub = substr (args[ind], strlen ("--sub=") + 1, -1);
 
@@ -1346,15 +1361,15 @@ class Ved
       return;
       }
 
-    ind = Opt.Arg.exists ("--global", args);
+    ind = Opt.Arg.exists ("--global", &args);
     ifnot (NULL == ind)
       global = 1;
 
-    ind = Opt.Arg.exists ("--dont-ask-when-subst", args);
+    ind = Opt.Arg.exists ("--dont-ask-when-subst", &args);
     ifnot (NULL == ind)
       ask = 0;
 
-    ind = Opt.Arg.compare ("--range=", args);
+    ind = Opt.Arg.compare ("--range=", &args);
     ifnot (NULL == ind)
       {
       lnrs = Ved.parse_arg_range (buf, args[ind], lnrs);
@@ -1410,7 +1425,7 @@ class Ved
     variable fn;
     variable args = argv[[1:]];
 
-    variable ind = Opt.Arg.compare ("--from-file=", args);
+    variable ind = Opt.Arg.compare ("--from-file=", &args);
     ifnot (NULL == ind)
       {
       fn = strchop (args[ind], '=', 0);

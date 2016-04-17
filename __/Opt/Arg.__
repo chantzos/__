@@ -6,7 +6,26 @@ subclass Arg
   end
 
   def exists (arg, argv)
-    wherefirst (arg == argv);
+    variable index = wherefirst (arg == @argv);
+
+    if (NULL == index)
+      return NULL;
+
+    variable del = qualifier_exists ("del_arg");
+    variable ret = qualifier_exists ("ret_arg");
+
+    if (ret )
+      ret = (@argv)[index];
+    else
+      ret = NULL;
+
+    if (del)
+      Array.delete_at (argv, index);
+
+    ifnot (NULL == ret)
+      ret;
+
+    index;
   end
 
   def compare (arg, argv)
@@ -18,7 +37,7 @@ subclass Arg
     variable ret = qualifier_exists ("ret_arg");
 
     if (ret)
-      ret = @argv[index[0]];
+      ret = (@argv)[index[0]];
     else
       ret = NULL;
 

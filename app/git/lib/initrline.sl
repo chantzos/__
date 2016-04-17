@@ -168,12 +168,12 @@ private define __log__ (argv)
   if (NULL == max_count)
     argv = [argv[0], "--max-count=10", argv[[1:]]];
 
-  variable patch = Opt.Arg.exists ("--patch_show", argv);
+  variable patch = Opt.Arg.exists ("--patch_show", &argv);
   ifnot (NULL == patch)
     ifnot (any ("-p" == argv))
       argv[patch] = "-p";
     else
-      argv = argv[wherenot ((argv[patch] = NULL, _isnull (argv)))];
+      Array.delete_at (&argv, patch);
 
   variable args = argv[[1:]];
 
@@ -602,13 +602,12 @@ private define __init__ (argv)
 private define __clone__ (argv)
 {
   variable cur_dir = getcwd;
-  variable dir = Opt.Arg.compare ("--dir=", &argv);
+  variable dir, t;
+  (t, dir) = Opt.Arg.compare ("--dir=", &argv;del_arg, ret_arg);
 
   ifnot (NULL == dir)
     {
-    variable t = strtok (argv[dir], "=");
-    argv[dir] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
+    t = strchop (t, '=', 0);
 
     ifnot (2 == length (t))
       dir = NULL;
@@ -633,20 +632,14 @@ private define __clone__ (argv)
     return;
     }
 
-  variable switch_to = Opt.Arg.exists ("--switch", argv);
-  ifnot (NULL == switch_to)
-    {
-    argv[switch_to] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
-    }
+  variable switch_to = Opt.Arg.exists ("--switch", &argv;del_arg);
 
-  variable as = Opt.Arg.compare ("--as=", &argv);
+  variable as;
+  (t, as) = Opt.Arg.compare ("--as=", &argv;del_arg, ret_arg);
 
   ifnot (NULL == as)
     {
-    t = strchop (argv[as], '=', 0);
-    argv[as] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
+    t = strchop (t, '=', 0);
 
     ifnot (2 == length (t))
       as = NULL;
@@ -672,10 +665,7 @@ private define __clone__ (argv)
   if (switch_to)
     __init__ ([NULL, dir + "/" + as]);
   else
-    {
-    __scratch (NULL);
     () = chdir (cur_dir);
-    }
 }
 
 private define my_commands ()

@@ -60,13 +60,7 @@ else
   else
     Class.load ("Srv");
 
-DEBUG = Opt.Arg.exists ("--debug", This.argv);
-
-ifnot (NULL == DEBUG)
-  {
-  This.argv[DEBUG] = NULL;
-  This.argv = This.argv[wherenot (_isnull (This.argv))];
-  }
+DEBUG = Opt.Arg.exists ("--debug", &This.argv;del_arg);
 
 This.appname    = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
 This.appdir     = Env->STD_APP_PATH + "/" + This.appname;
@@ -199,9 +193,9 @@ private define scratch_to_stdout (argv)
 private define __clear__ (argv)
 {
   variable fn = SCRATCH;
-  if (Opt.Arg.exists ("--stdout", argv))
+  if (Opt.Arg.exists ("--stdout", &argv))
     fn = This.stdoutFn;
-  else if (Opt.Arg.exists ("--stderr", argv))
+  else if (Opt.Arg.exists ("--stderr", &argv))
     fn = This.stderrFn;
 
   () = File.write (fn, "\000");
@@ -387,7 +381,7 @@ private define __write__ (argv)
   variable lnrs = [0:b._len];
   variable range = NULL;
   variable append = NULL;
-  variable ind = Opt.Arg.compare ("--range=", argv);
+  variable ind = Opt.Arg.compare ("--range=", &argv);
   variable lines;
   variable file;
   variable command;

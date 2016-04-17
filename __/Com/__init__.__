@@ -363,13 +363,11 @@ class Com
 
     argv = ();
 
-    variable isscratch = Opt.Arg.exists ("--pager", argv);
+    variable isscratch = Opt.Arg.exists ("--pager", &argv;del_arg);
 
     ifnot (NULL == isscratch)
       {
       isbg = 0;
-      argv[isscratch] = NULL;
-      argv = argv[wherenot (_isnull (argv))];
       stdoutfile = SCRATCH;
       stdoutflags = ">|";
       }
@@ -405,7 +403,8 @@ class Com
 
     if (NULL == isscratch &&
     %%% CARE FOR CHANGES argv-index
-      (any (argv[2] == ["man"]) && NULL == Opt.Arg.exists ("--buildcache", argv)))
+      (any (argv[2] == ["man"]) &&
+        NULL == Opt.Arg.exists ("--buildcache", &argv)))
       {
       isbg = 0;
       stdoutfile = SCRATCH;
