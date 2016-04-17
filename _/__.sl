@@ -105,7 +105,7 @@ private define __vset__ (cname, varname, varval)
         ? t
         : NULL);
   if (NULL == __V__[cname][varname])
-    throw ClassError, "var::vset::dtype qualifier should be of DataType_Type";
+    throw ClassError, "var::vset:: const qualifier should be of Integer_Type";
 }
 
 private define __vget__ (cname, varname)
@@ -378,9 +378,23 @@ private define __getself__ (cname)
 
 private define __setself__ (c, methods)
 {
-  variable f = c["__FUN__"];
+  ifnot (typeof (c) == Assoc_Type)
+    if (typeof (c) == String_Type)
+      c = __getclass__ (c, 0);
+    else
+      {
+      c = __get_qualifier_as (String_Type, "cname", qualifier ("cname"), NULL);
 
-  methods = [methods, get_struct_field_names (c["__SELF__"])];
+      if (NULL == c)
+        throw ClassError, "__setself__:: cannot get class";
+      c = __getclass__ (c, 0);
+      }
+
+  variable f = c["__FUN__"];
+  variable selfm = c["__SELF__"];
+  variable selff = get_struct_field_names (selfm);
+
+  methods = [methods, selff];
 
   variable
     i,
@@ -403,6 +417,8 @@ private define __setself__ (c, methods)
     if (any (methods == k[i]))
       ifnot (NULL == f[k[i]].funcref)
         set_struct_field (c["__SELF__"], k[i], f[k[i]].funcref);
+      else if (any (k[i] == selff))
+        set_struct_field (c["__SELF__"], k[i], get_struct_field (selfm, k[i]));
 
   c["__SELF__"].err_handler = handler;
   c["__SELF__"].__name = c["__R__"].name;
@@ -1105,7 +1121,7 @@ private define parse_subclass_init (methods, tokens, line, fp)
 }
 
 private define parse_subclass (
-  cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, found)
+  cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp)
 {
   if (2 > length (tokens))
     throw ClassError, "Class::__INIT__::subclass declaration, missing subname";
@@ -1301,7 +1317,7 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
       if (qualifier_exists ("forbid_subclass"))
         throw ClassError, "nested subclasses are not allowed";
 
-      parse_subclass (cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp, &found;;
+      parse_subclass (cname, classpath, funs, sub_funs, eval_buf, tokens, line, fp;;
         __qualifiers);
       continue;
       }
@@ -1343,13 +1359,13 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
 private define __Class_From_Init__ (classpath)
 {
-  ifnot (path_is_absolute (classpath))
-    classpath = CLASSPATH + "/" + classpath;
+  ifnot (path_is_absolute (@classpath))
+    @classpath = CLASSPATH + "/" + @classpath;
 
   variable __init__ = __get_qualifier_as (String_Type, "__init__",
     qualifier ("__init__"), "__init__");
 
-  variable __in__ = classpath + "/" + __init__ + ".__";
+  variable __in__ = @classpath + "/" + __init__ + ".__";
 
   if (-1 == access (__in__, F_OK|R_OK))
     throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
@@ -1368,31 +1384,53 @@ private define __Class_From_Init__ (classpath)
   if (2 > length (tokens))
     throw ClassError, "Class::__INIT__::name of the class is required";
 
-  ifnot ("class" == tokens[0])
+  ifnot (any (["class", "subclass"] == tokens[0]))
     throw ClassError, "Class::__INIT__::class identifier is missing";
 
-  variable cname = tokens[1];
+  variable isclass = "class" == tokens[0];
+  variable super, tmp, i, cname = tokens[1];
 
-  variable tmp, i, super = cname;
+  if (isclass)
+    {
+    super = cname;
 
-  if (any (cname == assoc_get_keys (__CLASS__)))
-    ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
-      throw ClassError, "Class::__INIT__::" + cname + " is already defined";
+    if (any (cname == assoc_get_keys (__CLASS__)))
+      ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
+        throw ClassError, "Class::__INIT__::" + cname + " is already defined";
+    }
+  else
+    {
+    super = __get_qualifier_as (String_Type, "super", qualifier ("super"), NULL);
+    if (NULL == super)
+      throw ClassError, "Class::__INIT__::awaiting super qualifier";
+
+    if (any (super + cname == assoc_get_keys (__CLASS__)))
+      ifnot (NULL == (tmp = __get_reference (super + cname), (@tmp).__name))
+        throw ClassError, "Class::__INIT__::" + super + cname + " is already defined";
+    }
 
   variable
     funs     = Assoc_Type[Fun_Type],
     sub_funs = String_Type[0],
     eval_buf = "";
 
-  funs["let"] = @Fun_Type;
-  funs["let"].nargs = 2;
-  funs["let"].const = 1;
+  if (isclass)
+    {
+    funs["let"] = @Fun_Type;
+    funs["let"].nargs = 2;
+    funs["let"].const = 1;
 
-  funs["fun"] = @Fun_Type;
-  funs["fun"].nargs = '?';
-  funs["fun"].const = 1;
-
-  parse_class (cname, classpath, &eval_buf, funs, &sub_funs, fp;;__qualifiers);
+    funs["fun"] = @Fun_Type;
+    funs["fun"].nargs = '?';
+    funs["fun"].const = 1;
+    parse_class (super, @classpath, &eval_buf, funs, &sub_funs, fp;;__qualifiers);
+    }
+  else
+    {
+    variable c = __getclass__ (super, 0);
+    tokens = [tokens, "from", qualifier ("from", super)];
+    parse_subclass (super, @classpath, funs, &sub_funs, &eval_buf, tokens, line, fp);
+    }
 
   variable __funs__ = assoc_get_keys (funs);
 
@@ -1402,14 +1440,24 @@ private define __Class_From_Init__ (classpath)
 
   __funs__ = [__funs__, sub_funs];
 
-  eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
-    classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
-      "\"], \"Class::classnew::" + cname + "\");\n\n" + eval_buf;
-
-  eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
-  eval_buf += cname + ".let = Class.let;\n";
-  eval_buf += cname + ".fun = Class.fun;\n";
-  eval_buf += "__uninitialize (&$9);";
+  if (isclass)
+    {
+    eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
+    @classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
+    "\"], \"Class::classnew::" + cname + "\");\n\n" + eval_buf;
+    eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
+    eval_buf += cname + ".let = Class.let;\n";
+    eval_buf += cname + ".fun = Class.fun;\n";
+    eval_buf += "__uninitialize (&$9);";
+    }
+  else
+    {
+    eval_buf = "private define " + cname + " ();\n" +
+    " __->__ (\"" + super + "\", \"" + cname + "\", &" + cname +
+    ", 0, 1, \"Class::setfun::__initfun__\";submethod = 1);\n" +
+    "__->__ (\"" + super + "\", [\"" + cname + "\"], \"Class::setself::subclass\");\n" +
+    __assignself__ (super;return_buf) + "\n\n" + eval_buf;
+    }
 
   variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
     cname);
@@ -1417,7 +1465,7 @@ private define __Class_From_Init__ (classpath)
   if (qualifier_exists ("return_buf"))
     return eval_buf;
 
-  __in__ = classpath + "/" + as + ".sl";
+  __in__ = @classpath + "/" + as + ".sl";
 
   variable dump = fopen (__in__, "w");
   () = fprintf (dump, "%S\n", eval_buf);
@@ -1439,7 +1487,7 @@ private define __LoadClass__ (cname)
   variable cpath = classpath + "/" + as + ".slc";
 
   if (-1 == access (cpath, F_OK|R_OK) || qualifier_exists ("force"))
-    __Class_From_Init__ (classpath;;__qualifiers);
+    __Class_From_Init__ (&classpath;;__qualifiers);
 
   () = evalfile (classpath + "/" + as, cname);
 }
@@ -1453,15 +1501,24 @@ __setfun__ ("Class", "classnew", &__classnew__, 4, 1);
 __setfun__ ("Class", "LoadClass", &__LoadClass__, 1, 1);
 __setfun__ ("Class", "vset", &__vset__, 3, 1);
 __setfun__ ("Class", "vget", &__vget__, 2, 1);
+__setfun__ ("Class", "setself", &__setself__, 2, 1);
 
 private define __load__ (self, cname)
 {
-  __->__ (cname, "Class::LoadClass::NULL";;__qualifiers);
+  __->__ (cname, "Class::LoadClass::__LoadClass__";;__qualifiers);
+}
+
+private define __subclass__ (self, sub, super)
+{
+  __->__ (sub, "Class::LoadClass::__subclass";
+    __init__ = sub, super = super,
+    from = __get_qualifier_as  (String_Type, "from", qualifier ("from"), super));
 }
 
 public variable Class = struct
   {
   load = &__load__,
+  subclass = &__subclass__,
   let = &vlet,
   fun = &addFun
   };
