@@ -12,39 +12,51 @@ class Env
   let SLSH_LIB_DIR   = get_slang_load_path ();
   let SLANG_MODULE_PATH = get_import_module_path ();
 
-  let OS_PATH        = getenv ("PATH");
-  let HOME_PATH      = getenv ("HOME");
-  let ROOT_PATH      = __tmp (&$0);
-  let SRC_PATH       = ROOT_PATH + "/__";
-  let STD_PATH       = ROOT_PATH + "/std";
-  let TMP_PATH       = ROOT_PATH + "/tmp";
-  let BIN_PATH       = ROOT_PATH + "/bin";
-  let USER_PATH      = ROOT_PATH + "/usr";
+  let OS_PATH          = getenv ("PATH");
+  let HOME_PATH        = getenv ("HOME");
+  let ROOT_PATH        = __tmp (&$0);
+  let SRC_PATH         = ROOT_PATH + "/__";
+  let STD_PATH         = ROOT_PATH + "/std";
+  let TMP_PATH         = ROOT_PATH + "/tmp";
+  let BIN_PATH         = ROOT_PATH + "/bin";
+  let USER_PATH        = ROOT_PATH + "/usr";
+  let LOCAL_PATH       = ROOT_PATH + "/local";
 
-  let STD_APP_PATH   = STD_PATH + "/app";
-  let STD_COM_PATH   = STD_PATH + "/com";
-  let STD_CLASS_PATH = STD_PATH + "/__";
-  let STD_LIB_PATH   = STD_PATH + "/___";
-  let STD_C_PATH     = STD_PATH + "/C";
-  let STD_DATA_PATH  = STD_PATH + "/data";
+  let STD_APP_PATH     = STD_PATH + "/app";
+  let STD_COM_PATH     = STD_PATH + "/com";
+  let STD_CLASS_PATH   = STD_PATH + "/__";
+  let STD_LIB_PATH     = STD_PATH + "/___";
+  let STD_C_PATH       = STD_PATH + "/C";
+  let STD_DATA_PATH    = STD_PATH + "/data";
 
-  let USER_APP_PATH   = USER_PATH + "/app";
-  let USER_COM_PATH   = USER_PATH + "/com";
-  let USER_CLASS_PATH = USER_PATH + "/__";
-  let USER_LIB_PATH   = USER_PATH + "/___";
-  let USER_C_PATH     = USER_PATH + "/C";
-  let USER_DATA_PATH  = USER_PATH + "/data";
+  let USER_APP_PATH    = USER_PATH + "/app";
+  let USER_COM_PATH    = USER_PATH + "/com";
+  let USER_CLASS_PATH  = USER_PATH + "/__";
+  let USER_LIB_PATH    = USER_PATH + "/___";
+  let USER_C_PATH      = USER_PATH + "/C";
+  let USER_DATA_PATH   = USER_PATH + "/data";
 
-  let SRC_PROTO_PATH = SRC_PATH + "/_";
-  let SRC_CLASS_PATH = SRC_PATH + "/__";
-  let SRC_C_PATH     = SRC_PATH + "/C";
-  let SRC_APP_PATH   = SRC_PATH + "/app";
-  let SRC_COM_PATH   = SRC_PATH + "/com";
-  let SRC_USER_PATH  = SRC_PATH + "/usr";
+  let LOCAL_COM_PATH   = LOCAL_PATH + "/com";
+  let LOCAL_APP_PATH   = LOCAL_PATH + "/app";
+  let LOCAL_CLASS_PATH = LOCAL_PATH + "/__";
+  let LOCAL_LIB_PATH   = LOCAL_PATH + "/___";
 
-  let SRC_STD_DATA_PATH   = SRC_PATH + "/data";
-  let SRC_USER_DATA_PATH  = SRC_USER_PATH + "/data";
-  let SRC_USER_CLASS_PATH = SRC_USER_PATH + "__";
+  let SRC_PROTO_PATH   = SRC_PATH + "/_";
+  let SRC_CLASS_PATH   = SRC_PATH + "/__";
+  let SRC_C_PATH       = SRC_PATH + "/C";
+  let SRC_APP_PATH     = SRC_PATH + "/app";
+  let SRC_COM_PATH     = SRC_PATH + "/com";
+  let SRC_USER_PATH    = SRC_PATH + "/usr";
+
+  let SRC_STD_DATA_PATH    = SRC_PATH + "/data";
+  let SRC_USER_DATA_PATH   = SRC_USER_PATH + "/data";
+  let SRC_USER_CLASS_PATH  = SRC_USER_PATH + "__";
+
+  let SRC_LOCAL_PATH       = SRC_PATH + "/local";
+  let SRC_LOCAL_COM_PATH   = SRC_LOCAL_PATH + "/com";
+  let SRC_LOCAL_APP_PATH   = SRC_LOCAL_PATH + "/app";
+  let SRC_LOCAL_CLASS_PATH = SRC_LOCAL_PATH + "/__";
+  let SRC_LOCAL_LIB_PATH   = SRC_LOCAL_PATH + "/___";
 
   def defenv ()
     variable lenv = [

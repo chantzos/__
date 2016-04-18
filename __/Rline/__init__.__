@@ -2089,6 +2089,20 @@ class Rline
         break;
         }
 
+      if (0 == s._ind && '~' == s._chr)
+        {
+        commands = assoc_get_keys (s.argvlist);
+        commands = commands[wherenot (strncmp (commands, "~", 1))];
+
+        if (commandcmp (NULL, s, commands) == 1)
+          {
+          s.execline (;;__qualifiers ());
+          return;
+          }
+
+        continue;
+        }
+
       if ('\r' == s._chr)
         {
         s.execline (;;__qualifiers ());
@@ -2181,7 +2195,10 @@ class Rline
               commands = String_Type[0];
             }
           else
+            {
             commands = assoc_get_keys (s.argvlist);
+            commands = commands[where (strncmp (commands, "~", 1))];
+            }
 
           if (commandcmp (NULL, s, commands) == 1)
             {

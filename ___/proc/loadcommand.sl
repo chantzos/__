@@ -110,6 +110,9 @@ This.err_handler = &__err_handler__;
 private variable COMDIR = Env->STD_COM_PATH + "/" + COM;
 
 if (-1 == access (COMDIR, F_OK))
+  COMDIR = Env->LOCAL_COM_PATH + "/" + COM;
+
+if (-1 == access (COMDIR, F_OK))
   COMDIR = Env->USER_COM_PATH + "/" + COM;
 
 ifnot (access (This.stdoutFn, F_OK))

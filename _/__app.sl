@@ -164,10 +164,18 @@ private define _build_comlist_ (a)
     ifnot (NULL == c)
       _for ii (0, length (c) - 1)
         {
-        a[(ex ? "!" : "") + c[ii]] = @Argvlist_Type;
-        a[(ex ? "!" : "") + c[ii]].dir = d[i] + "/" + c[ii];
+        a[(ex ? "!" : "") + c[ii]]      = @Argvlist_Type;
+        a[(ex ? "!" : "") + c[ii]].dir  = d[i] + "/" + c[ii];
         a[(ex ? "!" : "") + c[ii]].func = &com_execute;
         }
+    }
+
+  c = listdir (Env->LOCAL_COM_PATH);
+  _for i (0, length (c) - 1)
+    {
+    a["~" + c[i]]      = @Argvlist_Type;
+    a["~" + c[i]].dir  = Env->LOCAL_COM_PATH + "/" + c[i];
+    a["~" + c[i]].func = &com_execute;
     }
 }
 

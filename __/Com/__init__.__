@@ -341,6 +341,9 @@ class Com
   end
 
   def execute (argv)
+    if ('~' == argv[0][0])
+      argv[0] = substr (argv[0], 2, -1);
+
     variable isbg = 0;
     if (argv[-1] == "&")
       {
