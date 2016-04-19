@@ -130,82 +130,22 @@ class App
     () = write (SCRATCHFD, str);
   end
 
-  def run (argv, env)
-    APP_ERR = 0;
-
-    if (strncmp (argv[0], "__", 2))
-      argv[0] = "__" + argv[0];
-
-    argv[0] = Env->BIN_PATH + "/" + argv[0];
-
-    if (-1 == access (argv[0], F_OK|X_OK))
-      {
-      IO.tostderr (argv[0], "couldn't been executed,", errno_string (errno));
-      APP_ERR = 1;
-      return NULL;
-      }
-
-    variable issu = qualifier ("issu");
-    variable passwd = qualifier ("passwd");
-
-    variable p = Proc.init (issu, 0, 0);
-
-    if (issu)
-      {
-      if (NULL == passwd)
-        {
-        variable isgoingtoreset = 0;
-        ifnot (This.isscreenactive)
-          {
-          Api.restore_screen ();
-          isgoingtoreset = 1;
-          }
-
-          passwd = Os.__getpasswd ();
-
-          if (isgoingtoreset)
-            Api.reset_screen ();
-
-          if (NULL == passwd)
-            {
-            APP_ERR = 1;
-            return NULL;
-            }
-          }
-
-      p.stdin.in = passwd;
-
-      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
-      }
-
-    Api.reset_screen ();
-
-    variable status;
-    variable bg = qualifier_exists ("bg") ? 1 : NULL;
-
-    ifnot (NULL == env)
-      status = p.execve (argv, env, bg);
-    else
-      status = p.execv (argv, bg);
-
-    if (NULL == bg)
-      Api.restore_screen ();
-
-    status;
-  end
-
   def __eval () public proc
     Api.Eval.run (;;__qualifiers ());
   end
 
   def runcom (argv, issu) public proc
     variable rl = Ved.get_cur_rline ();
+    variable commands = assoc_get_keys (rl.argvlist);
+    variable orig = argv[0];
 
-    ifnot (any (assoc_get_keys (rl.argvlist) == argv[0]))
-      {
-      IO.tostderr (argv[0] + ": no such command");
-      return;
-      }
+    ifnot (any (commands == argv[0]))
+     ifnot (any (commands == (argv[0] = "~" + orig, argv[0])))
+      ifnot (any (commands == (argv[0] = "`" + orig, argv[0])))
+        {
+        IO.tostderr (argv[0] + ": no such command");
+        return;
+        }
 
     rl.argv = argv;
     (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});

@@ -274,3 +274,8 @@ static define USER_CLASS_PATH ()
 {
   realpath (CLASSPATH + "/../usr/__");
 }
+
+static define LOCAL_CLASS_PATH ()
+{
+  realpath (CLASSPATH + "/../local/__");
+}

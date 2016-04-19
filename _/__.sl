@@ -1148,16 +1148,15 @@ private define parse_subclass (
     else
       {
       variable lfrom = from;
-      from = CLASSPATH + "/../usr/__/" + from + "/" + as + ".__";
+      from = Env->STD_CLASS_PATH + "/" + lfrom + "/" + as + ".__";
       if (-1 == access (from, F_OK|R_OK))
-        if (-1 == access (
-          (from = CLASSPATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-          if (-1 == access (
-              (from = Env->USER_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-            if (-1 == access (
-                (from = Env->STD_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-              throw ClassError, "Class::__INIT__::subclass, cannot locate subclass " + as +
-                " from " + lfrom;
+       if (-1 == access ((from = CLASSPATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+        if (-1 == access ((from = Env->LOCAL_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+         if (-1 == access ((from = CLASSPATH + "/../local/__/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+          if (-1 == access ((from = Env->USER_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+           if (-1 == access ((from = CLASSPATH + "/../usr/__/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
+             throw ClassError, "Class::__INIT__::subclass, cannot locate subclass " + as +
+               " from " + lfrom;
        }
 
       fp = fopen (from, "r");

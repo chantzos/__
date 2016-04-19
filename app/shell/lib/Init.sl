@@ -62,9 +62,12 @@ public define _new_frame_ (s)
 
 public define intro ()
 {
-  variable file = Env->USER_COM_PATH + "/intro/intro.slc";
+  variable file = Env->LOCAL_LIB_PATH + "/intro/intro.slc";
+
   if (-1 == access (file, F_OK))
-    file = Env->STD_COM_PATH + "/intro/intro.slc";
+    if (-1 == access ((file = Env->USER_LIB_PATH + "/intro/intro.slc", file), F_OK))
+      file = Env->STD_LIB_PATH + "/intro/intro.slc";
+
   () = evalfile (file);
 }
 

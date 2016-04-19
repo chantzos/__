@@ -772,6 +772,11 @@ private define __main__ ()
         dargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH},
         fargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH, 0});
 
+    ifnot (access (SRC_USER_LIB_PATH, F_OK|R_OK))
+      Path.walk (SRC_USER_LIB_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_USER_LIB_PATH, USER_LIB_PATH},
+        fargs = {SRC_USER_LIB_PATH, USER_LIB_PATH, 1});
+
     ifnot (access (SRC_USER_APP_PATH, F_OK|R_OK))
       {
       () = chdir (BIN_PATH);
@@ -806,6 +811,11 @@ private define __main__ ()
       Path.walk (SRC_LOCAL_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_LOCAL_CLASS_PATH, LOCAL_CLASS_PATH},
         fargs = {SRC_LOCAL_CLASS_PATH, LOCAL_CLASS_PATH, 0});
+
+    ifnot (access (SRC_LOCAL_LIB_PATH, F_OK|R_OK))
+      Path.walk (SRC_LOCAL_LIB_PATH, &lib_dir_callback, &file_callback_libs;
+        dargs = {SRC_LOCAL_LIB_PATH, LOCAL_LIB_PATH},
+        fargs = {SRC_LOCAL_LIB_PATH, LOCAL_LIB_PATH, 1});
 
     ifnot (access (SRC_LOCAL_APP_PATH, F_OK|R_OK))
       {
