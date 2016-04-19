@@ -120,7 +120,6 @@ class Ved
   def __eval () public proc
   end
 
-  subclass Prev from Api
   subclass Reg from Ved
 
   def toogle_infoclrbg ()

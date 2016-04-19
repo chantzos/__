@@ -145,9 +145,89 @@ class Array
     if (at_index < 0)
       at_index = len + at_index;
 
-    if (len - 1 < at_index)
+    if (len - 1 < at_index || at_index < 0)
       return;
 
     @arr = [(@arr)[[0:at_index-1]], (@arr)[[at_index+1:]]];
+  end
+
+  def append (?)
+    variable arr, at_index, val;
+
+    if (3 == _NARGS)
+      {
+      val = (); arr = (); at_index = length (@arr);
+      }
+    else if (4 == _NARGS)
+      {
+      val = ();
+      at_index = ();
+      arr = ();
+      }
+    else
+      return;
+
+    variable self = ();
+
+    ifnot (self.istype (@arr, typeof (val)))
+      return;
+
+    variable len = length (@arr);
+    if (at_index < 0)
+      at_index = len + at_index;
+
+    if (len < at_index || at_index < -1)
+      return;
+
+    if (len == at_index)
+      @arr = [@arr, val];
+    else if (-1 == at_index)
+      @arr = [val, @arr];
+    else
+      @arr = [(@arr)[[0:at_index]], val, (@arr)[[at_index+1:]]];
+  end
+
+  def insert (?)
+    variable arr, at_index, val;
+
+    if (3 == _NARGS)
+      {
+      val = (); arr = (); at_index = 0;
+      }
+    else if (4 == _NARGS)
+      {
+      val = ();
+      at_index = ();
+      arr = ();
+      }
+    else
+      return;
+
+    variable self = ();
+
+    ifnot (self.istype (@arr, typeof (val)))
+      return;
+
+    variable len = length (@arr);
+    if (at_index < 0)
+      at_index = len + at_index;
+
+    if (len < at_index || at_index < 0)
+      return;
+
+    if (len == at_index)
+      @arr = [@arr, val];
+    else
+      @arr = [(@arr)[[0:at_index-1]], val, (@arr)[[at_index:]]];
+  end
+
+  def join (ar, bar)
+    if (any (0 == [self.istype (@ar, NULL), self.istype (bar, NULL)]))
+      return;
+
+    ifnot (_typeof (@ar) == _typeof (bar))
+      return;
+
+   @ar = [@ar, bar];
   end
 end

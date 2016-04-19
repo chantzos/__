@@ -214,7 +214,7 @@ private define _filter_bufs_ (v)
     {
     b = w.bufnames[i];
     ifnot (any (b == [v._abspath, SPECIAL]))
-      ar = [ar, b];
+      Array.append (&ar, b);
     }
 
   ar[array_sort (ar)];

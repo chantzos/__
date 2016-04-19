@@ -204,7 +204,7 @@ class Com
       }
 
     _for i (0, length (pids) - 1)
-      ar = [ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n"];
+      Array.append (&ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n");
 
     IO.tostdout (ar);
 

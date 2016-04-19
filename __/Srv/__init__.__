@@ -6,6 +6,7 @@ class Srv
   var CONNECTED_PIDS = Integer_Type[0];
   var CUR_APP = NULL;
   var CUR_IND = -1;
+  var PREV_APP = NULL;
 
   def go_idled () public proc
     exit_me (0);
@@ -203,6 +204,7 @@ class Srv
       }
 
     variable s = APPS[app][pid];
+    PREV_APP = CUR_APP;
     CUR_APP = k;
     Sock.send_int (s.fd, 0);
     0;
@@ -238,6 +240,7 @@ class Srv
     s.state = Api->CONNECTED;
     s.name  = app;
 
+    PREV_APP = CUR_APP;
     CUR_APP = app + "::" + string (s.pid);
     CUR_IND++;
   end

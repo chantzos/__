@@ -238,59 +238,6 @@ class Smg
   var defclr = 11;
   var headerclr = 5;
 
-  def _pop_up_ (ar, row, col, ifocus)
-    variable lar = array_map (String_Type, &sprintf, " %s", ar);
-
-    variable i;
-    variable len = length (lar);
-    variable fgclr = qualifier ("fgclr", 5);
-    variable bgclr = qualifier ("bgclr", 11);
-    variable maxlen = max (strlen (lar)) + 1;
-
-  %  if (maxlen > COLUMNS)
-  %    _for i (0, len - 1)
-  %      if (strlen (lar[i]) > COLUMNS)
-  %        lar[i] = substr (lar[i], 1, COLUMNS);
-  %
-  %  if (maxlen > COLUMNS)
-  %    col = 0;
-  %  else
-  %    while (col + maxlen > COLUMNS)
-  %      col--;
-
-    variable rows = [row:row + len - 1];
-    variable clrs = Integer_Type[len];
-    variable cols = Integer_Type[len];
-
-    ifocus = ifocus > length (clrs) ? length (clrs) : ifocus;
-
-    clrs[*] = bgclr;
-    clrs[ifocus - 1] = fgclr;
-    cols[*] = col;
-
-    aratrcaddnstr (self, lar, clrs, rows, cols, maxlen);
-    rows;
-  end
-
-  def pop_up (ar, row, col, ifocus)
-    ifnot (length (ar))
-      return Integer_Type[0];
-
-    variable avail_lines = LINES - 4;
-    variable lar;
-    variable lrow = row;
-
-    if (length (ar) > avail_lines)
-      lar = ar[[:avail_lines - 1]];
-    else
-      lar = @ar;
-
-    while (lrow--, lrow - 1 + length (lar) >= avail_lines);
-    lrow++;
-
-    return _pop_up_ (self, lar, lrow, col, ifocus;;__qualifiers ());
-  end
-
   def write_completion_routine (ar, startrow)
     variable
       lheaderclr = qualifier ("headerclr", headerclr),
@@ -415,6 +362,59 @@ class Smg
 
       chr;
       }
+  end
+
+  def _pop_up_ (self, ar, row, col, ifocus) proc
+    variable lar = array_map (String_Type, &sprintf, " %s", ar);
+
+    variable i;
+    variable len = length (lar);
+    variable fgclr = qualifier ("fgclr", 5);
+    variable bgclr = qualifier ("bgclr", 11);
+    variable maxlen = max (strlen (lar)) + 1;
+
+  %  if (maxlen > COLUMNS)
+  %    _for i (0, len - 1)
+  %      if (strlen (lar[i]) > COLUMNS)
+  %        lar[i] = substr (lar[i], 1, COLUMNS);
+  %
+  %  if (maxlen > COLUMNS)
+  %    col = 0;
+  %  else
+  %    while (col + maxlen > COLUMNS)
+  %      col--;
+
+    variable rows = [row:row + len - 1];
+    variable clrs = Integer_Type[len];
+    variable cols = Integer_Type[len];
+
+    ifocus = ifocus > length (clrs) ? length (clrs) : ifocus;
+
+    clrs[*] = bgclr;
+    clrs[ifocus - 1] = fgclr;
+    cols[*] = col;
+
+    aratrcaddnstr (self, lar, clrs, rows, cols, maxlen);
+    rows;
+  end
+
+  def pop_up (ar, row, col, ifocus)
+    ifnot (length (ar))
+      return Integer_Type[0];
+
+    variable avail_lines = LINES - 4;
+    variable lar;
+    variable lrow = row;
+
+    if (length (ar) > avail_lines)
+      lar = ar[[:avail_lines - 1]];
+    else
+      lar = @ar;
+
+    while (lrow--, lrow - 1 + length (lar) >= avail_lines);
+    lrow++;
+
+    return _pop_up_ (self, lar, lrow, col, ifocus;;__qualifiers ());
   end
 
   def get_screen_size ()

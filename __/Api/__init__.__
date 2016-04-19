@@ -29,6 +29,7 @@ class Api
   var public APPSINFO = Assoc_Type[AppInfo_Type];
 
   subclass Eval from Api
+  subclass Prev from Api
 
   def app_table ()
     variable i;

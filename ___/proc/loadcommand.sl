@@ -161,7 +161,7 @@ public define _usage ()
     }
 
   ifnot (access (helpfile, F_OK))
-    ar = [ar, File.readlines (helpfile)];
+    Array.join (&ar, File.readlines (helpfile));
 
   ifnot (length (ar))
     {

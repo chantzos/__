@@ -1,9 +1,20 @@
 subclass Prev
   __init__
-    menu
+    set
+    get
   end
 
-  def menu ()
-    Smg.send_msg_dr ("woueiiii", 1, NULL, NULL);
+  def invalid_key () proc
+    NULL;
+  end
+
+  var PREV_ACT = Assoc_Type[Ref_Type, &invalid_key];
+
+  def set (key, ref)
+    PREV_ACT[key] = ref;
+  end
+
+  def get (key)
+    PREV_ACT[key];
   end
 end
