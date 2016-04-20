@@ -30,10 +30,9 @@ public define shell ()
   mainloop ();
 }
 
-public define __err_handler__ (__r__)
+private define __err_handler__ (this, __r__)
 {
-  IO.tostderr (__r__);
-  IO.tostdout (__r__);
+  __messages;
 
   EXITSTATUS = 1;
 
@@ -43,3 +42,5 @@ public define __err_handler__ (__r__)
 
   mainloop ();
 }
+
+This.err_handler = &__err_handler__;

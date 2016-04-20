@@ -27,13 +27,9 @@ public define init_git ()
   mainloop ();
 }
 
-public define __err_handler__ (s)
+private define __err_handler__ (t, s)
 {
-  IO.tostderr (s);
-  IO.tostdout (s);
-
-  draw (Ved.get_cur_buf ());
-
+  __messages;
   mainloop ();
 }
 

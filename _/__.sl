@@ -856,7 +856,7 @@ private define parse_let (cname, eval_buf, tokens, line, fp, found)
     if (tok == "=")
       {
       if (length (tokens) > 3)
-        var_buf = strjoin (tokens[[3:]]);
+        var_buf = substr (strtrim_end (line), string_match (line, "=") + 1, -1);
       else
         var_buf = "";
 
@@ -902,6 +902,47 @@ private define parse_let (cname, eval_buf, tokens, line, fp, found)
   @eval_buf += "static define " + vname + " ()\n{\n__->__ (\"" +
   cname + "\",  \"" + vname + "\", \"Class::vget::" + vname +
     "\";getref);\n}\n\n";
+}
+
+private define parse_preproc (
+  cname, classpath, eval_buf, funs, sub_funs, tokens, line, fp)
+{
+  if (1 == length (tokens))
+    throw ClassError, "parse_preproc::missing condition";
+
+  variable cond = substr (strtrim_end (line), strlen (tokens[0]) + 1, -1);
+
+  try
+    {
+    cond = Anon->Fun (cond + ";";;__qualifiers);
+    }
+  catch AnyError:
+    throw ClassError, "parse_preproc::error while evaluating condition",
+      __get_exception_info;
+
+  variable foundend = 0;
+
+  cond = cond
+    ? "#if" == tokens[0]
+    : "#ifnot" == tokens[0];
+
+  ifnot (cond)
+    {
+    while (-1 != fgets (&line, fp))
+      {
+      if ("#endif" == strtrim (line))
+        {
+        foundend = 1;
+        break;
+        }
+      }
+    }
+  else
+    foundend = parse_class (cname, classpath, eval_buf, funs, sub_funs, fp;
+        end = "#endif");
+
+  ifnot (foundend)
+    throw ClassError, "Class::__INIT__::unended preproc expression";
 }
 
 private define parse_beg_block (eval_buf, tokens, line, fp, found)
@@ -1272,7 +1313,8 @@ private define parse_subclass (
 
 private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 {
-  variable ot_class = 1, found, line, tokens;
+  variable ot_class = 1, found, line, tokens, end = qualifier ("end");
+  variable foundend = 0;
 
   while (-1 != fgets (&line, fp))
     {
@@ -1281,10 +1323,34 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
     if (0 == length (tokens) || '%' == tokens[0][0])
       continue;
 
+    if (NULL != end && end == tokens[0])
+      {
+      foundend = 1;
+      break;
+      }
+
     if (1 == length (tokens) && "end" == tokens[0])
       {
       ot_class = 0;
       break;
+      }
+
+    if (any (["def", "def!"] == tokens[0]))
+      {
+      parse_def (cname, eval_buf, funs, tokens, line, fp, &found;;__qualifiers);
+      continue;
+      }
+
+    if ("var" == tokens[0])
+      {
+      parse_variable (eval_buf, tokens, line, fp, &found);
+      continue;
+      }
+
+    if (any (["let", "let!"] == tokens[0]))
+      {
+      parse_let (cname, eval_buf, tokens, line, fp, &found);
+      continue;
       }
 
     if ("require" == tokens[0])
@@ -1321,27 +1387,16 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
       continue;
       }
 
+    if (any (["#if", "#ifnot"] == tokens[0]))
+      {
+      parse_preproc (cname, classpath, eval_buf, funs, sub_funs, tokens, line, fp
+        ;;__qualifiers);
+      continue;
+      }
+
     if (any (["beg", "block"] == tokens[0]))
       {
       parse_beg_block (eval_buf, tokens, line, fp, &found);
-      continue;
-      }
-
-    if ("var" == tokens[0])
-      {
-      parse_variable (eval_buf, tokens, line, fp, &found);
-      continue;
-      }
-
-    if (any (["let", "let!"] == tokens[0]))
-      {
-      parse_let (cname, eval_buf, tokens, line, fp, &found);
-      continue;
-      }
-
-    if (any (["def", "def!"] == tokens[0]))
-      {
-      parse_def (cname, eval_buf, funs, tokens, line, fp, &found;;__qualifiers);
       continue;
       }
 
@@ -1351,6 +1406,9 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
       continue;
       }
     }
+
+  ifnot (NULL == end)
+    return foundend;
 
   if (ot_class)
     throw ClassError, "Class::__INIT__::end identifier is missing";
