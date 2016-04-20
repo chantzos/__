@@ -253,21 +253,6 @@ public variable Exc = struct
   __name, isnot = &isnot, print = &print, fmt = &fmt
   };
 
-__use_namespace ("Anon");
-
-static define function ();
-static define Fun ()
-{
-  variable args = __pop_list (_NARGS - 1);
-  variable buf = ();
-  buf = "static define function ()\n{\n" +
-  buf + "\n}";
-  IO.tostderr (buf);
-  eval (buf, "Anon");
-  Anon->function (__push_list (args);;__qualifiers);
-  eval ("static define function ();");
-}
-
 __use_namespace ("Env");
 
 static define STD_LIB_PATH ()

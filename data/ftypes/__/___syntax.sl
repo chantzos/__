@@ -1,7 +1,7 @@
 private variable colors = [
 %comments
   3,
-% api functions
+% api functins
   11,
 % identifiers
   12,
@@ -140,7 +140,6 @@ private variable regexps = [
 %conditional
   pcre_compile ("\
 (^\s*(if(?=\s))\
-|(^#(end)?if(?=\s|$))\
 |^\s*(else if(?=\s))\
 |^\s*(while(?=\s))\
 |^\s*(else)(?=$|\s{2,}%)\
