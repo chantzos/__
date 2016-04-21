@@ -29,19 +29,34 @@ private define tabhook (s)
   ifnot (s._ind)
     return -1;
 
-  ifnot (s.argv[0] == "killbgjob")
+  ifnot (any (s.argv[0] == ["killbgjob", "man"]))
     return -1;
 
-  variable pids = assoc_get_keys (BGPIDS);
+  ifnot ("man" == s.argv[0])
+    {
+    variable pids = assoc_get_keys (BGPIDS);
 
-  ifnot (length (pids))
-    return -1;
+    ifnot (length (pids))
+      return -1;
 
-  variable i;
-  _for i (0, length (pids) - 1)
-    pids[i] = pids[i] + " void " + strjoin (BGPIDS[pids[i]].argv, " ");
+    variable i;
+    _for i (0, length (pids) - 1)
+      pids[i] = pids[i] + " void " + strjoin (BGPIDS[pids[i]].argv, " ");
 
-  return Rline.argroutine (s;args = pids, accept_ws);
+    return Rline.argroutine (s;args = pids, accept_ws);
+    }
+  else
+    {
+    variable file = Env->STD_COM_PATH + "/man/pages.txt";
+    if (-1 == access (file, F_OK))
+      return -1;
+
+    variable pages = File.readlines (file);
+    ifnot (length (pages))
+      return -1;
+
+    return Rline.argroutine (s;args = pages, accept_ws);
+    }
 }
 
 public define rlineinit ()

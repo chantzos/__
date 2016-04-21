@@ -161,6 +161,7 @@ define main ()
     options = 0,
     cache = NULL,
     cachefile = sprintf ("%s/cache.txt", DATA_DIR),
+    from_file = NULL,
     c = Opt.Parse.new (&_usage);
 
   if (-1 == access (DATA_DIR, F_OK))
@@ -183,6 +184,7 @@ define main ()
 
   c.add ("search", &search;type="string");
   c.add ("caseless", &options;bor = PCRE_CASELESS);
+  c.add ("from-file", &from_file;type = "string");
   c.add ("buildcache", &cache);
   c.add ("help", &_usage);
   c.add ("info", &info);
@@ -223,6 +225,11 @@ define main ()
       }
 
     File.write (cachefile, list);
+    variable argsfile = Env->STD_COM_PATH + "/man/pages.txt";
+    list = array_map (String_Type, &path_basename_sans_extname, list);
+    list = array_map (String_Type, &path_basename_sans_extname, list);
+    list = array_map (String_Type, &sprintf, "%s void display %s", list, list);
+    File.write (argsfile, list);
     exit_me (0);
     }
 
@@ -237,7 +244,11 @@ define main ()
 
     cache = File.readlines (cachefile);
     pat = pcre_compile (search, options);
-    pos = strlen (MANDIR) + 4;
+    if (path_is_absolute (search))
+      pos = 0;
+    else
+      pos = strlen (MANDIR) + 4;
+
     man_page = String_Type[0];
 
     _for i (0, length (cache) - 1)
@@ -299,6 +310,23 @@ define main ()
     exit_me (retval);
     }
 
+  ifnot (NULL == from_file)
+    {
+    if (-1 == access (from_file, F_OK))
+      {
+      IO.tostderr (from_file, "no such file");
+      exit_me (1);
+      }
+
+    if (-1 == access (from_file, R_OK))
+      {
+      IO.tostderr (from_file, "is not readable");
+      exit_me (1);
+      }
+
+    exit_me (getpage (from_file));
+   }
+
   if (i == __argc)
     {
     IO.tostderr ("man: argument is required");
@@ -323,7 +351,11 @@ define main ()
 
     cache = File.readlines (cachefile);
     pat = pcre_compile (sprintf ("/%s\\056[0-9]", page), options);
-    pos = strlen (MANDIR) + 4;
+    if (path_is_absolute (page))
+      pos = 0;
+    else
+      pos = strlen (MANDIR) + 4;
+
     man_page = NULL;
 
     _for i (0, length (cache) - 1)
