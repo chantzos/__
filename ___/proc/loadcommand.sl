@@ -131,7 +131,7 @@ if (any (NULL == [This.stdoutFd, This.stderrFd]))
 Class.load ("Smg";as = "__tty_init__");
 Class.load ("Proc");
 Class.load ("Sock");
-Class.load ("Opt");
+Class.load ("Opt";load_Parse, force);
 
 public define verboseon ()
 {

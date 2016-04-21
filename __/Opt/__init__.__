@@ -1,4 +1,7 @@
 class Opt
+#if qualifier_exists ("load_Parse")
   subclass Parse from Opt
+#endif
+
   subclass Arg from Opt
 end

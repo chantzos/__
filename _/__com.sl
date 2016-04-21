@@ -10,7 +10,7 @@ public define to_tty ();
 public define restore_screen ();
 
 Class.load ("Proc");
-Class.load ("Opt");
+Class.load ("Opt";load_Parse, force);
 Class.load ("Input");
 Class.load ("Smg";__init__ = "__tty_init__", as = "SmgTTY");
 

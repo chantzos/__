@@ -7,19 +7,22 @@ subclass Arg
 
   def exists (arg, argv)
     variable index = wherefirst (arg == @argv);
-
-    if (NULL == index)
-      return NULL;
-
-    variable del = qualifier_exists ("del_arg");
     variable ret = qualifier_exists ("ret_arg");
 
-    if (ret )
+    if (NULL == index)
+      {
+      if (ret)
+        NULL;
+
+      return NULL;
+      }
+
+    if (ret)
       ret = (@argv)[index];
     else
       ret = NULL;
 
-    if (del)
+    if (qualifier_exists ("del_arg"))
       Array.delete_at (argv, index);
 
     ifnot (NULL == ret)
@@ -30,18 +33,22 @@ subclass Arg
 
   def compare (arg, argv)
     variable index = wherenot (strncmp (@argv, arg, strlen (arg)));
-    ifnot (length (index))
-      return NULL;
-
-    variable del = qualifier_exists ("del_arg");
     variable ret = qualifier_exists ("ret_arg");
+
+    ifnot (length (index))
+      {
+      if (ret)
+        NULL;
+
+      return NULL;
+      }
 
     if (ret)
       ret = (@argv)[index[0]];
     else
       ret = NULL;
 
-    if (del)
+    if (qualifier_exists ("del_arg"))
       Array.delete_at (argv, index[0]);
 
     ifnot (NULL == ret)

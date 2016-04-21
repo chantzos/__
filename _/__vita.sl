@@ -262,7 +262,6 @@ static define Fun ()
   variable buf = ();
   buf = "static define function ()\n{\n" +
   buf + "\n}";
-  IO.tostderr (buf);
   eval (buf, "Anon");
   Anon->function (__push_list (args);;__qualifiers);
   eval ("static define function ();");

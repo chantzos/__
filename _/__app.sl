@@ -219,8 +219,7 @@ private define __echo__ (argv)
   variable s = @Struct_Type ("");
   ifnot (NULL == hasnewline)
     {
-    argv[hasnewline] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
+    Array.delete_at (&argv, hasnewline);
     s = @Struct_Type ("n");
     hasnewline = "";
     }
@@ -389,26 +388,23 @@ private define __write__ (argv)
   variable lnrs = [0:b._len];
   variable range = NULL;
   variable append = NULL;
-  variable ind = Opt.Arg.compare ("--range=", &argv);
+  variable ind;
+  variable range_arg;
   variable lines;
   variable file;
   variable command;
 
-  ifnot (NULL == ind)
-    {
-    variable arg = argv[ind];
-    argv[ind] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
-    if (NULL == (lnrs = Ved.parse_arg_range (b, arg, lnrs), lnrs))
+  (range_arg, ) = Opt.Arg.compare ("--range=", &argv;ret_arg, del_arg);
+
+  ifnot (NULL == range_arg)
+    if (NULL == (lnrs = Ved.parse_arg_range (b, range_arg, lnrs), lnrs))
       return;
-    }
 
   ind = wherefirst (">>" == argv);
   ifnot (NULL == ind)
     {
     append = 1;
-    argv[ind] = NULL;
-    argv = argv[wherenot (_isnull (argv))];
+    Array.delete_at (&argv, ind);
     }
 
   command = argv[0];
@@ -510,8 +506,7 @@ public define init_functions ()
 
 public define init_commands ()
 {
-  variable
-    a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
 
   _build_comlist_ (a;;__qualifiers ());
 
