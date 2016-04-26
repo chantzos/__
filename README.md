@@ -1,30 +1,75 @@
-## WARNING:
-    This application doesn't catch and handle sigwinch.  
-    The author works exclusively in maximized terminals, throw  
-    first Ratpoison's era (2005 (for a year)), then for an  
-    another year (an ala ratpoison setup) with fvwm2 (the most  
-    advanced of all), then with wmii with a server - client  
-    relation, which this model then continued with the excellent  
-    Musca - where I've provided the man page and also identified a  
-    segmentation fault (my biggest (and the only one in fact) achievment  
-    with C) due to a changed pointer address (after an incremental),  
-    so free () couldn't deallocate the memory -  
-    and I would probably still use Musca, if it hadn't refuced to compile  
-    with new C compilers a couple of years ago (never tried again to be  
-    honest)... but the author dont't spend his time anymore (atleast at this time  
-    of writting (31 March 2016)) building softwaree (like he used to do, during  
-    LFS era (January 2006-January 2010))...
-    so for these couple of years I'm working with herbst(client|luftwm).  
-			     In fact one of the reasons of writting this app, is just to have control  
-   over my environment, by giving total focus to what I'm currently doing  
-   without disturbtions, by giving with genereosity all the screen space it  
-   deserves.  
-        thus a simple window resizing will make the application to misbeahave  
-   (!not in the functionality but its display (due to the changed  
-    LINES && COLUMNS, on which, the simple drawing machine is based to  
-   make some calculations)
-			though not enough complicated, it needs thinking and I'm boring to do that
-   thinking for something I never do.  
+This is very first draft of a proper README.
+
+## NOTE.
+The code status of this application, is at the moment just a published  
+personalization environment, though the code itself after a couple of  
+itteration is quite stable.     
+But, for instance doesn't catch and handle sigwinch, since I work  
+exclusively in maximized terminals throw ratpoison's era (2005)  
+followed by other window managers with the same logic.  
+The ratpoison logic is first to give total focus to the running application    
+by maximizing the client window, and secondly to control the application 
+only throw the keyboard.  
+Thus (for now) a simple window resizing will mess the display (due to the changed  
+LINES && COLUMNS, on which, the drawing machine is based to make the  
+calculations). Though not enough complicated, it needs thinking and 
+I'm not interest to give priority to do that thinking (now) for something it  
+never happens.  
+
+But one of the intentions _is_ the personalization, which simply means to provide  
+a interface that feels intuitive to me.  
+
+The UI is quite similar with Vim, with almost the same keybindings, and share the  
+modes consept.  
+
+For now published are three applications.
+ - a shell (rather stable)
+
+ - an editor called ved (which is considered as alpha, as this is the first write),  
+   on which some operations are unsafe (like editing lines which the length is longer  
+   than COLUMNS) or others like undo/redo you can't really rely on them to produce  
+   accurate results.  This is (mostly) a Vim clone, with some exceptions.
+
+ - a git frontend (recent development but already usefull at this stage).  This  
+   is based on git commands and not in libgit which is the wishfull intention.  As  
+   such, there is an extra overhead, plus it's unsafe (security wise) to use the  
+   "pushupstream" command, because the password is exposed in the proccess table.  The  
+   reason for this, is that I (while I can) don't want to reset the terminal state to get  
+   input from standard input, as I would like to deal with the login/password stuff withing  
+   the application.   
+
+Also available, are many of the basic system commands, which mimic the behavior with  
+their Gnu-coreutils counterparts, with some extensions, but of which are common to  
+utilities that use them. 
+Those commands are available throw a normal shell, prefixed with two underscores.
+
+## Note
+(at this point maybe is the time to emphasize that this app is not designed to be  
+installed to the system namespace, so the PATH is relative to the cloned sources,  
+as sources namespace and execution namespace have interchangeable relation to each other,  
+because for instance, a bug should be fixed on the fly, without the need for a restart)    
+
+Those same commands are available in the shell, accessible throw tab, but to the other  
+applications throw "!" as the first char in the command line.  
+
+Available also, which plays a centric role in the whole experience, is a readline  
+interface, which offers command, argument, filename, history and a couple other completions.    
+By default in shell, tab completes system commands while tab in the applications completes
+specific to applications commands.    
+
+Applications can execute foreground but aldo background jobs.  
+
+Applications can start at the same window/process other instances of themselves
+
+Applications can start other applications (throw F2), in separate procces and with no connection to  
+each other.  Responsible for this is the master process (the first one that started),  
+which is also indicated as master to the drawing line on the top).
+
+Also they can put themselves in idled mode, unless it's the master process (which currently exits),  
+and can cycle throw the running applications using F1.  
+The ":q" command exits the focused application - for now if it's the master application this  
+results in an grand exit, but this should change, at least in the case of the master process  
+there should be a forced confirmation. 
 
 ## Installation
 
@@ -35,56 +80,41 @@ git clone https://github.com/chantzos/__.git
 cd __
 slsh ___.sl --verbose
 ```
+## NOTES
 
-## USAGE
-
-The standard command line utilities can be reached within a shell
-and they are prefixed with two underscores. A couple of them however they
-produce output to be parse by the the applications, like the __search which
-can be feeded to ved like so:
+The standard command line utilities can be reached within a real shell  
+and they are prefixed with two underscores. But a couple of them however they  
+produce output to be parsed by the builtin applications, like the __search, but which  
+can be feeded to ved like:
 ```bash
 __search --pat=PATTERN --recursive dir | __ved --ftype=diff -
 ```
-all the commands are accesible with the __shell application without the
-underscores and to other applications with an "!" as the first char in the
-command line.
 
-Applications are also prefixed with two underscores, and currently
-there are three in repository:
+Applications are also prefixed with two underscores. Actually applications are  
+just symlinks to the App.sl and commands symlinks to COM.sl in the bin directory.  
+If it is desirable you can ommit the underscores, they will work either way.
 
-__shell: a shell that supports foreground and background processes.
+The code was written using the S-Lang programming language, but some part of it  
+(and there is a continuously aim for this), is written using a language agnostic manner  
+by incorporating, mature (nowdays) syntax (especially in declarations).  
 
-__ved: an editor with vi[m] modes and keybindings. Currently is unsafe
-to edit lines longer than screen columns.
+This is because one of the basic intentions is to teach programming consepts  
+to my son[s], and I would like to lower the syntax noise a bit.  
+Relative to the above and speaking for S-Lang.  
+Except that the language is plain simple, except that has probably the  
+best array manipulation from all known to me existed languages, except that  
+in some operations beats advertised fast languages like lua, except that  
+has a very small memory footprint, except that you can embed the language and
+use its builtin low level routines, its syntax resembles C and that is  
+perfect for teaching. 
 
-__git: a git application that (for now) is a git wrapper
-though libgit bindings for performance, simplicity and safety would be better.
-Now, it is unsafe to use the `pushupstream' command because the password
-is exposed in the process table.
-Though the screen can be reset and take input from standard input, it is something
-that is not desirable because one of the reasons that this application
-it was written is to be dependant only to itself and should have the guts
-to deal with all the mistakes.
-
-## NOTES
-
-The code was written using the S-Lang programming language, but
-some part of it (and there is a continuously aim for this),
-is written using a language agnostic manner by incorporating,
-mature (nowdays) syntax (especially in declarations) (settled
-atfer a 50 years of programming experience) and 
-with an expressional style towards the resemblance of human thinking.
-  -- dev --
-that will make (probably) easy to write code
-  -- end --
-The other part of course it is written in S-Lang, which its syntax is
-exactly like C's, with very few differences, mainly in functions and
-variable declarations with the significant difference that S-Lang
-doesn't really tries to mess with the stack (and this is a good thing
-for its domain); the programmer should just remember, that for a
-function that returns a value and the value is not needed, to discard
-the value by using, either
-```c 
+For those who are coming from C. The language has very few differences,  
+mainly in functions and variable declarations, but with the significant difference  
+that the stack is really dynamic and unhandled by the language itself.  
+The C programmer should just remember, that for a function that returns a value  
+and the value is not needed, it _should_ discard the value by using, either one  
+of the two forms,  
+```C
    () = fprintf (stdout, "%s\n", some_stuff);
 
 or

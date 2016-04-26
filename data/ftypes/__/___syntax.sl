@@ -35,7 +35,7 @@ private variable regexps = [
 |(?<=\s)(import(?=\s))\
 |(?<=\s)(proc(?=$))\
 |(?<=^|\s)(end(?=\s|$))\
-|(?<=\)|r)( public|static(?=\s))\
+|(?<=\)|r)( public| static(?=\s))\
 |(?<=&|\s|\[|\()(unless(?=\s|,))\
 |(?<=&|\s|\[|\()(raise(?=\s|,))\
 )"R, 0),

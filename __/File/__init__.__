@@ -101,28 +101,36 @@ class File
     0;
   end
 
-  def write (file, str)
-    variable type = typeof (str);
+  def __get_str__ (str) proc
+    variable type = typeof (@str);
     if (any ([String_Type, BString_Type] == type))
-      str = [str];
+      @str = [@str + (qualifier_exists ("n")
+        ? ""
+        : '\n' == (@str)[-1]
+          ? ""
+          : "\n")];
     else
       ifnot (Array_Type == type)
-        type = Null_Type;
+        @str = NULL;
       else
-        ifnot (any ([BString_Type, String_Type] == _typeof (str)))
-          type = Null_Type;
+        ifnot (any ([BString_Type, String_Type] == _typeof (@str)))
+          @str = NULL;
         else
           ifnot (qualifier_exists ("n"))
-            str += "\n";
+            @str += "\n";
+  end
 
-    if (Null_Type == type)
+  def write (file, str)
+    __get_str__  (&str;;__qualifiers);
+
+    if (NULL == str)
       {
       IO.tostderr ("type of string should be B?String_Type []?");
       return -1;
       }
 
-    variable fd =
-      open (file, O_WRONLY|O_CREAT|O_TRUNC, qualifier ("flags", File->PERM["__PUBLIC"]));
+    variable fd = open (file, O_WRONLY|O_CREAT|O_TRUNC, __get_qualifier_as
+       (Integer_Type, "mode", qualifier ("mode"), PERM["__STATIC"]));
 
     if (NULL == fd)
       {
@@ -143,15 +151,33 @@ class File
   end
 
   def append (file, str)
-    variable fd;
+    variable
+      flags = O_WRONLY|O_APPEND,
+      mode = NULL,
+      fd;
 
-    if (-1 == access (file, F_OK|R_OK))
+    __get_str__ (&str;;__qualifiers);
+
+    if (NULL == str)
       {
-      IO.tostderr (file + ": " + errno_string (errno));
+      IO.tostderr ("type of string should be B?String_Type []?");
       return -1;
       }
 
-    fd = open (file, O_WRONLY|O_APPEND);
+    if (-1 == access (file, F_OK|R_OK))
+      ifnot (qualifier_exists ("create"))
+        {
+        IO.tostderr (file + ": " + errno_string (errno));
+        return -1;
+        }
+      else
+        mode = __get_qualifier_as (Integer_Type, "mode",
+          qualifier ("mode"), PERM["__STATIC"]);
+
+    ifnot (NULL == mode)
+      fd = open (file, O_WRONLY|O_APPEND|O_CREAT, mode);
+    else
+      fd = open (file, O_WRONLY|O_APPEND);
 
     if (NULL == fd)
       {
@@ -165,11 +191,9 @@ class File
       return -1;
       }
 
-    if (-1 == (@__get_reference ("write")) (fd, str))
-      {
-      IO.tostderr (file + ": " + errno_string (errno));
+    if (any (-1 == Array.map (Integer_Type, &__write__, fd, str;
+        file = file)))
       return -1;
-      }
 
     if (-1 == close (fd))
       {
