@@ -1,9 +1,9 @@
-This is very first draft of a proper README.
+This is a very first draft of a proper README.
 
 ## NOTE.
 The code status of this application, is at the moment just a published  
 personalization environment, though the code itself after a couple of  
-itteration is quite stable.     
+itterations is quite stable.     
 But, for instance doesn't catch and handle sigwinch, since I work  
 exclusively in maximized terminals throw ratpoison's era (2005)  
 followed by other window managers with the same logic.  
@@ -27,19 +27,20 @@ For now published are three applications.
 
  - an editor called ved (which is considered as alpha, as this is the first write),  
    on which some operations are unsafe (like editing lines which the length is longer  
-   than COLUMNS) or others like undo/redo you can't really rely on them to produce  
-   accurate results.  This is (mostly) a Vim clone, with some exceptions.
+   than COLUMNS) or on others, like undo/redo, you can't really rely on them to produce  
+   accurate results.  However all the code is written with that editor.  
+			This is (mostly) a Vim clone, with some exceptions.
 
  - a git frontend (recent development but already usefull at this stage).  This  
    is based on git commands and not in libgit which is the wishfull intention.  As  
    such, there is an extra overhead, plus it's unsafe (security wise) to use the  
    "pushupstream" command, because the password is exposed in the proccess table.  The  
    reason for this, is that I (while I can) don't want to reset the terminal state to get  
-   input from standard input, as I would like to deal with the login/password stuff withing  
+   input from standard input, as I would like to deal with the login/password stuff within  
    the application.   
 
 Also available, are many of the basic system commands, which mimic the behavior with  
-their Gnu-coreutils counterparts, with some extensions, but of which are common to  
+their Gnu-coreutils counterparts, with some extensions but of which are common to  
 utilities that use them. 
 Those commands are available throw a normal shell, prefixed with two underscores.
 
@@ -94,23 +95,48 @@ Applications are also prefixed with two underscores. Actually applications are
 just symlinks to the App.sl and commands symlinks to COM.sl in the bin directory.  
 If it is desirable you can ommit the underscores, they will work either way.
 
-The code was written using the S-Lang programming language, but some part of it  
-(and there is a continuously aim for this), is written using a language agnostic manner  
-by incorporating, mature (nowdays) syntax (especially in declarations).  
+Hierarchy.
+ 
+ROOT_PATH + "/__"    Source Code of the distribution
+ROOT_PATH + "/std"   Standard libraries, applications, commands
+ROOT_PATH + "/usr"   Libraries, applications, commands (shared code)
+ROOT_PATH + "/local" Local code
+ROOT_PATH + "/tmp"   Can be mounted as tmpfs
+ROOT_PATH + "/bin"   __slsh executable, and symlinks (can be in $PATH)
 
-This is because one of the basic intentions is to teach programming consepts  
-to my son[s], and I would like to lower the syntax noise a bit.  
-Relative to the above and speaking for S-Lang.  
-Except that the language is plain simple, except that has probably the  
-best array manipulation from all known to me existed languages, except that  
-in some operations beats advertised fast languages like lua, except that  
-has a very small memory footprint, except that you can embed the language and
-use its builtin low level routines, its syntax resembles C and that is  
-perfect for teaching. 
+Priorities.
 
-For those who are coming from C. The language has very few differences,  
-mainly in functions and variable declarations, but with the significant difference  
-that the stack is really dynamic and unhandled by the language itself.  
+The application table is bulding based in a init search at:
+USER_APP_PATH:STD_APP_PATH:LOCAL_APP_PATH
+
+Since the table is an Assosiative Array, local path can overwrite
+even standard path.
+
+## The Programming Language
+
+The code was written using the S-Lang programming language,  
+which is very simple and with a syntax and a logic that resembles C.  
+ 
+However, libraries with an "__" extension are written with a syntax  
+that is not all valid code for S-Lang.  Such files are parsed by the  
+"_/__.sl" library and uses mature (nowdays) syntax.  For now this syntax  
+is used for declarations reasons.  The system is based in a very simple object  
+oriented style of programming.  All the methods are executing throw a intermediate  
+function, which is responsible print in details the errors and to call a callback  
+error handler. Every application should has its own error_handler assigned to  
+This.err_handler.
+ 
+Because of those reasons the application is suitable for learning programming  
+concepts, and probably this is the number one intention, for writting this.    
+I hope it will help me to show to my older son, who is now close to fifteen,  
+that programming is easy and fun. And because S-Lang is like C, I wanted also  
+to lower the syntax noise a bit.  Plus, it's a familiar and established syntax  
+that it will help him to feel at home whem it will get (naturally) in touch with  
+them.
+
+For those who are coming from C. S-Lang has very few differences, mainly in functions  
+and variable declarations, but with the significant difference  that the stack is   
+really dynamic and unhandled by the language itself.  
 The C programmer should just remember, that for a function that returns a value  
 and the value is not needed, it _should_ discard the value by using, either one  
 of the two forms,  

@@ -1,4 +1,4 @@
-Class.load ("Scm");
+Class.load ("Scm";loadGit,force);
 
 public define setrepo ();
 

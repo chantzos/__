@@ -1451,9 +1451,10 @@ private define __Class_From_Init__ (classpath)
     {
     super = cname;
 
-    if (any (cname == assoc_get_keys (__CLASS__)))
-      ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
-        throw ClassError, "Class::__INIT__::" + cname + " is already defined";
+    ifnot (qualifier_exists ("dont_eval"))
+      if (any (cname == assoc_get_keys (__CLASS__)))
+        ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
+          throw ClassError, "Class::__INIT__::" + cname + " is already defined";
     }
   else
     {
@@ -1461,9 +1462,10 @@ private define __Class_From_Init__ (classpath)
     if (NULL == super)
       throw ClassError, "Class::__INIT__::awaiting super qualifier";
 
-    if (any (super + cname == assoc_get_keys (__CLASS__)))
-      ifnot (NULL == (tmp = __get_reference (super + cname), (@tmp).__name))
-        throw ClassError, "Class::__INIT__::" + super + cname + " is already defined";
+    ifnot (qualifier_exists ("dont_eval"))
+      if (any (super + cname == assoc_get_keys (__CLASS__)))
+        ifnot (NULL == (tmp = __get_reference (super + cname), (@tmp).__name))
+          throw ClassError, "Class::__INIT__::" + super + cname + " is already defined";
     }
 
   variable
@@ -1516,11 +1518,11 @@ private define __Class_From_Init__ (classpath)
     __assignself__ (super;return_buf) + "\n\n" + eval_buf;
     }
 
-  variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
-    cname);
-
   if (qualifier_exists ("return_buf"))
     return eval_buf;
+
+  variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
+    cname);
 
   __in__ = @classpath + "/" + as + ".sl";
 
@@ -1546,7 +1548,8 @@ private define __LoadClass__ (cname)
   if (-1 == access (cpath, F_OK|R_OK) || qualifier_exists ("force"))
     __Class_From_Init__ (&classpath;;__qualifiers);
 
-  () = evalfile (classpath + "/" + as, cname);
+  ifnot (qualifier_exists ("dont_eval"))
+    () = evalfile (classpath + "/" + as, cname);
 }
 
 () = __classnew__ ("Class", "Class", NULL, 0, String_Type[0]);

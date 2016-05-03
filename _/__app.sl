@@ -63,15 +63,17 @@ else
 DEBUG = Opt.Arg.exists ("--debug", &This.argv;del_arg);
 
 This.appname    = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
-This.appdir     = Env->STD_APP_PATH + "/" + This.appname;
+This.appdir     = Env->LOCAL_APP_PATH + "/" + This.appname;
 This.datadir    = Env->USER_DATA_PATH + "/" + This.appname;
 This.tmpdir     = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
 This.stdouttype = "ashell";
 
 if (-1 == access (This.appdir, F_OK))
-  if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
+  if (-1 == access ((This.appdir = Env->STD_APP_PATH + "/" + This.appname,
       This.appdir), F_OK))
-    This.__err_handler__ (This.appname, "no such application");
+    if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
+        This.appdir), F_OK))
+      This.err_handler (This.appname, "no such application");
 
 if (-1 == access (This.appdir + "/" + This.appname + ".slc", F_OK|R_OK))
   if (-1 == access (This.appdir + "/" + This.appname + ".sl", F_OK|R_OK))

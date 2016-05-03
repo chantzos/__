@@ -126,8 +126,14 @@ class App
   end
 
   def toscratch (str) public proc
-    () = lseek (SCRATCHFD, 0, SEEK_END);
-    () = write (SCRATCHFD, str);
+    if (-1 == lseek (SCRATCHFD, 0, SEEK_END))
+      {
+      IO.tostderr ("lseek failed for SCRATCH FD:", errno_string (errno));
+      return;
+      }
+
+    if (-1 == write (SCRATCHFD, str))
+      IO.tostderr ("write failed for SCRATCH FD:", errno_string (errno));
   end
 
   def __eval () public proc

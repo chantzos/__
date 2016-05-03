@@ -1,5 +1,5 @@
 class Slang
-  def compile (file)
+  def bytecompile (file)
     try
       byte_compile_file (file, 0);
     catch AnyError:

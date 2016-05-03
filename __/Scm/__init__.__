@@ -1,3 +1,5 @@
 class Scm
+#if qualifier_exists ("loadGit")
   subclass Git from Scm
+#endif
 end

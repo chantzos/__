@@ -41,7 +41,8 @@ class Api
     variable app;
     variable dir;
     variable apps;
-    variable dirs = [Env->USER_APP_PATH, Env->STD_APP_PATH];
+    variable dirs = [
+    Env->USER_APP_PATH, Env->STD_APP_PATH, Env->LOCAL_APP_PATH];
 
     _for i (0, length (dirs) - 1)
       {
