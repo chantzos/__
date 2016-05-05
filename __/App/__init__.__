@@ -1,4 +1,20 @@
 class App
+  typedef AppInfo
+    init,
+    help,
+    info,
+    dir,
+  end
+
+  typedef App
+    fifo,
+    fd,
+    pid,
+    state,
+    name,
+    argv,
+  end
+
   var public SCRATCH_VED;
   var public ERR_VED;
   var public OUT_VED;
@@ -36,7 +52,7 @@ class App
 
     variable i, ar = String_Type[length (chs)];
     _for i (0, length (chs) - 1)
-      ar[0] = chs[i] + "::" + strjoin (CHILDREN[chs[i]].argv, " ");
+      ar[i] = chs[i] + "::" + strjoin (CHILDREN[chs[i]].argv, " ");
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);

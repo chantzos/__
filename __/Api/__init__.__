@@ -1,19 +1,4 @@
 class Api
-  typedef AppInfo
-    init,
-    help,
-    info,
-    dir,
-  end
-
-  typedef App
-    fifo,
-    fd,
-    pid,
-    state,
-    name,
-    argv,
-  end
 
   let GO_ATEXIT  = 0x0C8;
   let GO_IDLED   = 0x012c;

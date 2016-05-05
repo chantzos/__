@@ -467,9 +467,25 @@ private define __app_reconnect (s)
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
+private define __detach__ (s)
+{
+  Api.reset_screen ();
+
+  variable retval = (@__get_reference ("I->app_idle")) ();
+
+  ifnot (retval)
+    {
+    Api.restore_screen ();
+    return;
+    }
+
+  exit_me (0);
+}
+
 VED_PAGER[string (',')] = &handle_comma;
 VED_PAGER[string (Input->F1)] = &__app_reconnect;
 VED_PAGER[string (Input->F2)] = &__app_new;
+VED_PAGER[string (Input->CTRL_j)] = &__detach__;
 
 VED_CLINE["e"]   =      &_edit_other;
 VED_CLINE["b"]   =      &_edit_other;

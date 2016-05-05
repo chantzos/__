@@ -1,19 +1,4 @@
 class I
-%  typedef AppInfo
-%    init,
-%    help,
-%    info,
-%    dir,
-%  end
-
-%  typedef App
-%    fifo,
-%    fd,
-%    pid,
-%    state,
-%    name,
-%  end
-
   var static APPS          = Assoc_Type[Assoc_Type];
   var static APPSINFO      = Assoc_Type[AppInfo_Type];
 
