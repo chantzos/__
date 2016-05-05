@@ -12,6 +12,7 @@ class Api
     pid,
     state,
     name,
+    argv,
   end
 
   let GO_ATEXIT  = 0x0C8;
@@ -29,52 +30,8 @@ class Api
   let CONNECTED = 0x1;
   let IDLED = 0x2;
 
-  var public APPS = Assoc_Type[Assoc_Type];
-  var public APPSINFO = Assoc_Type[AppInfo_Type];
-
   subclass Eval from Api
   subclass Prev from Api
-
-  def app_table ()
-    variable i;
-    variable ii;
-    variable app;
-    variable dir;
-    variable apps;
-    variable dirs = [
-    Env->USER_APP_PATH, Env->STD_APP_PATH, Env->LOCAL_APP_PATH];
-
-    _for i (0, length (dirs) - 1)
-      {
-      dir = dirs[i];
-      apps = listdir (dir);
-      if (NULL == apps || (NULL != apps && 0 == length (apps)))
-        continue;
-
-      apps = apps[where (array_map (Integer_Type, Dir.isdirectory,
-        Dir, array_map (String_Type, &path_concat, dir, apps)))];
-
-      _for ii (0, length (apps) - 1)
-        {
-        app = apps[ii];
-        if (-1 == access (dir + "/" + app + "/" + app + ".sl", F_OK) &&
-            -1 == access (dir + "/" + app + "/" + app + ".slc", F_OK))
-          continue;
-
-        APPSINFO[app] = @AppInfo_Type;
-        APPSINFO[app].init = app + "Init";
-        APPSINFO[app].dir = dir + "/" + app;
-
-        ifnot (access (dir + "/" + app + "/help.txt", F_OK))
-          APPSINFO[app].help = dir + "/" + app + "/help.txt";
-
-        ifnot (access (dir + "/" + app + "/info.txt", F_OK))
-          APPSINFO[app].info = dir + "/" + app + "/info.txt";
-
-        APPS[app] = Assoc_Type[App_Type];
-        }
-      }
-  end
 
   def reset_screen ()
     if (Input.is_inited ())

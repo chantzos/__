@@ -1,14 +1,30 @@
-class Srv
-  var SRV_FIFO = NULL;
+subclass Srv
+  __init__
+    init
+    app_at_exit
+    mainloop
+    appnew
+    appreconnect
+    idle
+    reconnect_to_app
+    connect_to_app
+  end
+
+  var SRV_FIFO    = NULL;
   var SRV_FIFO_FD = NULL;
 
   var CONNECTED_APPS = String_Type[0];
   var CONNECTED_PIDS = Integer_Type[0];
+
+  var CHILDREN      = Assoc_Type[Assoc_Type];
+  var CHILDREN_CON  = String_Type[0];
+  var CHILDREN_PIDS = Integer_Type[0];
+  var CHILD_CUR     = NULL;
+
   var CUR_APP = NULL;
-  var CUR_IND = -1;
   var PREV_APP = NULL;
 
-  def go_idled () public proc
+  def idle ()
     exit_me (0);
   end
 
@@ -28,30 +44,14 @@ class Srv
     CONNECTED_APPS[ind] = NULL;
     CONNECTED_PIDS = CONNECTED_PIDS[where (CONNECTED_PIDS)];
     CONNECTED_APPS = CONNECTED_APPS[wherenot (_isnull (CONNECTED_APPS))];
-    CUR_IND = 0 == CUR_IND
-      ? length (CONNECTED_APPS)
-        ? length (CONNECTED_APPS) - 1
-        : -1
-      : CUR_IND - 1;
 
     () = close (s.fd);
     () = remove (s.fifo);
-    assoc_delete_key (APPS[s.name], string (s.pid));
+    assoc_delete_key (I->APPS[s.name], string (s.pid));
   end
 
-  def at_exit ()
-    variable i;
-    _for i (0, length (CONNECTED_APPS) - 1)
-      {
-      variable app = CONNECTED_APPS[i];
-      variable pid = CONNECTED_PIDS[i];
-      variable s = APPS[app][string (pid)];
-      Sock.send_int (s.fd, Api->GO_ATEXIT);
-      }
-  end
-
-  def app_new (s) public proc
-    variable apps = assoc_get_keys (APPS);
+  def appnew (s)
+    variable apps = assoc_get_keys (I->APPS);
     variable retval;
 
     Rline.set (s);
@@ -62,7 +62,7 @@ class Srv
     loop (1)
     {
     if (any (apps == s.argv[0]))
-      Srv.connect_to_app (s.argv[0];;__qualifiers);
+      self.connect_to_app (s.argv[0];;__qualifiers);
     else
       break;
 
@@ -71,15 +71,15 @@ class Srv
 
     forever
       {
-      retval = Srv.mainloop ();
+      retval = self.mainloop ();
       if (Api->APP_RECON_OTH == retval)
         {
-        retval = Srv.reconnect_to_app (CUR_APP);
+        retval = self.reconnect_to_app (CUR_APP);
         if (1 == retval)
           break 2;
         }
       else if (Api->APP_CON_NEW == retval)
-        Srv.connect_to_app (CUR_APP);
+        self.connect_to_app (CUR_APP);
       else
         break 2;
       }
@@ -96,7 +96,7 @@ class Srv
       String_Type, &sprintf, "%s::%d", CONNECTED_APPS, CONNECTED_PIDS)];
   end
 
-  def app_reconnect (s) public proc
+  def appreconnect (s)
     variable apps = get_connected_apps ()[[1:]];
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -109,7 +109,7 @@ class Srv
         return;
 
       Api.reset_screen ();
-      variable retval = Srv.reconnect_to_app (s.argv[0]);
+      variable retval = self.reconnect_to_app (s.argv[0]);
       if (1 == retval)
         {
         Api.restore_screen ();
@@ -123,15 +123,15 @@ class Srv
 
     forever
       {
-      retval = Srv.mainloop ();
+      retval = self.mainloop ();
       if (Api->APP_RECON_OTH == retval)
         {
-        retval = Srv.reconnect_to_app (CUR_APP);
+        retval = self.reconnect_to_app (CUR_APP);
         if (1 == retval)
           break;
         }
       else if (Api->APP_CON_NEW == retval)
-        Srv.connect_to_app (CUR_APP);
+        self.connect_to_app (CUR_APP);
       else
         break;
       }
@@ -149,7 +149,7 @@ class Srv
     variable tok = strtok (CUR_APP, "::");
     variable app = tok[0];
     variable pid = tok[1];
-    variable s = APPS[app][pid];
+    variable s = I->APPS[app][pid];
 
     forever
       {
@@ -203,7 +203,7 @@ class Srv
       return 1;
       }
 
-    variable s = APPS[app][pid];
+    variable s = I->APPS[app][pid];
     PREV_APP = CUR_APP;
     CUR_APP = k;
     Sock.send_int (s.fd, 0);
@@ -231,9 +231,9 @@ class Srv
     CONNECTED_APPS = [CONNECTED_APPS, app];
     CONNECTED_PIDS = [CONNECTED_PIDS, clpid];
 
-    APPS[app][string (clpid)] = @App_Type;
+    I->APPS[app][string (clpid)] = @App_Type;
 
-    variable s = APPS[app][string (clpid)];
+    variable s = I->APPS[app][string (clpid)];
     s.fifo  = clfifo;
     s.fd    = clfifo_fd;
     s.pid   = clpid;
@@ -242,6 +242,5 @@ class Srv
 
     PREV_APP = CUR_APP;
     CUR_APP = app + "::" + string (s.pid);
-    CUR_IND++;
   end
 end

@@ -26,14 +26,87 @@ subclass Run
       "SESSION_WRFIFO=" + srvf,
       "SESSION_RDFIFO=" + clnf,
       ];
+
     self.app (argv, env;;__qualifiers);
   end
 
   def as_child (argv)
+    ifnot (NULL == This.isachild)
+      return;
+
+    if (NULL == App->PARENT_FIFO)
+      {
+      App->PARENT_FIFO = This.tmpdir + "/PARENT.fifo";
+
+      if (-1 == mkfifo (App->PARENT_FIFO, 0755))
+        {
+        App->PARENT_FIFO = NULL;
+        throw ClassError, "Run.as.child::cannot crate Parent's fifo, " +
+          errno_string (errno);
+        }
+      }
+
+    ifnot (length (argv))
+      return;
+
+    variable child = argv[0];
+
+    variable chfifo = This.tmpdir + "/__" + child + "_child_" +
+      string (_time)[[5:]] + ".fifo";
+
+    if (-1 == mkfifo (chfifo, 0755))
+      throw ClassError, "Run.as.child::cannot crate Child's fifo, " +
+        errno_string (errno);
+
     variable env = [Env.defenv (),
       __get_qualifier_as (AString_Type, "env", qualifier ("env"), String_Type[0]),
+      "PARENT_WRFIFO=" + App->PARENT_FIFO,
+      "PARENT_RDFIFO=" + chfifo,
       "ISACHILD=1"];
-    self.app (argv, env;;__qualifiers);
+
+    variable chpid = self.app (argv, env;bg);
+
+    if (NULL == chpid)
+      {
+      () = remove (chfifo);
+      return;
+      }
+
+    App->PARENT_FIFO_FD = open (App->PARENT_FIFO, O_RDONLY);
+    variable chfifo_fd = open (chfifo, O_WRONLY);
+
+    App->CHILDREN[string (chpid)] = @App_Type;
+
+    variable s = App->CHILDREN[string (chpid)];
+    s.fifo  = chfifo;
+    s.fd    = chfifo_fd;
+    s.pid   = chpid;
+    s.state = Api->CONNECTED;
+    s.name  = child;
+    s.argv = argv;
+
+    variable retval = Sock.get_int (App->PARENT_FIFO_FD);
+
+    if (Api->GO_ATEXIT == retval)
+      {
+      () = waitpid (s.pid, 0);
+      () = close (s.fd);
+      () = remove (s.fifo);
+      assoc_delete_key (App->CHILDREN, string (chpid));
+      }
+    else if (Api->GO_IDLED == retval)
+      s.state |= Api->IDLED;
+    else
+      throw ClassError, "Run.as.child::unexpected retval from pipe";
+
+    Api.restore_screen ();
+
+    ifnot (qualifier_exists ("goto_rline"))
+      return;
+
+    variable rl = qualifier ("rline", Ved.get_cur_rline ());
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
   end
 
   def app (argv, env)

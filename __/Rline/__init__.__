@@ -36,6 +36,7 @@ class Rline
     onnolengthargs,
     osappnew,
     osapprec,
+    childrec,
     wind_mang,
     parse_argtype,
   end
@@ -299,6 +300,7 @@ class Rline
     rl.onnolengthargs = qualifier ("onnolengthargs");
     rl.osappnew = qualifier ("osappnew");
     rl.osapprec = qualifier ("osapprec");
+    rl.childrec = qualifier ("childrec");
     rl.wind_mang = qualifier ("wind_mang");
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
     rl.funclist = __get_qualifier_as (Assoc_Type, "funclist",
@@ -1329,12 +1331,16 @@ class Rline
         {
         restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
 
-        s.argv[s._ind] = strchop (tmp, ' ', 0)[0];
+        s.argv[s._ind] = qualifier_exists ("accept_ws")
+          ? tmp
+          : strchop (tmp, ' ', 0)[0];
         s._col = strlen (s.argv[0]) + 1;
         parse_args (NULL, s);
         prompt (NULL, s, s._lin, s._col);
 
-        return 0;
+        return length (s.argv) > 1
+          ? 0
+          : qualifier_exists ("accept_space_as_return");
         }
 
       if (any (Input->rmap.backspace == chr) && s._col > 1)
@@ -1351,7 +1357,7 @@ class Rline
       if (any ([' ', '\r'] == chr) || 0 == ('!' <= chr <= 'z'))
         {
         restore (NULL, s.cmp_lnrs, '\r' == chr ? s.ptr : [s._row, s._col], 1, s._columns);
-        return '\r' == chr;
+        return '\r' == chr || qualifier_exists ("accept_space_as_return");
         }
 
       s.argv[0] += char (chr);
@@ -2073,6 +2079,13 @@ class Rline
         ifnot (NULL == s.osappnew)
           {
           s.osappnew (;issu = 1);
+          continue;
+          }
+
+      if (any (Input->rmap.childrec == s._chr))
+        ifnot (NULL == s.childrec)
+          {
+          s.childrec ();
           continue;
           }
 

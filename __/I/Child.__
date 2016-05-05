@@ -1,0 +1,29 @@
+subclass Child
+  __init__
+    appnew
+    appreconnect
+    init
+    idle
+  end
+
+  let PARENT_WRFIFO = getenv ("PARENT_WRFIFO");
+  let PARENT_RDFIFO = getenv ("PARENT_RDFIFO");
+  let PARENT_RDFIFO_FD = NULL;
+  let PARENT_WRFIFO_FD = NULL;
+
+  def init ()
+     __->__ ("IChild", "PARENT_WRFIFO_FD", open (PARENT_WRFIFO, O_WRONLY), "Class::vset");
+     __->__ ("IChild", "PARENT_RDFIFO_FD", open (PARENT_RDFIFO, O_RDONLY), "Class::vset");
+  end
+
+  def appnew (s)
+  end
+
+  def appreconnect (s)
+  end
+
+  def idle ()
+    Sock.send_int (PARENT_WRFIFO_FD, Api->GO_IDLED);
+    return Sock.get_int (PARENT_RDFIFO_FD);
+  end
+end

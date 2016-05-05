@@ -1,8 +1,7 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
 public variable
-  DEBUG = NULL,
-  Client, Srv, APP_ERR;
+  DEBUG = NULL, APP_ERR, I;
 
 public define exit_me (x)
 {
@@ -11,11 +10,7 @@ public define exit_me (x)
 
   This.at_exit ();
 
-  if (NULL == This.isachild)
-    ifnot (NULL == This.isatsession)
-      Client.send_exit ();
-    else
-      Srv.at_exit ();
+  (@__get_reference ("I->at_exit")) ();
 
   exit (x);
 }
@@ -52,13 +47,7 @@ Class.load ("App");
 
 This.at_exit = &_exit_;
 
-ifnot (NULL == This.isachild)
-  Class.load ("Child");
-else
-  ifnot (NULL == This.isatsession)
-    Class.load ("Client");
-  else
-    Class.load ("Srv");
+Class.load ("I";force);
 
 DEBUG = Opt.Arg.exists ("--debug", &This.argv;del_arg);
 
@@ -351,7 +340,7 @@ private define __search__ (argv)
   Com.Fork.tofg (p, argv, env);
 
   ifnot (EXITSTATUS)
-    () = App.Run.as.child (["__ved", GREPFILE]);
+    App.Run.as.child (["__ved", GREPFILE]);
 
   Com.post_header ();
   draw (Ved.get_cur_buf ());
@@ -439,7 +428,7 @@ private define __ved__ (argv)
 
   Com.pre_header ("ved " + fname);
 
-  () = App.Run.as.child (["__ved", fname];;__qualifiers ());
+  App.Run.as.child (["__ved", fname];;__qualifiers ());
 
   Com.post_header ();
 
@@ -450,7 +439,7 @@ private define __idle__ (argv)
 {
   Api.reset_screen ();
 
-  variable retval = go_idled ();
+  variable retval = (@__get_reference ("I->app_idle")) ();
 
   ifnot (retval)
     {
@@ -621,8 +610,9 @@ public define __initrline ()
 
   w.rline = rlineinit (;
     funclist = init_functions (),
-    osappnew = __get_reference ("app_new"),
-    osapprec = __get_reference ("app_reconnect"),
+    osappnew = __get_reference ("I->app_new"),
+    osapprec = __get_reference ("I->app_reconnect"),
+    childrec = __get_reference ("App->child_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
     filterargs = &filterexargs,
     filtercommands = &filterexcom);
@@ -635,13 +625,9 @@ private define __rehash__ ()
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
-Api.app_table ();
+I.app_table ();
 
-if (NULL == This.isachild)
-  ifnot (NULL == This.isatsession)
-    Client.init ();
-  else
-    Srv.init ();
+I->init ();
 
 __initrline ();
 

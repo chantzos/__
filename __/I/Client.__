@@ -1,4 +1,11 @@
-class Client
+subclass Client
+  __init__
+    init
+    appnew
+    appreconnect
+    idle
+  end
+
   let SESSION_PID = getenv ("SESSION_PID");
   let SESSION_WRFIFO = getenv ("SESSION_WRFIFO");
   let SESSION_RDFIFO = getenv ("SESSION_RDFIFO");
@@ -6,12 +13,12 @@ class Client
   let SESSION_WRFIFO_FD = NULL;
 
   def init ()
-    self.let ("SESSION_WRFIFO_FD", open (SESSION_WRFIFO, O_WRONLY));
-    self.let ("SESSION_RDFIFO_FD", open (SESSION_RDFIFO, O_RDONLY));
+    __->__ ("IClient", "SESSION_WRFIFO_FD", open (SESSION_WRFIFO, O_WRONLY), "Class::vset");
+    __->__ ("IClient", "SESSION_RDFIFO_FD", open (SESSION_RDFIFO, O_RDONLY), "Class::vset");
   end
 
-  def app_new (s) public proc
-    variable apps = assoc_get_keys (APPS);
+  def appnew (s)
+    variable apps = assoc_get_keys (I->APPS);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -39,7 +46,7 @@ class Client
     Rline.prompt (s, s._lin, s._col);
   end
 
-  def app_reconnect (s) public proc
+  def appreconnect (s)
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_GET_CONNECTED);
 
     variable apps = Sock.get_str_ar (SESSION_RDFIFO_FD, SESSION_WRFIFO_FD);
@@ -76,11 +83,7 @@ class Client
     Rline.prompt (s, s._lin, s._col);
   end
 
-  def send_exit ()
-    Sock.send_int (SESSION_WRFIFO_FD, Api->GO_ATEXIT);
-  end
-
-  def go_idled () public proc
+  def idle ()
     Sock.send_int (SESSION_WRFIFO_FD, Api->GO_IDLED);
     return Sock.get_int (SESSION_RDFIFO_FD);
   end

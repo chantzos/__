@@ -25,7 +25,7 @@ private variable CLASSES = [
   "Input",  "Smg",    "Rand",  "Crypt",  "Os",    "Opt",
   "String", "Rline",  "Re",    "Diff",   "Proc",  "Sock",
   "Subst",  "Sync",   "Ved",   "Api",    "Curl",  "Json",
-  "Time",   "Scm",    "Srv",   "Client", "Child", "App",
+  "Time",   "Scm",    "App",
   "Com"];
 
 private variable THESE = Assoc_Type[String_Type];

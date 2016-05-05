@@ -19,9 +19,52 @@ class App
   var public NEEDSWINDDRAW = 0;
   var public EXITSTATUS = 0;
 
+  var static PARENT_FIFO    = NULL;
+  var static PARENT_FIFO_FD = NULL;
+  var static CHILDREN       = Assoc_Type[App_Type];
+
   subclass Run from App
+  subclass Connect from App
+
+  def child_reconnect (s) static proc
+    ifnot (NULL == This.isachild)
+      return;
+
+    variable chs = assoc_get_keys (CHILDREN);
+    ifnot (length (chs))
+      return;
+
+    variable i, ar = String_Type[length (chs)];
+    _for i (0, length (chs) - 1)
+      ar[0] = chs[i] + "::" + strjoin (CHILDREN[chs[i]].argv, " ");
+
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+
+    if (Rline.commandcmp (s, ar;accept_one_len, accept_space_as_return,
+        accept_ws) == 1)
+      if (NULL != s.argv && length (s.argv) && strlen (s.argv[0]) &&
+        (i = wherefirst (ar == s.argv[0]), NULL != i))
+          App.Connect.to.child (chs[i]);
+
+    Rline.set (s);
+    Rline.prompt (s, s._lin, s._col);
+  end
+
+  def __exit_children__ () proc
+    variable chs = assoc_get_keys (CHILDREN);
+    variable s, i;
+    _for i (0, length (chs) - 1)
+      {
+      s = CHILDREN[chs[i]];
+      Sock.send_int (s.fd, Api->GO_ATEXIT);
+      () = waitpid (s.pid, 0);
+      }
+  end
 
   def _exit_ () public proc
+    __exit_children__;
+
     if (__is_initialized (&Input))
       Input.at_exit ();
 

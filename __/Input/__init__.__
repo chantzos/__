@@ -60,6 +60,7 @@ class Input
     osappnew_su = [F4],
     osapprec    = [F1, 0x1006f], % Esc_p
     windmenu    = [F3, 0x10076], % Esc_w
+    childrec     =[F5],
     battery     = [F9, 0x10061],  % Esc_b
     changelang  = [F10, 0x1006b], % Esc_l
     home        = [HOME, CTRL_a],

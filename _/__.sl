@@ -657,7 +657,7 @@ private define __get_fun_head__ (
       { case "subproc"  : @issubproc = 1;}
       { case "public"   : @scope  = "public";}
       { case "muttable" : @const  = 0;}
-      { case "static"   : @scope = "private";}
+      { case "static"   : @scope = "static";}
       { throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";}
 
   if (qualifier_exists ("add_meth_decl"))

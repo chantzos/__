@@ -65,5 +65,6 @@ typedef struct
   {
   null
   } AInteger_Type;
+
 public variable This, Smg, Input, LINES, COLUMNS;
 

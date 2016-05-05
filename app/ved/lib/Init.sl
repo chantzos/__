@@ -456,14 +456,14 @@ public define handle_comma (s)
 private define __app_new (s)
 {
   variable rline = Ved.get_cur_rline ();
-  app_new (rline);
+  I->app_new (rline);
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
 private define __app_reconnect (s)
 {
   variable rline = Ved.get_cur_rline ();
-  app_reconnect (rline);
+  I->app_reconnect (rline);
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
