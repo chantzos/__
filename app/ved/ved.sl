@@ -6,14 +6,23 @@ private define init_ftype (self, ftype)
   ifnot (FTYPES[ftype])
     FTYPES[ftype] = 1;
 
-  variable type = @Ftype_Type;
+  variable
+    type = @Ftype_Type,
+    f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +  ftype + "_functions";
 
-  Load.file (Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" +
-    ftype + "_functions", NULL);
+  if (-1 == access (f + ".slc", F_OK))
+    f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" + ftype + "_functions";
+
+  Load.file (f, NULL);
 
   type._type = ftype;
 
-  Load.file (Env->STD_DATA_PATH + "/ftypes/" + ftype + "/ved", NULL);
+  f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/ved";
+
+  if (-1 == access (f + ".slc", F_OK))
+    f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/ved";
+
+  Load.file (f, NULL);
 
   type.ved = __get_reference (ftype + "_ved");
 

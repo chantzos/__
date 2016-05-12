@@ -19,7 +19,7 @@ static int Key_Error = -1;
 static int getkey_intrin (void)
 {
   int c = SLang_getkey ();
- 
+
   if (033 == c)
     if (0 == SLang_input_pending (1))
       return 033;
@@ -42,7 +42,7 @@ static void init_tty_intrin (int *abt_char, int *no_flow_control, int *opost)
 {
   if (TTY_Inited)
     return;
- 
+
   SLsig_block_signals ();
 
   SLtt_get_terminfo ();

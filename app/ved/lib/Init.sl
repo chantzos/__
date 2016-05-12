@@ -513,7 +513,19 @@ private define ved_err_handler (t, _s_)
   IO.tostdout (t;fd = fd);
   IO.tostdout (Struct.to_string (_s_);fd = fd);
   if (ERR_STACK > 4)
+    {
+    This.at_exit ();
+    IO.tostderr ("ved ", This.stderrFn);
+    IO.tostderr ("Hit Enter to open in a different_process the Standard Error file");
+    IO.tostderr ("Else it would be set in the clipboard if available");
+    variable chr = Input.getch ();
+    if ('\r' == chr)
+      App.Run.as.child (["__ved", This.stderrFn]);
+    else
+      seltoX ("ved " + This.stderrFn);
+
     exit_me (1);
+    }
 
   (@__get_reference ("__vmessages"));
   variable s = Ved.get_cur_buf ();
@@ -592,8 +604,11 @@ public define init_ved ()
     }
 
   fn = This.argv[-1];
+
   if (NULL == ft)
     ft = Ved.get_ftype (fn);
 
-  Ved.init_ftype (ft).ved (fn);
+  ft = Ved.init_ftype (ft);
+
+  ft.ved (fn);
 }
