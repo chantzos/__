@@ -1226,7 +1226,7 @@ private define parse_subclass (
     my_funs       = Assoc_Type[Fun_Type],
     sub_buf       = "",
     sub_cname     = cname + as,
-    sub_classpath = path_dirname (from);
+    sub_classpath = NULL == from ? classpath : path_dirname (from);
 
   sub_buf += "$8 = current_namespace;\n" +
       "__use_namespace  (\"" + sub_cname + "\");\n" +
@@ -1300,12 +1300,14 @@ private define parse_subclass (
   sub_buf += "\n" + `set_struct_field (__->__ ("` + cname + `", "Class::getself"), ` +
    `"` + as + `", ` + as + `("` + cname + `"));`;
 
+  sub_buf += "\nTHIS = __->__(\"" + cname + `", "Class::getself");`;
+
   sub_buf += "\n  __use_namespace ((strlen ($8) ? $8 : " + "\"" + cname + "\"));\n" +
     "__uninitialize (&$8);\n";
 
-  @eval_buf = "" + cname + as + " = __->__ (\"" + cname + as + "\", \"" + cname + "\", \"" +
+  @eval_buf = "" + sub_cname + " = __->__ (\"" + sub_cname + "\", \"" + cname + "\", \"" +
     sub_classpath + "\", 1, [\"" + strjoin (__fmethods, "\",\n \"") +
-      "\"], \"Class::classnew::subclass__from__" + cname + "__as__" + as +
+      "\"], \"Class::classnew::subclass_from_" + cname + "_as_" + as +
         "\");\n\n" + @eval_buf;
 
   @eval_buf += "\n" + sub_buf + "\n";

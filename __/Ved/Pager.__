@@ -18,6 +18,27 @@ subclass Pager
     page_up
   end
 
+  def __open_fname (s) proc
+    variable
+      start,
+      end,
+      line = __vline (s, '.'),
+      col = s._index;
+
+    variable fname = __vfind_Word (s, line, col, &start, &end);
+
+    ifnot (strlen (fname))
+      return;
+
+    if (-1 == access (fname, F_OK|R_OK))
+      return;
+
+    if (Dir.isdirectory (fname))
+      return;
+
+    App.Run.as.child (["__ved", fname]);
+  end
+
   def word_change_case (s, what)
     variable
       ii,
@@ -433,6 +454,12 @@ subclass Pager
     if ('v' == chr)
       {
       Ved.Visual.last (s);
+      return;
+      }
+
+    if ('f' == chr)
+      {
+      __open_fname (s);
       return;
       }
   end

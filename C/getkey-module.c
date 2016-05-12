@@ -108,8 +108,8 @@ int init_getkey_module_ns (char *ns_name)
 
   if (Key_Error == -1)
     {
-				if (-1 == (Key_Error = SLerr_new_exception (SL_RunTime_Error, "GetkeyError", "Getkey Error")))
-  				return -1;
+    if (-1 == (Key_Error = SLerr_new_exception (SL_RunTime_Error, "GetkeyError", "Getkey Error")))
+      return -1;
     }
 
   ns = SLns_create_namespace (ns_name);
@@ -122,8 +122,8 @@ int init_getkey_module_ns (char *ns_name)
 
   if (inited == 0)
     {
-				TTY_Inited = 0;
-				inited = 1;
+    TTY_Inited = 0;
+    inited = 1;
     }
 
   return 0;
