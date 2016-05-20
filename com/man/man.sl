@@ -224,12 +224,12 @@ define main ()
       exit_me (1);
       }
 
-    File.write (cachefile, list);
+    () = File.write (cachefile, list);
     variable argsfile = Env->STD_COM_PATH + "/man/pages.txt";
     list = array_map (String_Type, &path_basename_sans_extname, list);
     list = array_map (String_Type, &path_basename_sans_extname, list);
     list = array_map (String_Type, &sprintf, "%s void display %s", list, list);
-    File.write (argsfile, list);
+    () = File.write (argsfile, list);
     exit_me (0);
     }
 

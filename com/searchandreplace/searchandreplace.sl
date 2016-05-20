@@ -51,7 +51,7 @@ define unified_diff (lines, fname)
     {
     variable fn = Env->TMP_PATH + "/" + path_basename (fname) + "_" + string (Env->PID) + "_" +
       string (_time)[[5:]];
-    File.write (fn, lines);
+    () = File.write (fn, lines);
     com[-1] = fn;
     }
   else
@@ -121,10 +121,9 @@ private define sed (file, s)
         if ('n' == retval)
           return;
           }
-
       try
         {
-        File.write (file, ar);
+        () = File.write (file, ar);
         IO.tostdout (sprintf ("%s: was written, with %d changes", file, s.numchanges));
         }
       catch AnyError:

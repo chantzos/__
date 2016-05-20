@@ -1,45 +1,76 @@
 class I
-  var static APPS          = Assoc_Type[Assoc_Type];
-  var static APPSINFO      = Assoc_Type[AppInfo_Type];
+  var AM = NULL;
+  var ALSO = String_Type[0];
 
-  def app_table ()
-    variable i;
-    variable ii;
-    variable app;
-    variable dir;
-    variable apps;
-    variable dirs = [Env->USER_APP_PATH, Env->STD_APP_PATH, Env->LOCAL_APP_PATH];
+  subclass Set
+    __init__
+      myrole
+    end
 
-    _for i (0, length (dirs) - 1)
+    def myrole ()
+   %   ["CHILD", "SLAVE", "MASTER"][
+   %     getenv ("ISACHILD") == NULL == getenv ("SESSION")
+   %       ? 2
+   %       : NULL == getenv ("SESSION")
+   %   ifnot (NULL == getenv ("ISACHILD"))
+   %     I.Am.a ("CHILD");
+   %   else
+   %     {
+   %     ifnot (NULL == getenv ("SESSION"))
+   %       I.Am.a ("SLAVE");
+   %     else
+   %       I.Am.a ("MASTER");
+
+   %      I.Am.also ("PARENT");
+   %      }
+    end
+  end
+
+  subclass Am
+    __init__
+      a
+      also
+    end
+
+    def a (what)
+      ifnot (NULL == AM)
+        return;
+
+      AM = what;
+    end
+
+    def also (what)
+     ALSO = [ALSO, what];
+    end
+  end
+
+  subclass What
+    __init__
+      amI
+      amI_also
+    end
+
+    def amI ()
+      AM;
+    end
+
+    def amI_also ()
+      ALSO;
+    end
+  end
+
+  def setme ()
+    ifnot (NULL == getenv ("ISACHILD"))
+      self.Am.a ("CHILD");
+    else
       {
-      dir = dirs[i];
-      apps = listdir (dir);
-      if (NULL == apps || (NULL != apps && 0 == length (apps)))
-        continue;
+      ifnot (NULL == getenv ("SESSION"))
+        self.Am.a ("SLAVE");
+     else
+       self.Am.a ("MASTER");
 
-      apps = apps[where (array_map (Integer_Type, Dir.isdirectory,
-        Dir, array_map (String_Type, &path_concat, dir, apps)))];
-
-      _for ii (0, length (apps) - 1)
-        {
-        app = apps[ii];
-        if (-1 == access (dir + "/" + app + "/" + app + ".sl", F_OK) &&
-            -1 == access (dir + "/" + app + "/" + app + ".slc", F_OK))
-          continue;
-
-        APPSINFO[app] = @AppInfo_Type;
-        APPSINFO[app].init = app + "Init";
-        APPSINFO[app].dir = dir + "/" + app;
-
-        ifnot (access (dir + "/" + app + "/help.txt", F_OK))
-          APPSINFO[app].help = dir + "/" + app + "/help.txt";
-
-        ifnot (access (dir + "/" + app + "/info.txt", F_OK))
-          APPSINFO[app].info = dir + "/" + app + "/info.txt";
-
-        APPS[app] = Assoc_Type[App_Type];
-        }
-      }
+     self.Am.also ("PARENT");
+     }
   end
 
 #ifnot NULL == This.isachild
@@ -111,7 +142,7 @@ class I
       {
       variable app = CONNECTED_APPS[i];
       variable pid = CONNECTED_PIDS[i];
-      variable s = I->APPS[app][string (pid)];
+      variable s = App->APPS[app][string (pid)];
       Sock.send_int (s.fd, Api->GO_ATEXIT);
       }
   end

@@ -6,7 +6,6 @@ public define ask (a, b)
 
 public define send_msg_dr (msg)
 {
-IO.tostderr ("tty", This.is_tty ());
   IO.tostderr ("send_msg_dr function is disabled in bg jobs, msg go to stderr\n",
     msg);
 }

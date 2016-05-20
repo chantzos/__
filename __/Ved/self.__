@@ -74,6 +74,9 @@ beg
     ifnot (strlen (arg))
       return NULL;
 
+    if ("%" == arg)
+      return lnrs;
+
     arg = strchop (arg, ',', 0);
     ifnot (2 == length (arg))
       return NULL;

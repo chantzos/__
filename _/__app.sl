@@ -1,7 +1,7 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
 public variable
-  DEBUG = NULL, APP_ERR, I;
+  DEBUG = NULL, APP_ERR, I, App;
 
 public define exit_me (x)
 {
@@ -47,7 +47,10 @@ Class.load ("App");
 
 This.at_exit = &_exit_;
 
+
 Class.load ("I";force);
+
+I.setme ();
 
 DEBUG = Opt.Arg.exists ("--debug", &This.argv;del_arg);
 
@@ -625,7 +628,7 @@ private define __rehash__ ()
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
-I.app_table ();
+App.build_table ();
 
 I->init ();
 

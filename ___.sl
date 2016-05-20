@@ -7,8 +7,8 @@ private variable SRC_C_PATH = SRC_PATH + "/C";
 private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
 private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
 private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
-public  variable DEBUG = any ("--debug" == __argv);
 private variable CC = "gcc";
+public  variable DEBUG = any ("--debug" == __argv);
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
   "iconv", "json"];
@@ -25,8 +25,7 @@ private variable CLASSES = [
   "Input",  "Smg",    "Rand",  "Crypt",  "Os",    "Opt",
   "String", "Rline",  "Re",    "Diff",   "Proc",  "Sock",
   "Subst",  "Sync",   "Ved",   "Api",    "Curl",  "Json",
-  "Time",   "Scm",    "App",
-  "Com"];
+  "Time",   "Scm",    "App",   "Com"];
 
 private variable THESE = Assoc_Type[String_Type];
 
@@ -53,9 +52,7 @@ private define at_exit (self)
 {
 }
 
-public variable DEBUG = NULL;
-public variable APP_ERR;
-public variable App;
+public variable APP_ERR, App;
 
 public define send_msg_dr ();
 
@@ -323,11 +320,6 @@ private variable SRC_LOCAL_APP_PATH   = SRC_LOCAL_PATH + "/app";
 private variable SRC_LOCAL_CLASS_PATH = SRC_LOCAL_PATH + "/__";
 private variable SRC_LOCAL_LIB_PATH   = SRC_LOCAL_PATH + "/___";
 
-%__use_namespace ("Env");
-%static define SRC_USER_CLASS_PATH () {SRC_USER_PATH + "/__";}
-
-__use_namespace ("Install");
-
 private variable INST_PATHS = [
   ROOT_PATH, STD_PATH, TMP_PATH, BIN_PATH,
   USER_PATH, USER_APP_PATH, USER_COM_PATH, USER_CLS_PATH,
@@ -534,7 +526,11 @@ private define file_callback_libs (file, st, src_path, dest_path, bytecompile)
   dest = strreplace (file, src_path, dest_path);
 
   ifnot (path_extname (file) == ".slc")
-    File.copy (file, dest);
+    {
+    if (-1 == File.copy (file, dest))
+      This.exit ("failed to rename " + file + " to " + dest + "\n" +
+        errno_string (errno), 1);
+    }
   else
     if (-1 == rename (file, dest))
       This.exit ("failed to rename " + file + " to " + dest + "\n" +

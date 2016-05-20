@@ -78,7 +78,7 @@ public define shell ();
 public define init_shell ()
 {
   if (-1 == access (STACKFILE, F_OK))
-    File.write (STACKFILE, "STACK = {}");
+    () = File.write (STACKFILE, "STACK = {}");
 
   Load.file (This.appdir + "/lib/shell", NULL);
 

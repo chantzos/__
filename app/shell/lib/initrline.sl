@@ -21,7 +21,7 @@ private define filtercommands (s, ar)
 private define filterargs (s, args, type, desc)
 {
   [args, "--su", "--pager"], [type, "void", "void"],
-    [desc, "execute command as superuser", "viewoutput in a scratch buffer"];
+  [desc, "execute command as superuser", "viewoutput in a scratch buffer"];
 }
 
 private define tabhook (s)
@@ -30,6 +30,9 @@ private define tabhook (s)
     return -1;
 
   ifnot (any (s.argv[0] == ["killbgjob", "man"]))
+    return -1;
+
+  if (strlen (s.argv[s._ind]) && '-' == s.argv[s._ind][0])
     return -1;
 
   ifnot ("man" == s.argv[0])

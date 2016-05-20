@@ -1332,6 +1332,105 @@ class Ved
     Smg.askprintstr (ar, char_ar, &cmp_lnrs;hl_region = hl_reg);
   end
 
+  def __global () public proc
+    variable global = 0, whenmatch = 1, ask = 1, pat = NULL, action = NULL, ind, range = NULL;
+    variable args = __pop_list (_NARGS);
+    variable buf = Ved.get_cur_buf ();
+    variable lnrs = [0:buf._len];
+
+    args = list_to_array (args, String_Type);
+
+    ind = Opt.Arg.compare ("--pat=", &args);
+    ifnot (NULL == ind)
+      pat = substr (args[ind], strlen ("--pat=") + 1, -1);
+
+    if (NULL == pat || 0 == strlen (pat))
+      {
+      Smg.send_msg_dr ("--pat= argument is required", 1, buf.ptr[0], buf.ptr[1]);
+      return;
+      }
+
+    ind = Opt.Arg.compare ("--action=", &args);
+    ifnot (NULL == ind)
+      action = substr (args[ind], strlen ("--action=") + 1, -1);
+
+    if (NULL == action || 0 == strlen (action))
+      {
+      Smg.send_msg_dr ("--action= argument is required, supported are [delete]", 1, buf.ptr[0], buf.ptr[1]); 
+      return;
+      }
+
+    ifnot (any (action == ["delete"]))
+      {
+      Smg.send_msg_dr ("supported actions are [delete]", 1, buf.ptr[0], buf.ptr[1]);
+      return;
+      }
+
+    ind = Opt.Arg.exists ("--whenNotMatch", &args);
+    ifnot (NULL == ind)
+      whenmatch = 0;
+
+    ind = Opt.Arg.compare ("--range=", &args);
+    ifnot (NULL == ind)
+      {
+      lnrs = Ved.parse_arg_range (buf, args[ind], lnrs);
+      if (NULL == lnrs)
+        return;
+      }
+
+    try
+      {
+      pat = pcre_compile (pat, PCRE_UCP|PCRE_UTF8|PCRE_NO_UTF8_CHECK);
+      }
+    catch ParseError:
+      {
+      IO.tostderr (__get_exception_info.message);
+      Smg.send_msg_dr ("Error while compiling pattern", 1, buf.ptr[0], buf.ptr[1]);
+      return;
+      }
+
+    variable lnr, line, len;
+
+    _for ind (0, length (lnrs) -1)
+      {
+      lnr = lnrs[ind];
+      line = buf.lines[lnr];
+      if (pcre_exec (pat, line, 0))
+        ifnot (whenmatch)
+          continue;
+        else
+          buf.lines[lnr] = NULL;
+      else
+        ifnot (whenmatch)
+          buf.lines[lnr] = NULL;
+      }
+
+    variable nulllines = _isnull (buf.lines);
+    len = buf._len - length (nulllines);
+
+    buf.lines = buf.lines[wherenot (nulllines)];
+    buf._len = length (buf.lines) - 1;
+
+    buf._i = buf._ii - len;
+    if (0 > buf._i)
+      buf._i = 0;
+
+    buf.ptr[0] = buf.rows[0];
+    buf.ptr[1] = buf._indent;
+    buf._index = buf._indent;
+    buf._findex = buf._indent;
+
+    if (-1 == buf._len)
+      {
+      buf.lines = [__get_null_str (buf._indent)];
+      buf._len = 0;
+      }
+
+    buf.st_.st_size = Array.getsize (buf.lines);
+    set_modified (buf);
+    buf.draw ();
+  end
+
   def __substitute () public proc
     variable global = 0, ask = 1, pat = NULL, sub = NULL, ind, range = NULL;
     variable args = __pop_list (_NARGS);

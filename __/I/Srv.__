@@ -47,11 +47,11 @@ subclass Srv
 
     () = close (s.fd);
     () = remove (s.fifo);
-    assoc_delete_key (I->APPS[s.name], string (s.pid));
+    assoc_delete_key (App->APPS[s.name], string (s.pid));
   end
 
   def appnew (s)
-    variable apps = assoc_get_keys (I->APPS);
+    variable apps = assoc_get_keys (App->APPS);
     variable retval;
 
     Rline.set (s);
@@ -149,7 +149,7 @@ subclass Srv
     variable tok = strtok (CUR_APP, "::");
     variable app = tok[0];
     variable pid = tok[1];
-    variable s = I->APPS[app][pid];
+    variable s = App->APPS[app][pid];
 
     forever
       {
@@ -203,7 +203,7 @@ subclass Srv
       return 1;
       }
 
-    variable s = I->APPS[app][pid];
+    variable s = App->APPS[app][pid];
     PREV_APP = CUR_APP;
     CUR_APP = k;
     Sock.send_int (s.fd, 0);
@@ -231,9 +231,9 @@ subclass Srv
     CONNECTED_APPS = [CONNECTED_APPS, app];
     CONNECTED_PIDS = [CONNECTED_PIDS, clpid];
 
-    I->APPS[app][string (clpid)] = @App_Type;
+    App->APPS[app][string (clpid)] = @App_Type;
 
-    variable s = I->APPS[app][string (clpid)];
+    variable s = App->APPS[app][string (clpid)];
     s.fifo  = clfifo;
     s.fd    = clfifo_fd;
     s.pid   = clpid;

@@ -236,10 +236,9 @@ class Input
   end
 
   def setlang (lang)
-    lang = strlow (lang);
-    variable m = array_map (String_Type, &string, maps);
-    m = array_map (String_Type, &substr, m, 2, 2);
-    variable i = where (m == lang);
+    variable m = array_map (String_Type, &substr, array_map (
+      String_Type, &string, maps), 2, 2);
+    variable i = where (m == strlow (lang));
 
     if (NULL == i)
       return;

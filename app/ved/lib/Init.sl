@@ -198,7 +198,16 @@ private define my_commands ()
      "--pat= pattern pcre pattern (required)",
      "--sub= pattern substitution (required)",
      "--dont-ask-when-subst void dont ask when substitute (yes by default)",
-     "--range= int first linenr, last linenr"];
+     "--range= int first linenr, last linenr, or % for the whole buffer"];
+
+  a["global"] = @Argvlist_Type;
+  a["global"].func = &__global;
+  a["global"].type = "Func_Type";
+  a["global"].args =
+    ["--action= string supported actions [delete] (required)",
+     "--pat= pattern pcre pattern (required)",
+     "--whenNotMatch void perform action on lines that dont match pattern",
+     "--range= int first linenr, last linenr, or % for the whole buffer"];
 
   a;
 }

@@ -144,17 +144,19 @@ private define module ()
 
   switch (_NARGS)
     {
-    case 3: ns = (); module = (); pop ();
+    case 3: ns = (); module = ();
     }
 
     {
-    case 2: module = (); pop ();
+    case 2: module = ();
     }
 
     {
     loop (_NARGS) pop ();
     throw ClassError, "Load::__import_module__::NumArgsError, it should be 2 or 3";
     }
+
+  pop ();
 
   if (NULL == ns)
     ns = "Global";

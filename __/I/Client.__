@@ -18,7 +18,7 @@ subclass Client
   end
 
   def appnew (s)
-    variable apps = assoc_get_keys (I->APPS);
+    variable apps = assoc_get_keys (App->APPS);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);

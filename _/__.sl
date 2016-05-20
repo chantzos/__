@@ -779,6 +779,8 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
       throw ClassError, "Class::__INIT__::include " + lfile + " `beg' keyword is missing";
 
     parse_class (lcname, lclasspath, eval_buf, funs, sub_funs, lfp;;__qualifiers);
+    if (qualifier_exists ("end"))
+      pop ();
     }
   else
     @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
@@ -929,13 +931,11 @@ private define parse_preproc (
   ifnot (cond)
     {
     while (-1 != fgets (&line, fp))
-      {
       if ("#endif" == strtrim (line))
         {
         foundend = 1;
         break;
         }
-      }
     }
   else
     foundend = parse_class (cname, classpath, eval_buf, funs, sub_funs, fp;
@@ -1080,7 +1080,7 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
     }
 
   ifnot (@found)
-    throw ClassError, "Class::__INIT__::end identifier is missing";
+    throw ClassError, "Class::__INIT__::def end identifier is missing";
 
   ifnot (isproc)
     @eval_buf += "}\n\n" +
@@ -1234,6 +1234,9 @@ private define parse_subclass (
 
   parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;;
     struct {@__qualifiers, add_meth_decl, cname = as + "_", forbid_subclass});
+
+  if (qualifier_exists ("end"))
+    pop ();
 
   variable
     __funs__   = assoc_get_keys (my_funs),

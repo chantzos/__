@@ -10,7 +10,7 @@ subclass Visual
     clr = Smg->COLOR.visual,
     l_mode,l_down,l_up,l_page_up,l_page_down,
     l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', Input->DOWN, Input->UP,
-      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b],
+      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b, Input->HOME],
     c_mode,c_left,c_right,
     c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT],
     bw_mode,bw_down,bw_up,bw_left,bw_right,bw_maxlen,
@@ -298,20 +298,24 @@ subclass Visual
         VEDCOUNT = integer (VEDCOUNT);
         }
 
+      ifnot (any (chr == [vs.l_keys, '"']))
+        break;
+
       if ('"' == chr)
         if (reginit)
-          return;
+          break;
         else
           {
           reg = Input.getch ();
           ifnot (any (VedReg->REGS == reg))
-            return;
+            break;
 
           if (any (VedReg->RDREGS == reg))
-            return;
+            break;
 
           reg = char (reg);
           reginit = 1;
+          continue;
           }
 
       if (chr == Input->DOWN)
@@ -328,7 +332,7 @@ subclass Visual
         continue;
         }
 
-      if (chr == 'g')
+      if (chr == Input->HOME)
         {
         vs.l_page_up (s;count = s._len / s._avlins + 1);
         continue;
@@ -431,6 +435,20 @@ subclass Visual
         variable rl = Ved.get_cur_rline ();
         variable argv = ["substitute", "--global",
           sprintf ("--range=%d,%d", vs.lnrs[0], vs.lnrs[-1]), "--pat="];
+
+        Rline.set (rl;line = strjoin (argv, " "), argv = argv,
+          col = int (sum (strlen (argv))) + length (argv),
+          ind = length (argv) - 1);
+
+        Rline.readline (rl);
+        return;
+        }
+
+      if ('g' == chr)
+        {
+        rl = Ved.get_cur_rline ();
+        argv = ["global",
+          sprintf ("--range=%d,%d", vs.lnrs[0], vs.lnrs[-1]), "--action=delete", "--pat="];
 
         Rline.set (rl;line = strjoin (argv, " "), argv = argv,
           col = int (sum (strlen (argv))) + length (argv),
