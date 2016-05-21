@@ -80,7 +80,6 @@ class App
         APPS[app] = Assoc_Type[App_Type];
         }
       }
-    IO.tostderr ("App--", _stkdepth);
   end
 
   subclass Run from App

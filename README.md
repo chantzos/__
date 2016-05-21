@@ -50,9 +50,9 @@ So, ideally.
 Again: how else can you do that, other than writting and express yourself with code,  
 written in your prefered language?
 
-So this a Vim (like) application written in S-Lang.
+So this a vi(m) like application written in S-Lang.
 
-I adopted Vim's UI, because that is what I've used to, for over a decade now,  
+I adopted vim's UI, because that is what I've used to, for over a decade now,  
 (it's noiseless), but most importantly I believe that the mode consept, it   
 really makes sense.  It's allowing flexibility and extensebility without much  
 of complication.  Actually, is a combination of a shell (with too much influence of zsh)  
@@ -130,6 +130,14 @@ the focus to its parent process by using Ctrl-j, and reattached from its parent 
 So, that's the design so far and I think few things will change in this regard.
 
 ## Installation
+
+(assuming that S-Lang installed properly, that means the library, headers and the slsh
+interpreter)
+
+note that this application always targets S-Lang development sources,
+
+git://git.jedsoft.org/git/slang.git
+
 
 ```bash
 mkdir foo

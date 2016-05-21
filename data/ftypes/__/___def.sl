@@ -18,7 +18,7 @@ define ___blocks (swi, col)
   BLOCKS["private define"] =
     "private define ()\n{\n" + sw + "\n}";
 
-  return BLOCKS;
+  BLOCKS;
 }
 
 define ___autoindent (s, line)

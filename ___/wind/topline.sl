@@ -10,7 +10,7 @@ define _topline_ (str, columns)
     (NULL == This.isachild
       ? NULL == This.isatsession
         ? " [MASTER]"
-        : " "
+        : " [PARENT]"
       : " [CHILD]"),
     VED_CUR_WIND,
     strftime ("%a %d %I:%M:%S"));

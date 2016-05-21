@@ -99,84 +99,6 @@ public define Progr_Init (name)
   p;
 }
 
-__use_namespace ("Load");
-
-private variable IMPORTED = Assoc_Type[Integer_Type, 0];
-private variable LOADED = Assoc_Type[Integer_Type, 0];
-
-private define file ()
-{
-  variable __file = "", ns = NULL;
-
-  if (2 == _NARGS)
-    __file = ();
-
-  if (3 == _NARGS)
-    (__file, ns) = ();
-
-  pop ();
-
-  if (NULL == ns || "" == ns)
-    ns = "Global";
-
-  variable lib = ns + "->" + __file;
-
-  if (LOADED[lib] && 0 == qualifier_exists ("force"))
-    return;
-
-  try
-    {
-    () = evalfile (__file, ns);
-    }
-  catch OpenError:
-    throw ClassError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
-  catch ParseError:
-    throw ClassError, "Load::file::ParseError, " + __file, __get_exception_info;
-  catch RunTimeError:
-    throw ClassError, "Load::file::RunTimeError, " + __file, __get_exception_info;
-
-  LOADED[lib] = 1;
-}
-
-private define module ()
-{
-  variable ns = NULL, module;
-
-  switch (_NARGS)
-    {
-    case 3: ns = (); module = ();
-    }
-
-    {
-    case 2: module = ();
-    }
-
-    {
-    loop (_NARGS) pop ();
-    throw ClassError, "Load::__import_module__::NumArgsError, it should be 2 or 3";
-    }
-
-  pop ();
-
-  if (NULL == ns)
-    ns = "Global";
-
-  if (String_Type != typeof (module) || String_Type != typeof (ns))
-    throw ClassError, "Load::__import_module__::ArgsTypeError, it should be String_Type";
-
-  if (IMPORTED[ns + "->" + module])
-    return;
-
-  try
-    import (module, ns);
-  catch ImportError:
-    throw ClassError, "Load::__import_module__::ImportError", __get_exception_info;
-
-  IMPORTED[ns + "->" + module] = 1;
-}
-
-public variable Load = struct {__name, module = &module, file = &file};
-
 __use_namespace ("IO");
 
 private define tostderr ()
@@ -295,3 +217,4 @@ static define LOCAL_CLASS_PATH ()
 {
   realpath (CLASSPATH + "/../local/__");
 }
+
