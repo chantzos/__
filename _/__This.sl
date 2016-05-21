@@ -1,0 +1,64 @@
+public variable This, Smg, Input, LINES, COLUMNS;
+
+private define __def_exit__ ()
+{
+  variable code = _NARGS > 1 ? () : 0;
+  This.at_exit ();
+  exit (code);
+}
+
+private define __def_at_exit__ (self)
+{
+  if (__is_initialized (&Input))
+    Input.at_exit ();
+
+  if (__is_initialized (&Smg))
+    Smg.at_exit ();
+}
+
+private define __def_err_handler__ (self, s)
+{
+  self.exit (1);
+}
+
+private define __is_tty (self)
+{
+  if (__is_initialized (&Input))
+    Input.is_inited () == 0;
+  else
+    1;
+}
+
+private define __is_smg (self)
+{
+  if (__is_initialized (&Smg))
+    Smg.is_inited ();
+  else
+    0;
+}
+
+public define Progr_Init (name)
+{
+  variable p = @ThisProg_Type;
+
+  p.appname   = name;
+  p.argv   = __argv;
+  p.shell  = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1);
+  p.ved    = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1);
+  p.os     = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0);
+  p.is_tty = &__is_tty;
+  p.is_smg = &__is_smg;
+  p.stderrFn = __get_qualifier_as (
+    String_Type, "stderrFn", qualifier ("stderrFn"), NULL);
+  p.stdoutFn = __get_qualifier_as (
+    String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL);
+  p.at_exit = __get_qualifier_as (
+    Ref_Type, "at_exit", qualifier ("at_exit"), &__def_at_exit__);
+  p.exit = __get_qualifier_as (
+    Ref_Type, "exit", qualifier ("exit"), &__def_exit__);
+  p.err_handler = __get_qualifier_as (
+    Ref_Type, "err_handler", qualifier ("err_handler"), &__def_err_handler__);
+
+  p;
+}
+

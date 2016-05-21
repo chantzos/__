@@ -376,8 +376,9 @@ private define __read___ (this)
 `set_import_module_path (realpath (CLASSPATH + "/../C") + ":" + get_import_module_path);`
    + "\n\n";
 
-  __buf__ += readfile (SRC_PROTO_PATH + "/__slang.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__alfa.sl");
+  __buf__ += readfile (SRC_PROTO_PATH + "/__slang.sl");
+  __buf__ += readfile (SRC_PROTO_PATH + "/__This.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__vita.sl");
   __buf__ += this + "\n\n";
   __buf__ += readfile (SRC_PROTO_PATH + "/__.sl");
