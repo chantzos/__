@@ -52,8 +52,8 @@ static define __INIT__ (role)
       Ref_Type, "exit", qualifier ("exit"), &__def_exit__),
     has = struct
       {
-      frames,
-      max_frames,
+      frames = 1,
+      max_frames = 2,
       screenactive,
       argv = qualifier ("setargv")
         ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)
@@ -62,6 +62,7 @@ static define __INIT__ (role)
     is = struct
       {
       me,
+      also = String_Type[0],
       shell = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1),
       ved   = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1),
       os    = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0),

@@ -21,10 +21,18 @@ private define __err_handler__ (self, s)
   exit (1);
 }
 
-This.err_handler     = &__err_handler__;
-This.has.max_frames  = 2;
-This.is.atsession    = getenv ("SESSION");
-This.is.child        = getenv ("ISACHILD");
+This.err_handler  = &__err_handler__;
+This.is.child     = getenv ("ISACHILD");
+This.is.atsession = getenv ("SESSION");
+
+if (NULL == This.is.child)
+  This.is.also = [This.is.also, "PARENT"];
+
+This.is.me = Anon->Fun (`
+  if (NULL == This.is.child)
+    NULL == This.is.atsession ? "MASTER" : "PARENT";
+  else
+    "CHILD";`);
 
 Load.module ("socket");
 
@@ -46,17 +54,14 @@ Class.load ("App");
 
 This.at_exit = &_exit_;
 
-
 Class.load ("I";force);
-
-I.setme ();
 
 DEBUG = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 
-This.is.my.name    = strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
-This.is.my.basedir     = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
-This.is.my.datadir    = Env->USER_DATA_PATH + "/" + This.is.my.name;
-This.is.my.tmpdir     = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
+This.is.my.name      = strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
+This.is.my.basedir   = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
+This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;
+This.is.my.tmpdir    = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
 This.is.std.out.type = "ashell";
 
 if (-1 == access (This.is.my.basedir, F_OK))
