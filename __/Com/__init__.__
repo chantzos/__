@@ -3,19 +3,19 @@ class Com
 
   def pre_com ()
     ICOM++;
-    ERR_VED.st_.st_size = fstat (This.stderrFd).st_size;
+    ERR_VED.st_.st_size = fstat (This.is.std.err.fd).st_size;
   end
 
   def pre_header (argv)
     IARG++;
-    if (This.shell)
+    if (This.is.shell)
       IO.tostdout (strjoin (argv, " "));
     else
       toscratch (strjoin (argv, " ") + "\n");
   end
 
   def post_header ()
-    if (This.shell)
+    if (This.is.shell)
       IO.tostdout (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS); n);
     else
       toscratch (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS));
@@ -129,13 +129,13 @@ class Com
       out = strjoin (strtok (out, "\n"), "\n");
 
     ifnot (NULL == out)
-      if (This.shell)
+      if (This.is.shell)
         IO.tostdout ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
       else
         toscratch ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
 
     ifnot (force)
-      if (This.shell)
+      if (This.is.shell)
         IO.tostdout (pid + ": exit status " + string (status.exit_status));
       else
         toscratch (pid + ": exit status " + string (status.exit_status) + "\n");
@@ -180,7 +180,7 @@ class Com
 
     self.get_bgstatus (pid;force);
 
-    if (This.shell)
+    if (This.is.shell)
       IO.tostdout (pid + ": killed");
     else
       Smg.send_msg_dr (pid + ": killed", 0, PROMPTROW, 1);
@@ -220,10 +220,10 @@ class Com
   end
 
   def post_builtin ()
-    variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
+    variable err = File.read (This.is.std.err.fd;offset = ERR_VED.st_.st_size);
 
     ifnot (NULL == err)
-      if (This.shell)
+      if (This.is.shell)
         IO.tostdout (err);
       else
         toscratch (err + "\n");
@@ -325,13 +325,13 @@ class Com
 
   def parse_argv (argv, isbg)
     variable flags = ">>|";
-    variable file = @isbg ? STDOUTBG : This.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
+    variable file = @isbg ? STDOUTBG : This.is.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
     variable lfile = file;
 
     variable retval = self.parse_redir (argv[-1], &file, &flags);
 
     if (lfile == file && file == SCRATCH)
-      if (NULL == This.shell || 0 == This.shell)
+      if (NULL == This.is.shell || 0 == This.is.shell)
         {
         flags = ">|";
         @isbg = 0;
@@ -381,9 +381,9 @@ class Com
 
       if (-1 == retval)
         {
-        variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
+        variable err = File.read (This.is.std.err.fd;offset = ERR_VED.st_.st_size);
 
-        if (This.shell)
+        if (This.is.shell)
           IO.tostdout (err);
         else
           toscratch (err + "\n");
@@ -416,7 +416,7 @@ class Com
       }
 
     env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
-     "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
+     "stderrfile=" + This.is.std.err.fn, "stderrflags=>>|"];
 
     ifnot (isbg)
       self.Fork.tofg (p, argv, env);
@@ -426,7 +426,7 @@ class Com
       isscratch = NULL;
       }
 
-    if ((NULL != isscratch || 0 == This.shell) &&
+    if ((NULL != isscratch || 0 == This.is.shell) &&
       0 == EXITSTATUS &&
       0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
           App.scratch (Ved.get_cur_buf ());

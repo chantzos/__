@@ -1,6 +1,6 @@
 private define __my_send_msg__ (msg, progrbts)
 {
-  if (This.is_tty ())
+  if (This.is.tty ())
     {
     if (int (@progrbts))
       {

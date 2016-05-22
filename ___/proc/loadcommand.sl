@@ -24,8 +24,8 @@ private variable WRFD = NULL;
 private variable stdoutflags = getenv ("stdoutflags");
 private variable stderrflags = getenv ("stderrflags");
 
-This.stdoutFn = getenv ("stdoutfile");
-This.stderrFn = getenv ("stderrfile");
+This.is.std.out.fn = getenv ("stdoutfile");
+This.is.std.err.fn = getenv ("stderrfile");
 
 private define sigalrm_handler (sig)
 {
@@ -115,17 +115,17 @@ if (-1 == access (COMDIR, F_OK))
 if (-1 == access (COMDIR, F_OK))
   COMDIR = Env->USER_COM_PATH + "/" + COM;
 
-ifnot (access (This.stdoutFn, F_OK))
-  This.stdoutFd = open (This.stdoutFn, File->FLAGS[stdoutflags]);
+ifnot (access (This.is.std.out.fn, F_OK))
+  This.is.std.out.fd = open (This.is.std.out.fn, File->FLAGS[stdoutflags]);
 else
-  This.stdoutFd = open (This.stdoutFn, File->FLAGS[stdoutflags], File->PERM["__PUBLIC"]);
+  This.is.std.out.fd = open (This.is.std.out.fn, File->FLAGS[stdoutflags], File->PERM["__PUBLIC"]);
 
-ifnot (access (This.stderrFn, F_OK))
-  This.stderrFd = open (This.stderrFn, File->FLAGS[stderrflags]);
+ifnot (access (This.is.std.err.fn, F_OK))
+  This.is.std.err.fd = open (This.is.std.err.fn, File->FLAGS[stderrflags]);
 else
-  This.stderrFd = open (This.stderrFn, File->FLAGS[stderrflags], File->PERM["__PUBLIC"]);
+  This.is.std.err.fd = open (This.is.std.err.fn, File->FLAGS[stderrflags], File->PERM["__PUBLIC"]);
 
-if (any (NULL == [This.stdoutFd, This.stderrFd]))
+if (any (NULL == [This.is.std.out.fd, This.is.std.err.fd]))
   (@_exit_me_) (1;msg = errno_string (errno));
 
 Class.load ("Smg";as = "__tty_init__");
@@ -217,13 +217,13 @@ public define initproc (in, out, err)
   variable p = Proc.init (in, out, err);
   if (out)
     {
-    p.stdout.file = This.stdoutFn;
+    p.stdout.file = This.is.std.out.fn;
     p.stdout.wr_flags = stdoutflags;
     }
 
   if (err)
     {
-    p.stderr.file = This.stderrFn;
+    p.stderr.file = This.is.std.err.fn;
     p.stderr.wr_flags = stderrflags;
     }
 

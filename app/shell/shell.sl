@@ -1,1 +1,1 @@
-This.stdouttype = "ashell";
+This.is.std.out.type = "ashell";

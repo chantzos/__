@@ -30,34 +30,6 @@ typedef struct
 
 typedef struct
   {
-  appname,
-  argv,
-  shell,
-  ved,
-  os,
-  is_tty,
-  is_smg,
-  stderrFn,
-  stderrFd,
-  stdoutFn,
-  stdoutFd,
-  stdouttype,
-  tmpdir,
-  appdir,
-  datadir,
-  at_exit,
-  err_handler,
-  exit,
-  framesize_fun,
-  frames,
-  max_frames,
-  isatsession,
-  isscreenactive,
-  isachild,
-  } ThisProg_Type;
-
-typedef struct
-  {
   null
   } AString_Type;
 

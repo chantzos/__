@@ -86,7 +86,7 @@ class App
   subclass Connect from App
 
   def child_reconnect (s) static proc
-    ifnot (NULL == This.isachild)
+    ifnot (NULL == This.is.child)
       return;
 
     variable chs = assoc_get_keys (CHILDREN);

@@ -524,14 +524,14 @@ private define ved_err_handler (t, _s_)
   if (ERR_STACK > 4)
     {
     This.at_exit ();
-    IO.tostderr ("ved ", This.stderrFn);
+    IO.tostderr ("ved ", This.is.std.err.fn);
     IO.tostderr ("Hit Enter to open in a different_process the Standard Error file");
     IO.tostderr ("Else it would be set in the clipboard if available");
     variable chr = Input.getch ();
     if ('\r' == chr)
-      App.Run.as.child (["__ved", This.stderrFn]);
+      App.Run.as.child (["__ved", This.is.std.err.fn]);
     else
-      seltoX ("ved " + This.stderrFn);
+      seltoX ("ved " + This.is.std.err.fn);
 
     exit_me (1);
     }
@@ -546,14 +546,14 @@ This.err_handler = &ved_err_handler;
 
 public define init_ved ()
 {
-  variable __stdin = any (This.argv == "-");
+  variable __stdin = any (This.has.argv == "-");
   variable fn;
   variable pj;
-  variable ft = Opt.Arg.compare ("--ftype=", &This.argv);
+  variable ft = Opt.Arg.compare ("--ftype=", &This.has.argv);
 
   ifnot (NULL == ft)
     {
-    ft = strchop (This.argv[ft], '=', 0);
+    ft = strchop (This.has.argv[ft], '=', 0);
     if (2 == length (ft))
       {
       ft = ft[1];
@@ -582,17 +582,17 @@ public define init_ved ()
     This.exit (0);
     }
 
-  if (1 == length (This.argv))
+  if (1 == length (This.has.argv))
     {
     SCRATCH_VED.ved (SCRATCH);
     This.exit (0);
     }
 
-  pj = Opt.Arg.compare ("--pj=", &This.argv);
+  pj = Opt.Arg.compare ("--pj=", &This.has.argv);
 
   ifnot (NULL == pj)
     {
-    pj = strchop (This.argv[pj], '=', 0);
+    pj = strchop (This.has.argv[pj], '=', 0);
 
     if (1 == length (pj))
       {
@@ -612,7 +612,7 @@ public define init_ved ()
     This.exit (0);
     }
 
-  fn = This.argv[-1];
+  fn = This.has.argv[-1];
 
   if (NULL == ft)
     ft = Ved.get_ftype (fn);

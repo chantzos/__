@@ -29,7 +29,7 @@ subclass Srv
   end
 
   def init ()
-    SRV_FIFO = This.tmpdir + "/Session.fifo";
+    SRV_FIFO = This.is.my.tmpdir + "/Session.fifo";
     if (-1 == mkfifo (SRV_FIFO, 0755))
       throw ClassError, "Srv::init::" + SRV_FIFO + " cannot crate fifo, " +
         errno_string (errno);
@@ -92,7 +92,7 @@ subclass Srv
   end
 
   def get_connected_apps () proc
-    [This.appname + "::" + string (Env->PID), array_map (
+    [This.is.my.name + "::" + string (Env->PID), array_map (
       String_Type, &sprintf, "%s::%d", CONNECTED_APPS, CONNECTED_PIDS)];
   end
 
@@ -105,7 +105,7 @@ subclass Srv
 
     if (any (apps == s.argv[0]))
       {
-      if (s.argv[0] == This.appname + "::" + string (Env->PID))
+      if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
         return;
 
       Api.reset_screen ();
@@ -197,7 +197,7 @@ subclass Srv
     variable tok = strtok (k, "::");
     variable app = tok[0];
     variable pid = tok[1];
-    if (app == This.appname && pid == string (Env->PID))
+    if (app == This.is.my.name && pid == string (Env->PID))
       {
       CUR_APP = NULL;
       return 1;
@@ -211,7 +211,7 @@ subclass Srv
   end
 
   def connect_to_app (app)
-    variable clfifo = This.tmpdir + "/__" + app + "_client_" +
+    variable clfifo = This.is.my.tmpdir + "/__" + app + "_client_" +
       string (_time)[[5:]] + ".fifo";
 
     () = mkfifo (clfifo, 0755);

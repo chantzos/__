@@ -1,7 +1,6 @@
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
-public variable
-  DEBUG = NULL, APP_ERR, I, App;
+public variable DEBUG, APP_ERR, I, App;
 
 public define exit_me (x)
 {
@@ -22,10 +21,10 @@ private define __err_handler__ (self, s)
   exit (1);
 }
 
-This.err_handler = &__err_handler__;
-This.max_frames  = 2;
-This.isatsession = getenv ("SESSION");
-This.isachild    = getenv ("ISACHILD");
+This.err_handler     = &__err_handler__;
+This.has.max_frames  = 2;
+This.is.atsession    = getenv ("SESSION");
+This.is.child        = getenv ("ISACHILD");
 
 Load.module ("socket");
 
@@ -52,66 +51,66 @@ Class.load ("I";force);
 
 I.setme ();
 
-DEBUG = Opt.Arg.exists ("--debug", &This.argv;del_arg);
+DEBUG = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 
-This.appname    = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
-This.appdir     = Env->LOCAL_APP_PATH + "/" + This.appname;
-This.datadir    = Env->USER_DATA_PATH + "/" + This.appname;
-This.tmpdir     = Env->TMP_PATH + "/" + This.appname + "/" + string (Env->PID);
-This.stdouttype = "ashell";
+This.is.my.name    = strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
+This.is.my.basedir     = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
+This.is.my.datadir    = Env->USER_DATA_PATH + "/" + This.is.my.name;
+This.is.my.tmpdir     = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
+This.is.std.out.type = "ashell";
 
-if (-1 == access (This.appdir, F_OK))
-  if (-1 == access ((This.appdir = Env->STD_APP_PATH + "/" + This.appname,
-      This.appdir), F_OK))
-    if (-1 == access ((This.appdir = Env->USER_APP_PATH + "/" + This.appname,
-        This.appdir), F_OK))
-      This.err_handler (This.appname, "no such application");
+if (-1 == access (This.is.my.basedir, F_OK))
+  if (-1 == access ((This.is.my.basedir = Env->STD_APP_PATH + "/" + This.is.my.name,
+      This.is.my.basedir), F_OK))
+    if (-1 == access ((This.is.my.basedir = Env->USER_APP_PATH + "/" + This.is.my.name,
+        This.is.my.basedir), F_OK))
+      This.err_handler (This.is.my.name, "no such application");
 
-if (-1 == access (This.appdir + "/" + This.appname + ".slc", F_OK|R_OK))
-  if (-1 == access (This.appdir + "/" + This.appname + ".sl", F_OK|R_OK))
-    This.err_handler ("Couldn't find application " + This.appname);
+if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".slc", F_OK|R_OK))
+  if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".sl", F_OK|R_OK))
+    This.err_handler ("Couldn't find application " + This.is.my.name);
 
-if (-1 == Dir.make_parents (This.tmpdir, File->PERM["PRIVATE"];strict))
-  This.err_handler ("cannot create directory " + This.tmpdir);
+if (-1 == Dir.make_parents (This.is.my.tmpdir, File->PERM["PRIVATE"];strict))
+  This.err_handler ("cannot create directory " + This.is.my.tmpdir);
 
-if (-1 == Dir.make_parents (This.datadir + "/config", File->PERM["PRIVATE"];strict))
-  This.err_handler ("cannot create directory " + This.datadir + "/config");
+if (-1 == Dir.make_parents (This.is.my.datadir + "/config", File->PERM["PRIVATE"];strict))
+  This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-if (-1 == Dir.make_parents (strreplace (This.datadir + "/config",
+if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
-  This.err_handler ("cannot create directory " + This.datadir + "/config");
+  This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-Load.file (This.appdir + "/" + This.appname);
+Load.file (This.is.my.basedir + "/" + This.is.my.name);
 
 VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
-This.stderrFn   = This.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
-This.stdoutFn   = This.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.stdouttype;
-This.stdoutFd   = IO.open_fn (This.stdoutFn);
-This.stderrFd   = IO.open_fn (This.stderrFn);
-SCRATCH         = This.tmpdir + "/__SCRATCH__.txt";
-STDOUTBG        = This.tmpdir + "/__STDOUTBG__.txt";
-GREPFILE        = This.tmpdir + "/__GREP__.list";
-BGDIR           = This.tmpdir + "/__PROCS__";
-RDFIFO          = This.tmpdir + "/__SRV_FIFO__.fifo";
-WRFIFO          = This.tmpdir + "/__CLNT_FIFO__.fifo";
+This.is.std.err.fn   = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
+This.is.std.out.fn   = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
+This.is.std.out.fd   = IO.open_fn (This.is.std.out.fn);
+This.is.std.err.fd   = IO.open_fn (This.is.std.err.fn);
+SCRATCH         = This.is.my.tmpdir + "/__SCRATCH__.txt";
+STDOUTBG        = This.is.my.tmpdir + "/__STDOUTBG__.txt";
+GREPFILE        = This.is.my.tmpdir + "/__GREP__.list";
+BGDIR           = This.is.my.tmpdir + "/__PROCS__";
+RDFIFO          = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
+WRFIFO          = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
 SCRATCHFD       = IO.open_fn (SCRATCH);
 STDOUTFDBG      = IO.open_fn (STDOUTBG);
 SCRATCH_VED     = Ved.init_ftype ("txt");
 ERR_VED         = Ved.init_ftype ("txt");
-OUT_VED         = Ved.init_ftype (This.stdouttype);
-OUTBG_VED       = Ved.init_ftype (This.stdouttype);
+OUT_VED         = Ved.init_ftype (This.is.std.out.type);
+OUTBG_VED       = Ved.init_ftype (This.is.std.out.type);
 SCRATCH_VED._fd = SCRATCHFD;
 OUTBG_VED._fd   = STDOUTFDBG;
-ERR_VED._fd     = This.stderrFd;
-OUT_VED._fd     = This.stdoutFd;
-SPECIAL         = [SPECIAL, SCRATCH, This.stderrFn, This.stdoutFn, STDOUTBG];
+ERR_VED._fd     = This.is.std.err.fd;
+OUT_VED._fd     = This.is.std.out.fd;
+SPECIAL         = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn, STDOUTBG];
 
 txt_settype  (SCRATCH_VED, SCRATCH, VED_ROWS, NULL;_autochdir = 0);
-txt_settype  (ERR_VED, This.stderrFn, VED_ROWS, NULL;_autochdir = 0);
-(@__get_reference (This.stdouttype + "_settype"))
-  (OUT_VED, This.stdoutFn, VED_ROWS, NULL;_autochdir = 0);
-(@__get_reference (This.stdouttype + "_settype"))
+txt_settype  (ERR_VED, This.is.std.err.fn, VED_ROWS, NULL;_autochdir = 0);
+(@__get_reference (This.is.std.out.type + "_settype"))
+  (OUT_VED, This.is.std.out.fn, VED_ROWS, NULL;_autochdir = 0);
+(@__get_reference (This.is.std.out.type + "_settype"))
   (OUTBG_VED, STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
 
 if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
@@ -148,7 +147,7 @@ private define _build_comlist_ (a)
     d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
  ifnot (ex)
-   ifnot (This.shell)
+   ifnot (This.is.shell)
      ex = 1;
 
   _for i (0, length (d) - 1)
@@ -187,7 +186,7 @@ private define draw_wind (argv)
 
 private define scratch_to_stdout (argv)
 {
-  File.copy (SCRATCH, This.stdoutFn;flags = "ab", verbose = 1);
+  File.copy (SCRATCH, This.is.std.out.fn;flags = "ab", verbose = 1);
   pop ();
   draw (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
 }
@@ -196,9 +195,9 @@ private define __clear__ (argv)
 {
   variable fn = SCRATCH;
   if (Opt.Arg.exists ("--stdout", &argv))
-    fn = This.stdoutFn;
+    fn = This.is.std.out.fn;
   else if (Opt.Arg.exists ("--stderr", &argv))
-    fn = This.stderrFn;
+    fn = This.is.std.err.fn;
 
   () = File.write (fn, "\000");
 }
@@ -225,10 +224,10 @@ private define __echo__ (argv)
   ifnot (len)
     return;
 
-  variable tostd = This.shell ? __->__
+  variable tostd = This.is.shell ? __->__
     ("IO", "tostdout", "Class::getfun::__echo").funcref : &toscratch;
 
-  variable args = This.shell ? {IO} : {};
+  variable args = This.is.shell ? {IO} : {};
 
   if (1 == len)
     {
@@ -338,7 +337,7 @@ private define __search__ (argv)
   stdoutflags = ">|";
 
   env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
-    "stderrfile=" + This.stderrFn, "stderrflags=>>|"];
+    "stderrfile=" + This.is.std.err.fn, "stderrflags=>>|"];
 
   Com.Fork.tofg (p, argv, env);
 
@@ -366,7 +365,7 @@ private define __which__ (argv)
 
   variable msg = NULL != path ? path : com + " hasn't been found in PATH";
 
-  if (This.shell)
+  if (This.is.shell)
     IO.tostdout (msg;n);
   else
     toscratch (msg);
@@ -427,7 +426,7 @@ private define __ved__ (argv)
   variable fname = 1 == length (argv) ? SCRATCH : argv[1];
 
   if ("-" == fname)
-    fname = This.stdoutFn;
+    fname = This.is.std.out.fn;
 
   Com.pre_header ("ved " + fname);
 
@@ -555,7 +554,7 @@ public define init_commands ()
   a["search"].func = &__search__;
   a["search"].dir = Env->STD_COM_PATH + "/search";
 
-  variable pj = "PROJECT_" + strup (This.appname);
+  variable pj = "PROJECT_" + strup (This.is.my.name);
   variable f = __get_reference (pj);
   ifnot (NULL == f)
     {
@@ -584,20 +583,20 @@ private define filterexargs (s, args, type, desc)
   args, type, desc;
 }
 
-ifnot (access (This.appdir + "/lib/vars.slc", F_OK))
-  Load.file (This.appdir + "/lib/vars", NULL);
+ifnot (access (This.is.my.basedir + "/lib/vars.slc", F_OK))
+  Load.file (This.is.my.basedir + "/lib/vars", NULL);
 
-ifnot (access (This.appdir + "/lib/Init.slc", F_OK))
-  Load.file (This.appdir + "/lib/Init", NULL);
+ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
+  Load.file (This.is.my.basedir + "/lib/Init", NULL);
 
-ifnot (access (This.appdir + "/lib/initrline.slc", F_OK))
-  Load.file (This.appdir + "/lib/initrline", NULL);
+ifnot (access (This.is.my.basedir + "/lib/initrline.slc", F_OK))
+  Load.file (This.is.my.basedir + "/lib/initrline", NULL);
 
-ifnot (access (Env->USER_LIB_PATH + "/wind/" + This.appname + ".slc", F_OK))
-  Load.file (Env->USER_LIB_PATH + "/wind/" + This.appname);
+ifnot (access (Env->USER_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
+  Load.file (Env->USER_LIB_PATH + "/wind/" + This.is.my.name);
 else
-  ifnot (access (Env->STD_LIB_PATH + "/wind/" + This.appname + ".slc", F_OK))
-    Load.file (Env->STD_LIB_PATH + "/wind/" + This.appname);
+  ifnot (access (Env->STD_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
+    Load.file (Env->STD_LIB_PATH + "/wind/" + This.is.my.name);
 
 public define __initrline ()
 {
@@ -638,6 +637,6 @@ Smg.init ();
 
 Input.init ();
 
-(@__get_reference ("init_" + This.appname));
+(@__get_reference ("init_" + This.is.my.name));
 
 This.exit (0);

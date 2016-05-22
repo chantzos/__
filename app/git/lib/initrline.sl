@@ -517,7 +517,7 @@ private define __push_upstream__ (argv)
   if (Scm.Git.push (url;redir_to_file = SCRATCH, flags = ">|"))
     {
     __messages;
-    () = File.write (This.stderrFn, "\000");
+    () = File.write (This.is.std.err.fn, "\000");
     return;
     }
 

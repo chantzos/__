@@ -2,7 +2,7 @@ Class.load ("Scm";loadGit,force);
 
 public define setrepo ();
 
-public variable DIFF = This.tmpdir + "/__DIFF__.diff";
+public variable DIFF = This.is.my.tmpdir + "/__DIFF__.diff";
 public variable DIFF_VED = Ved.init_ftype ("diff");
 
 DIFF_VED._fd = IO.open_fn (DIFF);
@@ -30,7 +30,7 @@ private define stat_lexicalhl (s, lines, vlines)
 public define on_wind_change (w)
 {
   Ved.setbuf (w.frame_names[w.cur_frame]);
-  This.stdoutFd = Ved.get_frame_buf (0)._fd;
+  This.is.std.out.fd = Ved.get_frame_buf (0)._fd;
 
   ifnot (NULL == w.dir)
     {
@@ -51,21 +51,21 @@ public define on_wind_new (w)
 {
   CUR_REPO = "NONE";
 
-  This.stdoutFn = This.tmpdir + "/__STDOUT_" + w.name + "_" + string (_time)[[5:]] +
-  "." + This.stdouttype;
+  This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT_" + w.name + "_" + string (_time)[[5:]] +
+  "." + This.is.std.out.type;
 
-  variable b = This.tmpdir + "/__INFO_" + w.name + "_" + string (_time)[[5:]] + ".txt";
+  variable b = This.is.my.tmpdir + "/__INFO_" + w.name + "_" + string (_time)[[5:]] + ".txt";
 
-  SPECIAL = [SPECIAL, This.stdoutFn];
+  SPECIAL = [SPECIAL, This.is.std.out.fn];
 
-  variable aved = Ved.init_ftype (This.stdouttype);
+  variable aved = Ved.init_ftype (This.is.std.out.type);
   variable bved = Ved.init_ftype ("txt");
 
-  aved._fd = IO.open_fn (This.stdoutFn);
+  aved._fd = IO.open_fn (This.is.std.out.fn);
   bved._fd = IO.open_fn (b);
 
-  (@__get_reference (This.stdouttype + "_settype"))
-    (aved, This.stdoutFn, w.frame_rows[0], NULL;
+  (@__get_reference (This.is.std.out.type + "_settype"))
+    (aved, This.is.std.out.fn, w.frame_rows[0], NULL;
     indent = 2, _autochdir = 0, show_tilda = 0,
     show_status_line = 0, lexicalhl = &stat_lexicalhl);
 
@@ -74,11 +74,11 @@ public define on_wind_new (w)
     lexicalhl = &info_lexicalhl);
 
   Ved.setbuf (b;frame = 1);
-  Ved.setbuf (This.stdoutFn);
+  Ved.setbuf (This.is.std.out.fn);
 
   __vset_clr_bg (bved, NULL);
 
-  This.stdoutFd = aved._fd;
+  This.is.std.out.fd = aved._fd;
 
   topline (" -- git --");
 
@@ -105,6 +105,6 @@ private define _myframesize_ ()
   f;
 }
 
-This.framesize_fun = &_myframesize_;
+This.framesize = &_myframesize_;
 
-Load.file (This.appdir + "/lib/git", NULL);
+Load.file (This.is.my.basedir + "/lib/git", NULL);

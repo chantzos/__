@@ -73,7 +73,7 @@ class I
      }
   end
 
-#ifnot NULL == This.isachild
+#ifnot NULL == This.is.child
   subclass Child from I
 
   def app_new (s) static proc
@@ -97,7 +97,7 @@ class I
   end
 #endif
 
-#ifnot NULL == This.isatsession
+#ifnot NULL == This.is.atsession
   subclass Client from I
 
   def app_new (s) static proc
@@ -121,7 +121,7 @@ class I
   end
 #endif
 
-#if This.isachild == NULL == This.isatsession
+#if This.is.child == NULL == This.is.atsession
   subclass Srv from I
 
   def app_new (s) static proc

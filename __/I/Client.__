@@ -51,7 +51,7 @@ subclass Client
 
     variable apps = Sock.get_str_ar (SESSION_RDFIFO_FD, SESSION_WRFIFO_FD);
 
-    variable me = sprintf ("%s::%d", This.appname, Env->PID);
+    variable me = sprintf ("%s::%d", This.is.my.name, Env->PID);
     apps[where (me == apps)] = NULL;
     apps = apps[wherenot (_isnull (apps))];
 
@@ -62,7 +62,7 @@ subclass Client
 
     if (any (apps == s.argv[0]))
       {
-      if (s.argv[0] == This.appname + "::" + string (Env->PID))
+      if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
         return;
 
       Api.reset_screen ();

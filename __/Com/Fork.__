@@ -152,7 +152,7 @@ subclass Fork
 
     BGPIDS[string (pid)] = p;
 
-    if (This.shell)
+    if (This.is.shell)
       IO.tostdout ("forked " + string (pid) + " &");
     else
       Smg.send_msg_dr ("forked " + string (pid) + " &", 0, PROMPTROW, 1);
@@ -163,10 +163,10 @@ subclass Fork
 
     self.waitpid (p);
 
-    variable err = File.read (This.stderrFd;offset = ERR_VED.st_.st_size);
+    variable err = File.read (This.is.std.err.fd;offset = ERR_VED.st_.st_size);
 
     if (strlen (err))
-      if (This.shell)
+      if (This.is.shell)
         IO.tostdout (strtrim_end (err));
       else
         toscratch (err);

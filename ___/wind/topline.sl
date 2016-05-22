@@ -7,8 +7,8 @@ define _topline_ (str, columns)
   variable t = sprintf ("%sPID[%d]%s (W %s) [%s]",
     d,
     getpid,
-    (NULL == This.isachild
-      ? NULL == This.isatsession
+    (NULL == This.is.child
+      ? NULL == This.is.atsession
         ? " [MASTER]"
         : " [PARENT]"
       : " [CHILD]"),

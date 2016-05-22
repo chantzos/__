@@ -1,3 +1,5 @@
+__use_namespace ("This");
+
 public variable This, Smg, Input, LINES, COLUMNS;
 
 private define __def_exit__ ()
@@ -37,28 +39,63 @@ private define __is_smg (self)
     0;
 }
 
-public define Progr_Init (name)
+static define __INIT__ (role)
 {
-  variable p = @ThisProg_Type;
-
-  p.appname   = name;
-  p.argv   = __argv;
-  p.shell  = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1);
-  p.ved    = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1);
-  p.os     = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0);
-  p.is_tty = &__is_tty;
-  p.is_smg = &__is_smg;
-  p.stderrFn = __get_qualifier_as (
-    String_Type, "stderrFn", qualifier ("stderrFn"), NULL);
-  p.stdoutFn = __get_qualifier_as (
-    String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL);
-  p.at_exit = __get_qualifier_as (
-    Ref_Type, "at_exit", qualifier ("at_exit"), &__def_at_exit__);
-  p.exit = __get_qualifier_as (
-    Ref_Type, "exit", qualifier ("exit"), &__def_exit__);
-  p.err_handler = __get_qualifier_as (
-    Ref_Type, "err_handler", qualifier ("err_handler"), &__def_err_handler__);
-
-  p;
+  struct
+    {
+    framesize,
+    err_handler = __get_qualifier_as (
+      Ref_Type, "err_handler", qualifier ("err_handler"), &__def_err_handler__),
+    at_exit     = __get_qualifier_as (
+      Ref_Type, "at_exit", qualifier ("at_exit"), &__def_at_exit__),
+    exit        = __get_qualifier_as (
+      Ref_Type, "exit", qualifier ("exit"), &__def_exit__),
+    has = struct
+      {
+      frames,
+      max_frames,
+      screenactive,
+      argv = qualifier ("setargv")
+        ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)
+        : __argv,
+      },
+    is = struct
+      {
+      me,
+      shell = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1),
+      ved   = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1),
+      os    = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0),
+      tty   = &__is_tty,
+      smg   = &__is_tty,
+      master,
+      parent,
+      child,
+      atsession,
+      my = struct
+        {
+        role = role,
+        name,
+        tmpdir,
+        basedir,
+        datadir,
+        },
+      std = struct
+        {
+        out = struct
+          {
+          type,
+          fd,
+          fn = __get_qualifier_as (
+          String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL),
+          },
+        err = struct
+          {
+          fd,
+          fn = __get_qualifier_as (
+            String_Type, "stderrFn", qualifier ("stderrFn"), NULL),
+          }
+        },
+      },
+    };
 }
 

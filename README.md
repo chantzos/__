@@ -220,3 +220,9 @@ or
    
   fprintf (stdout, "%s\n", some_stuff); pop ();
 ```
+
+## About the code
+
+The quality of the code is good at places, though in the low level stuff there might  
+be obvious mistakes. This is the result of the age :) and my undecuated background.
+ 

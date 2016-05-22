@@ -1,5 +1,5 @@
-This.ved = 1;
-This.shell = 0;
+This.is.ved = 1;
+This.is.shell = 0;
 
 private define init_ftype (self, ftype)
 {

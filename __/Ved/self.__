@@ -327,7 +327,7 @@ beg
     w.frames--;
 
     variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
-      qualifier ("framesize_fun"), This.framesize_fun);
+      qualifier ("framesize_fun"), This.framesize);
 
     if (NULL == setframesize)
       setframesize = &framesize;
@@ -367,7 +367,7 @@ beg
 
   def new_frame (fn)
     variable w = self.get_cur_wind ();
-    if (w.frames == This.max_frames)
+    if (w.frames == This.has.max_frames)
       return;
 
     variable i;
@@ -377,7 +377,7 @@ beg
     w.frames++;
 
     variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
-      qualifier ("framesize_fun"), This.framesize_fun);
+      qualifier ("framesize_fun"), This.framesize);
 
     if (NULL == setframesize)
       setframesize = &framesize;

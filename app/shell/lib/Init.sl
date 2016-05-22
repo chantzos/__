@@ -2,28 +2,28 @@ public define on_wind_change (w)
 {
   topline (" -- shell --");
   Ved.setbuf (w.frame_names[w.cur_frame]);
-  This.stdoutFd = Ved.get_cur_buf ()._fd;
+  This.is.std.out.fd = Ved.get_cur_buf ()._fd;
 }
 
 public define on_wind_new (w)
 {
-  This.stdoutFn = This.tmpdir + "/" + "__STDOUT__" + string (_time)[[5:]] +
-  "." + This.stdouttype;
+  This.is.std.out.fn = This.is.my.tmpdir + "/" + "__STDOUT__" + string (_time)[[5:]] +
+  "." + This.is.std.out.type;
 
-  SPECIAL = [SPECIAL, This.stdoutFn];
+  SPECIAL = [SPECIAL, This.is.std.out.fn];
 
-  variable oved = Ved.init_ftype (This.stdouttype);
+  variable oved = Ved.init_ftype (This.is.std.out.type);
 
-  oved._fd = IO.open_fn (This.stdoutFn);
+  oved._fd = IO.open_fn (This.is.std.out.fn);
 
-  (@__get_reference (This.stdouttype + "_settype")) (oved, This.stdoutFn, VED_ROWS, NULL);
+  (@__get_reference (This.is.std.out.type + "_settype")) (oved, This.is.std.out.fn, VED_ROWS, NULL);
 
   oved.opt_show_tilda = 0;
   oved.opt_show_status_line = 0;
 
-  Ved.setbuf (This.stdoutFn);
+  Ved.setbuf (This.is.std.out.fn);
 
-  This.stdoutFd = oved._fd;
+  This.is.std.out.fd = oved._fd;
 
   topline (" -- shell --");
 
@@ -38,26 +38,26 @@ public define _change_frame_ (s)
 {
   Ved.change_frame (;;__qualifiers);
   s = Ved.get_cur_buf ();
-  This.stdoutFd = s._fd;
+  This.is.std.out.fd = s._fd;
 }
 
 public define _del_frame_ (s)
 {
   Ved.del_frame ();
   s = Ved.get_cur_buf ();
-  This.stdoutFd = s._fd;
+  This.is.std.out.fd = s._fd;
 }
 
 public define _new_frame_ (s)
 {
-  Ved.new_frame (This.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
-    "." + This.stdouttype);
+  Ved.new_frame (This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
+    "." + This.is.std.out.type);
 
   s = Ved.get_cur_buf ();
   s._fd = IO.open_fn (s._abspath);
   s.opt_show_tilda = 0;
   s.opt_show_status_line = 0;
-  This.stdoutFd = s._fd;
+  This.is.std.out.fd = s._fd;
 }
 
 public define intro ()
@@ -80,7 +80,7 @@ public define init_shell ()
   if (-1 == access (STACKFILE, F_OK))
     () = File.write (STACKFILE, "STACK = {}");
 
-  Load.file (This.appdir + "/lib/shell", NULL);
+  Load.file (This.is.my.basedir + "/lib/shell", NULL);
 
   shell ();
 }

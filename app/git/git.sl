@@ -1,3 +1,3 @@
-This.stdouttype = "diff";
-This.shell = 0;
-This.frames = 2;
+This.is.std.out.type = "diff";
+This.is.shell = 0;
+This.has.frames = 2;

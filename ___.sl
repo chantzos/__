@@ -29,12 +29,12 @@ private variable CLASSES = [
 
 private variable THESE = Assoc_Type[String_Type];
 
-THESE["__me__"] = `public variable This = Progr_Init ("__INSTALL__";` +
+THESE["__me__"] = `public variable This = This->__INIT__ ("__INSTALL__";` +
     `shell = 0, smg = 0, ved = 0, err_handler = NULL, at_exit = NULL, exit = NULL);`;
-THESE["__"] = `public variable This = Progr_Init ("__");`;
-THESE["__COMMAND__"] = `public variable This = Progr_Init ("__COMMAND__";` +
+THESE["__"] = `public variable This = This->__INIT__ ("__");`;
+THESE["__COMMAND__"] = `public variable This = This->__INIT__ ("__COMMAND__";` +
     `shell = 0, smg = 0, ved = 0);`;
-THESE["__APP__"] = `public variable This = Progr_Init ("__APP__");`;
+THESE["__APP__"] = `public variable This = This->__INIT__ ("__APP__";setargv);`;
 
 public variable This, io;
 
@@ -459,7 +459,7 @@ __build__ ("__me__");
 This.exit = &exit_me;
 This.err_handler = &err_handler;
 This.at_exit = &at_exit;
-This.max_frames = 2;
+This.has.max_frames = 2;
 
 private define __build_modules__ ()
 {

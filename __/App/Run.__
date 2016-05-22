@@ -31,12 +31,12 @@ subclass Run
   end
 
   def as_child (argv)
-    ifnot (NULL == This.isachild)
+    ifnot (NULL == This.is.child)
       return;
 
     if (NULL == App->PARENT_FIFO)
       {
-      App->PARENT_FIFO = This.tmpdir + "/PARENT.fifo";
+      App->PARENT_FIFO = This.is.my.tmpdir + "/PARENT.fifo";
 
       if (-1 == mkfifo (App->PARENT_FIFO, 0755))
         {
@@ -51,7 +51,7 @@ subclass Run
 
     variable child = argv[0];
 
-    variable chfifo = This.tmpdir + "/__" + child + "_child_" +
+    variable chfifo = This.is.my.tmpdir + "/__" + child + "_child_" +
       string (_time)[[5:]] + ".fifo";
 
     if (-1 == mkfifo (chfifo, 0755))
@@ -134,7 +134,7 @@ subclass Run
       if (NULL == passwd)
         {
         variable isgoingtoreset = 0;
-        ifnot (This.isscreenactive)
+        ifnot (This.has.screenactive)
           {
           Api.restore_screen ();
           isgoingtoreset = 1;

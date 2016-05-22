@@ -26,7 +26,7 @@ class Api
       ifnot (Smg.suspend_state ())
         Smg.suspend ();
 
-    This.isscreenactive = 0;
+    This.has.screenactive = 0;
   end
 
   def restore_screen ()
@@ -39,6 +39,6 @@ class Api
       if (Smg.suspend_state ())
         Smg.resume ();
 
-    This.isscreenactive = 1;
+    This.has.screenactive = 1;
   end
 end
