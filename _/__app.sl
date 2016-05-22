@@ -1,3 +1,5 @@
+__use_namespace ("__APP__");
+
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
 public variable DEBUG, APP_ERR, I, App;

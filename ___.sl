@@ -494,6 +494,19 @@ private define __install_bytecompiled__ ()
 private variable exclude_dirs = [".git", "dev", "C"];
 private variable exclude_files = ["README.md", "___.sl"];
 
+private variable exclude_class_for_removal =
+  ["__app.slc", "__.slc", "__com.slc"];
+
+private define clean_classes (file, st)
+{
+  if (path_extname (file) == ".slc" &&
+      0 == any (path_basename (file) == exclude_class_for_removal))
+    if (-1 == remove (file))
+      This.exit ("Failed to remove", file);
+
+  1;
+}
+
 private define lib_dir_callback (dir, st, src_path, dest_path)
 {
   if (any (exclude_dirs == path_basename (dir)))
@@ -725,6 +738,8 @@ private define __main__ ()
   if (VERBOSE)
     io.tostdout ("installing libraries");
 
+  Path.walk (STD_CLASS_PATH, NULL, &clean_classes);
+
   Path.walk (SRC_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_CLASS_PATH, STD_CLASS_PATH},
     fargs = {SRC_CLASS_PATH, STD_CLASS_PATH, 0});
@@ -763,6 +778,8 @@ private define __main__ ()
       Path.walk (SRC_USER_APP_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_APP_PATH, USER_APP_PATH},
         fargs = {SRC_USER_APP_PATH, USER_APP_PATH, 1});
+
+    Path.walk (USER_CLS_PATH, NULL, &clean_classes);
 
     ifnot (access (SRC_USER_CLASS_PATH, F_OK|R_OK))
       Path.walk (SRC_USER_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
@@ -803,6 +820,8 @@ private define __main__ ()
       Path.walk (SRC_LOCAL_APP_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_LOCAL_APP_PATH, LOCAL_APP_PATH},
         fargs = {SRC_LOCAL_APP_PATH, LOCAL_APP_PATH, 1});
+
+    Path.walk (LOCAL_CLASS_PATH, NULL, &clean_classes);
 
     ifnot (access (SRC_LOCAL_CLASS_PATH, F_OK|R_OK))
       Path.walk (SRC_LOCAL_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
