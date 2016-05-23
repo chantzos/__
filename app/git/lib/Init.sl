@@ -1,5 +1,7 @@
 Class.load ("Scm";loadGit,force);
 
+COM_NO_SETREPO = Opt.Arg.compare ("--no-setrepo", &This.has.argv;del_arg);
+
 public define setrepo ();
 
 public variable DIFF = This.is.my.tmpdir + "/__DIFF__.diff";

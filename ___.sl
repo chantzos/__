@@ -177,7 +177,7 @@ public variable Exc = struct {print = &__print_exc__, fmt = &__format_exc__};
 __use_namespace ("Install");
 
 if (-1 == chdir (SRC_PATH))
-  This.exit_me (sprintf ("%s, couldn't change directory: %s\n",
+  This.exit (sprintf ("%s, couldn't change directory: %s\n",
     SRC_PATH, errno_string (errno)), 1);
 
 ifnot (access (SRC_TMP_PATH, F_OK))

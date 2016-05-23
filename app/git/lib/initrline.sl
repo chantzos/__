@@ -706,8 +706,11 @@ private define my_commands ()
     "--skip= int start the log after `nth' revisions",
     "--patch_show void add the unified diff to the output"];
 
-  a["setrepo"] = @Argvlist_Type;
-  a["setrepo"].func = &__setrepo__;
+  if (NULL == COM_NO_SETREPO)
+    {
+    a["setrepo"] = @Argvlist_Type;
+    a["setrepo"].func = &__setrepo__;
+    }
 
   a["add"] = @Argvlist_Type;
   a["add"].func = &__add__;
