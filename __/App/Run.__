@@ -31,8 +31,9 @@ subclass Run
   end
 
   def as_child (argv)
-    ifnot (NULL == This.is.child)
-      return;
+    %Testing: can start other children but idle exits
+    %ifnot (NULL == This.is.child)
+    %return;
 
     if (NULL == App->PARENT_FIFO)
       {
@@ -55,7 +56,7 @@ subclass Run
       string (_time)[[5:]] + ".fifo";
 
     if (-1 == mkfifo (chfifo, 0755))
-      throw ClassError, "Run.as.child::cannot crate Child's fifo, " +
+      throw ClassError, "Run.as.child::cannot create Child's fifo, " +
         errno_string (errno);
 
     variable env = [Env.defenv (),
