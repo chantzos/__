@@ -226,3 +226,57 @@ or
 The quality of the code is good at places, though in the low level stuff there might  
 be obvious mistakes. This is the result of the age :) and my undecuated background.
  
+## SLSH
+
+Below is the minimal sample to use this code in slsh. 
+
+(assuming foo is the installation directory)
+
+```C
+#ifdef __INTERACTIVE__
+
+$5 = get_slang_load_path;
+
+set_import_module_path (foo + "/std/C:" + get_import_module_path);
+
+import (foo + "/std/C/__");
+
+() = evalfile (foo + "/std/__/__");
+
+private define dont_exit ()
+{
+  loop (_NARGS) pop ();
+}
+
+This.exit = &dont_exit;
+
+public define exit_me (x)
+{
+  This.exit (x);
+}
+
+Class.load ("Smg";as = "SmgTTY", __init__ = "__tty_init__");
+Class.load ("Rand");
+Class.load ("Crypt");
+Class.load ("Os");
+Class.load ("Opt");
+Class.load ("String");
+Class.load ("Rline");
+Class.load ("Re");
+Class.load ("Subst");
+Class.load ("Proc");
+ 
+define send_msg_dr (msg)
+{
+  IO.tostdout (msg);
+}
+
+define send_msg (msg)
+{
+  IO.tostdout (msg);
+} 
+
+set_slang_load_path (__tmp ($5));
+ 
+#endif
+```
