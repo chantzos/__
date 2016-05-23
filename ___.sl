@@ -6,6 +6,10 @@ private variable SRC_PATH =
 private variable SRC_C_PATH = SRC_PATH + "/C";
 private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
 private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
+private variable NOCOLOR = any ("--no-color" == __argv);
+private variable OUTCOLOR = NOCOLOR ? "" : "\e[37m";
+private variable ERRCOLOR = NOCOLOR ? "" : "\e[31m";
+private variable ESCCOLOR = NOCOLOR ? "" : "\e[m";
 private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
 private variable CC = "gcc";
 public  variable DEBUG = any ("--debug" == __argv);
@@ -85,12 +89,12 @@ private define ioproc ()
 
     try
       {
-      () = array_map (Integer_Type, &fprintf, iofp, "%s%S%S\e[m", ioclr, ioargs,
-        qualifier_exists ("n") ? "" : "\n");
+      () = array_map (Integer_Type, &fprintf, iofp, "%s%S%S%s", ioclr, ioargs,
+        qualifier_exists ("n") ? "" : "\n", ESCCOLOR);
       }
     catch AnyError:
-      This.exit (sprintf ("%sIO_WriteError:to%S, %s\e[m", ioclr, iofp,
-        errno_string (errno)), 1);
+      This.exit (sprintf ("%sIO_WriteError:to%S, %s%s", ioclr, iofp,
+        errno_string (errno), ESCCOLOR), 1);
 
     return;
     }
@@ -99,7 +103,7 @@ private define ioproc ()
   if (length (ioargs))
     loop (length (ioargs)) fmt += "%S ";
 
-  fmt += "\e[m%S";
+  fmt += ESCCOLOR + "%S";
 
   if (-1 == fprintf (iofp, fmt, ioclr, __push_list (ioargs),
        qualifier_exists ("n") ? "" : "\n"))
@@ -109,7 +113,7 @@ private define ioproc ()
 private define __tostdout__ ()
 {
   iofp = stdout;
-  ioclr = "\e[37m";
+  ioclr = OUTCOLOR;
   ioargs = __pop_list (_NARGS - 1);
   pop;
   ioproc (;;__qualifiers);
@@ -118,7 +122,7 @@ private define __tostdout__ ()
 private define __tostderr__ ()
 {
   iofp = stderr;
-  ioclr = "\e[31m";
+  ioclr = ERRCOLOR;
   ioargs = __pop_list (_NARGS - 1);
   pop;
   ioproc (;;__qualifiers);
@@ -493,7 +497,6 @@ private define __install_bytecompiled__ ()
 
 private variable exclude_dirs = [".git", "dev", "C"];
 private variable exclude_files = ["README.md", "___.sl"];
-
 private variable exclude_class_for_removal =
   ["__app.slc", "__.slc", "__com.slc"];
 
@@ -781,6 +784,9 @@ private define __main__ ()
 
     Path.walk (USER_CLS_PATH, NULL, &clean_classes);
 
+    ifnot (access (SRC_USER_CLASS_PATH + "/__app.sl", F_OK|R_OK))
+      __bytecompile__ (SRC_USER_CLASS_PATH + "/__app.sl");
+
     ifnot (access (SRC_USER_CLASS_PATH, F_OK|R_OK))
       Path.walk (SRC_USER_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH},
@@ -822,6 +828,9 @@ private define __main__ ()
         fargs = {SRC_LOCAL_APP_PATH, LOCAL_APP_PATH, 1});
 
     Path.walk (LOCAL_CLASS_PATH, NULL, &clean_classes);
+
+    ifnot (access (SRC_LOCAL_CLASS_PATH + "/__app.sl", F_OK|R_OK))
+      __bytecompile__ (SRC_LOCAL_CLASS_PATH + "/__app.sl");
 
     ifnot (access (SRC_LOCAL_CLASS_PATH, F_OK|R_OK))
       Path.walk (SRC_LOCAL_CLASS_PATH, &lib_dir_callback, &file_callback_libs;

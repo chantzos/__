@@ -58,6 +58,12 @@ This.at_exit = &_exit_;
 
 Class.load ("I";force);
 
+ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
+  Load.file (Env->USER_CLASS_PATH + "/__app.slc");
+
+ifnot (access (Env->LOCAL_CLASS_PATH + "/__app.slc", F_OK))
+  Load.file (Env->LOCAL_CLASS_PATH + "/__app.slc");
+
 DEBUG = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 
 This.is.my.name      = strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
