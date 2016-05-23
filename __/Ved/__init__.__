@@ -64,6 +64,12 @@ class Ved
   var public SEARCH_HISTFILE    = Env->USER_DATA_PATH + "/.__" + Env->USER + "_ved_search_history";
   var public SEARCH_HISTINDEX   = NULL;
   var public SEARCH_HISTORY     = {};
+  var public VED_OPTS = struct
+    {
+    del_frame = 1,
+    new_frame = 1,
+    new_wind = 1,
+    };
 
   var VED_INFOCLRFG = Smg->COLOR.infofg;
   var VED_INFOCLRBG = Smg->COLOR.infobg;
@@ -1018,16 +1024,25 @@ class Ved
   end
 
   def _new_frame_ (s) public proc
+    ifnot (VED_OPTS.new_frame)
+      return;
+
     Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname";_autochdir = 0);
     s = Ved.get_cur_buf ();
   end
 
   def _del_frame_ (s) proc
+    ifnot (VED_OPTS.del_frame)
+      return;
+
     Ved.del_frame ();
     s = Ved.get_cur_buf ();
   end
 
   def _del_wind_ (s) proc
+    ifnot (VED_OPTS.new_wind)
+      return;
+
     Ved.del_wind (VED_CUR_WIND);
     s = Ved.get_cur_buf ();
   end
@@ -1053,11 +1068,17 @@ class Ved
   end
 
   def _new_wind_ (s) public proc
+    ifnot (VED_OPTS.new_wind)
+      return;
+
     new_wind (;on_wind_new);
     s = Ved.get_cur_buf ();
   end
 
   def _goto_wind_ (s, chr) proc
+    ifnot (VED_OPTS.new_wind)
+      return;
+
     if (any (['0':'9'] == chr))
       chr = int (chr - '0');
     else
