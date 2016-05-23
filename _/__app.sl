@@ -450,21 +450,6 @@ private define __ved__ (argv)
   draw (Ved.get_cur_buf ());
 }
 
-private define __idle__ (argv)
-{
-  Api.reset_screen ();
-
-  variable retval = (@__get_reference ("I->app_idle")) ();
-
-  ifnot (retval)
-    {
-    Api.restore_screen ();
-    return;
-    }
-
-  exit_me (0);
-}
-
 private define __lock__ (argv)
 {
   Smg.cls ();
@@ -486,10 +471,14 @@ private define kill_bg_job (argv)
   Com.kill_bg_job (argv);
 }
 
+private define __detach (argv)
+{
+  App.detach ();
+}
+
 public define init_functions ()
 {
-  variable
-    a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
 
   a["@lock"] = @Argvlist_Type;
   a["@lock"].func = &__lock__;
@@ -508,6 +497,11 @@ public define init_functions ()
   a["@clear"].args = ["--stderr void clear stderr (default is scratch)",
                       "--stdout void clear stdout"];
   a;
+}
+
+private define __exit_me (argv)
+{
+  App.quit_me ();
 }
 
 public define init_commands ()
@@ -549,7 +543,7 @@ public define init_commands ()
   a["echo"].func = &__echo__;
 
   a["&"] = @Argvlist_Type;
-  a["&"].func = &__idle__;
+  a["&"].func = &__detach;
 
   a["w"] = @Argvlist_Type;
   a["w"].func = &__write__;
@@ -567,7 +561,7 @@ public define init_commands ()
     }
 
   a["q"] = @Argvlist_Type;
-  a["q"].func = &exit_me;
+  a["q"].func = &__exit_me;
 
   if (COM_OPTS.chdir)
     {

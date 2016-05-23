@@ -1,6 +1,5 @@
 class App
   typedef AppInfo
-    init,
     help,
     info,
     dir,
@@ -68,7 +67,6 @@ class App
           continue;
 
         APPSINFO[app] = @AppInfo_Type;
-        APPSINFO[app].init = app + "Init";
         APPSINFO[app].dir = dir + "/" + app;
 
         ifnot (access (dir + "/" + app + "/help.txt", F_OK))
@@ -80,6 +78,29 @@ class App
         APPS[app] = Assoc_Type[App_Type];
         }
       }
+  end
+
+  def detach ()
+    ifnot (This.is.me == "MASTER")
+      Api.reset_screen ();
+
+    variable retval = (@__get_reference ("I->app_idle")) ();
+
+    ifnot (retval)
+      {
+      ifnot (This.is.me == "MASTER")
+        Api.restore_screen ();
+      return;
+      }
+
+    exit_me (0);
+  end
+
+  def quit_me ()
+    ifnot (This.is.me == "MASTER")
+      exit_me (0);
+
+    () = (@__get_reference ("I->app_idle")) ();
   end
 
   subclass Run from App
@@ -271,7 +292,8 @@ class App
   end
 
   def send_msg_dr (msg) public proc
-    Smg.send_msg_dr (msg, 0, NULL, NULL);
+    Smg.send_msg_dr (msg, qualifier ("color", 0),
+      qualifier ("row"), qualifier ("col"));
   end
 
   def __scratch (argv) public proc

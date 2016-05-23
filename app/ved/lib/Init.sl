@@ -478,17 +478,7 @@ private define __app_reconnect (s)
 
 private define __detach__ (s)
 {
-  Api.reset_screen ();
-
-  variable retval = (@__get_reference ("I->app_idle")) ();
-
-  ifnot (retval)
-    {
-    Api.restore_screen ();
-    return;
-    }
-
-  exit_me (0);
+  App.detach ();
 }
 
 VED_PAGER[string (',')] = &handle_comma;

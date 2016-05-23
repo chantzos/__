@@ -67,7 +67,7 @@ static define __INIT__ (role)
       ved   = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1),
       os    = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0),
       tty   = &__is_tty,
-      smg   = &__is_tty,
+      smg   = &__is_smg,
       master,
       parent,
       child,

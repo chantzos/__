@@ -2061,6 +2061,12 @@ class Rline
         initdone = 1;
         }
 
+      if (Input->CTRL_j == s._chr)
+        {
+        App.detach ();
+        continue;
+        }
+
       if (any (Input->rmap.osappnew == s._chr))
         ifnot (NULL == s.osappnew)
           {

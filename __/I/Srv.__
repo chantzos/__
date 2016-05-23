@@ -25,6 +25,18 @@ subclass Srv
   var PREV_APP = NULL;
 
   def idle ()
+    if (length (CONNECTED_APPS))
+      {
+      variable ret = IO.ask (["There are idled applications", "Do you really want to exit?",
+        "y/n"], ['y', 'n']);
+      if ('n' == ret)
+        {
+        variable rl = Ved.get_cur_rline ();
+        Rline.prompt (rl, rl._lin, rl._col);
+        return 0;
+        }
+      }
+
     exit_me (0);
   end
 
