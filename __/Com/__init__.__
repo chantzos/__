@@ -1,4 +1,15 @@
 class Com
+
+  var public COM_OPTS = struct
+    {
+    bg_jobs = 1,
+    chdir   = 1,
+    search  = 1,
+    rehash  = 1,
+    eval    = 1,
+    ved     = 1,
+    };
+
   subclass Fork from Com
 
   def pre_com ()
@@ -422,6 +433,9 @@ class Com
       self.Fork.tofg (p, argv, env);
     else
       {
+      ifnot (COM_OPTS.bg_jobs)
+        return;
+
       self.Fork.tobg (p, argv, env);
       isscratch = NULL;
       }

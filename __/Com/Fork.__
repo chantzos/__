@@ -139,6 +139,9 @@ subclass Fork
   end
 
   def tobg (p, argv, env)
+    ifnot (COM_OPTS.bg_jobs)
+      return;
+
     env = [env, "BG=" + BGDIR];
 
     OUTBG_VED.st_.st_size = fstat (STDOUTFDBG).st_size;

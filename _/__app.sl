@@ -522,19 +522,28 @@ public define init_commands ()
   a["edit"] = @Argvlist_Type;
   a["edit"].func = &__edit__;
 
-  a["eval"] = @Argvlist_Type;
-  a["eval"].func = &__eval;
-  a["eval"].type = "Func_Type";
+  if (COM_OPTS.eval)
+    {
+    a["eval"] = @Argvlist_Type;
+    a["eval"].func = &__eval;
+    a["eval"].type = "Func_Type";
+    }
 
   a["messages"] = @Argvlist_Type;
   a["messages"].func = &__messages;
 
-  a["ved"] = @Argvlist_Type;
-  a["ved"].func = &__ved__;
+  if (COM_OPTS.ved)
+    {
+    a["ved"] = @Argvlist_Type;
+    a["ved"].func = &__ved__;
+    }
 
-  a["rehash"] = @Argvlist_Type;
-  a["rehash"].func = &__rehash__;
-  a["rehash"].type = "Func_Type";
+  if (COM_OPTS.rehash)
+    {
+    a["rehash"] = @Argvlist_Type;
+    a["rehash"].func = &__rehash__;
+    a["rehash"].type = "Func_Type";
+    }
 
   a["echo"] = @Argvlist_Type;
   a["echo"].func = &__echo__;
@@ -548,24 +557,33 @@ public define init_commands ()
 
   a["w!"] = a["w"];
 
-  a["bgjobs"] = @Argvlist_Type;
-  a["bgjobs"].func = &list_bg_jobs;
+  if (COM_OPTS.bg_jobs)
+    {
+    a["bgjobs"] = @Argvlist_Type;
+    a["bgjobs"].func = &list_bg_jobs;
 
-  a["killbgjob"] = @Argvlist_Type;
-  a["killbgjob"].func = &kill_bg_job;
+    a["killbgjob"] = @Argvlist_Type;
+    a["killbgjob"].func = &kill_bg_job;
+    }
 
   a["q"] = @Argvlist_Type;
   a["q"].func = &exit_me;
 
-  a["cd"] = @Argvlist_Type;
-  a["cd"].func = &__cd__;
+  if (COM_OPTS.chdir)
+    {
+    a["cd"] = @Argvlist_Type;
+    a["cd"].func = &__cd__;
+    }
 
   a["which"] = @Argvlist_Type;
   a["which"].func = &__which__;
 
-  a["search"] = @Argvlist_Type;
-  a["search"].func = &__search__;
-  a["search"].dir = Env->STD_COM_PATH + "/search";
+  if (COM_OPTS.search)
+    {
+    a["search"] = @Argvlist_Type;
+    a["search"].func = &__search__;
+    a["search"].dir = Env->STD_COM_PATH + "/search";
+    }
 
   variable pj = "PROJECT_" + strup (This.is.my.name);
   variable f = __get_reference (pj);
