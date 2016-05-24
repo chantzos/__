@@ -476,6 +476,42 @@ private define __detach (argv)
   App.detach ();
 }
 
+private define __help (argv)
+{
+  variable k = App->APPSINFO[This.is.my.name];
+
+  ifnot (NULL == Opt.Arg.exists ("--edit", &argv))
+    {
+    variable f = I.get_src_path (k.dir) + "/help.txt";
+    App.Run.as.child (["__ved", f]);
+    draw (Ved.get_cur_buf ());
+    return;
+    }
+
+  ifnot (NULL == k.help)
+    ifnot (access (k.help, F_OK|R_OK))
+      ifnot (File.copy (k.help, SCRATCH))
+        __scratch (NULL);
+}
+
+private define __info (argv)
+{
+  variable k = App->APPSINFO[This.is.my.name];
+
+  ifnot (NULL == Opt.Arg.exists ("--edit", &argv))
+    {
+    variable f = I.get_src_path (k.dir) + "/desc.txt";
+    App.Run.as.child (["__ved", f]);
+    draw (Ved.get_cur_buf ());
+    return;
+    }
+
+  ifnot (NULL == k.info)
+    ifnot (access (k.info, F_OK|R_OK))
+      ifnot (File.copy (k.info, SCRATCH))
+        __scratch (NULL);
+}
+
 public define init_functions ()
 {
   variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
@@ -496,6 +532,15 @@ public define init_functions ()
   a["@clear"].func = &__clear__;
   a["@clear"].args = ["--stderr void clear stderr (default is scratch)",
                       "--stdout void clear stdout"];
+
+  a["@help"] = @Argvlist_Type;
+  a["@help"].func = &__help;
+  a["@help"].args = ["--edit void edit help file"];
+
+  a["@info"] = @Argvlist_Type;
+  a["@info"].func = &__info;
+  a["@info"].args = ["--edit void edit info file"];
+
   a;
 }
 

@@ -73,8 +73,8 @@ class App
         ifnot (access (dir + "/" + app + "/help.txt", F_OK|R_OK))
           APPSINFO[app].help = dir + "/" + app + "/help.txt";
 
-        ifnot (access (dir + "/" + app + "/info.txt", F_OK|R_OK))
-          APPSINFO[app].info = dir + "/" + app + "/info.txt";
+        ifnot (access (dir + "/" + app + "/desc.txt", F_OK|R_OK))
+          APPSINFO[app].info = dir + "/" + app + "/desc.txt";
 
         ifnot (access (dir + "/" + app + "/set", F_OK|R_OK))
           APPSINFO[app].set = File.readlines (dir + "/" + app + "/set");

@@ -1,4 +1,31 @@
 class I
+  def get_src_path (path)
+    variable
+      is_local = -1,
+      is_user = -1,
+      is_std = strncmp (path, Env->STD_PATH, strlen (Env->STD_PATH));
+
+    if (is_std)
+      {
+      is_user = strncmp (path, Env->USER_PATH, strlen (Env->USER_PATH));
+      if (is_user)
+        {
+        is_local = strncmp (path, Env->LOCAL_PATH, strlen (Env->LOCAL_PATH));
+        if (is_local)
+          throw ClassError, "I::get_src_path::" + path + ", unhandled/unknown path";
+        }
+      }
+
+     ifnot (is_std)
+       return strreplace (path, Env->STD_PATH, Env->SRC_PATH);
+
+     ifnot (is_user)
+       return strreplace (path, Env->USER_PATH, Env->SRC_USER_PATH);
+
+     ifnot (is_local)
+       return strreplace (path, Env->LOCAL_PATH, Env->SRC_LOCAL_PATH);
+  end
+
 #ifnot NULL == This.is.child
   subclass Child from I
 
