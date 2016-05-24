@@ -91,7 +91,11 @@ subclass Srv
           break 2;
         }
       else if (Api->APP_CON_NEW == retval)
+        {
         self.connect_to_app (CUR_APP);
+        if (APP_ERR)
+          break 2;
+        }
       else
         break 2;
       }
@@ -143,7 +147,11 @@ subclass Srv
           break;
         }
       else if (Api->APP_CON_NEW == retval)
+        {
         self.connect_to_app (CUR_APP);
+        if (APP_ERR)
+          break;
+        }
       else
         break;
       }
@@ -223,6 +231,17 @@ subclass Srv
   end
 
   def connect_to_app (app)
+    ifnot (NULL == App->APPSINFO[app].set)
+      {
+      if (any (app == CONNECTED_APPS))
+        if (($1 = app, Anon->Fun (`
+            return any (0 == strncmp (App->APPSINFO[__tmp ($1)].set, "unique:1", 8));`)))
+          {
+          APP_ERR = 1;
+          return;
+          }
+      }
+
     variable clfifo = This.is.my.tmpdir + "/__" + app + "_client_" +
       string (_time)[[5:]] + ".fifo";
 

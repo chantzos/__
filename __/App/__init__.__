@@ -3,6 +3,7 @@ class App
     help,
     info,
     dir,
+    set,
   end
 
   typedef App
@@ -69,11 +70,14 @@ class App
         APPSINFO[app] = @AppInfo_Type;
         APPSINFO[app].dir = dir + "/" + app;
 
-        ifnot (access (dir + "/" + app + "/help.txt", F_OK))
+        ifnot (access (dir + "/" + app + "/help.txt", F_OK|R_OK))
           APPSINFO[app].help = dir + "/" + app + "/help.txt";
 
-        ifnot (access (dir + "/" + app + "/info.txt", F_OK))
+        ifnot (access (dir + "/" + app + "/info.txt", F_OK|R_OK))
           APPSINFO[app].info = dir + "/" + app + "/info.txt";
+
+        ifnot (access (dir + "/" + app + "/set", F_OK|R_OK))
+          APPSINFO[app].set = File.readlines (dir + "/" + app + "/set");
 
         APPS[app] = Assoc_Type[App_Type];
         }
