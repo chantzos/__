@@ -2067,6 +2067,14 @@ class Rline
         continue;
         }
 
+      if (Input->F3 == s._chr)
+        {
+        (@__get_reference ("next_wind")) (s);
+        set (NULL, s);
+        prompt (NULL, s, s._lin, s._col);
+        continue;
+        }
+
       if (any (Input->rmap.osappnew == s._chr))
         ifnot (NULL == s.osappnew)
           {

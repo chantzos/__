@@ -760,7 +760,7 @@ class Ved
     Ved.draw_wind ();
   end
 
-  def next_wind (s) proc
+  def next_wind (s) public proc
     wind_change (".");
   end
 
