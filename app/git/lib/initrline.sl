@@ -339,14 +339,17 @@ private define __add__ (argv)
     return;
     }
 
-  variable file = argv[1];
-  if (-1 == access (file, F_OK))
-    {
-    Smg.send_msg_dr (file + ": no such file", 1, NULL, NULL);
-    return;
-    }
+  variable files = argv[[1:]];
+  variable i;
 
-  ifnot (Scm.Git.add (file;redir_to_file = SCRATCH, flags = ">|"))
+  _for i (0, length (files) - 1)
+    if (-1 == access (files[i], F_OK))
+      {
+      Smg.send_msg_dr (files[i] + ": no such file", 1, NULL, NULL);
+      return;
+      }
+
+  ifnot (Scm.Git.add (files;redir_to_file = SCRATCH, flags = ">|"))
     {
     __scratch (NULL);
 

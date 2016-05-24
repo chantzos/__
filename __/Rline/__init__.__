@@ -624,7 +624,7 @@ class Rline
       len = strlen (ar[0]),
       new_str = len > index ? ar[0][[0:index]] : NULL,
       indices = NULL != new_str ? array_map (Char_Type, &string_match, ar,
-          str_quote_string (sprintf ("^%s", new_str), ".+", '\\')) : [0];
+        str_quote_string (sprintf ("^%s", new_str), ".+[]()?", '\\')) : [0];
 
     ifnot (length (ar) == length (where (indices)))
       return;
@@ -637,7 +637,7 @@ class Rline
     while (NULL != new_str)
       {
       indices = array_map (Char_Type, &string_match, ar,
-        str_quote_string (sprintf ("^%s", new_str), ".", '\\'));
+        str_quote_string (sprintf ("^%s", new_str), ".+[]()?", '\\'));
 
       if (length (ar) == length (where (indices)))
         {
