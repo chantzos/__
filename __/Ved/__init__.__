@@ -1336,13 +1336,13 @@ class Ved
     variable ar =
       ["@" + fn + " linenr: " + string (lnr+1),
        "replace?",
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        sprintf ("%s%s%s", fpart, context, lpart),
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        "with?",
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        sprintf ("%s%s%s", fpart, replace, lpart),
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        "y[es]/n[o]/q[uit]/a[ll]/c[ansel]"];
 
     variable hl_reg = Array_Type[2];

@@ -421,6 +421,10 @@ class Smg
     SLsmg_Screen_Rows, SLsmg_Screen_Cols;
   end
 
+  def __HLINE__ ()
+    repeat (char (8212), COLUMNS);
+  end
+
   beg
     array_map (Void_Type, &set_basic_color,
       ["normal", "error", "success", "warn", "prompt",

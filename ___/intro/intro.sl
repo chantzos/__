@@ -11,7 +11,7 @@ public define intro (rl, vd)
 {
   runcom (["moonphase", ">|" + SCRATCH], NULL;no_header);
 
-  () = File.append (SCRATCH, repeat ("_", COLUMNS) + "\n");
+  () = File.append (SCRATCH, Smg.__HLINE__ () + "\n");
 
   runcom (["battery",  ">>" + SCRATCH], NULL;no_header);;
 

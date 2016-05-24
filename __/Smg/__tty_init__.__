@@ -20,6 +20,10 @@ class Smg
     integer (retval[0]), integer (retval[1]);
   end
 
+  def __HLINE__ ()
+    repeat (char (8212), COLUMNS);
+  end
+
   def at_exit ()
   end
 

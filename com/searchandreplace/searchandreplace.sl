@@ -111,7 +111,7 @@ private define sed (file, s)
         {
         undiff = unified_diff (ar, file);
         undiff = NULL == undiff ? "No diff available" :
-          ["    UNIFIED DIFF", repeat ("_", COLUMNS), strchop (undiff, '\n', 0)];
+          ["    UNIFIED DIFF", Smg.__HLINE__ (), strchop (undiff, '\n', 0)];
 
         retval = IO.ask ([
           sprintf ("@write changes to `%s' ? y[es]/n[o]", file),

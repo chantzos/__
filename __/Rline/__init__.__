@@ -546,13 +546,12 @@ class Rline
       ifnot (s._ind)
         {
         if (1 == s._col)
+          {
           if (qualifier_exists ("accept_ws"))
-            {
             insert_at (s);
-            return;
-            }
-          else
-            return;
+
+          return;
+          }
 
         ifnot (length (s.argv) - 1)
           s.argv = [

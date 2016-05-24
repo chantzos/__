@@ -21,7 +21,7 @@ private define __write_info__ (s)
   variable info = Ved.get_frame_buf (1);
 
   () = File.write (info._abspath,
-    Ved.__HLINE__ () + "\n" +
+    Smg.__HLINE__ () + "\n" +
     "repository : " + s.name + "\n" +
     "branches   : " + strjoin (s.branches, ", ") + "\n" +
     "current    : " + (NULL == s.cur_branch ? "None yet" : s.cur_branch) + "\n" +

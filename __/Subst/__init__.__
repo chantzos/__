@@ -223,13 +223,13 @@ class Subst
     variable ar =
       ["@" + fn + " linenr: " + string (lnr+1),
        "replace?",
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        sprintf ("%s%s%s", fpart, context, lpart),
        repeat ("_", COLUMNS),
        "with?",
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        sprintf ("%s%s%s", fpart, replace, lpart),
-       repeat ("_", COLUMNS),
+       Smg.__HLINE__ (),
        "y[es]/n[o]/q[uit]/a[ll]/c[ansel]"];
 
     hl_reg[0] = [5, LINES - 10, strlen (fpart), 1, strlen (context)];

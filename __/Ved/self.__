@@ -452,8 +452,4 @@ beg
       opt_show_status_line = 1,
       };
   end
-
-  def __HLINE__ ()
-    repeat (char (8212), COLUMNS);
-  end
 end

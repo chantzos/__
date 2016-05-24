@@ -507,7 +507,7 @@ private define ved_err_handler (t, _s_)
 
   variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["PUBLIC"]);
   () = lseek (fd, 0, SEEK_END);
-  IO.tostdout (Ved.__HLINE__ ();fd = fd);
+  IO.tostdout (Smg.__HLINE__ ();fd = fd);
   IO.tostdout (Env->PID, ERR_STACK;fd = fd);
   IO.tostdout (t;fd = fd);
   IO.tostdout (Struct.to_string (_s_);fd = fd);
