@@ -512,6 +512,22 @@ private define __info (argv)
         __scratch (NULL);
 }
 
+private define __edit_history (argv)
+{
+  variable rl = Ved.get_cur_rline ();
+
+  if (NULL == rl.histfile)
+    return;
+
+  if (length (rl.history))
+    Rline.writehistory (rl.history, rl.histfile);
+
+  App.Run.as.child (["__ved", rl.histfile]);
+  draw (Ved.get_cur_buf ());
+
+  rl.history = Rline.readhistory (rl.histfile);
+}
+
 public define init_functions ()
 {
   variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
@@ -540,6 +556,9 @@ public define init_functions ()
   a["@info"] = @Argvlist_Type;
   a["@info"].func = &__info;
   a["@info"].args = ["--edit void edit info file"];
+
+  a["@history_edit"] = @Argvlist_Type;
+  a["@history_edit"].func = &__edit_history;
 
   a;
 }
