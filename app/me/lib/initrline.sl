@@ -278,6 +278,69 @@ private define __myrepo (argv)
   draw (Ved.get_cur_buf ());
 }
 
+private define __sync_to (argv)
+{
+  variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
+  variable interactive_copy   = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
+  variable to;
+
+  (to, ) = Opt.Arg.compare ("--to=", &argv;del_arg, ret_arg);
+
+  if (NULL == to)
+    {
+    IO.tostderr ("no target specified, needs the --to= option");
+    __messages;
+    return;
+    }
+
+  to = strchop (to, '=', 0);
+
+  if (1 == length (to))
+    {
+    IO.tostderr ("--to= option doesn't specify a target");
+    __messages;
+    return;
+    }
+
+  to = to[1];
+
+  if (-1 == access (to, F_OK))
+    {
+    if (-1 == Dir.make_parents (to, File->PERM["_PUBLIC"]))
+      {
+      IO.tostderr (to, "Couldn't create directory");
+      __messages;
+      return;
+      }
+    }
+  else
+    ifnot (Dir.isdirectory (to))
+      {
+      IO.tostderr (to, "not a directory");
+      __messages;
+      return;
+      }
+
+  variable from = Env->SRC_PATH;
+
+  variable sync = Sync.init ();
+
+  sync.interactive_remove = NULL == no_interactive_remove ? 0 : 1;
+  sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
+
+  to = strtrim_end (to, "/");
+
+  variable exit_code = sync.run (from, to;fd = SCRATCHFD);
+
+  if (exit_code)
+    {
+    IO.tostderr (sprintf ("sync failed, EXIT_CODE: %d", exit_code));
+    __messages;
+    }
+  else
+    __scratch (NULL);
+}
+
 private define my_commands ()
 {
   variable a = init_commands ();
@@ -297,6 +360,13 @@ private define my_commands ()
 
   a["myrepo"] = @Argvlist_Type;
   a["myrepo"].func = &__myrepo;
+
+  a["sync_to"] = @Argvlist_Type;
+  a["sync_to"].func = &__sync_to;
+  a["sync_to"].args = [
+    "--no-remove-interactive void no confirmation on remove extra files, default yes",
+    "--copy-interactive void confirmation when syncing, default no",
+    "--to= filename target directory"];
 
   a;
 }

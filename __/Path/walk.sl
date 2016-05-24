@@ -5,6 +5,8 @@
 % terms of the GNU General Public License.  See the file COPYING for
 % more information.
 
+% Modified for the distribution
+
 private define process_dir (w, dir, dir_st);
 
 private define process_dir (w, dir, dir_st)
@@ -13,7 +15,7 @@ private define process_dir (w, dir, dir_st)
 
   if (w.dir_method != NULL)
     {
-	   status = (@w.dir_method) (dir, dir_st, __push_list (w.dir_method_args));
+	   status = (@w.dir_method) (dir, dir_st, __push_list (w.dir_method_args);;__qualifiers);
 
 	   if (status <= 0)
     return status;
@@ -33,7 +35,7 @@ private define process_dir (w, dir, dir_st)
 
    	if (stat_is ("dir", st.st_mode))
    	  {
-      status = process_dir (w, file, dir_st);
+      status = process_dir (w, file, dir_st;;__qualifiers);
 
 	     if (status < 0)
 	       return status;
@@ -44,7 +46,7 @@ private define process_dir (w, dir, dir_st)
    	if (w.file_method == NULL)
    	  continue;
 
-   	status = (@w.file_method) (file, st, __push_list(w.file_method_args));
+   	status = (@w.file_method) (file, st, __push_list(w.file_method_args);;__qualifiers);
    	if (status <= 0)
    	  return status;
     }
@@ -59,7 +61,7 @@ private define fswalk (w, start)
    	throw ClassError, "FSwalkInvalidParmError::" + _function_name +
       "::" + start + " is not a directory";
 
-  () = process_dir (w, start, st);
+  () = process_dir (w, start, st;;__qualifiers);
 }
 
 private define fswalk_new (dir_method, file_method)
@@ -81,5 +83,5 @@ private define fswalk_new (dir_method, file_method)
 
 private define walk (self, dir, dir_method, file_method)
 {
-  fswalk_new (dir_method, file_method;;__qualifiers).walk (dir);
+  fswalk_new (dir_method, file_method;;__qualifiers).walk (dir;;__qualifiers);
 }

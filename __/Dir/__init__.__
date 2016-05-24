@@ -61,7 +61,7 @@ class Dir
         }
 
       if (qualifier ("verbose"))
-        IO.tostdout ("created directory `" + dir + "'");
+        IO.tostdout ("created directory `" + dir + "'";;__qualifiers);
 
       st = lstat_file (dir);
 

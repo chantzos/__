@@ -63,7 +63,7 @@ private define __my_copy_verb__ (source, dest)
     return -1;
     }
 
-  IO.tostdout (sprintf ("`%s' -> `%s' ", source, dest);n);
+  IO.tostdout (sprintf ("`%s' -> `%s' ", source, dest);;struct {@__qualifiers, n});
 
   while (-1 != fread (&buf, String_Type, 4096, source_fp))
     {
@@ -81,7 +81,7 @@ private define __my_copy_verb__ (source, dest)
     __my_send_msg__ (msg, &progrbts);
     }
 
-  IO.tostdout (" ");
+  IO.tostdout (" ";;__qualifiers);
 
   if (-1 == fclose (source_fp) || -1 == fclose (dest_fp))
     {
