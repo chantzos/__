@@ -48,6 +48,9 @@ class Rline
     type,
   end
 
+  var __HISTORY__ = Assoc.new (Array_Type, ["PATTERN", "FNAME"],
+    {String_Type[0], String_Type[0]});
+
   def _glob_ (argv) proc
     variable
       i,
@@ -1567,6 +1570,8 @@ class Rline
 
     Smg.setrcdr (prow, strlen (rl.argv[0]));
 
+    variable i, h_ind = 0;
+
     forever
       {
       rl._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
@@ -1578,7 +1583,43 @@ class Rline
         {
         @pat = '\r' == rl._chr ? rl.argv[0] : "";
         s.cmp_lnrs = rl.cmp_lnrs;
-        return;
+        break;
+        }
+
+      if (Input->UP == rl._chr)
+        {
+        try (err)
+          {
+          pcrepat = pcre_compile (rl.argv[0], 0);
+          variable m = where (array_map (Integer_Type, &pcre_exec, pcrepat,
+            __HISTORY__["PATTERN"], 0));
+          variable l = length (m);
+
+          if (l)
+            {
+            i = 0;
+            h_ind = m[i];
+            rl.argv[0] = __HISTORY__["PATTERN"][h_ind];
+            rl._lin = rl.argv[0];
+            rl._col = strlen (rl.argv[0]) + 1;
+            Smg.atrcaddnstrdr (rl.argv[0], 7, prow, 0, prow, rl._col - 1, rl._columns);
+            while ((rl._chr = Input.getch (
+                ;on_lang = s.on_lang, on_lang_args = s.on_lang_args), rl._chr == Input->UP))
+              {
+              if (i == l - 1)
+                i = 0;
+              else
+                i++;
+
+              h_ind = m[i];
+              rl.argv[0] = __HISTORY__["PATTERN"][h_ind];
+              rl._lin = rl.argv[0];
+              rl._col = strlen (rl.argv[0]) + 1;
+              Smg.atrcaddnstrdr (rl.argv[0], 7, prow, 0, prow, rl._col - 1, rl._columns);
+              }
+            }
+          }
+        catch ParseError: {}
         }
 
       rl._lin = rl.argv[0];
@@ -1594,6 +1635,10 @@ class Rline
 
       Smg.atrcaddnstrdr (rl.argv[0], 7, prow, 0, prow, rl._col - 1, rl._columns);
       }
+
+    if (strlen (rl.argv[0]))
+      Array.insert (&__HISTORY__["PATTERN"], rl.argv[0]);
+
   end
 
   % split to functions so we can call them from the structure

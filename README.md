@@ -1,12 +1,21 @@
 This is a very first draft of a proper README.
 
-This project started for self educating - and for quite a long time belonged  
+## intro
+For now this project can be useful to:
+ - S-Lang programmers or to those who like to make themselves a favor and want to  
+migrate to a powerfull, fast, efficient, super easy interpreted language and who they  
+could get some code or ideas or hack in an existing codebase
+ - vi[m], shell, text mode lovers, who might find an interface design|prototype  
+to implement it into their favorite language
+
+## History
+So, this project started for self educating - and for quite a long time belonged  
 to the futile category of human activities - and though definitely there were  
 better things to do at that time (than programming), (now) I'm in a nice  
 position to explain and demystify some of (at least) the common programming   
-consepts (which usually it takes a couple of years), and if time and situations  
-allows it, to (at least) my kids, in an environment that proper education is   
-a futile dream.
+consepts (which usually it takes a couple of years to grasp and some thousand lines  
+of written code to master), and if time and situations will allow it, to (at least) 
+my kids, in an environment that proper education is  a futile dream.
  
 ## NOTE.
 The code status of this application, is at the moment just a published  
@@ -138,6 +147,20 @@ note that this application always targets S-Lang development sources,
 
 git://git.jedsoft.org/git/slang.git
 
+by default if you issue:
+
+```bash
+./configure && make && sudo make install
+```
+
+will install S-Lang into /usr/local namespace and it won't class with existing  
+installations: (note however, if there are problems to load the right libraries, try  
+to adjust and point to them by (at least in Linux) using LD_LIBRARY_PATH, and also  
+note that slsh interpeter will be used once at the initial installation and it won't  
+be needed again)
+
+so, to install this distribution issue: 
+(assuming foo is an existing directory with read/write/execute access rights)
 
 ```bash
 mkdir foo
@@ -147,7 +170,7 @@ cd __
 slsh ___.sl --verbose
 ```
 
-## NOTE
+## NOTES
 
 The standard command line utilities can be reached within a real shell  
 and they are prefixed with two underscores. But a couple of them however, they  
@@ -188,8 +211,12 @@ simple and very easy to learn, with a syntax and logic that resembles C.
  
 However, libraries with an "__" extension are written with a syntax  
 that is not all valid code for S-Lang.  Such files are parsed by the  
-"_/__.sl" library and uses mature (nowdays) syntax.  For now this syntax  
-is used for declarations reasons.  
+"_/__.sl" library and uses mature (nowdays) common syntax found in popular  
+languages like Ruby or Python.  
+But, for now this syntax  is used for declarations reasons but there is a  
+continuasly interest to evolve (there are some ideas about an agnostic syntax  
+prototyping)  
+
 The system is based on a very simple object oriented style of programming.  
 All the methods are executing throw a intermediate function, which is responsible to print  
 in details the errors, and to call a callback error handler.  

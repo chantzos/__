@@ -349,7 +349,7 @@ private define __add__ (argv)
       return;
       }
 
-  ifnot (Scm.Git.add (files;redir_to_file = SCRATCH, flags = ">|"))
+  ifnot (Scm.Git.add (Array.push (files);redir_to_file = SCRATCH, flags = ">|"))
     {
     __scratch (NULL);
 
