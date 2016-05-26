@@ -1,6 +1,6 @@
 This is a very first draft of a proper README.
 
-## intro
+## Introduction
 For now this project can be useful to:
  - S-Lang programmers or to those who like to make themselves a favor and want to  
 migrate to a powerfull, fast, efficient, super easy interpreted language and who they  
@@ -16,11 +16,20 @@ position to explain and demystify some of (at least) the common programming
 consepts (which usually it takes a couple of years to grasp and some thousand lines  
 of written code to master), and if time and situations will allow it, to (at least) 
 my kids, in an environment that proper education is  a futile dream.
+The first code was written in spring of 2010, when for the sake of introduction to    
+S-Lang, I wrote the basic system utilities.  Later, I wrote some glue code, 
+based on the slsmg module, to run this code and other personal functions under a 
+common (indepented of the running shell and terminal emulators) interface, where  
+naturally it was evolved into a first very primitive window system.  I stabilized  
+a first api around 2012 and then I started to iterate over the api. This is the  
+third (low level) rewrite, yet much of the code still exists from the very first  
+scratch code.  (for reference, on every iteration takes me less and less time to  
+readjust and I realized the importantance of this programming consept)
  
-## NOTE.
+## Status
 The code status of this application, is at the moment just a published  
-personalization environment, though the code itself after a couple of  
-itterations is quite stable in places.         
+personalization environment, though I'm very close to a stable to a so called  
+application layer, but and the code itself is quite stable in places.  
 But, for instance doesn't catch and handle sigwinch, since I work  
 exclusively in maximized terminals throw ratpoison's era (2005)  
 followed by other window managers with the same logic.  
@@ -33,7 +42,7 @@ calculations). Though not enough complicated, it needs thinking and
 I'm not interest to give priority to do that thinking (now) for something it  
 never happens.  
 
-But! One of the intentions _was|is_ the personalization.   
+But! One of the major intentions _is_ the personalization.  
  
 And how else can you accomplish this in its glorious extend, other than to   
 know how to either modify (existing) code or develop new?  
@@ -48,7 +57,7 @@ api changes, that usually you have to re-learn things and possible throw away th
 gained knowledge.  At the end, the user usually becomes a follower of other people  
 choises, like them or not.  If he has enough motivation she could try other solutions,  
 other applications, other desktop environments, other window managers, other operating  
-systems.  That quite probably, means different switches, libraries, interface, keybindings,  
+systems.  That (quite probably) means different switches, libraries, interface, keybindings,  
 menus, philosophy ... and again and again ...
 
 So, ideally.
@@ -56,17 +65,29 @@ So, ideally.
  - yet the underlying code could or _should_ be evolved in eternity (better memory  
    managment, optimized code, catching corner cases and code errors, handle code errors, 
    easier api ...)  
+
 Again: how else can you do that, other than writting and express yourself with code,  
 written in your prefered language?
+(In fact, there is no care for a config system nor it will ever be, thus to modify  
+the behavior of certain actions it should be done by hacking explicitly on the code.  
+That's why is important, that the applications should be written in our favorite  
+language, where we have total control over the code. In my opinion the most criticals 
+coding cares are:
+ - to be written in such way that it is easy to change it
+ - to stabilize an api or better an abstraction layer, that no matters  
+   of the underlying code evolution, there can be always a communication or at the  
+   worst, that few lines of code should change, to adapt to otherwise incompatible  
+   changes)
 
 So this a vi(m) like application written in S-Lang.
 
 I adopted vim's UI, because that is what I've used to, for over a decade now,  
 (it's noiseless), but most importantly I believe that the mode consept, it   
 really makes sense.  It's allowing flexibility and extensebility without much  
-of complication.  Actually, is a combination of a shell (with too much influence of zsh)  
-an editor and a terminal multiplexer (without the de|attached capability, 
-for this a specialized tool like abduco can be used), bundled together.  
+of complication, neither in code nor its usage.  
+Actually, it's a combination of a shell (with too much influence of zsh superiority),   
+an editor and a terminal multiplexer (without the de|attached capability, which  
+for this, a specialized tool like abduco can be used), bundled together.  
 
 For now published are three applications.
 - a shell (rather stable), that acts like a common shell, with some exceptions, notably:
@@ -98,12 +119,12 @@ their Gnu-coreutils counterparts, with some extensions, but which are _common_ t
 that makes use of them.  
 
 Those commands are available throw a normal shell, prefixed with two underscores and are  
-installed in bin directory that is installed/created during initial installation.  
+installed in the bin directory that is installed/created during initial installation.  
 (note, that this application is not intended to be installed to the system namespace, as  
 sources namespace and execution namespace have interchangeable relation to each other, so  
 the bin directory is relative to the cloned sources) 
 
-Those same commands are available in the __shell, accessible throw tab, but to all the other  
+Those same commands are available in the __shell, accessible through tab, but to all the other  
 applications throw "!" as the first char in the command line.  
 
 Available also, which is intended to play the major role in the whole experience, is a readline  
@@ -122,19 +143,21 @@ Applications can execute foreground but aldo background jobs.
 Applications can start at the same window/process other instances of themselves, without forking  
 a new process.
 
-Applications can start other applications (throw F2), in separate procces and with no connection to  
+Applications can start other applications (through F2), in separate procces and with no connection to  
 each other.  Responsible for this is the master process (the first one that started),  
-which is also indicated as master to the drawing line at the top).
+which is also indicated as MASTER to the drawing line at the top).
 
 Also, they can put themselves in idled mode, unless it's the master process (which currently exits),  
 and can cycle throw the running applications using F1.  
 The ":q" command exits the focused application - for now if it's the master application this  
 results in an grand exit, but this should change; at least in the case of the master process  
-there should be a forced confirmation.  
+there should be a forced confirmation - done in 82f23bc)  
 
 Also, they can start children of applications, which they have relation only to the application that  
 started them, and cannot be seen by others, neither can see others.  Those can be dettached and return  
 the focus to its parent process by using Ctrl-j, and reattached from its parent throw F5. 
+(for now children can start children (which is in testing phase) but idle and quit is the same  
+thing for them)
 
 So, that's the design so far and I think few things will change in this regard.
 
@@ -147,7 +170,7 @@ note that this application always targets S-Lang development sources,
 
 git://git.jedsoft.org/git/slang.git
 
-by default if you issue:
+on which (after cloning) by default if you issue:
 
 ```bash
 ./configure && make && sudo make install
@@ -156,7 +179,7 @@ by default if you issue:
 will install S-Lang into /usr/local namespace and it won't class with existing  
 installations: (note however, if there are problems to load the right libraries, try  
 to adjust and point to them by (at least in Linux) using LD_LIBRARY_PATH, and also  
-note that slsh interpeter will be used once at the initial installation and it won't  
+note that the slsh interpeter will be used once at the initial installation and it won't  
 be needed again)
 
 so, to install this distribution issue: 
@@ -171,7 +194,6 @@ slsh ___.sl --verbose
 ```
 
 ## NOTES
-
 The standard command line utilities can be reached within a real shell  
 and they are prefixed with two underscores. But a couple of them however, they  
 produce output to be parsed by the builtin applications, like the __search command, but which   
@@ -191,10 +213,20 @@ ROOT_PATH + "/__"    Source Code of the distribution
 ROOT_PATH + "/std"   Standard libraries, applications, commands
 ROOT_PATH + "/usr"   Libraries, applications, commands (published shared code)
 ROOT_PATH + "/local" Local code (cannot be published)
-ROOT_PATH + "/tmp"   Can be mounted as tmpfs
+ROOT_PATH + "/tmp"   Can be mounted as tmpfs (there is no cleaning at exit)
 ROOT_PATH + "/bin"   __slsh executable, and symlinks (can be in $PATH)
 
-Priorities.
+Subdirectories:
+
+_     (only in __) used for system initialization
+__    classes (in most cases the code needs parsing)
+___   libs (written in pure S-Lang)
+com   commands namespace
+app   application namespace
+data  used from standard applications and standard libraries
+usr/data (userspace) is being used to write every personal data
+
+## Priorities.
 
 The application table is bulding based in a init search at:
 USER_APP_PATH:STD_APP_PATH:LOCAL_APP_PATH
@@ -213,15 +245,9 @@ However, libraries with an "__" extension are written with a syntax
 that is not all valid code for S-Lang.  Such files are parsed by the  
 "_/__.sl" library and uses mature (nowdays) common syntax found in popular  
 languages like Ruby or Python.  
-But, for now this syntax  is used for declarations reasons but there is a  
-continuasly interest to evolve (there are some ideas about an agnostic syntax  
-prototyping)  
-
-The system is based on a very simple object oriented style of programming.  
-All the methods are executing throw a intermediate function, which is responsible to print  
-in details the errors, and to call a callback error handler.  
-Every application should has its own error_handler assigned to This.err_handler.  
-(in my mind, catching the errors is the number one priority when writting code) 
+But, for now this syntax is used for declarations reasons but there is a  
+continuous interest to evolve, which it does constantly (there are some ideas  
+about an agnostic syntax prototyping)  
 
 Anyway, because of those reasons (S-Lang and the home made (kind of) language), the application  
 is suitable for understand programming  concepts, and probably this is the number one intention,  
@@ -230,7 +256,7 @@ I hope it will help me to show (first) to my sons (I'm not sure about the daught
 that programming is easy and fun (it already helped me).  
 And because S-Lang is like C, I wanted also to lower the syntax noise a bit,  
 and it's one of the reasons I developed this syntax.  
-Plus, it's a familiar and established syntax, that it will help them to feel 
+Plus, because is a familiar and established syntax,it will help them to feel 
 at home whem it will get (naturally) in touch with them at later time. 
 
 ## C MIGRATION
@@ -252,8 +278,19 @@ or
 
 The quality of the code is good at places, though in the low level stuff there might  
 be obvious mistakes. This is the result of the age :) and my undecuated background.
- 
-## SLSH
+
+The system is based on a very simple object oriented style of programming.  
+All the methods are executing throw a intermediate function, which is responsible to print  
+in details the errors, and to call a callback error handler.  
+Every application should has its own error_handler assigned to This.err_handler.  
+(in my mind, catching the errors is the number one priority when writting code) 
+
+All the functions are bytecompiled (for faster loading) and the classes  
+are compiled first in S-Lang and then bytecompiled (some of the required classes  
+are already bytecompiled through initial installation, otherwise they got compiled  
+at the first run).
+
+## Run on slsh
 
 Below is the minimal sample to use this code in slsh. 
 
@@ -307,3 +344,22 @@ set_slang_load_path (__tmp ($5));
  
 #endif
 ```
+
+### WARNINGS
+Because of the development status, some parts of this Readme can contain  
+outdated information.
+
+This application written and run in a Linux system, but it should run on  
+other unixes too.
+
+This code was written by a self educuated human being :) in a time that he  
+should build a house for his four kids and to take care about those too, but  
+also to take care about some goats, gardens, forests and friends (around the  
+time of the so called Greek Crisis).  Like such it probably contains unacceptable  
+code errors.  
+ 
+## Thanks
+Special thanks to John E. Davis who wrote S-Lang and to the uncountable 
+contributors around this enormous open source ecosystem (which this model is  
+the reason that produced this trementous amount of code and this super fast  
+evolution, unbelievable for that short time).

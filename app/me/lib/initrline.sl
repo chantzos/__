@@ -321,6 +321,8 @@ private define __sync_to (argv)
       return;
       }
 
+  () = File.write (SCRATCH, "\000");
+
   variable from = Env->SRC_PATH;
 
   variable sync = Sync.init ();
@@ -329,6 +331,71 @@ private define __sync_to (argv)
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
 
   to = strtrim_end (to, "/");
+
+  variable exit_code = sync.run (from, to;fd = SCRATCHFD);
+
+  if (exit_code)
+    {
+    IO.tostderr (sprintf ("sync failed, EXIT_CODE: %d", exit_code));
+    __messages;
+    }
+  else
+    __scratch (NULL);
+}
+
+private define __sync_from (argv)
+{
+  variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
+  variable interactive_copy   = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
+  variable from;
+
+  (from, ) = Opt.Arg.compare ("--from=", &argv;del_arg, ret_arg);
+
+  if (NULL == from)
+    {
+    IO.tostderr ("no sources specified, needs the --from= option");
+    __messages;
+    return;
+    }
+
+  from = strchop (from, '=', 0);
+
+  if (1 == length (from))
+    {
+    IO.tostderr ("--from= option doesn't specify a sources path");
+    __messages;
+    return;
+    }
+
+  from = from[1];
+
+  if (-1 == access (from, F_OK))
+    {
+    if (-1 == Dir.make_parents (from, File->PERM["_PUBLIC"]))
+      {
+      IO.tostderr (from, "Couldn't create directory");
+      __messages;
+      return;
+      }
+    }
+  else
+    ifnot (Dir.isdirectory (from))
+      {
+      IO.tostderr (from, "not a directory");
+      __messages;
+      return;
+      }
+
+  () = File.write (SCRATCH, "\000");
+
+  variable to = Env->SRC_PATH;
+
+  variable sync = Sync.init ();
+
+  sync.interactive_remove = NULL == no_interactive_remove ? 0 : 1;
+  sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
+
+  from = strtrim_end (from, "/");
 
   variable exit_code = sync.run (from, to;fd = SCRATCHFD);
 
@@ -366,8 +433,14 @@ private define my_commands ()
   a["sync_to"].args = [
     "--no-remove-interactive void no confirmation on remove extra files, default yes",
     "--copy-interactive void confirmation when syncing, default no",
-    "--to= filename target directory"];
+    "--to= directory target directory"];
 
+  a["sync_from"] = @Argvlist_Type;
+  a["sync_from"].func = &__sync_from;
+  a["sync_from"].args = [
+    "--no-remove-interactive void no confirmation on remove extra files, default yes",
+    "--copy-interactive void confirmation when syncing, default no",
+    "--from= directory sources directory"];
   a;
 }
 
