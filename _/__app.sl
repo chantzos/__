@@ -482,7 +482,7 @@ private define __help (argv)
 
   ifnot (NULL == Opt.Arg.exists ("--edit", &argv))
     {
-    variable f = I.get_src_path (k.dir) + "/help.txt";
+    variable f = Me.get_src_path (k.dir) + "/help.txt";
     App.Run.as.child (["__ved", f]);
     draw (Ved.get_cur_buf ());
     return;

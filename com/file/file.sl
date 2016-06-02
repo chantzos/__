@@ -23,7 +23,7 @@ define main ()
 
   argv = [file_exec, files];
 
-  variable p = initproc (0, openstdout, 0);
+  variable p = initproc (0, openstdout, openstderr);
 
   status = p.execv (argv, NULL);
 

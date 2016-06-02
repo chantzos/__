@@ -47,7 +47,7 @@ define main ()
   else
     argv = [umount, mountpoint];
 
-  p = initproc (0, openstdout, 0);
+  p = initproc (0, openstdout, openstderr);
 
   status = p.execv (argv, NULL);
 

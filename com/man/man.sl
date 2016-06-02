@@ -112,7 +112,7 @@ define getpage (page)
         status = p.execv ([gzip, "-dc", page], NULL);
         }
       else
-        File.copy (page, sprintf ("%s/%s", MYMANDIR, match));
+        () = File.copy (page, sprintf ("%s/%s", MYMANDIR, match));
       }
 
     p = initproc (0, 1, 0);

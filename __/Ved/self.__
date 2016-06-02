@@ -46,10 +46,7 @@ beg
       }
 
     if (-1 == access (fname, W_OK))
-      {
       Smg.send_msg (fname + ": is Read Only", 1);
-      st._flags |= VED_RDONLY;
-      }
 
     variable lines = File.readlines (fname);
 
