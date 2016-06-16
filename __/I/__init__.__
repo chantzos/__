@@ -23,7 +23,7 @@ class I
   end
 #endif
 
-#ifnot NULL == This.is.atsession
+#ifnot NULL == This.is.at.session
   subclass Client from I
 
   def app_new (s) static proc
@@ -47,7 +47,7 @@ class I
   end
 #endif
 
-#if This.is.child == NULL == This.is.atsession
+#if This.is.child == NULL == This.is.at.session
   subclass Srv from I
 
   def app_new (s) static proc

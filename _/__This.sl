@@ -59,6 +59,10 @@ static define __INIT__ (role)
         ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)
         : __argv,
       },
+    request = struct
+      {
+      X,
+      },
     is = struct
       {
       me,
@@ -71,7 +75,11 @@ static define __INIT__ (role)
       master,
       parent,
       child,
-      atsession,
+      at = struct
+        {
+        X,
+        session,
+        },
       my = struct
         {
         role = role,
@@ -87,7 +95,7 @@ static define __INIT__ (role)
           type,
           fd,
           fn = __get_qualifier_as (
-          String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL),
+            String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL),
           },
         err = struct
           {

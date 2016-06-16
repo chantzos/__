@@ -1,3 +1,51 @@
+if (any ("--help" == __argv or  "-h" == __argv))
+  {
+  () = array_map (Integer_Type, &fprintf, stderr, "%s\n",
+    [
+     "INSTALLATION OPTIONS:",
+     "",
+     "  -v|--verbose   be verbose",
+     "  --no-color     don't colorize the output",
+     "  --debug        compile modules with debug flags",
+     "  --no-x         don't compile X code (xlib headers and libs are required)",
+     "  --compile=no   don't compile modules (usefull _only_ at later installations)",
+     "",
+     "PREQUISITIES:",
+     "",
+     "  pcre libs and headers",
+     "  openssl libs and headers",
+     "  curl libs and headers",
+     "  git",
+     "",
+     "NOTE:",
+     "This application targets S-Lang development tree and uses its latest features",
+     "  git://git.jedsoft.org/git/slang.git",
+     "because of that, there are very few chances to work with S-Lang that is installed by the distributions"
+    ]);
+
+  exit (0);
+  }
+
+private variable vers_str = _slang_version_string;
+private variable vers_int = _slang_version;
+private variable is_enough = 20301 <= vers_int;
+
+ifnot (is_enough)
+  {
+  () = fprintf (stderr, "S-Lang version is old and not compatible\n");
+  exit (1);
+  }
+
+is_enough = 20301 == vers_int;
+
+if (is_enough)
+  ifnot (strncmp (vers_str, "pre2.3.1-", 9))
+    if (atoi (vers_str[[9:]]) < 71)
+      {
+      () = fprintf (stderr, "S-Lang atleast patchlevel 2.3.1-71 is needed\n");
+      exit (1);
+      }
+
 private variable SRC_PATH =
   (SRC_PATH = path_concat (getcwd (), path_dirname (__FILE__)),
     SRC_PATH[[-2:]] == "/."
@@ -13,6 +61,7 @@ private variable ESCCOLOR = NOCOLOR ? "" : "\e[m";
 private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
 private variable CC = "gcc";
 public  variable DEBUG = any ("--debug" == __argv);
+private variable X = any ("--no-x" == __argv) ? 0 : 1;
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
   "iconv", "json"];
@@ -30,6 +79,13 @@ private variable CLASSES = [
   "String", "Rline",  "Re",    "Diff",   "Proc",  "Sock",
   "Subst",  "Sync",   "Ved",   "Api",    "Curl",  "Json",
   "Time",   "Scm",    "App",   "Com"];
+
+if (X)
+  {
+  MODULES = [MODULES, "xsrv", "xclient"];
+  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst"];
+  CLASSES = [CLASSES, "Xsrv", "Xclnt"];
+  }
 
 private variable THESE = Assoc_Type[String_Type];
 

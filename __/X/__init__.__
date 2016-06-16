@@ -1,0 +1,40 @@
+class X
+  var public Xsrv = NULL;
+
+#if This.request.X
+  def is_running ()
+    XIsRunning ();
+  end
+
+  def Xstart () proc
+    ifnot (is_running (NULL))
+      ifnot (NULL == Xsrv)
+        {
+        variable p = Proc.init (0, 1, 1);
+        variable argv = [Sys.which ("xinit"), Env->BIN_PATH + "/__xstart", "-nolisten", "tcp"];
+        variable status = p.execv (argv, NULL);
+        if (status.exit_status)
+          IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+        else
+          if (strlen (p.stdout.out))
+            IO.tostderr (strjoin (strtok (p.stdout.out, "\n"), "\n"));
+
+          __messages;
+        }
+  end
+
+  def comlist (a)
+    a["Xstart"] = @Argvlist_Type;
+    a["Xstart"].func = &Xstart;
+  end
+#endif
+
+#ifnot This.request.X
+  def is_running ()
+    NULL != Env->DISPLAY;
+  end
+
+  def comlist (a)
+  end
+#endif
+end

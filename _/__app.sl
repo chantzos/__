@@ -23,18 +23,31 @@ private define __err_handler__ (self, s)
   exit (1);
 }
 
-This.err_handler  = &__err_handler__;
-This.is.child     = getenv ("ISACHILD");
-This.is.atsession = getenv ("SESSION");
+This.err_handler   = &__err_handler__;
+This.is.child      = getenv ("ISACHILD");
+This.is.at.session = getenv ("SESSION");
 
 if (NULL == This.is.child)
   This.is.also = [This.is.also, "PARENT"];
 
 This.is.me = Anon->Fun (`
   if (NULL == This.is.child)
-    NULL == This.is.atsession ? "MASTER" : "PARENT";
+    NULL == This.is.at.session ? "MASTER" : "PARENT";
   else
     "CHILD";`);
+
+This.request.X = Anon->Fun (`
+  variable i = where ("--no-x" == This.has.argv);
+  if (length (i))
+    {
+    Array.delete_at (&This.has.argv, i[0]);
+    0;
+    }
+  else
+    ifnot (access (Env->STD_C_PATH + "/xsrv-module.so", F_OK))
+      1;
+    else
+      0;`);
 
 Load.module ("socket");
 
@@ -55,6 +68,17 @@ Class.load ("Api");
 Class.load ("App");
 
 This.at_exit = &_exit_;
+
+if (This.request.X)
+  Class.load ("Xclnt");
+
+Class.load ("X";force);
+
+This.is.at.X = X.is_running ();
+
+if (This.request.X)
+  ifnot (This.is.at.X)
+    Class.load ("Xsrv");
 
 Class.load ("I";force);
 
@@ -573,6 +597,8 @@ public define init_commands ()
   variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
 
   _build_comlist_ (a;;__qualifiers ());
+
+  X.comlist (a);
 
   a["scratch"] = @Argvlist_Type;
   a["scratch"].func = &__scratch;

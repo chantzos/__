@@ -745,25 +745,30 @@ class Rline
       lines;
 
     ifnot (qualifier_exists ("dont_format"))
+      {
       if (max_len < s._columns)
+        {
         items = s._columns / max_len;
+        if ((items - 1) + (max_len * items) > s._columns)
+          items--;
+        }
       else
         items = 1;
 
-    ifnot (qualifier_exists ("dont_format"))
-      if (max_len < s._columns)
-        if ((items - 1) + (max_len * items) > s._columns)
-          items--;
+      formar (items, fmt, ar, &bar);
+      }
+    else
+      bar = @ar;
 
     while ((i + 1) * s._columns <= acol)
       i++;
 
     bcol = acol - (s._columns * i);
 
-    ifnot (qualifier_exists ("dont_format"))
-      formar (items, fmt, ar, &bar);
-    else
-      bar = @ar;
+%    ifnot (qualifier_exists ("dont_format"))
+%      formar (items, fmt, ar, &bar);
+%    else
+%      bar = @ar;
 
     len = length (bar);
     @item = ar[index];
@@ -1177,6 +1182,45 @@ class Rline
         continue;
         }
 
+      if (65535 + Input->UP == chr)
+        {
+        variable l = length (__HISTORY__["FNAME"]);
+        variable i;
+
+        if (l)
+          {
+          i = 0;
+          s.argv[s._ind] = __HISTORY__["FNAME"][i];
+          s._col = strlen (strjoin (s.argv[[:s._ind]], " ")) + 1;
+          parse_args (NULL, s);
+          restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
+          prompt (NULL, s, s._lin, s._col);
+
+          while ((chr = Input.getch (;on_lang = s.on_lang, on_lang_args =
+             s.on_lang_args), any (chr == [Input->UP, 65535 + Input->UP])))
+            {
+            if (i == l - 1)
+              i = 0;
+            else
+              i++;
+
+            s.argv[s._ind] = __HISTORY__["FNAME"][i];
+            s._col = strlen (strjoin (s.argv[[:s._ind]], " ")) + 1;
+            parse_args (NULL, s);
+            restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
+            prompt (NULL, s, s._lin, s._col);
+            }
+
+          if (' ' == chr)
+            {
+            ifnot (any (__HISTORY__["FNAME"] == s.argv[s._ind]))
+              Array.insert (&__HISTORY__["FNAME"], s.argv[s._ind]);
+
+            return 0;
+            }
+          }
+        }
+
       if (033 == chr)
         {
         restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
@@ -1245,6 +1289,9 @@ class Rline
         restore (NULL, s.cmp_lnrs, '\r' == chr ? s.ptr : [s._row, s._col], 1, s._columns);
         ifnot ('\r' == chr)
           prompt (NULL, s, s._lin, s._col);
+
+        if (' ' == chr && 0 == any (__HISTORY__["FNAME"] == s.argv[s._ind]))
+          Array.insert (&__HISTORY__["FNAME"], s.argv[s._ind]);
 
         return '\r' == chr;
         }
@@ -1570,8 +1617,6 @@ class Rline
 
     Smg.setrcdr (prow, strlen (rl.argv[0]));
 
-    variable i, h_ind = 0;
-
     forever
       {
       rl._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
@@ -1586,8 +1631,10 @@ class Rline
         break;
         }
 
-      if (Input->UP == rl._chr)
+      if (any ([6535 + Input->UP, Input->UP] == rl._chr))
         {
+        variable i, h_ind;
+
         try (err)
           {
           pcrepat = pcre_compile (rl.argv[0], 0);
@@ -1603,8 +1650,8 @@ class Rline
             rl._lin = rl.argv[0];
             rl._col = strlen (rl.argv[0]) + 1;
             Smg.atrcaddnstrdr (rl.argv[0], 7, prow, 0, prow, rl._col - 1, rl._columns);
-            while ((rl._chr = Input.getch (
-                ;on_lang = s.on_lang, on_lang_args = s.on_lang_args), rl._chr == Input->UP))
+            while ((rl._chr = Input.getch (;on_lang = s.on_lang, on_lang_args =
+                s.on_lang_args), any ([Input->UP, 65535 + Input->UP] == rl._chr)))
               {
               if (i == l - 1)
                 i = 0;
@@ -1636,7 +1683,7 @@ class Rline
       Smg.atrcaddnstrdr (rl.argv[0], 7, prow, 0, prow, rl._col - 1, rl._columns);
       }
 
-    if (strlen (rl.argv[0]))
+    if (strlen (rl.argv[0]) && 0 == any (rl.argv[0] == __HISTORY__["PATTERN"]))
       Array.insert (&__HISTORY__["PATTERN"], rl.argv[0]);
 
   end
@@ -1710,6 +1757,9 @@ class Rline
         s.argv[s._ind] += tmp;
         s._col = baselen + strlen (s.argv[s._ind]) + 1;
         parse_args (NULL, s);
+
+        ifnot (any (__HISTORY__["FNAME"] == s.argv[s._ind]))
+          Array.insert (&__HISTORY__["FNAME"], s.argv[s._ind]);
 
         s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
         prompt (NULL, s, s._lin, s._col);

@@ -1,0 +1,13 @@
+ SYNOPSIS
+  start X
+
+ USAGE
+  xstart
+
+ DESCRIPTION
+  start X and do the window managment
+
+ OPTIONS
+	
+  --info         Show info
+  --help         Show help

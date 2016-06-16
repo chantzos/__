@@ -33,11 +33,11 @@ char *myStrCat (char *s, char *a)
 /*
  see
  http://stackoverflow.com/questions/5770940/how-repeat-a-string-in-language-c?
- 
+
  By using above function instead of strcat, execution is multiply faster.
  Also the following slang code is much faster than using strcat and sligtly slower
  than the repeat intrinsic
- 
+
 define repeat (str, count)
 {
   ifnot (0 < count)
@@ -61,7 +61,7 @@ static void repeat_intrin (char *str, int *count)
     (void) SLang_push_string ("");
     return;
     }
- 
+
   /* strlen returns size_t */
   res = (char *) SLmalloc (strlen (str) * (size_t) *count + 1);
 

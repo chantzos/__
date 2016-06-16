@@ -1,12 +1,38 @@
 This is a very first draft of a proper README.
 
 ## Introduction
+This project is a prototype of some ideas of a way to interact with a computer.  
+It is implemented in S-Lang programming language with some of C code.  
+
 For now this project can be useful to:
  - S-Lang programmers or to those who like to make themselves a favor and want to  
 migrate to a powerfull, fast, efficient, super easy interpreted language and who they  
 could get some code or ideas or hack in an existing codebase
  - vi[m], shell, text mode lovers, who might find an interface design|prototype  
 to implement it into their favorite language
+
+Obviously it's not for (so to say) production environments (nor it meant to be or it should  
+ever be), as it's quite idiosycratic,  but mainly because it quite probably contains  
+unsafe C code (on which I'm not in a position to control).  
+However is a quite productive environment as it is designed (or it was intented) to be  
+easy to use (guide you by a customized readline interface), but also easy to extent  
+by writing all kind of personal functions, under a spartan and common to all, ala vi(m)  
+interface.
+
+The end intention and ambition (of this application) is to get (at some point and with  
+no excuses)  total control of the computer, that means code that can handle
+ 
+  - the startup and the end (functional code about the login and the cleanup already  
+written in the previous api)
+  - interface consistency either under VT consoles or under X graphical environment
+(this implies of course and a built in managment for both) (as of 15 May there is ready  
+for commiting a first working prototype of window manager)
+  - system managment (the primitive functions already implemented)
+  - application managment (that means even how and which they will start up) 
+  - application interactivity (this already is handled)
+  - at least primitive needs (which means at least email and internet stuff (this is  
+the hardest part because of the unfriendly web environment, which is written in a  
+way that makes hard to use it for what it was meant to be))
 
 ## History
 So, this project started for self educating - and for quite a long time belonged  
@@ -15,21 +41,21 @@ better things to do at that time (than programming), (now) I'm in a nice
 position to explain and demystify some of (at least) the common programming   
 consepts (which usually it takes a couple of years to grasp and some thousand lines  
 of written code to master), and if time and situations will allow it, to (at least) 
-my kids, in an environment that proper education is  a futile dream.
+my kids, in an environment that proper education is a futile dream.
 The first code was written in spring of 2010, when for the sake of introduction to    
-S-Lang, I wrote the basic system utilities.  Later, I wrote some glue code, 
+S-Lang, I wrote the basic system utilities.  Later, some glue code was written, 
 based on the slsmg module, to run this code and other personal functions under a 
 common (indepented of the running shell and terminal emulators) interface, where  
-naturally it was evolved into a first very primitive window system.  I stabilized  
-a first api around 2012 and then I started to iterate over the api. This is the  
-third (low level) rewrite, yet much of the code still exists from the very first  
-scratch code.  (for reference, on every iteration takes me less and less time to  
-readjust and I realized the importantance of this programming consept)
+naturally it was evolved into a first very primitive window system.
+I stabilized a first api around 2012 and then I started to iterate over the api. 
+This is the third (low level) rewrite, yet much of the code still exists from the  
+very first scratch code.  (for reference, on every iteration takes me less and less  
+time to  readjust and I realized the importantance of this programming consept)
  
 ## Status
 The code status of this application, is at the moment just a published  
 personalization environment, though I'm very close to a stable to a so called  
-application layer, but and the code itself is quite stable in places.  
+application layer, but also the code itself is quite stable in places.  
 But, for instance doesn't catch and handle sigwinch, since I work  
 exclusively in maximized terminals throw ratpoison's era (2005)  
 followed by other window managers with the same logic.  
@@ -91,11 +117,11 @@ for this, a specialized tool like abduco can be used), bundled together.
 
 For now published are three applications.
 - a shell (rather stable), that acts like a common shell, with some exceptions, notably:
-   - the output is not printed at real time
-   - the output buffer is redirected to files (one for standard out and  
+   -- the output is not printed at real time
+   -- the output buffer is redirected to files (one for standard out and  
      one for standard error), but which can be both edited (actually everything  
      should be editable)
-   - pipes are not yet implemented (I have to find a way that really makes
+   -- pipes are not yet implemented (I have to find a way that really makes
      sense, it's easy and can be achieved (probably) differently than on shells)  
 
 - an editor called ved (which is considered as alpha, as this is the first write),  
@@ -112,6 +138,13 @@ For now published are three applications.
    reason for this, is that I (while I can) don't want to reset the terminal state to get  
    input from standard input, as I would like to deal with the login/password stuff within  
    the application.   
+
+Available (at the time of writing this, that is 16 of May) also a first functional window  
+manager. Much of the code was taken by dmimiwm (many many thanks)
+https://github.com/moetunes/dminiwm.git
+
+So, this is window manager with a fullscreen mode (default mode for all desktops except one),  
+and a floating mode where the windows can be moved and resized with the keyboard.
 
 
 Also available, are many of the basic system commands, which they mimic the behavior with  
@@ -186,7 +219,6 @@ so, to install this distribution issue:
 (assuming foo is an existing directory with read/write/execute access rights)
 
 ```bash
-mkdir foo
 cd foo
 git clone https://github.com/chantzos/__.git
 cd __
@@ -196,8 +228,9 @@ slsh ___.sl --verbose
 ## NOTES
 The standard command line utilities can be reached within a real shell  
 and they are prefixed with two underscores. But a couple of them however, they  
-produce output to be parsed by the builtin applications, like the __search command, but which   
-can be feeded to ved like:
+produce output to be parsed by the builtin applications, like the __search command,  
+but which can be feeded to ved like:
+
 ```bash
 __search --pat=PATTERN --recursive dir | __ved --ftype=diff -
 ```
@@ -257,12 +290,14 @@ that programming is easy and fun (it already helped me).
 And because S-Lang is like C, I wanted also to lower the syntax noise a bit,  
 and it's one of the reasons I developed this syntax.  
 Plus, because is a familiar and established syntax,it will help them to feel 
-at home whem it will get (naturally) in touch with them at later time. 
+at home whem it will get (naturally) in touch with them at later time. With few words  
+at least three languages basic consepts for free.   
 
 ## C MIGRATION
 For those who are coming from C.  
 S-Lang has very few differences, mainly in functions and variable declarations, but  
-with the significant difference that the stack is really dynamic and unhandled by the language itself.  
+with the significant difference that the stack is really dynamic and unhandled by the  
+language itself.  
 The C programmer should just remember, that for a function that returns a value  
 and the value is not needed, it _should_ discard the value by using, either one  
 of the two forms,  
@@ -290,14 +325,34 @@ are compiled first in S-Lang and then bytecompiled (some of the required classes
 are already bytecompiled through initial installation, otherwise they got compiled  
 at the first run).
 
-## Run on slsh
+The C code is for sure bad (but I'm innocent).  
+But, in my (50-ieth) spring, I don't have the slightest ambition or illusion to ever  
+master C and all the cases that needs proper attention and handling, so what in fact 
+I'm exposing with my C code, it's really my ignorance.  
 
-Below is the minimal sample to use this code in slsh. 
+But for the S-Lang side of code, I should have no excuses (so I'm guilty for any error).
+Actually speaking a bit more about this topic, we are speaking for two different things  
+here. The first is the handle of the language itself, on which I believe I'm some kind  
+of expert here, as I think I know all the corner cases, so I have the freedom to expess  
+the ideas with any way is desirable (but really the language is plain simple).  
+But the other thing is the implementation, on which in many cases (like the fork's or  
+select (of which I still don't use it (probably there is a little bit of fear here),  
+and generally the low level stuff), where the implementation is probably flawed.
 
-(assuming foo is the installation directory)
+## Integrate and run on slsh interactive shell
+
+Much of the code can be used by the slsh interactive shell.  
+Some is not going to work (think of the slsmg routines).
+ 
+Below is the minimal sample in ~/.slshrc.
+
+(assuming foo is the installation directory, which it should be replaced  
+with the actual path)
 
 ```C
 #ifdef __INTERACTIVE__
+
+variable App;
 
 $5 = get_slang_load_path;
 
@@ -352,14 +407,14 @@ outdated information.
 This application written and run in a Linux system, but it should run on  
 other unixes too.
 
-This code was written by a self educuated human being :) in a time that he  
+This code was written by a self educuated human being, in a time that he  
 should build a house for his four kids and to take care about those too, but  
 also to take care about some goats, gardens, forests and friends (around the  
 time of the so called Greek Crisis).  Like such it probably contains unacceptable  
 code errors.  
  
 ## Thanks
-Special thanks to John E. Davis who wrote S-Lang and to the uncountable 
+Special thanks to John E. Davis who wrote S-Lang but and to the all (uncountable)  
 contributors around this enormous open source ecosystem (which this model is  
 the reason that produced this trementous amount of code and this super fast  
-evolution, unbelievable for that short time).
+evolution, unbelievable for that short time that happened).

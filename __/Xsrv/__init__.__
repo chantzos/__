@@ -1,0 +1,64 @@
+class Xsrv
+  let XDIR = Env->TMP_PATH + "/X";
+  let RDFIFO = XDIR + "/Svfifo";
+  let WRFIFO = XDIR + "/Clfifo";
+
+  import xsrv
+
+  def start ()
+    Xstart ();
+  end
+
+  def X_startup () public proc
+    () = system ("urxvtd -q -f -o &");
+    sleep (0.3);
+    () = system ("setxkbmap -layout \"us,el\" -option \"grp:alt_space_toggle\"");
+    () = system ("urxvtc -e shell &");
+  end
+
+  def clslchdesk ()
+  end
+
+  def Srv_getdeskwinds () public proc
+    variable wrfd = open (WRFIFO, O_WRONLY);
+    variable rdfd = open (RDFIFO, O_RDONLY);
+
+    variable desk = Sock.get_int (rdfd);
+
+    variable ar = XGetDeskWinds (desk);
+
+    if (NULL == ar)
+      ar = String_Type[0];
+
+    Sock.send_str_ar (rdfd, wrfd, ar);
+  end
+
+  beg
+    ifnot (access (XDIR, F_OK))
+      {
+      ifnot (Dir.isdirectory (XDIR))
+        This.err_handler (XDIR + ": not a directory");
+      }
+    else
+      if (-1 == Dir.make (XDIR, File->PERM["PRIVATE"];strict))
+        This.err_handler ("cannot create directory: " + XDIR);
+
+    ifnot (access (RDFIFO, F_OK))
+      {
+      ifnot (File.is_fifo (RDFIFO))
+        This.err_handler (RDFIFO + ": not a fifo file");
+      }
+    else
+      if (-1 == mkfifo (RDFIFO, File->PERM["PRIVATE"]))
+        This.err_handler ("cannot create fifo: " + RDFIFO);
+
+    ifnot (access (WRFIFO, F_OK))
+      {
+      ifnot (File.is_fifo (WRFIFO))
+        This.err_handler (WRFIFO + ": not a fifo file");
+      }
+    else
+      if (-1 == mkfifo (WRFIFO, File->PERM["PRIVATE"]))
+        This.err_handler ("cannot create fifo: " + WRFIFO);
+  end
+end
