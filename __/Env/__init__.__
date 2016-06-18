@@ -6,8 +6,8 @@ class Env
   let GROUP          = Sys.getgrname (GID);
   let TERM           = getenv ("TERM");
   let LANG           = getenv ("LANG");
-  let DISPLAY        = getenv ("DISPLAY");
-  let XAUTHORITY     = getenv ("XAUTHORITY");
+  let! DISPLAY       = getenv ("DISPLAY");
+  let! XAUTHORITY    = getenv ("XAUTHORITY");
   let IS_SU_PROC     = getuid == 0;
   let SLSH_LIB_DIR   = get_slang_load_path ();
   let SLANG_MODULE_PATH = get_import_module_path ();
