@@ -2,6 +2,27 @@ class Sys
   let MACHINE = uname.machine;
   let OS = uname.sysname;
 
+  def gethostname ()
+    variable h;
+    ifnot (access ("/etc/hostname", F_OK|R_OK))
+      {
+      variable fp = fopen ("/etc/hostname", "r");
+      ifnot (NULL == fp)
+        ifnot (-1 == fgets (&h, fp))
+          {
+          h = strtrim_end (h);
+          if (strlen (h))
+            return h;
+          }
+      }
+
+    h = getenv ("HOSTNAME");
+    ifnot (NULL == h)
+      return h;
+
+    uname.nodename;
+  end
+
   def checkperm (mode, perm)
     self.modetoint (mode) == perm ? 0 : -1;
   end

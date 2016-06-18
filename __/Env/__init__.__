@@ -4,6 +4,7 @@ class Env
   let GID            = getgid ();
   let USER           = Sys.getpwname (UID);
   let GROUP          = Sys.getgrname (GID);
+  let HOSTNAME       = Sys.gethostname ();
   let TERM           = getenv ("TERM");
   let LANG           = getenv ("LANG");
   let! DISPLAY       = getenv ("DISPLAY");
