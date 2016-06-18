@@ -587,7 +587,7 @@ private define addFun ()
 private define vlet (self, varname, varval)
 {
   __->__ (self.__name, varname, varval, "Class::vset::vlet";;
-    struct {@__qualifiers, const = 1});
+    struct {const = 1, @__qualifiers});
 
   variable eval_buf = "static define " + varname  + " ()\n{\n__->__ (\"" +
     self.__name + "\",  \"" + varname + "\", \"Class::vget::" + varname +
@@ -844,13 +844,13 @@ private define parse_typedef (eval_buf, tokens, line, fp, found)
 private define parse_let (cname, eval_buf, tokens, line, fp, found)
 {
   if (2 > length (tokens))
-    throw ClassError, "Class::__INIT__::let declaration needs at least 1 args";
+    throw ClassError, "Class::__INIT__::let declaration needs at least 1 argument";
 
   variable v, vname, tok, var_buf, tmp;
 
   vname = tokens[1];
   v = @Var_Type;
-  v.const = strup (vname) == vname ? 1 : "let" == tokens[0];
+  v.const = "let" == tokens[0];
 
   if (2 < length (tokens))
     {

@@ -32,7 +32,6 @@ class Rand
       index = 0,
       rtype = rand_new ();
 
-
     while (index < num)
       {
       ar = new_ar (rtype, num);
@@ -44,6 +43,13 @@ class Rand
   end
 
   def getstr (imin, imax, len)
+    if (imin >= imax)
+      {
+      variable t = imin;
+      imin = imax;
+      imax = t;
+      }
+
     strjoin (array_map (String_Type, &char, self.rand_int_ar (imin, imax, len)));
   end
 end
