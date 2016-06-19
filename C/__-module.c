@@ -31,12 +31,12 @@ char *myStrCat (char *s, char *a)
 }
 
 /*
- see
- http://stackoverflow.com/questions/5770940/how-repeat-a-string-in-language-c?
+see
+http://stackoverflow.com/questions/5770940/how-repeat-a-string-in-language-c?
 
- By using above function instead of strcat, execution is multiply faster.
- Also the following slang code is much faster than using strcat and sligtly slower
- than the repeat intrinsic
+By using above function instead of strcat, execution is multiply faster.
+Also the following slang code is much faster than using strcat and sligtly slower
+than the repeat intrinsic
 
 define repeat (str, count)
 {
@@ -47,10 +47,9 @@ define repeat (str, count)
   ar[*] = str;
   return strjoin (ar);
 }
-
-this function returns an empty string if (count < 0)
 */
 
+/* returns an empty string if (count < 0) */
 static void repeat_intrin (char *str, int *count)
 {
   char *res;
@@ -75,6 +74,30 @@ static void repeat_intrin (char *str, int *count)
   (void) SLang_push_malloced_string (res);
 }
 
+static void mkstemp_intrin (char *template)
+{
+  int fd;
+
+  if (-1 == (fd = mkstemp (template)))
+    {
+    (void) SLang_push_null ();
+    return;
+    }
+
+  SLFile_FD_Type *f;
+
+  if (NULL == (f = SLfile_create_fd (NULL, fd)))
+    {
+    (void) SLang_push_null ();
+    return;
+    }
+
+  if (-1 == SLfile_push_fd (f))
+    (void) SLang_push_null ();
+
+  SLfile_free_fd (f);
+}
+
 static int initgroups_intrin (char *user, int *gid)
 {
   int retval;
@@ -97,9 +120,9 @@ static int conversation (int num_msg, const struct pam_message** msg, struct pam
 
   reply[0].resp = (char*) appdata_ptr;
   reply[0].resp_retcode = 0;
- 
+
   *resp = reply;
- 
+
   return PAM_SUCCESS;
 }
 
@@ -110,20 +133,20 @@ static int auth_intrin (const char *user, const char* pass)
   int retval;
 
   strcpy (password, pass);
- 
+
   struct pam_conv pamc = {conversation, password};
- 
+
   retval = pam_start ("exit", user, &pamc, &pamh);
- 
+
   if (retval != PAM_SUCCESS)
     {
     SLang_verror (SL_OS_Error, "pam_start failed: %s", pam_strerror (pamh, retval));
     (void) pam_end (pamh, 0);
     return -1;
     }
- 
+
   retval = pam_authenticate (pamh, 0);
- 
+
   (void) pam_end (pamh, 0);
   return retval == PAM_SUCCESS ? 0 : -1;
 }
@@ -139,33 +162,27 @@ static int push_grp_struct (struct group *grent)
   VOID_STAR field_values[NUM_GR_FIELDS];
   SLang_Array_Type *at;
   SLindex_Type idx;
-         int status;
-  int ndx;
-  int i;
+  int status, ndx, i;
 
   i = 0;
-
   field_values[i] = &grent->gr_name;
   field_types[i] =  SLANG_STRING_TYPE;
 
   i++;
-
   field_values[i] = &grent->gr_gid;
   field_types[i] = SLANG_INT_TYPE;
 
   i++;
-
   field_values[i] = grent->gr_passwd;
   field_types[i] = SLANG_NULL_TYPE;
 
   i++;
- 
   for (ndx = 0; grent->gr_mem[ndx] != NULL; ndx++);
- 
+
   idx = ndx;
 
   at = SLang_create_array (SLANG_STRING_TYPE, 0, NULL, &idx, 1);
- 
+
   if (at == NULL)
     return -1;
 
@@ -299,33 +316,6 @@ static void getpwnan_intrin (char *name)
   (void) do_getpwxxx (name, 1);
 }
 
-static void realpath_intrin (char *path)
-{
-  long path_max;
-  char *p;
-
-#ifdef PATH_MAX
-  path_max = PATH_MAX;
-#else
-  path_max = pathconf (path, _PC_PATH_MAX);
-  if (path_max <= 0)
-    path_max = 4096;
-#endif
-
-  if (NULL == (p = (char *)SLmalloc (path_max+1)))
-    return;
- 
-  if (NULL != realpath (path, p))
-    {
-    (void) SLang_push_malloced_string (p);
-    return;
-    }
-
-   SLerrno_set_errno (errno);
-   SLfree (p);
-   (void) SLang_push_null ();
-}
-
 static SLang_CStruct_Field_Type Fstat_Struct [] =
 {
   MAKE_CSTRUCT_INT_FIELD(struct stat, st_dev, "st_dev", 0),
@@ -345,12 +335,11 @@ static SLang_CStruct_Field_Type Fstat_Struct [] =
 static void fstat_intrin (void)
 {
   struct stat st;
-  int status;
-  int fd;
+  int status, fd;
 
   SLang_MMT_Type *mmt = NULL;
   SLFile_FD_Type *f = NULL;
- 
+
   switch (SLang_peek_at_stack ())
     {
     case SLANG_FILE_FD_TYPE:
@@ -371,7 +360,7 @@ static void fstat_intrin (void)
       fd = fileno (fp);
       }
       break;
- 
+
     case SLANG_INT_TYPE:
       if (-1 == SLang_pop_int (&fd))
         {
@@ -401,8 +390,36 @@ static void fstat_intrin (void)
   if (mmt != NULL) SLang_free_mmt (mmt);
 }
 
+static void realpath_intrin (char *path)
+{
+  long path_max;
+  char *p;
+
+#ifdef PATH_MAX
+  path_max = PATH_MAX;
+#else
+  path_max = pathconf (path, _PC_PATH_MAX);
+  if (path_max <= 0)
+    path_max = 4096;
+#endif
+
+  if (NULL == (p = (char *)SLmalloc (path_max+1)))
+    return;
+
+  if (NULL != realpath (path, p))
+    {
+    (void) SLang_push_malloced_string (p);
+    return;
+    }
+
+   SLerrno_set_errno (errno);
+   SLfree (p);
+   (void) SLang_push_null ();
+}
+
 static SLang_Intrin_Fun_Type ___Intrinsics [] =
 {
+  MAKE_INTRINSIC_S("mkstemp", mkstemp_intrin, VOID_TYPE),
   MAKE_INTRINSIC_SI("repeat", repeat_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_SS("auth", auth_intrin, SLANG_INT_TYPE),
   MAKE_INTRINSIC_SI("initgroups", initgroups_intrin, SLANG_INT_TYPE),

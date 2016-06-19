@@ -145,7 +145,7 @@ https://github.com/moetunes/dminiwm.git
 So, this is window manager with a fullscreen mode (default mode for all d
 and a floating mode but where the windows can be moved and resized with the keyboard.
 By default at startup, the X_startup function from Xsrv class is executed,
-which for now starts the urxvtd daemon and the __shell application,
+which for now starts the urxvtd daemon and the __shell application.
 
 Also available, are many of the basic system commands, which they mimic the behavior with  
 their Gnu-coreutils counterparts, with some extensions, but which are _common_ to utilities  
