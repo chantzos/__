@@ -1,25 +1,61 @@
 class X
+  beg
+    Class.load ("Diff");
+  end
+
   var public Xsrv = NULL;
+  let XINIT_BIN = Sys.which ("xinit");
+  let XAUTH_BIN = Sys.which ("xauth");
+  let ISCROUTON = NULL != Sys.which ("croutonversion");
 
 #if This.request.X
   def is_running ()
-    XIsRunning ();
+    XIsRunning (); % from the xclient-module
+  end
+
+  def __xget_free_displaynr () proc
+    variable i = 0;
+    while (i < 6)
+      {
+      ifnot (Dir.isdirectory (sprintf ("/tmp/.X%d-lock", i)))
+        return sprintf (":%d", i);
+
+      i++;
+      }
+
+    NULL;
   end
 
   def Xstart () proc
-    ifnot (is_running (NULL))
-      ifnot (NULL == Xsrv)
-        {
-        variable p = Proc.init (0, 1, 1);
-        variable argv = [Sys.which ("xinit"), Env->BIN_PATH + "/__xstart", "-nolisten", "tcp"];
-        variable status = p.execv (argv, NULL);
-        if (status.exit_status)
-          IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
-        else
-          if (strlen (p.stdout.out))
-            IO.tostderr (strjoin (strtok (p.stdout.out, "\n"), "\n"));
+    if (NULL == XINIT_BIN)
+      throw ClassError, "xinit cannot be found in $PATH";
 
-          __messages;
+    variable dis = __xget_free_displaynr ();
+
+    if (is_running (NULL) || dis == NULL || NULL == Xsrv)
+      return;
+
+    variable p = Proc.init (0, 1, 1);
+
+    variable argv;
+    % for the chromebook that runs crouton with its own xinit wrapper
+    if (ISCROUTON)
+      argv = [XINIT_BIN, Env->BIN_PATH + "/__xstart", "-nolisten", "tcp"];
+    else
+      argv = [XINIT_BIN, Env->BIN_PATH + "/__xstart", "--", dis,
+        "-nolisten", "tcp"];
+
+    variable status = p.execv (argv, NULL);
+    if (status.exit_status)
+      {
+      IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+      __messages;
+      }
+    else
+      if (strlen (p.stdout.out))
+        {
+        toscratch (strjoin (strtok (p.stdout.out, "\n"), "\n"));
+        __scratch (NULL);
         }
   end
 
@@ -31,7 +67,7 @@ class X
 
 #ifnot This.request.X
   def is_running ()
-    NULL != Env->DISPLAY;
+    NULL != getenv ("DISPLAY");
   end
 
   def comlist (a)

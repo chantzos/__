@@ -1,4 +1,4 @@
-/* included code snippetes from xkev and xcut
+/* included code snippets from xkev and xcut
 xkev:
 © 2014 Carlos J. Torres <vlaadbrain@gmail.com>
 MIT/X Consortium License
@@ -148,10 +148,6 @@ int init_xclient_module_ns (char *ns_name)
 
   if (-1 == SLns_add_intrin_fun_table (ns, xclient_Intrinsics, NULL))
     return -1;
-
-/*  if (-1 == SLang_load_file ("/home/aga/X/xlib-module/Xclient.sl"))
-    return -1;
-*/
 
   return 0;
 }

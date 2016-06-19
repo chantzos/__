@@ -1,7 +1,14 @@
 class Xsrv
+  beg
+    Class.load ("Diff");
+  end
+
   let XDIR = Env->TMP_PATH + "/X";
   let RDFIFO = XDIR + "/Svfifo";
   let WRFIFO = XDIR + "/Clfifo";
+  let XAUTH_BIN = Sys.which ("xauth");
+  let URXVTD_BIN = Sys.which ("urxvtd");
+  let X_TERM_BIN = NULL == URXVTD_BIN ? Sys.which ("xterm") : Sys.which ("urxvtc");
 
   import xsrv
 
@@ -9,11 +16,37 @@ class Xsrv
     Xstart ();
   end
 
+  % should be replaced by md5sum?
+  def __xget_cookie () proc
+    variable mc = Sys.which ("mcookie");
+    if (NULL == mc)
+      return NULL;
+
+    variable buf, fp = popen (mc, "r");
+    () = fgets (&buf, fp);
+    strtrim_end (buf);
+  end
+
   def X_startup () public proc
-    () = system ("urxvtd -q -f -o &");
-    sleep (0.3);
+    ifnot (NULL == URXVTD_BIN)
+      () = system ("urxvtd -q -f -o &");
+
+    variable cookie = __xget_cookie ();
+    if (NULL != cookie && NULL != XAUTH_BIN)
+      {
+      variable al = listdir (Env->TMP_PATH + "/X");
+      variable xauthfd = mkstemp (Env->TMP_PATH + "/X/serverauth.XXXXXX");
+      variable bl = listdir (Env->TMP_PATH + "/X");
+      variable d = Diff.new (al, bl);
+      variable xauthfile = d[wherenot (strncmp (d, "+", 1))[0]];
+      xauthfile = Env->TMP_PATH + "/X/" + substr (xauthfile, 2, -1);
+      putenv ("XAUTHORITY=" + xauthfile);
+      () = system (XAUTH_BIN + " add " + getenv ("DISPLAY") + " . " + cookie);
+      }
+
     () = system ("setxkbmap -layout \"us,el\" -option \"grp:alt_space_toggle\"");
-    () = system ("urxvtc -e shell &");
+    sleep (0.2);
+    () = system (X_TERM_BIN + " -e shell &");
   end
 
   def clslchdesk ()

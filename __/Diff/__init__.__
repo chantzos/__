@@ -47,8 +47,8 @@ class Diff
       return NULL;
       }
 
-    variable x = IO.readlines (fnamea);
-    variable y = IO.readlines (fnameb);
+    variable x = File.readlines (fnamea);
+    variable y = File.readlines (fnameb);
 
     self.new (x, y);
   end

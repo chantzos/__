@@ -17,10 +17,7 @@ class Sys
       }
 
     h = getenv ("HOSTNAME");
-    ifnot (NULL == h)
-      return h;
-
-    uname.nodename;
+    (NULL == h) ? uname.nodename : h;
   end
 
   def checkperm (mode, perm)

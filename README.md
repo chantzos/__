@@ -124,15 +124,31 @@ For now published are three applications,
    -- pipes are not yet implemented (I have to find a way that really makes sense, it's 
       easy and can be achieved (probably) differently than on shells)  
 
-- an editor called ved (which is considered as alpha, as this is the first write),  
-   which is focused to edit the sources of this distribution.  
-   This is (mostly) a Vim clone with some exceptions, but which some of its operations  
+- an editor called ved (it should be considered as alpha), which it's
+   actually the drawing machine, but also does basic editing (mainly
+   used by me to edit the code sources). It's not of course a general
+   purposes editor nor it will ever be, it's there for very specific
+   operations and for this I'm gratefull. But, some of its operations
    are considered unsafe, like when editing lines which the length is longer than COLUMNS,  
    or others (like undo/redo implementation) are still very primitive and doesn't always  
    produce accurate results.  
+   This is (mostly) a Vim clone with some exceptions, it doesn't (nor it
+   will ever do) implements even a quarter of the enormous vim features.
+   but most of the basic ones are there. The two big differences is that
+   first, there isn't :s/pat/sub/ command, as it is implemented throw the normal
+   substitute command, and the second is the way were implemented the search
+   operations, which simply don't change file position when a match found, 
+   instead the result is displayed in the message line, while it is possible
+   to continue with C-n|p for other matches. I'm missing this feature when I'm in vim tho
+   quite probably can be achieved through vim scripting (though that era
+   is quite behind (when I even wrote a complete super :) package manager that
+   was able to build single packages but more importantly the [B]LFS BOOKS)).
+   What could be change in that regard, is the context, on which can be added
+   at least one more line (above or below the matched line or both). Enter
+   accepts the match, escape aborts. In pager [n,N] both act like vim.
 
 - a git frontend (recent development but already usefull at this stage).  This  
-   is based on git commands and not in libgit which is the wishfull intention.  As  
+   is based on git commands and not in libgit which is my wish. As  
    such, there is an extra overhead, plus it's unsafe (security wise) to use the  
    "pushupstream" command, because the password is exposed in the proccess table.  The  
    reason for this, is that I (while I can) don't want to reset the terminal state to get  
@@ -142,10 +158,14 @@ For now published are three applications,
 Available (at the time of writing this, that is 16 of May) also a first functional window  
 manager. Much of the initial code was taken by dmimiwm (many many thanks)  
 https://github.com/moetunes/dminiwm.git  
-So, this is window manager with a fullscreen mode (default mode for all d
-and a floating mode but where the windows can be moved and resized with the keyboard.
-By default at startup, the X_startup function from Xsrv class is executed,
-which for now starts the urxvtd daemon and the __shell application.
+So, this is very small window manager, with just a fullscreen mode (default 
+mode for all (13) desktops) and a floating mode but where the windows can 
+be moved and resized, by using just the keyboard. Isn't that great!
+Besides joking it's really a basic window manager that doesn't cover all
+the posibilities (though this can be change in future), like support for
+more than one screen.
+By default at startup, the X_startup function from Xsrv class is executed
+which for now it just starts the urxvtd daemon and the __shell application.
 
 Also available, are many of the basic system commands, which they mimic the behavior with  
 their Gnu-coreutils counterparts, with some extensions, but which are _common_ to utilities  

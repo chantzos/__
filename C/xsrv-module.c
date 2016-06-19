@@ -1,3 +1,8 @@
+/*
+Initial code from dminiwm
+https://github.com/moetunes/dminiwm.git
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,40 +28,48 @@ SLANG_MODULE(xsrv);
 #define CLEANMASK(mask) (mask & ~(numlockmask | LockMask))
 #define TABLENGTH(X)    (sizeof(X)/sizeof(*X))
 
-typedef union {
-    const char** com;
-    const int i;
-} Arg;
+typedef union
+  {
+  const char** com;
+  const int i;
+  } Arg;
 
-typedef struct {
-    unsigned int mod;
-    KeySym keysym;
-    void (*function)(const Arg arg);
-    const Arg arg;
-} key;
+typedef struct
+  {
+  unsigned int mod;
+  KeySym keysym;
+  void (*function)(const Arg arg);
+  const Arg arg;
+  } key;
 
 typedef struct client client;
-struct client {
-    client *next, *prev;
-    Window win;
-    unsigned int x, y, width, height, order;
-};
+
+struct client
+  {
+  client *next, *prev;
+  Window win;
+  unsigned int x, y, width, height, order;
+  };
 
 typedef struct desktop desktop;
-struct desktop{
-    unsigned int mode, growth, numwins;
-    client *head, *current, *transient;
-};
 
-typedef struct {
-    const char *class;
-    unsigned int preferredd, followwin;
-} Convenience;
+struct desktop
+  {
+  unsigned int mode, growth, numwins;
+  client *head, *current, *transient;
+  };
 
-typedef struct {
-    const char *class;
-    unsigned int x, y, width, height;
-} Positional;
+typedef struct
+  {
+  const char *class;
+  unsigned int preferredd, followwin;
+  } Convenience;
+
+typedef struct
+  {
+  const char *class;
+  unsigned int x, y, width, height;
+  } Positional;
 
 static void get_windows (unsigned int desk);
 static void add_window(Window w, unsigned int tw, client *cl);
@@ -93,7 +106,7 @@ static void switch_mode(const Arg arg);
 static void tile();
 static void unmapnotify(XEvent *e); //for thunderbird's write window and maybe others
 static void update_current();
-static void update_info();
+/*static void update_info();*/
 
 static void slchdesk (const Arg arg);
 static void slgetdeskwinds ();
@@ -112,15 +125,14 @@ const unsigned int MODES[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1};
 static const Convenience convenience[] = { \
     /*  class       desktop  follow */
     { "chromium",       12,    1 },
-    { "vimb",           12,    1 },
     { "SHELL",          3,     1 },
     { "HTOP",           13,    1 },
     { "ALSA",           13,    1 },
 };
 
 static const Positional positional[] = { \
-    /* class  x  y  width  height */
-    /*{ "Thunar", 100,100,800,400 }, */
+    /* class  x  y  width  height
+   { "Thunar", 100,100,800,400 }, */
 };
 
 const char* urxvtcmd[] = {"urxvtc", NULL};
@@ -129,7 +141,6 @@ const char* stcmd[]    = {"st", NULL};
 const char* htopcmd[]  = {"urxvtc", "-name", "HTOP", "-e", "htop", NULL};
 const char* alsacmd[]  = {"urxvtc", "-name", "ALSA", "-e", "alsamixer", NULL};
 const char* chromcmd[] = {"chromium", NULL};
-const char* vimbcmd[]  = {"tabbed", "-n", "vimb", "-c", "vimb", "-e", NULL};
 const char* shellcmd[] = {"urxvtc", "-name", "SHELL", "-e", "__shell", NULL};
 
 #define DESKTOPCHANGE(K,N) \
@@ -142,8 +153,6 @@ static key keys[] = {
     {  MOD1,             XK_w,          slgetdeskwinds,    {NULL}},
     {  MOD4|ShiftMask,   XK_k,          kill_client,       {NULL}},
     {  MOD4|ShiftMask,   XK_q,          quit,              {NULL}},
-    {  MOD4|ShiftMask,   XK_c,          spawn,             {.com = urxvtcmd}},
-    {  MOD1|ShiftMask,   XK_c,          spawn,             {.com = xtermcmd}}, 
     {  MOD4,             XK_Tab,        next_win,          {NULL}},
     {  MOD4,             XK_q,          prev_win,          {NULL}},
     {  MOD4,             XK_grave,      last_desktop,      {NULL}},
@@ -163,7 +172,6 @@ static key keys[] = {
     {  MOD4,             XK_Return,     spawn,             {.com = xtermcmd}},
     {  MOD4,             XK_n,          spawn,             {.com = stcmd}},
     {  MOD1,             XK_F2,         spawn,             {.com = chromcmd}},
-    {  MOD1,             XK_F1,         spawn,             {.com = vimbcmd}},
     {  MOD1,             XK_F3,         spawn,             {.com = alsacmd}},
     {  MOD1,             XK_F4,         spawn,             {.com = htopcmd}},
     {  MOD4,             XK_a,          spawn,             {.com = shellcmd}},
@@ -207,34 +215,31 @@ static desktop desktops[DESKTOPS];
 
 static void slgetdeskwinds ()
 {
-  SLang_execute_function ("Srv_getdeskwinds");
+  (void) SLang_execute_function ("Srv_getdeskwinds");
 }
 
 static void slchdesk (const Arg arg)
 {
-  SLang_push_int (arg.i);
-  SLang_execute_function ("clslchdesk");
+  (void) SLang_push_integer (arg.i);
+  (void) SLang_execute_function ("clslchdesk");
 }
 
 void XGetDeskWinds (unsigned int *desk)
 {
   if (*desk < 0 || *desk > DESKTOPS)
     {
-    SLang_push_null ();
+    (void) SLang_push_null ();
     return;
     }
 
   unsigned int i = *desk;
 
-  printf ("a%d %d\n", *desk, desktops[i].numwins);
-
   if (desktops[*desk].numwins == 0)
     {
-    SLang_push_null ();
+    (void) SLang_push_null ();
     return;
     }
 
-  printf ("bdesk %d nwins %d\n", *desk, desktops[i].numwins);
   char **argv;
   int argc, blen, j;
 
@@ -251,7 +256,7 @@ void XGetDeskWinds (unsigned int *desk)
 
   if (windows == NULL)
     {
-    SLang_push_null ();
+    (void) SLang_push_null ();
     return;
     }
 
@@ -289,7 +294,7 @@ void XGetDeskWinds (unsigned int *desk)
     if (-1 == SLang_set_array_element (windows, &idx, &ptr))
       {
       SLang_free_array (windows);
-      SLang_push_null ();
+      (void) SLang_push_null ();
       return;
       }
      idx++;
@@ -308,7 +313,7 @@ static void XGetWindows_intrin (void)
 
   if ((dpy = XOpenDisplay (NULL)) == NULL)
     {
-    SLang_push_null ();
+    (void) SLang_push_null ();
     return;
     }
 
@@ -319,7 +324,7 @@ static void XGetWindows_intrin (void)
 
   if (nwins == 0)
     {
-    SLang_push_null ();
+    (void) SLang_push_null ();
     return;
     }
 
@@ -329,7 +334,7 @@ static void XGetWindows_intrin (void)
 
   if (windows == NULL)
     {
-    SLang_push_null ();
+    (void) SLang_push_null ();
     return;
     }
 
@@ -374,8 +379,8 @@ static void XGetWindows_intrin (void)
 
     if (-1 == SLang_set_array_element (windows, &idx, &ptr))
       {
-      SLang_free_array (windows);
-      SLang_push_null ();
+      (void) SLang_free_array (windows);
+      (void) SLang_push_null ();
       return;
       }
     }
@@ -621,8 +626,7 @@ void move_sideways (const Arg arg)
     XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width, current->height);
     }
 }
-
-/* Desktop Management */
+/*
 void update_info ()
 {
   if (OUTPUT_INFO == 0)
@@ -640,6 +644,7 @@ void update_info ()
 
   fflush (stdout);
 }
+*/
 
 void change_desktop (const Arg arg)
 {
@@ -683,7 +688,7 @@ void change_desktop (const Arg arg)
 
   select_desktop (arg.i);
   update_current ();
-  update_info ();
+  /*update_info ();*/
 }
 
 void last_desktop ()
@@ -720,7 +725,7 @@ void client_to_desktop (const Arg arg)
   add_window (tmp->win, 0, tmp);
   save_desktop (arg.i);
   select_desktop (tmp2);
-  update_info ();
+  /*update_info ();*/
 }
 
 void save_desktop (unsigned int i)
@@ -845,7 +850,7 @@ void switch_mode (const Arg arg)
 
   tile ();
   update_current ();
-  update_info ();
+  /*update_info ();*/
 }
 
 void resize_stack_side (const Arg arg)
@@ -1006,7 +1011,7 @@ void maprequest (XEvent *e)
         if (ch.res_name)
           XFree (ch.res_name);
 
-        update_info ();
+        /*update_info ();*/
         return;
         }
 
@@ -1024,7 +1029,7 @@ void maprequest (XEvent *e)
     XMapWindow (dpy, ev->window);
 
   update_current ();
-  update_info ();
+  /*update_info ();*/
 }
 
 void destroynotify (XEvent *e)
@@ -1044,7 +1049,7 @@ void destroynotify (XEvent *e)
         {
         remove_window (ev->window, 0, 0);
         select_desktop (tmp);
-        update_info ();
+        /*update_info ();*/
         return;
         }
 
@@ -1071,7 +1076,7 @@ void unmapnotify (XEvent *e)
       if (ev->window == c->win)
         {
         remove_window (ev->window, 1, 0);
-        update_info ();
+        /*update_info ();*/
         return;
         }
 }
@@ -1083,7 +1088,7 @@ void kill_client ()
 
   kill_client_now (current->win);
   remove_window (current->win, 0, 0);
-  update_info ();
+  /*update_info ();*/
 }
 
 void kill_client_now (Window w)
@@ -1182,7 +1187,7 @@ void setup ()
   XSelectInput (dpy, root, SubstructureNotifyMask|SubstructureRedirectMask);
   // For exiting
   bool_quit = 0;
-  update_info ();
+  /*update_info ();*/
 }
 
 void spawn (const Arg arg)
@@ -1253,18 +1258,14 @@ static void startx_intrin (void)
     return;
     }
 
+  SLang_Name_Type *fun;
+
   XSetErrorHandler (xerror);
 
   setup ();
 
-  SLang_Name_Type *fun = SLang_get_function ("X_startup");
-  if (NULL != fun)
-    {
-    printf ("yes\n");
-    SLexecute_function (fun);
-    }
-   else
-     printf ("no\n");
+  if (NULL != (fun = SLang_get_function ("X_startup")))
+    (void) SLexecute_function (fun);
 
   start ();
 
@@ -1288,10 +1289,6 @@ int init_xsrv_module_ns (char *ns_name)
 
   if (-1 == SLns_add_intrin_fun_table (ns, xsrv_Intrinsics, NULL))
     return -1;
-
-/*  if (-1 == SLang_load_file ("/home/aga/X/xlib-module/Xsrv.sl"))
-    return -1;
-*/
 
   return 0;
 }
