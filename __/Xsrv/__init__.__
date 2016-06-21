@@ -3,18 +3,42 @@ class Xsrv
     Class.load ("Diff");
   end
 
+  import xsrv
+
   let XDIR = Env->TMP_PATH + "/X";
   let RDFIFO = XDIR + "/Svfifo";
   let WRFIFO = XDIR + "/Clfifo";
   let XAUTH_BIN = Sys.which ("xauth");
   let URXVTD_BIN = Sys.which ("urxvtd");
   let X_TERM_BIN = NULL == URXVTD_BIN ? Sys.which ("xterm") : Sys.which ("urxvtc");
+  let! DESKLEN = NULL;
 
-  import xsrv
+  let DESKTOP_CLASSES = struct
+    {
+    class =
+      {
+      String_Type[0],
+      ["CMODULES", "XSRV_CLASS"],
+      String_Type[0],
+      String_Type[0],
+      String_Type[0],
+      ["SLSH"],
+      ["MAIL"],
+      String_Type[0],
+      String_Type[0],
+      String_Type[0],
+      String_Type[0],
+      String_Type[0],
+      String_Type[0],
+      },
+    CMODULES = X_TERM_BIN + " -name CMODULES -e __ved " + Env->SRC_C_PATH +
+      "/xsrv-module.c",
+    XSRV_CLASS = X_TERM_BIN + " -name XSRV_CLASS -e __ved " + Env->SRC_CLASS_PATH +
+      "/Xsrv/__init__.__",
+    MAIL = X_TERM_BIN + " -name MAIL -e mutt -y",
+    SLSH = X_TERM_BIN + " -name SLSH -e slsh",
+    };
 
-  def start ()
-    Xstart ();
-  end
 
   % should be replaced by md5sum?
   def __xget_cookie () proc
@@ -49,21 +73,48 @@ class Xsrv
     () = system (X_TERM_BIN + " -e shell &");
   end
 
-  def clslchdesk ()
-  end
+  var FUNS = Assoc_Type[Ref_Type];
 
-  def Srv_getdeskwinds () public proc
-    variable wrfd = open (WRFIFO, O_WRONLY);
-    variable rdfd = open (RDFIFO, O_RDONLY);
-
-    variable desk = Sock.get_int (rdfd);
-
-    variable ar = XGetDeskWinds (desk);
-
+  def getdeskclassnames (wrfd, rdfd) proc
+    Sock.send_int (wrfd, 1);
+    variable did = Sock.get_int (rdfd);
+    variable ar = XGetDeskClassNames (did);
     if (NULL == ar)
       ar = String_Type[0];
 
     Sock.send_str_ar (rdfd, wrfd, ar);
+  end
+
+  def Srv_interp () public proc
+    variable wrfd = open (WRFIFO, O_WRONLY);
+    variable rdfd = open (RDFIFO, O_RDONLY);
+    variable f    = Sock.get_str (rdfd);
+
+    (@FUNS[f]) (wrfd, rdfd);
+  end
+
+  def Srv_on_desktop_change (did) public proc
+    variable ar = XGetDeskClassNames (did);
+    variable cls = DESKTOP_CLASSES.class[did];
+    ifnot (length (cls))
+      return;
+
+    if (NULL == ar)
+      ar = String_Type[0];
+
+    variable i, p;
+    _for i (0, length (cls) - 1)
+      {
+      if (any (ar == cls[i]))
+        continue;
+      p = get_struct_field (DESKTOP_CLASSES, cls[i]);
+      () = system (p);
+      }
+  end
+
+  def start ()
+    Xsrv.let ("DESKLEN", DeskLen ());
+    Xstart ();
   end
 
   beg
@@ -93,5 +144,9 @@ class Xsrv
     else
       if (-1 == mkfifo (WRFIFO, File->PERM["PRIVATE"]))
         This.err_handler ("cannot create fifo: " + WRFIFO);
+
+    FUNS["getdeskclassnames"] = &getdeskclassnames;
+  end
+
   end
 end

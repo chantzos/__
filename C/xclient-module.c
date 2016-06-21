@@ -42,14 +42,6 @@ static void gen_key_intrin (char *mode, char *key)
       mod = XK_Control_R;
       break;
 
-    case 'm':
-      mod = XK_Meta_L;
-      break;
-
-    case 'M':
-      mod = XK_Meta_R;
-      break;
-
     case 'a':
       mod = XK_Alt_L;
       break;

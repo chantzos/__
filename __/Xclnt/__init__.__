@@ -4,24 +4,46 @@ class Xclnt
   let XDIR = Env->TMP_PATH + "/X";
   let WRFIFO = XDIR + "/Svfifo";
   let RDFIFO = XDIR + "/Clfifo";
+  let MODIFIER = 'a';
+  let KEY = "bracketleft";
+  let! DESKLEN = 13;
+  let CUR_ID = 0;
 
   subclass Desk
     __init__
       change_by
         id
         name
+      get
+        cur
+        winds
     end
 
-    let CUR_ID = 0;
-    let TOTAL = 13;
+    def get_cur ()
+    end
+
+    def get_winds (desk)
+      ifnot (-1 < desk < Xclnt->DESKLEN)
+        return NULL;
+
+      XSendKey (Xclnt->MODIFIER, Xclnt->KEY);
+
+      variable rdfd = open (Xclnt->RDFIFO, O_RDONLY);
+      variable wrfd = open (Xclnt->WRFIFO, O_WRONLY);
+
+      Sock.send_str (wrfd, "getdeskclassnames");
+      () = Sock.get_int (rdfd);
+      Sock.send_int (wrfd, desk);
+      return Sock.get_str_ar (rdfd, wrfd);
+    end
 
     def change_by_id (did)
-      if (0 == (-1 < did < TOTAL) || did == CUR_ID)
+      if (0 == (-1 < did < Xclnt->DESKLEN) || did == Xclnt->CUR_ID)
         return;
     end
 
     def change_by_name (did)
-      if (0 == (-1 < did < TOTAL) || did == CUR_ID)
+      if (0 == (-1 < did < Xclnt->DESKLEN) || did == Xclnt->CUR_ID)
         return;
     end
   end

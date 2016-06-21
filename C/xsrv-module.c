@@ -1,6 +1,24 @@
 /*
-Initial code from dminiwm
-https://github.com/moetunes/dminiwm.git
+*  Initial code from dminiwm. see at
+*  https://github.com/moetunes/dminiwm.git
+*  I started this from catwm 31/12/10
+*  Permission is hereby granted, free of charge, to any person obtaining a
+*  copy of this software and associated documentation files (the "Software"),
+*  to deal in the Software without restriction, including without limitation
+*  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+*  and/or sell copies of the Software, and to permit persons to whom the
+*  Software is furnished to do so, subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in
+*  all copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+*  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+*  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+*  DEALINGS IN THE SOFTWARE.
 */
 
 #include <stdio.h>
@@ -108,8 +126,7 @@ static void unmapnotify(XEvent *e); //for thunderbird's write window and maybe o
 static void update_current();
 /*static void update_info();*/
 
-static void slchdesk (const Arg arg);
-static void slgetdeskwinds ();
+static void interp_fun ();
 
 #define DESKTOPS        13
 #define MOD1            Mod1Mask
@@ -119,6 +136,8 @@ static void slgetdeskwinds ();
 #define DEFAULT_MODE    1
 #define FOCUS           "#664422" // dkorange
 #define UNFOCUS         "#004050" // blueish
+
+static unsigned int LOG = 1;
 
 const unsigned int MODES[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1};
 
@@ -150,7 +169,7 @@ const char* shellcmd[] = {"urxvtc", "-name", "SHELL", "-e", "__shell", NULL};
 
 static key keys[] = {
     /* MOD               KEY            FUNCTION           ARGS */
-    {  MOD1,             XK_w,          slgetdeskwinds,    {NULL}},
+    {  MOD1,             XK_bracketleft,interp_fun,        {NULL}},
     {  MOD4|ShiftMask,   XK_k,          kill_client,       {NULL}},
     {  MOD4|ShiftMask,   XK_q,          quit,              {NULL}},
     {  MOD4,             XK_Tab,        next_win,          {NULL}},
@@ -210,21 +229,19 @@ static void (*events[LASTEvent])(XEvent *e) = {
     [ConfigureRequest] = configurerequest
 };
 
-// Desktop array
 static desktop desktops[DESKTOPS];
 
-static void slgetdeskwinds ()
+static void interp_fun ()
 {
-  (void) SLang_execute_function ("Srv_getdeskwinds");
+    (void) SLang_execute_function ("Srv_interp");
 }
 
-static void slchdesk (const Arg arg)
+static int DeskLen_intrin (void)
 {
-  (void) SLang_push_integer (arg.i);
-  (void) SLang_execute_function ("clslchdesk");
+  return (int) DESKTOPS;
 }
 
-void XGetDeskWinds (unsigned int *desk)
+void XGetDeskClassNames (unsigned int *desk)
 {
   if (*desk < 0 || *desk > DESKTOPS)
     {
@@ -240,12 +257,8 @@ void XGetDeskWinds (unsigned int *desk)
     return;
     }
 
-  char **argv;
-  int argc, blen, j;
-
   client *c;
   XClassHint hint;
-  XTextProperty name;
 
   SLindex_Type idx;
   SLang_Array_Type *windows;
@@ -264,21 +277,10 @@ void XGetDeskWinds (unsigned int *desk)
 
   for (c = desktops[*desk].head; c; c = c->next)
     {
-    char buf[1024];
+    char buf[512];
     if (XGetClassHint (dpy, c->win, &hint))
       {
-      XGetWMName (dpy, c->win, &name);
-      blen = 0;
-
-      blen += sprintf (buf + blen, "name:%s res_name:%s ", name.value, hint.res_name);
-
-      if (XGetCommand (dpy, c->win, &argv, &argc))
-        {
-        for (j = 0; j < argc; j++)
-          blen += sprintf (buf + blen, "%s ", argv[j]);
-
-        XFreeStringList (argv);
-        }
+      strcpy (buf, hint.res_name);
 
       if (hint.res_class)
         XFree (hint.res_class);
@@ -297,100 +299,18 @@ void XGetDeskWinds (unsigned int *desk)
       (void) SLang_push_null ();
       return;
       }
+
      idx++;
     }
 
   (void) SLang_push_array (windows, 1);
 }
 
-static void XGetWindows_intrin (void)
-{
-  Window parent, root_ret, *wins, w;
-  SLindex_Type idx;
-  SLang_Array_Type *windows;
-
-  unsigned int nwins = 0;
-
-  if ((dpy = XOpenDisplay (NULL)) == NULL)
-    {
-    (void) SLang_push_null ();
-    return;
-    }
-
-   screen = DefaultScreen (dpy);
-   root = RootWindow (dpy, screen);
-
-   XQueryTree(dpy, root, &root_ret, &parent, &wins, &nwins);
-
-  if (nwins == 0)
-    {
-    (void) SLang_push_null ();
-    return;
-    }
-
-  idx = nwins;
-
-  windows = SLang_create_array (SLANG_STRING_TYPE, 0, NULL, &idx, 1);
-
-  if (windows == NULL)
-    {
-    (void) SLang_push_null ();
-    return;
-    }
-
-  XClassHint hint;
-  XTextProperty name;
-
-  char **argv;
-  int argc, blen, j;
-  char *winds[nwins];
-
-  for (idx = 0; idx < nwins; idx++)
-    {
-    w = wins[idx];
-    char buf[1024];
-
-    if (XGetClassHint (dpy, w, &hint))
-      {
-      XGetWMName (dpy, w, &name);
-      blen = 0;
-
-      blen += sprintf (buf + blen, "name:%s res_name:%s ", name.value, hint.res_name);
-
-      if (XGetCommand (dpy, w, &argv, &argc))
-        {
-        for (j = 0; j < argc; j++)
-          blen += sprintf (buf + blen, "%s ", argv[j]);
-
-        XFreeStringList (argv);
-        }
-
-      if (hint.res_class)
-        XFree (hint.res_class);
-
-      if (hint.res_name)
-        XFree (hint.res_name);
-
-      }
-    else
-      strcpy (buf, "NONE");
-
-    char *ptr = buf;
-
-    if (-1 == SLang_set_array_element (windows, &idx, &ptr))
-      {
-      (void) SLang_free_array (windows);
-      (void) SLang_push_null ();
-      return;
-      }
-    }
-
-  (void) SLang_push_array (windows, 1);
-}
-
-
 void logger (const char* e)
 {
+  if (!LOG)
+    return;
+
   fprintf (stderr,"\n%s\n", e);
 }
 
@@ -688,6 +608,8 @@ void change_desktop (const Arg arg)
 
   select_desktop (arg.i);
   update_current ();
+  (void) SLang_push_integer (current_desktop);
+  (void) SLang_execute_function ("Srv_on_desktop_change");
   /*update_info ();*/
 }
 
@@ -757,7 +679,7 @@ void tile ()
   client *c;
 
   // If only one window
-  if (mode == 0 && head != NULL && head->next == NULL)
+  if (!mode && head != NULL && head->next == NULL)
     {
     XMapWindow (dpy, current->win);
     XMoveResizeWindow (dpy, head->win, 0, 0, sw+bdw, sh+bdw);
@@ -855,7 +777,7 @@ void switch_mode (const Arg arg)
 
 void resize_stack_side (const Arg arg)
 {
-  if (mode == 0 || current == NULL)
+  if (!mode || current == NULL)
     return;
 
   current->width += arg.i;
@@ -864,7 +786,7 @@ void resize_stack_side (const Arg arg)
 
 void resize_stack (const Arg arg)
 {
-  if (mode == 0 || current == NULL)
+  if (!mode || current == NULL)
     return;
 
   current->height += arg.i;
@@ -969,7 +891,7 @@ void maprequest (XEvent *e)
     return;
     }
 
-  if (mode == 0 && current != NULL)
+  if (!mode && current != NULL)
     XUnmapWindow (dpy, current->win);
 
   XClassHint ch = {0};
@@ -999,7 +921,7 @@ void maprequest (XEvent *e)
          else
            select_desktop (tmp);
 
-        if (convenience[i].followwin != 0)
+        if (convenience[i].followwin != 0 && convenience[i].preferredd-1 != current_desktop)
           {
           Arg a = {.i = convenience[i].preferredd-1};
           change_desktop (a);
@@ -1023,7 +945,7 @@ void maprequest (XEvent *e)
 
   add_window (ev->window, 0, NULL);
 
-  if (mode == 0)
+  if (!mode)
     tile ();
   else
     XMapWindow (dpy, ev->window);
@@ -1275,8 +1197,8 @@ static void startx_intrin (void)
 static SLang_Intrin_Fun_Type xsrv_Intrinsics [] =
 {
   MAKE_INTRINSIC_0("Xstart", startx_intrin, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_I("XGetDeskWinds", XGetDeskWinds, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("XGetWindows", XGetWindows_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("DeskLen", DeskLen_intrin, SLANG_INT_TYPE),
+  MAKE_INTRINSIC_I("XGetDeskClassNames", XGetDeskClassNames, SLANG_VOID_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
 

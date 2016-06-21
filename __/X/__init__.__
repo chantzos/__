@@ -36,6 +36,8 @@ class X
       return;
 
     variable p = Proc.init (0, 1, 1);
+    p.stdout.file = SCRATCH;
+    p.stderr.file = SCRATCH;
 
     variable argv;
     % for the chromebook that runs crouton with its own xinit wrapper
@@ -46,17 +48,19 @@ class X
         "-nolisten", "tcp"];
 
     variable status = p.execv (argv, NULL);
-    if (status.exit_status)
-      {
-      IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
-      __messages;
-      }
-    else
-      if (strlen (p.stdout.out))
-        {
-        toscratch (strjoin (strtok (p.stdout.out, "\n"), "\n"));
-        __scratch (NULL);
-        }
+    toscratch ("\nexit_status: " + string (status.exit_status) + "\n");
+    __scratch (NULL);
+  %   if (status.exit_status)
+  %     {
+  %     IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+  %     __messages;
+  %     }
+  %   else
+  %     if (strlen (p.stdout.out))
+  %       {
+  %       toscratch (strjoin (strtok (p.stdout.out, "\n"), "\n"));
+  %       __scratch (NULL);
+  %       }
   end
 
   def comlist (a)
