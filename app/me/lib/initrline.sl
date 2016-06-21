@@ -1,3 +1,5 @@
+Load.file (Env->SRC_C_PATH + "/makefile", "Me");
+
 private define __bytecompile__ (argv)
 {
   variable dont_move = Opt.Arg.exists ("--dont-move", &argv;del_arg);
@@ -253,15 +255,17 @@ private define __install_distribution (argv)
   variable p = Proc.init (0, 1, 1);
 
   p.stdout.file = SCRATCH;
+  p.stderr.file = SCRATCH;
 
   variable status = p.execve (myargv, Env.defenv (), NULL);
 
-  if (status.exit_status)
-    {
-    IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
-    __messages;
-    }
-  else
+  toscratch ("exit status: " + string (status.exit_status) + "\n");
+%  if (status.exit_status)
+%    {
+%    IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+%    __messages;
+%    }
+%  else
     __scratch (NULL);
 }
 
@@ -281,7 +285,7 @@ private define __myrepo (argv)
 private define __sync_to (argv)
 {
   variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
-  variable interactive_copy   = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
+  variable interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
   variable to;
 
   (to, ) = Opt.Arg.compare ("--to=", &argv;del_arg, ret_arg);
@@ -327,7 +331,7 @@ private define __sync_to (argv)
 
   variable sync = Sync.init ();
 
-  sync.interactive_remove = NULL == no_interactive_remove ? 0 : 1;
+  sync.interactive_remove = NULL == no_interactive_remove;
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
 
   to = strtrim_end (to, "/");
@@ -346,7 +350,7 @@ private define __sync_to (argv)
 private define __sync_from (argv)
 {
   variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
-  variable interactive_copy   = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
+  variable interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
   variable from;
 
   (from, ) = Opt.Arg.compare ("--from=", &argv;del_arg, ret_arg);
@@ -392,7 +396,7 @@ private define __sync_from (argv)
 
   variable sync = Sync.init ();
 
-  sync.interactive_remove = NULL == no_interactive_remove ? 0 : 1;
+  sync.interactive_remove = NULL == no_interactive_remove;
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
 
   from = strtrim_end (from, "/");
@@ -404,6 +408,102 @@ private define __sync_from (argv)
     IO.tostderr (sprintf ("sync failed, EXIT_CODE: %d", exit_code));
     __messages;
     }
+  else
+    __scratch (NULL);
+}
+
+private define __module_compile__ (argv)
+{
+  variable debug = Opt.Arg.exists ("--debug", &argv;del_arg);
+  variable dont_inst = Opt.Arg.exists ("--dont-install", &argv;del_arg);
+  variable cflags = Opt.Arg.compare ("--cflags=", &argv;del_arg, ret_arg);
+
+  ifnot (NULL == cflags)
+    {
+    variable tk = strchop (cflags, '=', 0);
+    if (1 == length (tk))
+      cflags = NULL;
+    else
+      cflags = tk[1];
+    }
+
+  if (1 == length (argv))
+    {
+    IO.tostderr ("module argument is required");
+    __messages;
+    return;
+    }
+
+  variable modules = argv[[1:]];
+  variable i, ind, mdl, mdlout, flags, err = 0;
+  variable p, largv, status, pabs;
+
+  _for i (0, length (modules) - 1)
+    {
+    mdl = modules[i];
+
+    ifnot (path_is_absolute (mdl))
+      {
+      pabs = 0;
+      ind = wherefirst (Me->MODULES == mdl);
+      if (NULL == ind)
+        {
+        IO.tostderr (mdl, ": no such module");
+        err = 1;
+        continue;
+        }
+
+      try
+        {
+        flags = Me->FLAGS[ind];
+        }
+      catch AnyError:
+        {
+        IO.tostderr (Exc.fmt (NULL));
+        err = 1;
+        continue;
+        }
+      }
+    else
+      {
+      if (-1 == access (mdl, F_OK|R_OK))
+        {
+        IO.tostderr (mdl, ": no such module");
+        err = 1;
+        continue;
+        }
+
+      pabs = 1;
+      flags = NULL == cflags ? " " : cflags;
+      }
+
+    flags = Me-> DEF_FLAGS + " " + flags +
+          (debug ? " " + Me->DEB_FLAGS :  "");
+
+    p = Proc.init (0, 1, 1);
+    p.stdout.file = SCRATCH;
+    p.stderr.file = SCRATCH;
+
+    toscratch ("compiling " + mdl);
+    mdlout = pabs ? path_basename_sans_extname (mdl) + ".so" : mdl + "-module.so";
+
+    largv = [Sys.which (Me->CC), strtok (flags), pabs ? mdl : Env->SRC_C_PATH + "/" +
+      mdl + "-module.c", "-o", This.is.my.tmpdir + "/" + mdlout];
+
+    status = p.execv (largv, NULL);
+
+    if (status.exit_status)
+      err = 1;
+
+   % getkey segfaults
+    if (NULL == dont_inst && "getkey" != mdl && 0 == pabs)
+      if (-1 == File.copy (This.is.my.tmpdir + "/" + mdlout,
+        Env->STD_C_PATH + "/" + mdlout))
+          err = 1;
+    }
+
+  if (err)
+    __messages;
   else
     __scratch (NULL);
 }
@@ -441,6 +541,13 @@ private define my_commands ()
     "--no-remove-interactive void no confirmation on remove extra files, default yes",
     "--copy-interactive void confirmation when syncing, default no",
     "--from= directory sources directory"];
+
+  a["module_compile"] = @Argvlist_Type;
+  a["module_compile"].func = &__module_compile__;
+  a["module_compile"].args = [
+    "--debug void add debug flags when compiling",
+    "--cflags= string append flags",
+    "--dont-install void do not install the module"];
   a;
 }
 
