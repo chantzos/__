@@ -698,7 +698,9 @@ ROOTPATH = realpath (ROOTPATH + "/..");
       errno_string (errno), 1);
 
   Path.walk (SRC_APP_PATH + "/", &__apps_dir_callback__, NULL);
-  Path.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
+
+  ifnot (access (SRC_USER_APP_PATH, F_OK))
+    Path.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
 
   () = chdir (SRC_PATH);
 }
