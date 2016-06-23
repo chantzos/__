@@ -259,14 +259,10 @@ private define __install_distribution (argv)
 
   variable status = p.execve (myargv, Env.defenv (), NULL);
 
-  toscratch ("exit status: " + string (status.exit_status) + "\n");
-%  if (status.exit_status)
-%    {
-%    IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
-%    __messages;
-%    }
-%  else
-    __scratch (NULL);
+  Smg.send_msg_dr ("exit status: " + string (status.exit_status),
+      status.exit_status, NULL, NULL);
+
+  __scratch (NULL);
 }
 
 private define __myrepo (argv)
@@ -416,7 +412,8 @@ private define __module_compile__ (argv)
 {
   variable debug = Opt.Arg.exists ("--debug", &argv;del_arg);
   variable dont_inst = Opt.Arg.exists ("--dont-install", &argv;del_arg);
-  variable cflags = Opt.Arg.compare ("--cflags=", &argv;del_arg, ret_arg);
+  variable cflags, ind;
+  (cflags, ind) = Opt.Arg.compare ("--cflags=", &argv;del_arg, ret_arg);
 
   ifnot (NULL == cflags)
     {
@@ -429,13 +426,13 @@ private define __module_compile__ (argv)
 
   if (1 == length (argv))
     {
-    IO.tostderr ("module argument is required");
+    IO.tostderr ("a module name as argument is required");
     __messages;
     return;
     }
 
   variable modules = argv[[1:]];
-  variable i, ind, mdl, mdlout, flags, err = 0;
+  variable i, mdl, mdlout, flags, err = 0;
   variable p, largv, status, pabs;
 
   _for i (0, length (modules) - 1)

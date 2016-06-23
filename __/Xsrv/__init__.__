@@ -19,24 +19,37 @@ class Xsrv
       {
       String_Type[0],
       ["CMODULES", "XSRV_CLASS"],
-      String_Type[0],
-      String_Type[0],
-      String_Type[0],
+      ["SHELL_ON_APP"],
+      ["SHELL_ON___"],
+      ["SHELL_ON_CLASS_A", "SHELL_ON_CLASS_B"],
       ["SLSH"],
       ["MAIL"],
-      String_Type[0],
-      String_Type[0],
-      String_Type[0],
+      ["SHELL_ON_TMP"],
+      ["HTML_DOCS"],
+      ["VED_LIB"],
       String_Type[0],
       String_Type[0],
       String_Type[0],
       },
+    SHELL_ON_APP = "cd " + Env->SRC_APP_PATH + " && " +
+        X_TERM_BIN + " -name SHELL_ON_APP",
+    SHELL_ON_TMP = "cd /tmp && " + X_TERM_BIN + " -name SHELL_ON_TMP",
+    SHELL_ON___ =  "cd " + Env->SRC_PATH  + " && " +
+        X_TERM_BIN + " -name SHELL_ON___",
+    SHELL_ON_CLASS_A = "cd " + Env->SRC_CLASS_PATH + " && " +
+        X_TERM_BIN + " -name SHELL_ON_CLASS_A",
+    SHELL_ON_CLASS_B = "cd " + Env->SRC_CLASS_PATH + " && " +
+        X_TERM_BIN + " -name SHELL_ON_CLASS_B",
     CMODULES = X_TERM_BIN + " -name CMODULES -e __ved " + Env->SRC_C_PATH +
-      "/xsrv-module.c",
+        "/xsrv-module.c",
     XSRV_CLASS = X_TERM_BIN + " -name XSRV_CLASS -e __ved " + Env->SRC_CLASS_PATH +
-      "/Xsrv/__init__.__",
+        "/Xsrv/__init__.__",
     MAIL = X_TERM_BIN + " -name MAIL -e mutt -y",
+    HTML_DOCS = X_TERM_BIN + " -name HTML_DOCS -e elinks " +
+      Env->HOME_PATH + "/htmldocs/docs.html",
     SLSH = X_TERM_BIN + " -name SLSH -e slsh",
+    VED_LIB = X_TERM_BIN + " -name VED_LIB -e __ved " + Env->SRC_CLASS_PATH +
+      "/Ved/__init__.__",
     };
 
 
