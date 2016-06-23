@@ -1,6 +1,6 @@
 $0 = realpath (path_dirname (__FILE__) + "/../..");
 
-public variable Dir;
+public variable Dir, File;
 eval ("static define OS_PATH ();", "Env");
 
 Class.load ("Load");
@@ -9,6 +9,7 @@ Class.load ("Sys");
 Class.load ("Env");
 Class.load ("Array");
 Class.load ("Assoc");
+Class.load ("Diff");
 Class.load ("File");
 Class.load ("Dir");
 Class.load ("Path");

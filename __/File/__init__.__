@@ -203,4 +203,28 @@ class File
 
     0;
   end
+
+  def mktmp (dir, fn)
+    if (dir == ".")
+      dir = getcwd ();
+
+    ifnot (path_is_absolute (dir))
+      dir = getcwd + "/" + dir;
+
+    dir = realpath (dir);
+
+    if (NULL == dir || 0 == Dir.isdirectory (dir))
+      return NULL;
+
+    variable al = listdir (dir);
+
+    variable fd = mkstemp (dir + "/" + fn + ".XXXXXX");
+    if (NULL == fd)
+      return NULL;
+
+    variable bl = listdir (dir);
+    variable d = Diff.new (al, bl);
+    variable file = d[wherenot (strncmp (d, "+", 1))[0]];
+    struct {file = dir + "/" + substr (file, 2, -1), fd = fd};
+  end
 end

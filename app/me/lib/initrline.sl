@@ -329,6 +329,8 @@ private define __sync_to (argv)
 
   sync.interactive_remove = NULL == no_interactive_remove;
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
+  sync.ignoredir = ["tmp"];
+  sync.ignoredironremove = ["tmp"];
 
   to = strtrim_end (to, "/");
 
@@ -394,6 +396,8 @@ private define __sync_from (argv)
 
   sync.interactive_remove = NULL == no_interactive_remove;
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
+  sync.ignoredir = ["tmp"];
+  sync.ignoredironremove = ["tmp"];
 
   from = strtrim_end (from, "/");
 

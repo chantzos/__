@@ -75,10 +75,10 @@ private variable DEB_FLAGS =
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
 private variable CLASSES = [
-  "Input",  "Smg",    "Rand",  "Crypt",  "Os",    "Opt",
-  "String", "Rline",  "Re",    "Diff",   "Proc",  "Sock",
-  "Subst",  "Sync",   "Ved",   "Api",    "Curl",  "Json",
-  "Time",   "Scm",    "App",   "Com"];
+  "Input",  "Smg",   "Rand", "Crypt",  "Os",  "Opt",
+  "String", "Rline", "Re",   "Proc",  "Sock", "Subst",
+  "Sync",   "Ved",   "Api",  "Curl",  "Json", "Time",
+  "Scm",    "App",   "Com"];
 
 if (X)
   {

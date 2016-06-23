@@ -24,20 +24,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <libgen.h>
-#include <string.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <string.h>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-#include <X11/extensions/XTest.h>
-#include <X11/XKBlib.h>
 #include <X11/Xproto.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xlocale.h>
+#include <X11/XKBlib.h>
 #include <errno.h>
 #include <slang.h>
 
@@ -89,7 +84,6 @@ typedef struct
   unsigned int x, y, width, height;
   } Positional;
 
-static void get_windows (unsigned int desk);
 static void add_window(Window w, unsigned int tw, client *cl);
 static void change_desktop(const Arg arg);
 static void client_to_desktop(const Arg arg);
@@ -151,7 +145,7 @@ static const Convenience convenience[] = { \
 
 static const Positional positional[] = { \
     /* class  x  y  width  height
-   { "Thunar", 100,100,800,400 }, */
+   { "classname", 100,100,800,400 }, */
 };
 
 const char* urxvtcmd[] = {"urxvtc", NULL};
@@ -175,10 +169,10 @@ static key keys[] = {
     {  MOD4,             XK_Tab,        next_win,          {NULL}},
     {  MOD4,             XK_q,          prev_win,          {NULL}},
     {  MOD4,             XK_grave,      last_desktop,      {NULL}},
-    {  MOD1,             XK_Down,       resize_stack,      {.i = +12}},
-    {  MOD1,             XK_Up,         resize_stack,      {.i = -12}},
-    {  MOD1,             XK_Right,      resize_stack_side, {.i = +12}},
-    {  MOD1,             XK_Left,       resize_stack_side, {.i = -12}},
+    {  MOD1|ControlMask, XK_Down,       resize_stack,      {.i = +12}},
+    {  MOD1|ControlMask, XK_Up,         resize_stack,      {.i = -12}},
+    {  MOD1|ControlMask, XK_Right,      resize_stack_side, {.i = +12}},
+    {  MOD1|ControlMask, XK_Left,       resize_stack_side, {.i = -12}},
     {  MOD1|ShiftMask,   XK_Up,         move_up,           {.i = -15}},
     {  MOD1|ShiftMask,   XK_Down,       move_down,         {.i = 15}},
     {  MOD1|ShiftMask,   XK_Left,       move_sideways,     {.i = -15}},//left
@@ -194,19 +188,19 @@ static key keys[] = {
     {  MOD1,             XK_F3,         spawn,             {.com = alsacmd}},
     {  MOD1,             XK_F4,         spawn,             {.com = htopcmd}},
     {  MOD4,             XK_a,          spawn,             {.com = shellcmd}},
-       DESKTOPCHANGE(   XK_0,                              0)
-       DESKTOPCHANGE(   XK_1,                              1)
-       DESKTOPCHANGE(   XK_2,                              2)
-       DESKTOPCHANGE(   XK_3,                              3)
-       DESKTOPCHANGE(   XK_4,                              4)
-       DESKTOPCHANGE(   XK_5,                              5)
-       DESKTOPCHANGE(   XK_6,                              6)
-       DESKTOPCHANGE(   XK_7,                              7)
-       DESKTOPCHANGE(   XK_8,                              8)
-       DESKTOPCHANGE(   XK_9,                              9)
-       DESKTOPCHANGE(   XK_F1,                            10)
-       DESKTOPCHANGE(   XK_F2,                            11)
-       DESKTOPCHANGE(   XK_F3,                            12)
+       DESKTOPCHANGE(    XK_0,                             0)
+       DESKTOPCHANGE(    XK_1,                             1)
+       DESKTOPCHANGE(    XK_2,                             2)
+       DESKTOPCHANGE(    XK_3,                             3)
+       DESKTOPCHANGE(    XK_4,                             4)
+       DESKTOPCHANGE(    XK_5,                             5)
+       DESKTOPCHANGE(    XK_6,                             6)
+       DESKTOPCHANGE(    XK_7,                             7)
+       DESKTOPCHANGE(    XK_8,                             8)
+       DESKTOPCHANGE(    XK_9,                             9)
+       DESKTOPCHANGE(    XK_F1,                            10)
+       DESKTOPCHANGE(    XK_F2,                            11)
+       DESKTOPCHANGE(    XK_F3,                            12)
 };
 
 static Display *dpy;

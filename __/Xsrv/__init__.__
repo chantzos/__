@@ -1,8 +1,4 @@
 class Xsrv
-  beg
-    Class.load ("Diff");
-  end
-
   import xsrv
 
   let XDIR = Env->TMP_PATH + "/X";
@@ -12,6 +8,7 @@ class Xsrv
   let URXVTD_BIN = Sys.which ("urxvtd");
   let X_TERM_BIN = NULL == URXVTD_BIN ? Sys.which ("xterm") : Sys.which ("urxvtc");
   let! DESKLEN = NULL;
+  let SETXKBMAP_BIN = Sys.which ("setxkbmap");
 
   let DESKTOP_CLASSES = struct
     {
@@ -66,24 +63,24 @@ class Xsrv
 
   def X_startup () public proc
     ifnot (NULL == URXVTD_BIN)
-      () = system ("urxvtd -q -f -o &");
+      () = system (URXVTD_BIN + " -q -f -o &");
 
     variable cookie = __xget_cookie ();
     if (NULL != cookie && NULL != XAUTH_BIN)
       {
-      variable al = listdir (Env->TMP_PATH + "/X");
-      variable xauthfd = mkstemp (Env->TMP_PATH + "/X/serverauth.XXXXXX");
-      variable bl = listdir (Env->TMP_PATH + "/X");
-      variable d = Diff.new (al, bl);
-      variable xauthfile = d[wherenot (strncmp (d, "+", 1))[0]];
-      xauthfile = Env->TMP_PATH + "/X/" + substr (xauthfile, 2, -1);
-      putenv ("XAUTHORITY=" + xauthfile);
-      () = system (XAUTH_BIN + " add " + getenv ("DISPLAY") + " . " + cookie);
+      variable tmp = File.mktmp (Env->TMP_PATH + "/X", "serverauth");
+      ifnot (NULL == tmp)
+        {
+        putenv ("XAUTHORITY=" + tmp.file);
+        () = system (XAUTH_BIN + " add " + getenv ("DISPLAY") + " . " + cookie);
+        }
       }
 
-    () = system ("setxkbmap -layout \"us,el\" -option \"grp:alt_space_toggle\"");
+    ifnot (NULL == SETXKBMAP_BIN)
+      () = system (SETXKBMAP_BIN + " -layout \"us,el\" -option \"grp:alt_space_toggle\"");
+
     sleep (0.2);
-    () = system (X_TERM_BIN + " -e shell &");
+    () = system (X_TERM_BIN + " -e " + Env->BIN_PATH + "/__shell &");
   end
 
   var FUNS = Assoc_Type[Ref_Type];
@@ -128,6 +125,16 @@ class Xsrv
   def start ()
     Xsrv.let ("DESKLEN", DeskLen ());
     Xstart ();
+
+    variable xauthfile = getenv ("XAUTHORITY");
+    ifnot (NULL == xauthfile)
+      () = remove (xauthfile);
+
+    ifnot (access (RDFIFO, F_OK))
+      () = remove (RDFIFO);
+
+    ifnot (access (WRFIFO, F_OK))
+      () = remove (WRFIFO);
   end
 
   beg
@@ -159,7 +166,5 @@ class Xsrv
         This.err_handler ("cannot create fifo: " + WRFIFO);
 
     FUNS["getdeskclassnames"] = &getdeskclassnames;
-  end
-
   end
 end
