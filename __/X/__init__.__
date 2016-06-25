@@ -1,11 +1,7 @@
 class X
-  beg
-    Class.load ("Diff");
-  end
 
   var public Xsrv = NULL;
   let XINIT_BIN = Sys.which ("xinit");
-  let XAUTH_BIN = Sys.which ("xauth");
   let ISCROUTON = NULL != Sys.which ("croutonversion");
 
 #if This.request.X
@@ -48,19 +44,10 @@ class X
         "-nolisten", "tcp"];
 
     variable status = p.execv (argv, NULL);
+
     toscratch ("\nexit_status: " + string (status.exit_status) + "\n");
+
     __scratch (NULL);
-  %   if (status.exit_status)
-  %     {
-  %     IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
-  %     __messages;
-  %     }
-  %   else
-  %     if (strlen (p.stdout.out))
-  %       {
-  %       toscratch (strjoin (strtok (p.stdout.out, "\n"), "\n"));
-  %       __scratch (NULL);
-  %       }
   end
 
   def comlist (a)

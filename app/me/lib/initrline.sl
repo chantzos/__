@@ -482,10 +482,10 @@ private define __module_compile__ (argv)
           (debug ? " " + Me->DEB_FLAGS :  "");
 
     p = Proc.init (0, 1, 1);
-    p.stdout.file = SCRATCH;
-    p.stderr.file = SCRATCH;
+    p.stdout.file = This.is.std.err.fn;
+    p.stderr.file = This.is.std.err.fn;;
 
-    toscratch ("compiling " + mdl);
+    IO.tostderr ("compiling " + mdl);
     mdlout = pabs ? path_basename_sans_extname (mdl) + ".so" : mdl + "-module.so";
 
     largv = [Sys.which (Me->CC), strtok (flags), pabs ? mdl : Env->SRC_C_PATH + "/" +
@@ -495,18 +495,17 @@ private define __module_compile__ (argv)
 
     if (status.exit_status)
       err = 1;
-
-   % getkey segfaults
-    if (NULL == dont_inst && "getkey" != mdl && 0 == pabs)
-      if (-1 == File.copy (This.is.my.tmpdir + "/" + mdlout,
-        Env->STD_C_PATH + "/" + mdlout))
-          err = 1;
+    else
+    % getkey segfaults
+      if (NULL == dont_inst && "getkey" != mdl && 0 == pabs)
+        if (-1 == File.copy (This.is.my.tmpdir + "/" + mdlout,
+          Env->STD_C_PATH + "/" + mdlout))
+            err = 1;
     }
 
-  if (err)
-    __messages;
-  else
-    __scratch (NULL);
+  Smg.send_msg_dr ("exit status: " + string (err), err, NULL, NULL);
+
+  __messages;
 }
 
 private define my_commands ()

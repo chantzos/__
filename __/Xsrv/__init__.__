@@ -4,17 +4,19 @@ class Xsrv
   let XDIR = Env->TMP_PATH + "/X";
   let RDFIFO = XDIR + "/Svfifo";
   let WRFIFO = XDIR + "/Clfifo";
+  let! WRFD = NULL;
+  let! RDFD = NULL;
   let XAUTH_BIN = Sys.which ("xauth");
   let URXVTD_BIN = Sys.which ("urxvtd");
   let X_TERM_BIN = NULL == URXVTD_BIN ? Sys.which ("xterm") : Sys.which ("urxvtc");
-  let! DESKLEN = NULL;
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
-
+  let ERR = 0xc8;
+  let DESKNUM = 13;
   let DESKTOP_CLASSES = struct
     {
     class =
       {
-      String_Type[0],
+      ["__SHELL"],
       ["CMODULES", "XSRV_CLASS"],
       ["SHELL_ON_APP"],
       ["SHELL_ON___"],
@@ -28,6 +30,8 @@ class Xsrv
       String_Type[0],
       String_Type[0],
       },
+    __SHELL = X_TERM_BIN + " -name __SHELL -e " + Env->BIN_PATH +
+        "/__shell",
     SHELL_ON_APP = "cd " + Env->SRC_APP_PATH + " && " +
         X_TERM_BIN + " -name SHELL_ON_APP",
     SHELL_ON_TMP = "cd /tmp && " + X_TERM_BIN + " -name SHELL_ON_TMP",
@@ -80,27 +84,41 @@ class Xsrv
       () = system (SETXKBMAP_BIN + " -layout \"us,el\" -option \"grp:alt_space_toggle\"");
 
     sleep (0.2);
-    () = system (X_TERM_BIN + " -e " + Env->BIN_PATH + "/__shell &");
+    () = system (X_TERM_BIN + " -name __SHELL -e " + Env->BIN_PATH +
+        "/__shell &");
   end
 
-  var FUNS = Assoc_Type[Ref_Type];
+  def invalid_fun () proc
+    Sock.send_int (WRFD, ERR);
+  end
 
-  def getdeskclassnames (wrfd, rdfd) proc
-    Sock.send_int (wrfd, 1);
-    variable did = Sock.get_int (rdfd);
+  var FUNS = Assoc_Type[Ref_Type, &invalid_fun];
+
+  def getdeskclassnames () proc
+    Sock.send_int (WRFD, 1);
+    variable did = Sock.get_int (RDFD);
     variable ar = XGetDeskClassNames (did);
     if (NULL == ar)
       ar = String_Type[0];
 
-    Sock.send_str_ar (rdfd, wrfd, ar);
+    Sock.send_str_ar (RDFD, WRFD, ar);
   end
 
   def Srv_interp () public proc
-    variable wrfd = open (WRFIFO, O_WRONLY);
-    variable rdfd = open (RDFIFO, O_RDONLY);
-    variable f    = Sock.get_str (rdfd);
+    Xsrv.let ("WRFD", open (WRFIFO, O_WRONLY));
+    Xsrv.let ("RDFD", open (RDFIFO, O_RDONLY));
+    (@FUNS[Sock.get_str (RDFD)]);
+  end
 
-    (@FUNS[f]) (wrfd, rdfd);
+  def Srv_set_modes () public proc
+    variable ar = Integer_Type[DESKNUM];
+    ar++;
+    ar[10]++;
+    ar;
+  end
+
+  def Srv_set_desktops () public proc
+    DESKNUM;
   end
 
   def Srv_on_desktop_change (did) public proc
@@ -123,7 +141,6 @@ class Xsrv
   end
 
   def start ()
-    Xsrv.let ("DESKLEN", DeskLen ());
     Xstart ();
 
     variable xauthfile = getenv ("XAUTHORITY");

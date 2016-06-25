@@ -4,10 +4,13 @@ class Xclnt
   let XDIR = Env->TMP_PATH + "/X";
   let WRFIFO = XDIR + "/Svfifo";
   let RDFIFO = XDIR + "/Clfifo";
+  let! WRFD = NULL;
+  let! RDFD = NULL;
   let MODIFIER = 'a';
   let KEY = "bracketleft";
   let! DESKLEN = 13;
   let CUR_ID = 0;
+  let ERR = 0xc8;
 
   subclass Desk
     __init__
@@ -28,13 +31,15 @@ class Xclnt
 
       XSendKey (Xclnt->MODIFIER, Xclnt->KEY);
 
-      variable rdfd = open (Xclnt->RDFIFO, O_RDONLY);
-      variable wrfd = open (Xclnt->WRFIFO, O_WRONLY);
+      Xclnt.let ("RDFD", open (Xclnt->RDFIFO, O_RDONLY));
+      Xclnt.let ("WRFD", open (Xclnt->WRFIFO, O_WRONLY));
 
-      Sock.send_str (wrfd, "getdeskclassnames");
-      () = Sock.get_int (rdfd);
-      Sock.send_int (wrfd, desk);
-      return Sock.get_str_ar (rdfd, wrfd);
+      Sock.send_str (Xclnt->WRFD, "getdeskclassnames");
+      if (Xclnt->ERR == Sock.get_int (Xclnt->RDFD))
+        return NULL;
+
+      Sock.send_int (Xclnt->WRFD, desk);
+      return Sock.get_str_ar (Xclnt->RDFD, Xclnt->WRFD);
     end
 
     def change_by_id (did)
