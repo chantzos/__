@@ -1,7 +1,8 @@
 variable COM = strtrim_beg (path_basename_sans_extname (__argv[0]), "_");
-variable COMDIR = Env->STD_COM_PATH + "/" + COM;
+variable COMDIR = Env->LOCAL_COM_PATH + "/" + COM;
 if (-1 == access (COMDIR, F_OK))
-  COMDIR = Env->USER_COM_PATH + "/" + COM;
+  if (-1 == access ((COMDIR = Env->STD_COM_PATH + "/" + COM, COMDIR), F_OK))
+    COMDIR = Env->USER_COM_PATH + "/" + COM;
 
 public variable openstdout = 0;
 public variable openstderr = 0;
