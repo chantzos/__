@@ -10,7 +10,6 @@ private define mainloop ()
 
 public define init_me ()
 {
-  variable default;
   wind_init ("a", 2;force, on_wind_new);
 
   mainloop ();

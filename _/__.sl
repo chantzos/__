@@ -760,14 +760,17 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
       else
         lcname = tokens[5];
 
-  variable isinusr = 0;
-
   if (-1 == access (lfile, F_OK))
     if (-1 == access ((lfile = strreplace (
-      lfile, CLASSPATH, CLASSPATH + "/../usr/__"), isinusr = 1, lfile), F_OK))
-      throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
+        lfile, CLASSPATH, CLASSPATH + "/../local/__"), lfile), F_OK))
+      if (-1 == access ((lfile = strreplace (
+          lfile, CLASSPATH, CLASSPATH + "/../usr/__"), lfile), F_OK))
+        ifnot ("include!" == tokens[0])
+          throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
+        else
+          return;
 
-  if ("include" == tokens[0])
+  if (any (["include", "include!"] == tokens[0]))
     {
     variable lfp = fopen (lfile, "r");
     if (NULL == lfp)
@@ -1364,7 +1367,7 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
       continue;
       }
 
-    if (any (["include", "load"] == tokens[0]))
+    if (any (["include", "include!", "load"] == tokens[0]))
       {
       parse_load_include (funs, sub_funs, eval_buf, tokens, line;;__qualifiers);
       continue;

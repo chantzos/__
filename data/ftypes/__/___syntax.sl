@@ -30,7 +30,7 @@ private variable regexps = [
 |(?<=\s)(typedef(?=\s))\
 |(?<=\s)(muttable(?=\s|$))\
 |(?<=\s)(fun(?=\s))\
-|(?<=\s)(load|require|include (?=[a-z]*))\
+|(?<=\s)(load|require|include!? (?=[a-z]*))\
 |(?<=\s)(from(?=\s))\
 |(?<=\s)(import(?=\s))\
 |(?<=\s)(proc(?=$))\

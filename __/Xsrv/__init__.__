@@ -12,7 +12,7 @@ class Xsrv
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
   let ERR = 0xc8;
   let DESKNUM = 13;
-  let DESKTOP_CLASSES = struct
+  let! DESKTOP_CLASSES = struct
     {
     class =
       {
@@ -53,6 +53,7 @@ class Xsrv
       "/Ved/__init__.__",
     };
 
+  include! __init__ from Xlocalxsrv as Xsrv
 
   % should be replaced by md5sum?
   def __xget_cookie () proc
@@ -183,5 +184,6 @@ class Xsrv
         This.err_handler ("cannot create fifo: " + WRFIFO);
 
     FUNS["getdeskclassnames"] = &getdeskclassnames;
+
   end
 end
