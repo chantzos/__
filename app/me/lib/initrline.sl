@@ -278,6 +278,24 @@ private define __myrepo (argv)
   draw (Ved.get_cur_buf ());
 }
 
+private define __exclude (sync)
+{
+  ifnot (access (This.is.my.datadir + "/exclude_dirs", F_OK))
+    sync.ignoredir = [sync.ignoredir, File.readlines (
+      This.is.my.datadir + "/exclude_dirs")];
+
+  ifnot (access (This.is.my.datadir + "/exclude_dirs_on_remove", F_OK))
+    sync.ignoredironremove = [sync.ignoredironremove, File.readlines (
+      This.is.my.datadir + "/exclude_dirs_on_remove")];
+
+  ifnot (access (This.is.my.datadir + "/exclude_files", F_OK))
+    sync.ignorefile = File.readlines (This.is.my.datadir + "/exclude_files");
+
+  ifnot (access (This.is.my.datadir + "/exclude_files_on_remove", F_OK))
+    sync.ignorefileonremove = File.readlines (This.is.my.datadir +
+    "/exclude_files_on_remove");
+}
+
 private define __sync_to (argv)
 {
   variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
@@ -331,6 +349,8 @@ private define __sync_to (argv)
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
   sync.ignoredir = ["tmp"];
   sync.ignoredironremove = ["tmp"];
+
+  __exclude (sync);
 
   to = strtrim_end (to, "/");
 
@@ -398,6 +418,8 @@ private define __sync_from (argv)
   sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
   sync.ignoredir = ["tmp"];
   sync.ignoredironremove = ["tmp"];
+
+  __exclude (sync);
 
   from = strtrim_end (from, "/");
 
