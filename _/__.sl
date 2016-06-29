@@ -1314,7 +1314,7 @@ private define parse_subclass (
   @eval_buf = "" + sub_cname + " = __->__ (\"" + sub_cname + "\", \"" + cname + "\", \"" +
     sub_classpath + "\", 1, [\"" + strjoin (__fmethods, "\",\n \"") +
       "\"], \"Class::classnew::subclass_from_" + cname + "_as_" + as +
-        "\");\n\n" + @eval_buf;
+        "\"" + (qualifier_exists ("force") ? ";force" : "") + ");\n\n" + @eval_buf;
 
   @eval_buf += "\n" + sub_buf + "\n";
 }
@@ -1496,7 +1496,8 @@ private define __Class_From_Init__ (classpath)
     {
     variable c = __getclass__ (super, 0);
     tokens = [tokens, "from", qualifier ("from", super)];
-    parse_subclass (super, @classpath, funs, &sub_funs, &eval_buf, tokens, line, fp);
+    parse_subclass (super, @classpath, funs, &sub_funs, &eval_buf, tokens, line, fp
+      ;;__qualifiers);
     }
 
   variable __funs__ = assoc_get_keys (funs);
@@ -1511,7 +1512,8 @@ private define __Class_From_Init__ (classpath)
     {
     eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
     @classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
-    "\"], \"Class::classnew::" + cname + "\");\n\n" + eval_buf;
+    "\"], \"Class::classnew::" + cname + "\"" +
+      (qualifier_exists ("force") ? ";force" : "") + ");\n\n" + eval_buf;
     eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
     eval_buf += cname + ".let = Class.let;\n";
     eval_buf += cname + ".fun = Class.fun;\n";
