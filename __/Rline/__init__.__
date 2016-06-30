@@ -2316,10 +2316,7 @@ class Rline
               commands = String_Type[0];
             }
           else
-            {
             commands = assoc_get_keys (s.argvlist);
-            commands = commands[where (strncmp (commands, "~", 1))];
-            }
 
           if (commandcmp (NULL, s, commands) == 1)
             {
