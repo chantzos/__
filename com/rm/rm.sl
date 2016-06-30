@@ -17,7 +17,6 @@ define assign_string_pattern (pat, pattern, what)
 
 define file_callback (file, st, filelist, opts)
 {
-
   ifnot (NULL == opts.pattern)
     if (pcre_exec (opts.pattern, file))
       {
@@ -29,14 +28,12 @@ define file_callback (file, st, filelist, opts)
         return 1;
 
   list_append (filelist, file);
-
   return 1;
 }
 
 define dir_callback (dir, st, filelist)
 {
   list_append (filelist, dir);
-
   return 1;
 }
 

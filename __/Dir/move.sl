@@ -13,6 +13,7 @@ private define dir_callback (dir, st, dirlist)
 private define move (self, source, dest, opts)
 {
   variable
+    verbose = __get_qualifier_as (Integer_Type, "verbose", qualifier ("verbose"), 0),
     i,
     st,
     ar,
@@ -38,7 +39,7 @@ private define move (self, source, dest, opts)
       }
 
     opts.backup = NULL;
-    retval = File.copy_recursive (dest, backup;copy_opts = opts);
+    retval = File.copy_recursive (dest, backup;copy_opts = opts, verbose = verbose);
     opts.backup = 1;
 
     if (-1 == retval)
@@ -52,7 +53,7 @@ private define move (self, source, dest, opts)
 
   variable keep_backup_opt = opts.backup;
   opts.backup = NULL;
-  retval = File.copy_recursive (source, dest;copy_opts = opts);
+  retval = File.copy_recursive (source, dest;copy_opts = opts, verbose = verbose);
   opts.backup = keep_backup_opt;
 
   if (-1 == retval)
@@ -75,6 +76,7 @@ private define move (self, source, dest, opts)
       return -1;
       }
 
-  IO.tostderr (sprintf ("`%s' -> `%s'%s", source, dest, backuptext));
+  if (verbose)
+    IO.tostdout (sprintf ("`%s' -> `%s'%s", source, dest, backuptext));
   0;
 }

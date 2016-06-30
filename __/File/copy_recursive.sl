@@ -1,11 +1,12 @@
-private define cpr_dir_callback (dir, st, source, dest, opts, exit_code)
+private define cpr_dir_callback (dir, st, source, dest, opts, exit_code, verbose)
 {
   ifnot (NULL == opts.ignore_dir)
     {
     variable ldir = strtok (dir, "/");
     if (any (ldir[-1] == opts.ignore_dir))
       {
-      IO.tostdout (sprintf ("ignored dir: %s", dir));
+      if (verbose)
+        IO.tostdout (sprintf ("ignored dir: %s", dir));
       return 0;
       }
     }
@@ -27,21 +28,24 @@ private define cpr_file_callback (file, st_source, source, dest, opts, exit_code
   if (NULL == opts.copy_hidden)
     if ('.' == path_basename (file)[0])
       {
-      IO.tostdout (sprintf ("omitting hidden file `%s'", file));
+      if (verbose)
+        IO.tostdout (sprintf ("omitting hidden file `%s'", file));
       return 1;
       }
 
   ifnot (NULL == opts.match_pat)
     ifnot (pcre_exec (opts.match_pat, file))
       {
-      IO.tostdout (sprintf ("ignore file: %s", file));
+      if (verbose)
+        IO.tostdout (sprintf ("ignore file: %s", file));
       return 1;
       }
 
   ifnot (NULL == opts.ignore_pat)
     if (pcre_exec (opts.ignore_pat, file))
       {
-      IO.tostdout (sprintf ("ignore file: %s", file));
+      if (verbose)
+        IO.tostdout (sprintf ("ignore file: %s", file));
       return 1;
       }
 
@@ -69,7 +73,7 @@ private define copy_recursive (self, source, dest)
   variable exit_code = 0;
 
   Path.walk (source, &cpr_dir_callback, &cpr_file_callback;
-    dargs = {source, dest, opts, &exit_code},
+    dargs = {source, dest, opts, &exit_code, verbose},
     fargs = {source, dest, opts, &exit_code, verbose},
     maxdepth = opts.maxdepth);
 

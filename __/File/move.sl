@@ -1,6 +1,8 @@
 private define move (self, source, dest, opts)
 {
   variable
+    verbose = __get_qualifier_as (Integer_Type, "verbose",
+       qualifier ("verbose"), 0),
     backup,
     retval,
     backuptext = "",
@@ -10,7 +12,7 @@ private define move (self, source, dest, opts)
   if (NULL != st_dest && opts.backup)
     {
     backup = strcat (dest, opts.suffix);
-    retval = File.copy (dest, backup);
+    retval = File.copy (dest, backup;verbose = verbose);
     if (-1 == retval)
       {
       IO.tostderr (sprintf ("%s: backup failed", backup));
@@ -47,7 +49,7 @@ private define move (self, source, dest, opts)
     {
     if ("Cross-device link" == errno_string (errno))
       {
-      retval = File.copy (source, dest);
+      retval = File.copy (source, dest;verbose = verbose);
       if (-1 == retval)
         {
         IO.tostderr (sprintf
@@ -71,6 +73,8 @@ private define move (self, source, dest, opts)
       }
     }
 
-  IO.tostdout (sprintf ("`%s' -> `%s'%s", source, dest, backuptext));
+  if (verbose)
+    IO.tostdout (sprintf ("`%s' -> `%s'%s", source, dest, backuptext));
+
   0;
 }

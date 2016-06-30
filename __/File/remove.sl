@@ -75,4 +75,3 @@ private define remove (self, file, interactive, isdir)
     return 0;
     }
 }
-

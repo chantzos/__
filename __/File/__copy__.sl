@@ -36,7 +36,8 @@ private define __copy__ (self, source, dest, st_source, st_dest, opts)
 
     if (opts.only_update && st_source.st_mtime <= st_dest.st_mtime)
       {
-      IO.tostdout ("`" + dest + "' is newer than `" + source + "', aborting ...");
+      if (verbose)
+        IO.tostdout ("`" + dest + "' is newer than `" + source + "', aborting ...");
       return 0;
       }
 
@@ -49,7 +50,8 @@ private define __copy__ (self, source, dest, st_source, st_dest, opts)
 
       if (any (['n', 033, 'q'] == retval))
         {
-        IO.tostdout (source + " aborting ...");
+        if (verbose)
+          IO.tostdout (source + " aborting ...");
         return 0;
         }
       }

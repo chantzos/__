@@ -1,3 +1,11 @@
+variable VERBOSE = 0;
+
+define my_verboseon ()
+{
+  VERBOSE = 1;
+  verboseon ();
+}
+
 define assign_interactive_noclobber (interactive, noclobber, code)
 {
   @interactive = code ? 1 : NULL;
@@ -36,7 +44,7 @@ define main ()
   c.add ("i|interactive", &assign_interactive_noclobber, &opts.interactive, &opts.no_clobber, 1);
   c.add ("n|no-clobber", &assign_interactive_noclobber, &opts.interactive, &opts.no_clobber, 0);
   c.add ("u|update", &opts.only_update);
-  c.add ("v|verbose", &verboseon);
+  c.add ("v|verbose", &my_verboseon);
   c.add ("help", &_usage);
   c.add ("info", &info);
 
@@ -111,13 +119,13 @@ define main ()
         continue;
         }
 
-      retval = Dir.move (source, destname, opts);
+      retval = Dir.move (source, destname, opts;verbose = VERBOSE);
       if (-1 == retval)
         exit_code = 1;
       continue;
       }
 
-    retval = File.move (source, destname, opts);
+    retval = File.move (source, destname, opts;verbose = VERBOSE);
     if (-1 == retval)
       exit_code = 1;
     }
