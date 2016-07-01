@@ -106,7 +106,7 @@ private define __classcompile__ (argv)
     return;
     }
 
-  variable i, cpath, cname, class, tok, buf, as,
+  variable i, cpath, cname, class, tok, buf, as, orig,
     ern = 0,
     splen = strlen (Env->SRC_PATH),
     classes = argv[[1:]];
@@ -114,19 +114,26 @@ private define __classcompile__ (argv)
   _for i (0, length (classes) - 1)
     {
     class = classes[i];
-    ifnot (".__" == path_extname (class))
-      {
-      IO.tostderr (class, ": is not a class file");
-      ern = 1;
-      continue;
-      }
+    orig = path_basename (class);
 
     ifnot (path_is_absolute (class))
-      class = path_concat (Env->SRC_PATH, class);
+      if (access ((class = Env->SRC_PATH + "/" + class, class), F_OK)
+         || Dir.isdirectory (class))
+        if (access ((class = Env->SRC_LOCAL_CLASS_PATH + "/" + orig, class), F_OK)
+           || Dir.isdirectory (class))
+          if (access ((class = Env->SRC_CLASS_PATH + "/" + orig, class), F_OK)
+              || Dir.isdirectory (class))
+            if (access ((class = Env->SRC_USER_CLASS_PATH + "/" + orig, class), F_OK)
+               || Dir.isdirectory (class))
+              if (access ((class = Env->SRC_LOCAL_CLASS_PATH + "/" + orig + "/__init__.__", class), F_OK)
+                  || Dir.isdirectory (class))
+                if (access ((class = Env->SRC_CLASS_PATH + "/" + orig + "/__init__.__", class), F_OK)
+                    || Dir.isdirectory (class))
+                  class = Env->SRC_USER_CLASS_PATH + "/" + orig + "/__init__.__";
 
-    if (-1 == access (class, F_OK))
+    if (-1 == access (class, F_OK) || Dir.isdirectory (class))
       {
-      IO.tostderr (class, ": no such file");
+      IO.tostderr (orig, ": class cannot be found");
       ern = 1;
       continue;
       }
@@ -186,7 +193,7 @@ private define __classcompile__ (argv)
       continue;
       }
 
-    if (-1 == rename (as + "c", class + "c"))
+    if (-1 == rename (as + "c", class + ".slc"))
       {
       IO.tostderr ("failed to rename", as, "to", class, "\n", errno_string (errno));
       ern = 1;
