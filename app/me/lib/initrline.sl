@@ -217,18 +217,8 @@ private define __classcompile__ (argv)
 
 private define __loadlib__ (argv)
 {
-  variable ns;
-  (ns, ) = Opt.Arg.compare ("--ns=", &argv;del_arg, ret_arg);
-
-  ifnot (NULL == ns)
-    {
-    variable t = strtok (ns, "=");
-    if (2 == length (t))
-      ns = t[1];
-    else
-      ns = "Global";
-    }
-  else
+  variable ns = Opt.Arg.getlong ("ns", NULL, &argv;del_arg);
+  if (NULL == ns)
     ns = "Global";
 
   if (1 == length (argv))
@@ -303,53 +293,35 @@ private define __exclude (sync)
     "/exclude_files_on_remove");
 }
 
-private define __sync_to (argv)
+private define __sync_gen__ (argv, type)
 {
   variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
   variable interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
-  variable to;
+  variable toorfrom;
 
-  (to, ) = Opt.Arg.compare ("--to=", &argv;del_arg, ret_arg);
+  toorfrom = Opt.Arg.getlong (type, "from" == type ? "dir" : NULL, &argv;del_arg,
+    exists_err = "no" + (type == "from" ? "source" : "destination") + " specified, the --" +
+        type + "= option is required");
 
-  if (NULL == to)
+  if (NULL == toorfrom)
     {
-    IO.tostderr ("no target specified, needs the --to= option");
-    __messages;
-    return;
+    IO.tostderr (Opt.Arg.geterr ());
+    return -1;
     }
 
-  to = strchop (to, '=', 0);
-
-  if (1 == length (to))
-    {
-    IO.tostderr ("--to= option doesn't specify a target");
-    __messages;
-    return;
-    }
-
-  to = to[1];
-
-  if (-1 == access (to, F_OK))
-    {
-    if (-1 == Dir.make_parents (to, File->PERM["_PUBLIC"]))
+  if (-1 == access (toorfrom, F_OK))
+    if (-1 == Dir.make_parents (toorfrom, File->PERM["_PUBLIC"]))
       {
-      IO.tostderr (to, "Couldn't create directory");
-      __messages;
-      return;
+      IO.tostderr (toorfrom, "Couldn't create directory");
+      return -1;
       }
-    }
-  else
-    ifnot (Dir.isdirectory (to))
-      {
-      IO.tostderr (to, "not a directory");
-      __messages;
-      return;
-      }
+
+  toorfrom = strtrim_end (toorfrom, "/");
 
   () = File.write (SCRATCH, "\000");
 
-  variable from = Env->SRC_PATH;
-
+  variable to = type == "from" ? Env->SRC_PATH : toorfrom;
+  variable from = type == "from" ? toorfrom : Env->SRC_PATH;
   variable sync = Sync.init ();
 
   sync.interactive_remove = NULL == no_interactive_remove;
@@ -359,86 +331,31 @@ private define __sync_to (argv)
 
   __exclude (sync);
 
-  to = strtrim_end (to, "/");
-
   variable exit_code = sync.run (from, to;fd = SCRATCHFD);
 
   if (exit_code)
     {
     IO.tostderr (sprintf ("sync failed, EXIT_CODE: %d", exit_code));
-    __messages;
+    return -1;
     }
-  else
+
+  0;
+}
+
+private define __sync_to (argv)
+{
+  ifnot (__sync_gen__ (argv, "to"))
     __scratch (NULL);
+  else
+    __messages;
 }
 
 private define __sync_from (argv)
 {
-  variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
-  variable interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
-  variable from;
-
-  (from, ) = Opt.Arg.compare ("--from=", &argv;del_arg, ret_arg);
-
-  if (NULL == from)
-    {
-    IO.tostderr ("no sources specified, needs the --from= option");
-    __messages;
-    return;
-    }
-
-  from = strchop (from, '=', 0);
-
-  if (1 == length (from))
-    {
-    IO.tostderr ("--from= option doesn't specify a sources path");
-    __messages;
-    return;
-    }
-
-  from = from[1];
-
-  if (-1 == access (from, F_OK))
-    {
-    if (-1 == Dir.make_parents (from, File->PERM["_PUBLIC"]))
-      {
-      IO.tostderr (from, "Couldn't create directory");
-      __messages;
-      return;
-      }
-    }
-  else
-    ifnot (Dir.isdirectory (from))
-      {
-      IO.tostderr (from, "not a directory");
-      __messages;
-      return;
-      }
-
-  () = File.write (SCRATCH, "\000");
-
-  variable to = Env->SRC_PATH;
-
-  variable sync = Sync.init ();
-
-  sync.interactive_remove = NULL == no_interactive_remove;
-  sync.interactive_copy = NULL == interactive_copy ? 0 : 1;
-  sync.ignoredir = ["tmp"];
-  sync.ignoredironremove = ["tmp"];
-
-  __exclude (sync);
-
-  from = strtrim_end (from, "/");
-
-  variable exit_code = sync.run (from, to;fd = SCRATCHFD);
-
-  if (exit_code)
-    {
-    IO.tostderr (sprintf ("sync failed, EXIT_CODE: %d", exit_code));
-    __messages;
-    }
-  else
+  ifnot (__sync_gen__ (argv, "from"))
     __scratch (NULL);
+  else
+    __messages;
 }
 
 private define __module_compile__ (argv)
