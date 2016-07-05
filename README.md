@@ -56,7 +56,7 @@ time to  readjust and I realized the importantance of this programming consept)
 The code status of this application, is at the moment just a published
 personalization environment, though I'm very close to a stable to a so called
 application layer, but also the code itself is quite stable in places.  
-But, for instance doesn't catch and handle sigwinch, since I work
+But, for instance doesn't catch and handle SIGWINCH, since I work
 exclusively in maximized terminals throw ratpoison's era (2005)
 followed by other window managers with the same logic.  
 The ratpoison logic is first to give total focus to the running application
@@ -463,3 +463,10 @@ Special thanks to John E. Davis who wrote S-Lang but and to all (uncountable)
 contributors around this enormous open source ecosystem (which this model is  
 the reason that produced this trementous amount of code and this super fast  
 evolution, unbelievable for that short time that happened).
+
+## EPILOGUE
+This programming project, as and because, it includes so many sub projects 
+which are more than enough to keep someone busy (for as long he can (or has the
+desire) to code), its natural to say that this is the project of my life's ... and 
+for my lifetime.  
+And for this I'm gratefull and I feel lucky.
