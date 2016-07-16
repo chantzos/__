@@ -132,6 +132,13 @@ subclass Run
 
     if (issu)
       {
+      if (any (App->NOT_RUN_AS_SU == path_basename (argv[0])))
+        {
+        IO.tostderr (argv[0], "is not allowed to run with super rights");
+        APP_ERR = 1;
+        return NULL;
+        }
+
       if (NULL == passwd)
         {
         variable isgoingtoreset = 0;

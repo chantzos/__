@@ -42,6 +42,8 @@ class App
   var static APPS     = Assoc_Type[Assoc_Type];
   var static APPSINFO = Assoc_Type[AppInfo_Type];
 
+  let NOT_RUN_AS_SU = ["__me"];
+
   def build_table ()
     variable i;
     variable ii;
