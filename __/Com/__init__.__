@@ -405,7 +405,7 @@ class Com
         return;
         }
 
-      if (1 == retval)
+      if (1 == retval) % unused condition; with current code, we never get that retval
         {
         argv[-1] = NULL;
         argv = argv[wherenot (_isnull (argv))];

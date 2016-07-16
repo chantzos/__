@@ -170,6 +170,7 @@ private define __classcompile__ (argv)
       continue;
       }
 
+    orig = class;
     class = substr (as, splen + 2, -1);
     tok = strtok (class, "/");
 
@@ -206,7 +207,7 @@ private define __classcompile__ (argv)
       ern = 1;
       }
 
-    toscratch ("class compiled: " + class + "\n");
+    toscratch ("class compiled: " + orig + "\ninstalled as  : " + class + ".slc\n");
     }
 
   if (ern)

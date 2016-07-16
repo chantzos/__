@@ -3,7 +3,7 @@ class I
   subclass Child from I
 
   def app_new (s) static proc
-    I.Child.appnew (s);
+    I.Child.appnew (s;;__qualifiers);
   end
 
   def app_reconnect (s) static proc
@@ -27,7 +27,7 @@ class I
   subclass Client from I
 
   def app_new (s) static proc
-    I.Client.appnew (s);
+    I.Client.appnew (s;;__qualifiers);
   end
 
   def app_reconnect (s) static proc
@@ -51,7 +51,7 @@ class I
   subclass Srv from I
 
   def app_new (s) static proc
-    I.Srv.appnew (s);
+    I.Srv.appnew (s;;__qualifiers);
   end
 
   def app_reconnect (s) static proc

@@ -302,6 +302,9 @@ Since the table is an Assosiative Array, local path can overwrite even standard 
 
 The code was written using the S-Lang programming language, which it is really very
 simple and very easy to learn, with a syntax and logic that resembles C.
+
+Its strongest point in my opininion, besides the uncomparable array manipulation,
+its that usually, you get what you expect to get.
  
 However, libraries with an "\__" extension are written with a syntax
 that is not all valid code for S-Lang.  Such files are parsed by the

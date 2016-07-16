@@ -64,7 +64,7 @@ subclass Srv
 
   def appnew (s)
     variable apps = assoc_get_keys (App->APPS);
-    variable retval;
+    variable retval, issu;
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -83,7 +83,7 @@ subclass Srv
 
     forever
       {
-      retval = self.mainloop ();
+      retval = self.mainloop (&issu);
       if (Api->APP_RECON_OTH == retval)
         {
         retval = self.reconnect_to_app (CUR_APP);
@@ -92,7 +92,7 @@ subclass Srv
         }
       else if (Api->APP_CON_NEW == retval)
         {
-        self.connect_to_app (CUR_APP);
+        self.connect_to_app (CUR_APP;issu = issu);
         if (APP_ERR)
           break 2;
         }
@@ -137,9 +137,10 @@ subclass Srv
     else
       return;
 
+    variable issu;
     forever
       {
-      retval = self.mainloop ();
+      retval = self.mainloop (&issu);
       if (Api->APP_RECON_OTH == retval)
         {
         retval = self.reconnect_to_app (CUR_APP);
@@ -148,7 +149,7 @@ subclass Srv
         }
       else if (Api->APP_CON_NEW == retval)
         {
-        self.connect_to_app (CUR_APP);
+        self.connect_to_app (CUR_APP;issu = issu);
         if (APP_ERR)
           break;
         }
@@ -162,7 +163,7 @@ subclass Srv
     Rline.prompt (s, s._lin, s._col);
   end
 
-  def mainloop ()
+  def mainloop (issu)
     if (NULL == CUR_APP)
       return;
 
@@ -206,6 +207,9 @@ subclass Srv
         s.state |= Api->IDLED;
         Sock.send_int (s.fd, 1);
         CUR_APP = Sock.get_str (SRV_FIFO_FD);
+        Sock.send_int (s.fd, 1);
+        @issu = Sock.get_int (SRV_FIFO_FD);
+
         return retval;
         }
       }

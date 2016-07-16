@@ -65,7 +65,7 @@ subclass Run
       "PARENT_RDFIFO=" + chfifo,
       "ISACHILD=1"];
 
-    variable chpid = self.app (argv, env;bg);
+    variable chpid = self.app (argv, env;;struct {@__qualifiers, bg});
 
     if (NULL == chpid)
       {

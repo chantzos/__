@@ -28,10 +28,13 @@ subclass Client
     if (any (apps == s.argv[0]))
       {
       Api.reset_screen ();
-
+      variable is_su = __get_qualifier_as (Integer_Type, "issu", qualifier ("issu"),
+      0);
       Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
       () = Sock.get_int (SESSION_RDFIFO_FD);
       Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+      () = Sock.get_int (SESSION_RDFIFO_FD);
+      Sock.send_int (SESSION_WRFIFO_FD, is_su);
 
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
       if (retval == Api->GO_ATEXIT)

@@ -7,11 +7,24 @@ class Smg
   let COLOR = NULL;
 
   def get_screen_size ()
-    variable
-      retval,
-      fp = popen ("stty size", "r");
+    variable retval, fp, bts;
 
-    () = fgets (&retval, fp);
+    % there is a bug when executing from a process and creating new process
+    % which opens standard input (message is: inappropriate ioctl device)
+    try
+      {
+      fp = popen ("stty size", "r");
+      }
+    catch AnyError:
+      {
+      IO.tostderr ("stty failed:", Exc.fmt (NULL));
+      return [24, 80];
+      }
+
+    bts = fgets (&retval, fp);
+
+    if (-1 == bts)
+      retval = "24 80";
 
     () = pclose (fp);
 
