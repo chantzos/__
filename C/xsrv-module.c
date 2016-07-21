@@ -76,14 +76,17 @@ struct desktop
 typedef struct
   {
   const char *class;
-  unsigned int preferredd, followwin;
-  } Convenience;
-
-typedef struct
-  {
-  const char *class;
   unsigned int x, y, width, height;
   } Positional;
+
+typedef struct OnMap OnMap;
+
+struct OnMap
+  {
+  OnMap *next;
+  const char *class;
+  unsigned int desk, follow;
+  };
 
 static void add_window(Window w, unsigned int tw, client *cl);
 static void change_desktop(const Arg arg);
@@ -129,14 +132,6 @@ static void set_modes (int *modes);
 #define BORDER_WIDTH    1
 #define FOCUS           "#664422" /* dkorange */
 #define UNFOCUS         "#004050" /* blueish */
-
-static const Convenience convenience[] = { \
-  /*  class       desktop  follow */
-  { "chromium",       12,    1 },
-  { "SHELL",          3,     1 },
-  { "HTOP",           13,    1 },
-  { "ALSA",           13,    1 },
-};
 
 static const Positional positional[] = { \
   /* class  x  y  width  height
@@ -210,8 +205,17 @@ static client *head, *current, *transient;
 static XWindowAttributes attr;
 static Atom *protocols, wm_delete_window, protos;
 
+static OnMap *ONMAP;
 static desktop *DESKTOPS;
 static int DESKNUM;
+
+SLang_CStruct_Field_Type OnMap_Type [] = 
+{
+MAKE_CSTRUCT_FIELD(OnMap, class, "class", SLANG_STRING_TYPE, 0),
+MAKE_CSTRUCT_FIELD(OnMap, desk, "desk", SLANG_INT_TYPE, 0),
+MAKE_CSTRUCT_FIELD(OnMap, follow, "follow", SLANG_INT_TYPE, 0),
+SLANG_END_CSTRUCT_TABLE
+};
 
 static void (*events[LASTEvent])(XEvent *e) = {
   [KeyPress] = keypress,
@@ -220,6 +224,37 @@ static void (*events[LASTEvent])(XEvent *e) = {
   [DestroyNotify] = destroynotify,
   [ConfigureRequest] = configurerequest
 };
+
+static void set_onmap (void)
+{
+  (void) SLang_execute_function ("Srv_set_onmap");
+
+  OnMap s;
+  OnMap *c;
+  int len;
+  int i = 0;
+
+  if (-1 == SLang_pop_integer (&len))
+    return;
+
+  while (i < len && -1 != SLang_pop_cstruct ((VOID_STAR)&s, OnMap_Type))
+    {
+    i++;
+    if ((c = malloc (sizeof *c)) == NULL)
+      {
+      (void) SLang_free_cstruct ((VOID_STAR)&s, OnMap_Type);
+      return;
+      }
+
+    c->next = ONMAP;
+    ONMAP = c;
+
+    c->class = s.class;
+    c->desk = s.desk;
+    c->follow = s.follow;
+    (void) SLang_free_cstruct ((VOID_STAR)&s, OnMap_Type);
+    }
+}
 
 static void set_desks ()
 {
@@ -882,15 +917,16 @@ void maprequest (XEvent *e)
     XUnmapWindow (dpy, current->win);
 
   XClassHint ch = {0};
-  unsigned int i = 0, j = 0, tmp = current_desktop;
+  unsigned int j = 0, tmp = current_desktop;
+  OnMap *o;
 
   if (XGetClassHint (dpy, ev->window, &ch))
-    for (i = 0; i < TABLENGTH(convenience); ++i)
-      if ((strcmp (ch.res_class, convenience[i].class) == 0) ||
-          (strcmp (ch.res_name, convenience[i].class) == 0))
+    for (o = ONMAP; o; o = o->next)
+      if ((strcmp (ch.res_class, o->class) == 0) ||
+          (strcmp (ch.res_name, o->class) == 0))
         {
         save_desktop (tmp);
-        select_desktop (convenience[i].preferredd-1);
+        select_desktop (o->desk-1);
 
         for (c = head; c; c = c->next)
           if (ev->window == c->win)
@@ -899,7 +935,7 @@ void maprequest (XEvent *e)
         if (j < 1)
           add_window (ev->window, 0, NULL);
 
-        if (tmp == convenience[i].preferredd-1)
+        if (tmp == o->desk-1)
           {
           tile ();
           XMapWindow (dpy, ev->window);
@@ -908,9 +944,9 @@ void maprequest (XEvent *e)
          else
            select_desktop (tmp);
 
-        if (convenience[i].followwin != 0 && convenience[i].preferredd-1 != current_desktop)
+        if (o->follow && o->desk-1 != current_desktop)
           {
-          Arg a = {.i = convenience[i].preferredd-1};
+          Arg a = {.i = o->desk-1};
           change_desktop (a);
           }
 
@@ -1066,6 +1102,7 @@ void setup ()
 
   grabkeys ();
 
+  set_onmap ();
   set_desks ();
   unsigned int modes[DESKNUM];
   set_modes (modes);

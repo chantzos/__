@@ -134,7 +134,7 @@ subclass Run
       {
       if (any (App->NOT_RUN_AS_SU == path_basename (argv[0])))
         {
-        IO.tostderr (argv[0], "is not allowed to run with super rights");
+        IO.tostderr (argv[0], "is not allowed to run with super user rights");
         APP_ERR = 1;
         return NULL;
         }

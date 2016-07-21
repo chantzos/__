@@ -1542,7 +1542,8 @@ private define __Class_From_Init__ (classpath)
 
   byte_compile_file (__in__, 0);
 
-  () = remove (__in__);
+  ifnot (qualifier_exists ("keep_compiled"))
+    () = remove (__in__);
 }
 
 private define __LoadClass__ (cname)

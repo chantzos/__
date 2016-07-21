@@ -12,45 +12,19 @@ class Xsrv
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
   let ERR = 0xc8;
   let DESKNUM = 13;
+  % samples, those can be set on SRC_PATH/local/__/Xlocalxsrv/__init.__ instead
   let! DESKTOP_CLASSES = struct
     {
     class =
       {
       ["__SHELL"],
-      ["CMODULES", "XSRV_CLASS"],
-      ["SHELL_ON_APP"],
-      ["SHELL_ON___"],
-      ["SHELL_ON_CLASS_A", "SHELL_ON_CLASS_B"],
-      ["SLSH"],
-      ["MAIL"],
-      ["SHELL_ON_TMP"],
-      ["HTML_DOCS"],
-      ["VED_LIB"],
-      String_Type[0],
-      String_Type[0],
-      String_Type[0],
       },
     __SHELL = X_TERM_BIN + " -name __SHELL -e " + Env->BIN_PATH +
         "/__shell",
-    SHELL_ON_APP = "cd " + Env->SRC_APP_PATH + " && " +
-        X_TERM_BIN + " -name SHELL_ON_APP",
-    SHELL_ON_TMP = "cd /tmp && " + X_TERM_BIN + " -name SHELL_ON_TMP",
-    SHELL_ON___ =  "cd " + Env->SRC_PATH  + " && " +
-        X_TERM_BIN + " -name SHELL_ON___",
-    SHELL_ON_CLASS_A = "cd " + Env->SRC_CLASS_PATH + " && " +
-        X_TERM_BIN + " -name SHELL_ON_CLASS_A",
-    SHELL_ON_CLASS_B = "cd " + Env->SRC_CLASS_PATH + " && " +
-        X_TERM_BIN + " -name SHELL_ON_CLASS_B",
-    CMODULES = X_TERM_BIN + " -name CMODULES -e __ved " + Env->SRC_C_PATH +
-        "/xsrv-module.c",
-    XSRV_CLASS = X_TERM_BIN + " -name XSRV_CLASS -e __ved " + Env->SRC_CLASS_PATH +
-        "/Xsrv/__init__.__",
-    MAIL = X_TERM_BIN + " -name MAIL -e mutt -y",
-    HTML_DOCS = X_TERM_BIN + " -name HTML_DOCS -e elinks " +
-      Env->HOME_PATH + "/htmldocs/docs.html",
-    SLSH = X_TERM_BIN + " -name SLSH -e slsh",
-    VED_LIB = X_TERM_BIN + " -name VED_LIB -e __ved " + Env->SRC_CLASS_PATH +
-      "/Ved/__init__.__",
+    };
+ let! ON_MAP =
+    {
+    struct {class = "HTOP", desk = 13, follow = 1},
     };
 
   include! __init__ from Xlocalxsrv as Xsrv
@@ -109,6 +83,11 @@ class Xsrv
     Xsrv.let ("WRFD", open (WRFIFO, O_WRONLY));
     Xsrv.let ("RDFD", open (RDFIFO, O_RDONLY));
     (@FUNS[Sock.get_str (RDFD)]);
+  end
+
+  def Srv_set_onmap () public proc
+    __push_list (ON_MAP);
+    length (ON_MAP);
   end
 
   def Srv_set_modes () public proc
