@@ -73,12 +73,6 @@ struct desktop
   client *head, *current, *transient;
   };
 
-typedef struct
-  {
-  const char *class;
-  unsigned int x, y, width, height;
-  } Positional;
-
 typedef struct OnMap OnMap;
 
 struct OnMap
@@ -87,6 +81,33 @@ struct OnMap
   const char *class;
   unsigned int desk, follow;
   };
+
+SLang_CStruct_Field_Type OnMap_Type [] = 
+{
+MAKE_CSTRUCT_FIELD(OnMap, class, "class", SLANG_STRING_TYPE, 0),
+MAKE_CSTRUCT_FIELD(OnMap, desk, "desk", SLANG_INT_TYPE, 0),
+MAKE_CSTRUCT_FIELD(OnMap, follow, "follow", SLANG_INT_TYPE, 0),
+SLANG_END_CSTRUCT_TABLE
+};
+
+typedef struct Positional Positional;
+
+struct Positional
+  {
+  Positional *next;
+  const char *class;
+  unsigned int x, y, width, height;
+  };
+
+SLang_CStruct_Field_Type Positional_Type [] = 
+{
+MAKE_CSTRUCT_FIELD(Positional, class, "class", SLANG_STRING_TYPE, 0),
+MAKE_CSTRUCT_FIELD(Positional, x, "x", SLANG_INT_TYPE, 0),
+MAKE_CSTRUCT_FIELD(Positional, y, "y", SLANG_INT_TYPE, 0),
+MAKE_CSTRUCT_FIELD(Positional, width, "width", SLANG_INT_TYPE, 0),
+MAKE_CSTRUCT_FIELD(Positional, height, "height", SLANG_INT_TYPE, 0),
+SLANG_END_CSTRUCT_TABLE
+};
 
 static void add_window(Window w, unsigned int tw, client *cl);
 static void change_desktop(const Arg arg);
@@ -132,11 +153,6 @@ static void set_modes (int *modes);
 #define BORDER_WIDTH    1
 #define FOCUS           "#664422" /* dkorange */
 #define UNFOCUS         "#004050" /* blueish */
-
-static const Positional positional[] = { \
-  /* class  x  y  width  height
-  { "classname", 100,100,800,400 }, */
-};
 
 const char* urxvtcmd[] = {"urxvtc", NULL};
 const char* xtermcmd[] = {"xterm", NULL};
@@ -206,16 +222,9 @@ static XWindowAttributes attr;
 static Atom *protocols, wm_delete_window, protos;
 
 static OnMap *ONMAP;
+static Positional *POSITIONAL;
 static desktop *DESKTOPS;
 static int DESKNUM;
-
-SLang_CStruct_Field_Type OnMap_Type [] = 
-{
-MAKE_CSTRUCT_FIELD(OnMap, class, "class", SLANG_STRING_TYPE, 0),
-MAKE_CSTRUCT_FIELD(OnMap, desk, "desk", SLANG_INT_TYPE, 0),
-MAKE_CSTRUCT_FIELD(OnMap, follow, "follow", SLANG_INT_TYPE, 0),
-SLANG_END_CSTRUCT_TABLE
-};
 
 static void (*events[LASTEvent])(XEvent *e) = {
   [KeyPress] = keypress,
@@ -224,6 +233,40 @@ static void (*events[LASTEvent])(XEvent *e) = {
   [DestroyNotify] = destroynotify,
   [ConfigureRequest] = configurerequest
 };
+
+static void set_positional (void)
+{
+  (void) SLang_execute_function ("Srv_set_positional");
+
+  Positional s;
+  Positional *c;
+  int len;
+  int i = 0;
+
+  if (-1 == SLang_pop_integer (&len))
+    return;
+
+  while (i < len && -1 != SLang_pop_cstruct ((VOID_STAR)&s, Positional_Type))
+    {
+    i++;
+    if ((c = malloc (sizeof *c)) == NULL)
+      {
+      (void) SLang_free_cstruct ((VOID_STAR)&s, Positional_Type);
+      return;
+      }
+
+    c->next = POSITIONAL;
+    POSITIONAL = c;
+
+    c->class = s.class;
+    c->y = s.y;
+    c->x = s.x;
+    c->width = s.width;
+    c->height = s.height;
+
+    (void) SLang_free_cstruct ((VOID_STAR)&s, Positional_Type);
+    }
+}
 
 static void set_onmap (void)
 {
@@ -394,24 +437,26 @@ void add_window (Window w, unsigned int tw, client *cl)
 
   if (tw == 0 && cl == NULL)
     {
-    XClassHint chh = {0};
-    unsigned int i, j = 0;
+    XClassHint ch = {0};
+    unsigned int j = 0;
+    Positional *p;    
 
-    if (XGetClassHint (dpy, w, &chh))
+    if (XGetClassHint (dpy, w, &ch))
       {
-      for (i = 0; i < TABLENGTH(positional); ++i)
-        if ((strcmp (chh.res_class, positional[i].class) == 0) ||
-            (strcmp (chh.res_name, positional[i].class) == 0))
+      for (p = POSITIONAL; p; p = p->next)
+        if ((strcmp (ch.res_class, p->class) == 0) ||
+            (strcmp (ch.res_name, p->class) == 0))
           {
-          XMoveResizeWindow (dpy, w, positional[i].x, positional[i].y, positional[i].width, positional[i].height);
+          XMoveResizeWindow (dpy, w, p->x, p->y, p->width, p->height);
           ++j;
+          break;
           }
 
-      if (chh.res_class)
-        XFree (chh.res_class);
+      if (ch.res_class)
+        XFree (ch.res_class);
 
-      if (chh.res_name)
-        XFree (chh.res_name);
+      if (ch.res_name)
+        XFree (ch.res_name);
       }
 
     if (j < 1)
@@ -1102,6 +1147,7 @@ void setup ()
 
   grabkeys ();
 
+  set_positional ();
   set_onmap ();
   set_desks ();
   unsigned int modes[DESKNUM];
