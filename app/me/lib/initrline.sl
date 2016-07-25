@@ -98,6 +98,7 @@ private define __bytecompile__ (argv)
 private define __classcompile__ (argv)
 {
   variable dont_move = Opt.Arg.exists ("--dont-move", &argv;del_arg);
+  variable dont_remove = Opt.Arg.exists ("--dont-remove", &argv;del_arg);
 
   if (1 == length (argv))
     {
@@ -141,8 +142,13 @@ private define __classcompile__ (argv)
     cpath = path_dirname (class);
     cname = path_basename (cpath);
 
+    variable qualif = struct {from = cpath, force, return_buf, dont_eval};
+
+    ifnot (NULL == dont_remove)
+      qualif = struct {@qualif, keep_compiled};
+
     buf = NULL;
-    buf = Class.load (cname;from = cpath, force, return_buf, dont_eval);
+    buf = Class.load (cname;;qualif);
 
     if (NULL == buf)
       {
@@ -464,6 +470,9 @@ private define my_commands ()
 
   a["classcompile"] = @Argvlist_Type;
   a["classcompile"].func = &__classcompile__;
+  a["classcompile"].args = [
+    "--dont-move void do not try to put bytecompiled class on application hierarchy",
+    "--dont-remove void do not remove parsed class from filesystem"];
 
   a["loadlib"] = @Argvlist_Type;
   a["loadlib"].func = &__loadlib__;
