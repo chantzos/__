@@ -206,12 +206,13 @@ private define __classcompile__ (argv)
       ern = 1;
       continue;
       }
-
-    if (-1 == remove (as))
-      {
-      IO.tostderr ("failed to remove", as);
-      ern = 1;
-      }
+    
+    ifnot (NULL == dont_remove)
+      if (-1 == remove (as))
+        {
+        IO.tostderr ("failed to remove", as);
+        ern = 1;
+        }
 
     toscratch ("class compiled: " + orig + "\ninstalled as  : " + class + ".slc\n");
     }

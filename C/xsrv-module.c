@@ -40,21 +40,12 @@
 SLANG_MODULE(xsrv);
 
 #define CLEANMASK(mask) (mask & ~(numlockmask | LockMask))
-#define TABLENGTH(X)    (sizeof(X)/sizeof(*X))
 
 typedef union
   {
   const char** com;
   const int i;
   } Arg;
-
-typedef struct
-  {
-  unsigned int mod;
-  KeySym keysym;
-  void (*function)(const Arg arg);
-  const Arg arg;
-  } key;
 
 typedef struct client client;
 
@@ -109,105 +100,45 @@ MAKE_CSTRUCT_FIELD(Positional, height, "height", SLANG_INT_TYPE, 0),
 SLANG_END_CSTRUCT_TABLE
 };
 
+typedef struct key key;
+
+struct key
+  {
+  key *next;
+  unsigned int modifier;
+  KeySym keysym;
+  };
+
+SLang_CStruct_Field_Type Key_Type [] = 
+{
+MAKE_CSTRUCT_FIELD(key, modifier, "modifier", SLANG_INT_TYPE, 0),
+MAKE_CSTRUCT_FIELD(key, keysym, "key", SLANG_STRING_TYPE, 0),
+SLANG_END_CSTRUCT_TABLE
+};
+
+static void client_to_desktop (int *desk);
 static void add_window(Window w, unsigned int tw, client *cl);
-static void change_desktop(const Arg arg);
-static void client_to_desktop(const Arg arg);
 static void configurerequest(XEvent *e);
 static void destroynotify(XEvent *e);
-static void follow_client_to_desktop(const Arg arg);
 static unsigned long getcolor(const char* color);
 static void grabkeys();
 static void keypress(XEvent *e);
-static void kill_client();
 static void kill_client_now(Window w);
-static void last_desktop();
 static void logger(const char* e);
 static void maprequest(XEvent *e);
-static void move_down(const Arg arg);
-static void move_up(const Arg arg);
-static void move_sideways(const Arg arg);
-static void next_win();
-static void prev_win();
-static void quit();
 static void remove_window(Window w, unsigned int dr, unsigned int tw);
-static void resize_stack(const Arg arg);
-static void resize_stack_side(const Arg arg);
-static void rotate_desktop(const Arg arg);
 static void save_desktop(unsigned int i);
 static void select_desktop(unsigned int i);
 static void setup();
 static void sigchld(int unused);
-static void spawn(const Arg arg);
 static void start();
-static void switch_mode(const Arg arg);
 static void tile();
 static void unmapnotify(XEvent *e);
 static void update_current();
 
-static void interp_fun ();
-static void set_desks ();
-static void set_modes (int *modes);
-
-#define MOD1            Mod1Mask
-#define MOD4            Mod4Mask
 #define BORDER_WIDTH    1
 #define FOCUS           "#664422" /* dkorange */
 #define UNFOCUS         "#004050" /* blueish */
-
-const char* urxvtcmd[] = {"urxvtc", NULL};
-const char* xtermcmd[] = {"xterm", NULL};
-const char* stcmd[]    = {"st", NULL};
-const char* htopcmd[]  = {"urxvtc", "-name", "HTOP", "-e", "htop", NULL};
-const char* alsacmd[]  = {"urxvtc", "-name", "ALSA", "-e", "alsamixer", NULL};
-const char* chromcmd[] = {"chromium", NULL};
-const char* shellcmd[] = {"urxvtc", "-name", "SHELL", "-e", "__shell", NULL};
-
-#define DESKTOPCHANGE(K,N) \
-  {  MOD4,             K,   change_desktop, {.i = N}}, \
-  {  MOD1|ShiftMask,   K,   follow_client_to_desktop, {.i = N}}, \
-  {  MOD4|ShiftMask,   K,   client_to_desktop, {.i = N}},
-
-static key keys[] = {
-  /* MOD               KEY            FUNCTION           ARGS */
-  {  MOD1,             XK_bracketleft,interp_fun,        {NULL}},
-  {  MOD4|ShiftMask,   XK_k,          kill_client,       {NULL}},
-  {  MOD4|ShiftMask,   XK_q,          quit,              {NULL}},
-  {  MOD4,             XK_Tab,        next_win,          {NULL}},
-  {  MOD4,             XK_q,          prev_win,          {NULL}},
-  {  MOD4,             XK_grave,      last_desktop,      {NULL}},
-  {  MOD1|ControlMask, XK_Down,       resize_stack,      {.i = +12}},
-  {  MOD1|ControlMask, XK_Up,         resize_stack,      {.i = -12}},
-  {  MOD1|ControlMask, XK_Right,      resize_stack_side, {.i = +12}},
-  {  MOD1|ControlMask, XK_Left,       resize_stack_side, {.i = -12}},
-  {  MOD1|ShiftMask,   XK_Up,         move_up,           {.i = -15}},
-  {  MOD1|ShiftMask,   XK_Down,       move_down,         {.i = 15}},
-  {  MOD1|ShiftMask,   XK_Left,       move_sideways,     {.i = -15}},
-  {  MOD1|ShiftMask,   XK_Right,      move_sideways,     {.i = 15}},
-  {  MOD1|ShiftMask,   XK_f,          switch_mode,       {.i = 0}},
-  {  MOD1|ShiftMask,   XK_s,          switch_mode,       {.i = 1}},
-  {  MOD4,             XK_Right,      rotate_desktop,    {.i = 1}},
-  {  MOD4,             XK_Left,       rotate_desktop,    {.i = -1}},
-  {  MOD4,             XK_c,          spawn,             {.com = urxvtcmd}},
-  {  MOD4,             XK_Return,     spawn,             {.com = xtermcmd}},
-  {  MOD4,             XK_n,          spawn,             {.com = stcmd}},
-  {  MOD1,             XK_F2,         spawn,             {.com = chromcmd}},
-  {  MOD1,             XK_F3,         spawn,             {.com = alsacmd}},
-  {  MOD1,             XK_F4,         spawn,             {.com = htopcmd}},
-  {  MOD4,             XK_a,          spawn,             {.com = shellcmd}},
-     DESKTOPCHANGE(    XK_0,                             0)
-     DESKTOPCHANGE(    XK_1,                             1)
-     DESKTOPCHANGE(    XK_2,                             2)
-     DESKTOPCHANGE(    XK_3,                             3)
-     DESKTOPCHANGE(    XK_4,                             4)
-     DESKTOPCHANGE(    XK_5,                             5)
-     DESKTOPCHANGE(    XK_6,                             6)
-     DESKTOPCHANGE(    XK_7,                             7)
-     DESKTOPCHANGE(    XK_8,                             8)
-     DESKTOPCHANGE(    XK_9,                             9)
-     DESKTOPCHANGE(    XK_F1,                            10)
-     DESKTOPCHANGE(    XK_F2,                            11)
-     DESKTOPCHANGE(    XK_F3,                            12)
-};
 
 static Display *dpy;
 static Window root;
@@ -224,6 +155,7 @@ static Atom *protocols, wm_delete_window, protos;
 static OnMap *ONMAP;
 static Positional *POSITIONAL;
 static desktop *DESKTOPS;
+static key *KEYS;
 static int DESKNUM;
 
 static void (*events[LASTEvent])(XEvent *e) = {
@@ -233,6 +165,37 @@ static void (*events[LASTEvent])(XEvent *e) = {
   [DestroyNotify] = destroynotify,
   [ConfigureRequest] = configurerequest
 };
+
+static void set_keys (void)
+{
+  (void) SLang_execute_function ("Srv_set_keys");
+
+  key s;
+  key *k;
+  int len;
+  int i = 0;
+
+  if (-1 == SLang_pop_integer (&len))
+    return;
+
+  while (i < len && -1 != SLang_pop_cstruct ((VOID_STAR)&s, Key_Type))
+    {
+    i++;
+    if ((k = malloc (sizeof *k)) == NULL)
+      {
+      (void) SLang_free_cstruct ((VOID_STAR)&s, Key_Type);
+      return;
+      }
+
+    k->next = KEYS;
+    KEYS = k;
+
+    k->modifier = s.modifier;
+    k->keysym = XStringToKeysym ((char *) s.keysym);
+
+    (void) SLang_free_cstruct ((VOID_STAR)&s, Key_Type);
+    }
+}
 
 static void set_positional (void)
 {
@@ -335,11 +298,6 @@ static void set_modes (int *modes)
 
     SLang_free_array (at);
     }
-}
-
-static void interp_fun ()
-{
-    (void) SLang_execute_function ("Srv_interp");
 }
 
 static void XGetDeskClassNames (unsigned int *desk)
@@ -614,51 +572,56 @@ void prev_win ()
   update_current ();
 }
 
-void move_down (const Arg arg)
+void resize_stack_side (int *inc)
+{
+  if (!mode || current == NULL)
+    return;
+
+  current->width += *inc;
+  XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width + *inc, current->height);
+}
+
+void resize_stack (int *inc)
+{
+  if (!mode || current == NULL)
+    return;
+
+  current->height += *inc;
+  XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width, current->height + *inc);
+}
+
+void move_stack (int *inc)
 {
   if (!mode)
     return;
 
   if (current != NULL)
     {
-    current->y += arg.i;
+    current->y += *inc;
     XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width, current->height);
     }
 }
 
-void move_up (const Arg arg)
-{
-  if (!mode)
-    return;
-
-  if (current != NULL)
-    {
-    current->y += arg.i;
-    XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width, current->height);
-    }
-}
-
-void move_sideways (const Arg arg)
+void move_sideways (int *inc)
 {
   if (mode && current != NULL)
     {
-    current->x += arg.i;
+    current->x += *inc;
     XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width, current->height);
     }
 }
 
-void change_desktop (const Arg arg)
+void change_desktop (int *desk)
 {
-  if (arg.i == current_desktop)
+  if (*desk == current_desktop)
     return;
-
   client *c;
   unsigned int tmp = current_desktop;
 
   save_desktop (current_desktop);
   previous_desktop = current_desktop;
 
-  select_desktop (arg.i);
+  select_desktop (*desk);
 
   if (head != NULL)
     {
@@ -683,33 +646,34 @@ void change_desktop (const Arg arg)
     for (c = head; c; c = c->next)
       XUnmapWindow (dpy, c->win);
 
-  select_desktop (arg.i);
+  select_desktop (*desk);
   update_current ();
+
   (void) SLang_push_integer (current_desktop);
   (void) SLang_execute_function ("Srv_on_desktop_change");
 }
 
 void last_desktop ()
 {
-  Arg a = {.i = previous_desktop};
-  change_desktop (a);
+  unsigned int desk = previous_desktop;
+  change_desktop (&desk);
 }
 
-void rotate_desktop (const Arg arg)
+void rotate_desktop (int *inc)
 {
-  Arg a = {.i = (current_desktop + DESKNUM + arg.i) % DESKNUM};
-  change_desktop (a);
+  unsigned int desk = (current_desktop + DESKNUM +  *inc) % DESKNUM;
+  change_desktop (&desk);
 }
 
-void follow_client_to_desktop (const Arg arg)
+void follow_client_to_desktop (int *desk)
 {
-  client_to_desktop (arg);
-  change_desktop (arg);
+  client_to_desktop (desk);
+  change_desktop (desk);
 }
 
-void client_to_desktop (const Arg arg)
+void client_to_desktop (int *desk)
 {
-  if (arg.i == current_desktop || current == NULL)
+  if (*desk == current_desktop || current == NULL)
     return;
 
   client *tmp = current;
@@ -717,9 +681,9 @@ void client_to_desktop (const Arg arg)
 
   remove_window (current->win, 1, 0);
 
-  select_desktop (arg.i);
+  select_desktop (*desk);
   add_window (tmp->win, 0, tmp);
-  save_desktop (arg.i);
+  save_desktop (*desk);
   select_desktop (tmp2);
 }
 
@@ -818,9 +782,9 @@ void update_current ()
   XSync (dpy, False);
 }
 
-void switch_mode (const Arg arg)
+void change_mode (int *md)
 {
-  if (mode == arg.i)
+  if (mode == *md)
     return;
 
   client *c;
@@ -835,7 +799,7 @@ void switch_mode (const Arg arg)
       XMapWindow (dpy, c->win);
     }
 
-  mode = arg.i;
+  mode = *md;
 
   if (!mode && current != NULL && head->next != NULL)
     for (c = head; c; c = c->next)
@@ -843,24 +807,6 @@ void switch_mode (const Arg arg)
 
   tile ();
   update_current ();
-}
-
-void resize_stack_side (const Arg arg)
-{
-  if (!mode || current == NULL)
-    return;
-
-  current->width += arg.i;
-  XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width+arg.i, current->height);
-}
-
-void resize_stack (const Arg arg)
-{
-  if (!mode || current == NULL)
-    return;
-
-  current->height += arg.i;
-  XMoveResizeWindow (dpy, current->win, current->x, current->y, current->width, current->height+arg.i);
 }
 
 void grabkeys ()
@@ -885,13 +831,14 @@ void grabkeys ()
 
   XUngrabKey (dpy, AnyKey, AnyModifier, root);
 
-  for (i = 0; i < TABLENGTH(keys); ++i)
+  key *k;
+  for (k = KEYS; k; k = k->next) 
     {
-    code = XKeysymToKeycode (dpy, keys[i].keysym);
-    XGrabKey (dpy, code, keys[i].mod, root, True, GrabModeAsync, GrabModeAsync);
-    XGrabKey (dpy, code, keys[i].mod | LockMask, root, True, GrabModeAsync, GrabModeAsync);
-    XGrabKey (dpy, code, keys[i].mod | numlockmask, root, True, GrabModeAsync, GrabModeAsync);
-    XGrabKey (dpy, code, keys[i].mod | numlockmask | LockMask, root, True, GrabModeAsync, GrabModeAsync);
+    code = XKeysymToKeycode (dpy, k->keysym);
+    XGrabKey (dpy, code, k->modifier, root, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey (dpy, code, k->modifier | LockMask, root, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey (dpy, code, k->modifier | numlockmask, root, True, GrabModeAsync, GrabModeAsync);
+    XGrabKey (dpy, code, k->modifier | numlockmask | LockMask, root, True, GrabModeAsync, GrabModeAsync);
     }
 }
 
@@ -902,11 +849,18 @@ void keypress (XEvent *e)
   XKeyEvent *ev = &e->xkey;
 
   keysym = XkbKeycodeToKeysym (dpy, (KeyCode)ev->keycode, 0, 0);
+ 
+  key *k;
 
-  for (i = 0; i < TABLENGTH(keys); ++i)
-    if (keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state))
-      if (keys[i].function)
-        keys[i].function(keys[i].arg);
+  for (k = KEYS; k; k = k->next)
+    if (keysym == k->keysym && CLEANMASK(k->modifier) == CLEANMASK(ev->state))
+      {
+      char *kstr = XKeysymToString (k->keysym);
+      (void) SLang_push_integer (k->modifier);
+      (void) SLang_push_string (kstr);
+      (void) SLang_execute_function ("Srv_on_keypress");
+      break;
+      }
 }
 
 void configurerequest (XEvent *e)
@@ -991,8 +945,8 @@ void maprequest (XEvent *e)
 
         if (o->follow && o->desk-1 != current_desktop)
           {
-          Arg a = {.i = o->desk-1};
-          change_desktop (a);
+          unsigned int desk = o->desk-1;
+          change_desktop (&desk);
           }
 
         if (ch.res_class)
@@ -1145,8 +1099,8 @@ void setup ()
   win_focus = getcolor (FOCUS);
   win_unfocus = getcolor (UNFOCUS);
 
+  set_keys ();
   grabkeys ();
-
   set_positional ();
   set_onmap ();
   set_desks ();
@@ -1178,8 +1132,30 @@ void setup ()
   bool_quit = 0;
 }
 
-void spawn (const Arg arg)
+void Xspawn ()
 {
+  SLang_Array_Type *at;
+  SLindex_Type i, j, num[1];
+  char *n;
+
+  if (-1 == SLang_pop_array_of_type (&at, SLANG_STRING_TYPE))
+   return;
+
+  j = at->dims[0];
+  if (!j)
+    return;
+
+  const char* command[j+1];
+
+  for (i = 0; i < j; i++)
+    {
+    num[0] = i;
+    (void) SLang_get_array_element (at, num, &n);
+    command[i] = n;
+    }
+
+  command[i] = NULL;
+	
   if (fork () == 0)
     {
     if (fork () == 0)
@@ -1188,7 +1164,7 @@ void spawn (const Arg arg)
         close (ConnectionNumber (dpy));
 
       setsid ();
-      execvp ((char*)arg.com[0], (char**)arg.com);
+      execvp ((char*)command[0], (char**)command);
       }
 
     exit (0);
@@ -1260,10 +1236,39 @@ static void startx_intrin (void)
   XCloseDisplay (dpy);
 }
 
+int controlmask = ControlMask;
+int shiftmask = ShiftMask;
+int mod1mask = Mod1Mask;
+int mod4mask = Mod4Mask;
+
+static SLang_Intrin_Var_Type xsrv_Variables [] =
+{
+  MAKE_VARIABLE("ControlMask", &controlmask, SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("ShiftMask",   &shiftmask,   SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("Mod1Mask",    &mod1mask,    SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("Mod4Mask",    &mod4mask,    SLANG_INT_TYPE, 1),
+  SLANG_END_TABLE
+};
+
 static SLang_Intrin_Fun_Type xsrv_Intrinsics [] =
 {
   MAKE_INTRINSIC_0("Xstart", startx_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("XGetDeskClassNames", XGetDeskClassNames, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("Xspawn", Xspawn, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xrotate_desk", rotate_desktop, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("Xkill_client", kill_client, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("Xquit", quit, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("Xnext_win", next_win, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("Xprev_win", prev_win, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("Xlast_desk", last_desktop, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xchange_desk", change_desktop, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xfollow_client", follow_client_to_desktop, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xclient_to_desk", client_to_desktop, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xresize_stack", resize_stack, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xresize_stack_sideways", resize_stack_side, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xmove_stack", move_stack, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xmove_stack_sideways", move_sideways, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("Xchange_mode", change_mode, SLANG_VOID_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
 
@@ -1275,6 +1280,9 @@ int init_xsrv_module_ns (char *ns_name)
     return -1;
 
   if (-1 == SLns_add_intrin_fun_table (ns, xsrv_Intrinsics, NULL))
+    return -1;
+
+  if (-1 == SLadd_intrin_var_table (xsrv_Variables, NULL))
     return -1;
 
   return 0;

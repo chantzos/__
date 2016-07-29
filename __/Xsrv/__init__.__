@@ -11,29 +11,113 @@ class Xsrv
   let X_TERM_BIN = NULL == URXVTD_BIN ? Sys.which ("xterm") : Sys.which ("urxvtc");
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
   let ERR = 0xc8;
+
+  def __desktop_change () public proc
+  end
+
+  def __follow_client () public proc
+  end
+
+  def __client_to_desk () public proc
+  end
+
   % Config samples,
   % those can be set on SRC_PATH/local/__/Xlocalxsrv/__init.__ instead
-  let! DESKNUM = 1;
-  % length of DESKTOP_CLASSES.class should be equal to DESKNUM
-  let! DESKTOP_CLASSES = struct
+  let! DESKTOP_CLASSES =
+  struct
     {
     class =
       {
       ["__SHELL"],
+      ["VED_LIB"],
+      ["MAIL"],
       },
-    __SHELL = X_TERM_BIN + " -name __SHELL -e " + Env->BIN_PATH +
-        "/__shell",
+    __SHELL = [Xsrv->X_TERM_BIN, "-name", "__SHELL", "-e",
+      Env->BIN_PATH + "/__shell"],
+    MAIL = [Xsrv->X_TERM_BIN, "-name", "MAIL", "-e", "mutt", "-y"],
+    VED_LIB = [Xsrv->X_TERM_BIN, "-name", "VED_LIB", "-e", "__ved",
+      Env->SRC_CLASS_PATH + "/Ved/__init__.__"],
     };
  let! ON_MAP =
     {
-    struct {class = "HTOP", desk = 13, follow = 1},
+    struct {class = "SHELL", desk = 1, follow = 1},
     };
   let! POSITIONALS =
     {
-    struct {class = "class", x = 100, y = 100, width = 1000, height = 1000}
+   % struct {class = "someclass", x = 100, y = 100, width = 1000, height = 1000}
     };
+  let! COMMANDS = Assoc.new (Assoc_Type,
+    [
+    string (Mod4Mask),
+    string (Mod4Mask|Mod1Mask),
+    string (Mod4Mask|ShiftMask),
+    string (Mod4Mask|ControlMask),
+    string (Mod1Mask),
+    string (Mod1Mask|ControlMask),
+    string (Mod1Mask|ShiftMask),
+    ],
+    [
+    Assoc.new (Struct_Type,
+      ["c", "a", "Left", "Right", "Tab", "q", "grave"],
+      {
+      struct {fun = &Xspawn, args = {[X_TERM_BIN]}},
+      struct {fun = &Xspawn, args = {[X_TERM_BIN, "-name", "SHELL", "-e", "__shell"]}},
+      struct {fun = &Xrotate_desk, args = {1}},
+      struct {fun = &Xrotate_desk, args = {-1}},
+      struct {fun = &Xprev_win, args  = {}},
+      struct {fun = &Xnext_win, args  = {}},
+      struct {fun = &Xlast_desk, args   = {}},
+      }),
+    Assoc.new (Struct_Type, ["Up", "Down", "Left", "Right"], {
+      struct {fun = &Xresize_stack, args = {-12}},
+      struct {fun = &Xresize_stack, args = {12}},
+      struct {fun = &Xresize_stack_sideways, args = {-12}},
+      struct {fun = &Xresize_stack_sideways, args = {12}},
+      }),
+    Assoc.new (Struct_Type, ["k", "q", "f", "s"], {
+      struct {fun = &Xkill_client, args = {}},
+      struct {fun = &Xquit, args = {}},
+      struct {fun = &Xchange_mode, args = {0}},
+      struct {fun = &Xchange_mode, args = {1}},
+      }),
+    Assoc.new (Struct_Type, ["Up", "Down", "Left", "Right"], {
+      struct {fun = &Xmove_stack, args = {-15}},
+      struct {fun = &Xmove_stack, args = {15}},
+      struct {fun = &Xmove_stack_sideways, args = {-15}},
+      struct {fun = &Xmove_stack_sideways, args = {15}},
+      }),
+    Assoc.new (Struct_Type, ["F3"], {
+      struct {fun = &Xspawn, args = {[X_TERM_BIN, "-name", "ALSA", "-e", "alsamixer"]}},
+      }),
+    Assoc.new (Struct_Type, NULL, NULL),
+    Assoc.new (Struct_Type, NULL, NULL),
+    ]);
 
   include! __init__ from Xlocalxsrv as Xsrv
+
+  beg
+    _for $5 (0, length (DESKTOP_CLASSES.class) - 1)
+      if ($5 > 9)
+        {
+        COMMANDS ()[string (Mod4Mask)]["F" + string ($5 - 9)] =
+          struct {fun = &__desktop_change, args = {$5}};
+        COMMANDS ()[string (Mod4Mask|ControlMask)]["F" + string ($5 - 9)] =
+          struct {fun = &__follow_client, args = {$5}};
+        COMMANDS ()[string (Mod4Mask|Mod1Mask)]["F" + string ($5 - 9)] =
+          struct {fun = &__client_to_desk, args = {$5}};
+        }
+      else
+        {
+        COMMANDS ()[string (Mod4Mask)][string ($5)] =
+          struct {fun = &__desktop_change, args = {$5}};
+        COMMANDS ()[string (Mod4Mask|ControlMask)][string ($5)] =
+          struct {fun = &__follow_client, args = {$5}};
+        COMMANDS ()[string (Mod4Mask|Mod1Mask)][string ($5)] =
+          struct {fun = &__client_to_desk, args = {$5}};
+       }
+
+     __uninitialize (&$5);
+  end
 
   % should be replaced by md5sum?
   def __xget_cookie () proc
@@ -69,26 +153,21 @@ class Xsrv
         "/__shell &");
   end
 
-  def invalid_fun () proc
-    Sock.send_int (WRFD, ERR);
-  end
+  def Srv_set_keys () public proc
+    variable i, j, keys, len = 0, llen,_mod;
+    variable mods = assoc_get_keys (COMMANDS);
 
-  var FUNS = Assoc_Type[Ref_Type, &invalid_fun];
+    _for i (0, length (mods) -1)
+      {
+      _mod = mods[i];
+      keys = assoc_get_keys (COMMANDS[_mod]);
+      llen = length (keys);
+      len += llen;
+      _for j (0, llen - 1)
+        struct {modifier = atoi (_mod), key = keys[j]};
+      }
 
-  def getdeskclassnames () proc
-    Sock.send_int (WRFD, 1);
-    variable did = Sock.get_int (RDFD);
-    variable ar = XGetDeskClassNames (did);
-    if (NULL == ar)
-      ar = String_Type[0];
-
-    Sock.send_str_ar (RDFD, WRFD, ar);
-  end
-
-  def Srv_interp () public proc
-    Xsrv.let ("WRFD", open (WRFIFO, O_WRONLY));
-    Xsrv.let ("RDFD", open (RDFIFO, O_RDONLY));
-    (@FUNS[Sock.get_str (RDFD)]);
+    len;
   end
 
   def Srv_set_positional () public proc
@@ -102,14 +181,56 @@ class Xsrv
   end
 
   def Srv_set_modes () public proc
-    variable ar = Integer_Type[DESKNUM];
+    variable ar = Integer_Type[length (DESKTOP_CLASSES.class)];
     ar++;
-    ar[10]++;
+    ar[length (DESKTOP_CLASSES.class)-1]++;
     ar;
   end
 
   def Srv_set_desktops () public proc
-    DESKNUM;
+    length (DESKTOP_CLASSES.class);
+  end
+
+  def __client_to_desk () public proc
+    variable desk, k = qualifier ("key");
+    if ('F' == k[0])
+      desk = 9 + atoi (k[[1:]]);
+    else
+      desk = atoi (k);
+
+    Xclient_to_desk (desk);
+  end
+
+  def __follow_client () public proc
+    variable desk, k = qualifier ("key");
+    if ('F' == k[0])
+      desk = 9 + atoi (k[[1:]]);
+    else
+      desk = atoi (k);
+
+    Xfollow_client (desk);
+  end
+
+  def __desktop_change () public proc
+    variable desk, k = qualifier ("key");
+    if ('F' == k[0])
+      desk = 9 + atoi (k[[1:]]);
+    else
+      desk = atoi (k);
+
+    Xchange_desk (desk);
+  end
+
+  def Srv_on_keypress (modifier, kstr) public proc
+    variable _mod = string (modifier);
+    ifnot (assoc_key_exists (COMMANDS, _mod))
+      return;
+
+    ifnot (assoc_key_exists (COMMANDS[_mod], kstr))
+      return;
+
+    (@COMMANDS[_mod][kstr].fun)
+      (__push_list (COMMANDS[_mod][kstr].args);key = kstr);
   end
 
   def Srv_on_desktop_change (did) public proc
@@ -126,8 +247,8 @@ class Xsrv
       {
       if (any (ar == cls[i]))
         continue;
-      p = get_struct_field (DESKTOP_CLASSES, cls[i]);
-      () = system (p);
+
+      Xspawn (get_struct_field (DESKTOP_CLASSES, cls[i]));
       }
   end
 
@@ -172,8 +293,5 @@ class Xsrv
     else
       if (-1 == mkfifo (WRFIFO, File->PERM["PRIVATE"]))
         This.err_handler ("cannot create fifo: " + WRFIFO);
-
-    FUNS["getdeskclassnames"] = &getdeskclassnames;
-
   end
 end
