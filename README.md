@@ -57,11 +57,11 @@ The code status of this application, is at the moment just a published
 personalization environment, though I'm very close to a stable to a so called
 application layer, but also the code itself is quite stable in places.  
 But, for instance doesn't catch and handle SIGWINCH, since I work
-exclusively in maximized terminals throw ratpoison's era (2005)
+exclusively in maximized terminals through ratpoison's era (2005)
 followed by other window managers with the same logic.  
 The ratpoison logic is first to give total focus to the running application
 by maximizing the client window, and secondly to control the application
-_only_ throw the keyboard.  
+_only_ through the keyboard.  
 Thus (for now) a simple window resizing will mess the display (due to the changed
 LINES and COLUMNS, on which, the drawing machine is based to make the
 calculations). Though not enough complicated, it needs thinking and
@@ -135,7 +135,7 @@ For now published are three applications,
    This is (mostly) a Vim clone with some exceptions, it doesn't (nor it
    will ever do) implements even a quarter of the enormous vim features.
    but most of the basic ones are there. The two big differences is that
-   first, there isn't :s/pat/sub/ command, as it is implemented throw the normal
+   first, there isn't :s/pat/sub/ command, as it is implemented through the normal
    substitute command, and the second is the way were implemented the search
    operations, which simply don't change file position when a match found, 
    instead the result is displayed in the message line, while it is possible
@@ -171,14 +171,14 @@ Also available, are many of the basic system commands, which they mimic the beha
 their Gnu-coreutils counterparts, with some extensions, but which are _common_ to utilities  
 that makes use of them.  
 
-Those commands are available throw a normal shell, prefixed with two underscores and are  
+Those commands are available through a normal shell, prefixed with two underscores and are  
 installed in the bin directory that is installed/created during initial installation.  
 (note, that this application is not intended to be installed to the system namespace, as
 sources namespace and execution namespace have interchangeable relation to each other, so
 the bin directory is relative to the cloned sources) 
 
 Those same commands are available in the __shell, accessible through tab, but to all the other
-applications throw "!" as the first char in the command line.  
+applications, if "!" is the first char in the command line.  
 
 Available also, which is intended to play the major role in the whole experience, is a readline 
 interface, which offers:  
@@ -210,7 +210,7 @@ each other.  Responsible for this is the master process (the first one that star
 which is also indicated as MASTER to the drawing line at the top).
 
 Also, they can put themselves in idled mode, unless it's the master process (which currently
-exits), and can cycle throw the running applications using F1.  
+exits), and can cycle the running applications using F1.  
 The ":q" command exits the focused application - for now if it's the master application this
 results in an grand exit, but this should change; at least in the case of the master process
 there should be a forced confirmation - done in 82f23bc)  
@@ -218,7 +218,7 @@ there should be a forced confirmation - done in 82f23bc)
 Also, they can start children of applications, which they have relation only to the application
 that started them, and cannot be seen by others, neither can see others.  
 Those can be dettached and return the focus to its parent process by using Ctrl-j, and
-reattached from its parent throw F5.  
+reattached from its parent through F5.  
 (for now children can start children (which is in testing phase) but idle and quit is the same
 thing for them)
 
@@ -364,7 +364,7 @@ The quality of the code is good at places, though in the low level stuff there m
 be obvious mistakes. This is the result of the age :) and my undecuated background.
 
 The system is based on a very simple object oriented style of programming.  
-All the methods are executing throw a intermediate function, which is responsible to print
+All the methods are executing through a intermediate function, which is responsible to print
 in details the errors, and to call a callback error handler.  
 Every application should has its own error_handler assigned to This.err_handler.
 (in my mind, catching the errors is the number one priority when writting code) 

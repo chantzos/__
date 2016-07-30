@@ -13,7 +13,7 @@ if (any ("--help" == __argv or  "-h" == __argv))
      "PREQUISITIES:",
      "",
      "  pcre libs and headers",
-     "  openssl libs and headers",
+     "  ssl libs and headers",
      "  curl libs and headers",
      "  git",
      "",
@@ -600,9 +600,15 @@ private define file_callback_libs (file, st, src_path, dest_path, bytecompile)
 
   ifnot (path_extname (file) == ".slc")
     {
+    variable is_exec = access (file, X_OK);
     if (-1 == File.copy (file, dest))
       This.exit ("failed to rename " + file + " to " + dest + "\n" +
         errno_string (errno), 1);
+
+    ifnot (is_exec)
+      if (-1 == chmod (dest, 0700))
+        This.exit ("failed to set executable bits on " + file +
+           ",\n" + errno_string (errno), 1);
     }
   else
     if (-1 == rename (file, dest))
