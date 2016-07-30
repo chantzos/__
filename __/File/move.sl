@@ -6,9 +6,18 @@ private define move (self, source, dest, opts)
     backup,
     retval,
     backuptext = "",
+    st_source = qualifier ("st_source", stat_file (source)),
     st_dest = stat_file (dest);
 
-%TODO CHMOD
+  if (NULL == st_source)
+    {
+    IO.tostderr (source, "cannot stat it, ",
+      errno == 0  ? "" : errno_string (errno));
+    return -1;
+    }
+
+  variable mode = Sys.modetoint (st_source.st_mode);
+
   if (NULL != st_dest && opts.backup)
     {
     backup = strcat (dest, opts.suffix);
@@ -49,7 +58,7 @@ private define move (self, source, dest, opts)
     {
     if ("Cross-device link" == errno_string (errno))
       {
-      retval = File.copy (source, dest;verbose = verbose);
+      retval = File.copy (source, dest);
       if (-1 == retval)
         {
         IO.tostderr (sprintf
@@ -75,6 +84,13 @@ private define move (self, source, dest, opts)
 
   if (verbose)
     IO.tostdout (sprintf ("`%s' -> `%s'%s", source, dest, backuptext));
+
+  if (-1 == chmod (dest, mode))
+    {
+    IO.tostderr ("failed to set executable bits on " + dest +
+           ",\n" + errno_string (errno), 1);
+    return -1;
+    }
 
   0;
 }

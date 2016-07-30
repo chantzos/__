@@ -125,7 +125,9 @@ define main ()
       continue;
       }
 
-    retval = File.move (source, destname, opts;verbose = VERBOSE);
+    retval = File.move (source, destname, opts;verbose = VERBOSE,
+      st_source = st_source);
+
     if (-1 == retval)
       exit_code = 1;
     }

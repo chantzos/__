@@ -18,13 +18,13 @@ class Smg
     catch AnyError:
       {
       IO.tostderr ("stty failed:", Exc.fmt (NULL));
-      return [24, 80];
+      return [20, 74];
       }
 
     bts = fgets (&retval, fp);
 
     if (-1 == bts)
-      retval = "24 80";
+      retval = "20 74";
 
     () = pclose (fp);
 
