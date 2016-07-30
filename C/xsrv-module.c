@@ -615,6 +615,7 @@ void change_desktop (int *desk)
 {
   if (*desk == current_desktop)
     return;
+
   client *c;
   unsigned int tmp = current_desktop;
 
@@ -648,9 +649,6 @@ void change_desktop (int *desk)
 
   select_desktop (*desk);
   update_current ();
-
-  (void) SLang_push_integer (current_desktop);
-  (void) SLang_execute_function ("Srv_on_desktop_change");
 }
 
 void last_desktop ()
@@ -1247,6 +1245,7 @@ static SLang_Intrin_Var_Type xsrv_Variables [] =
   MAKE_VARIABLE("ShiftMask",   &shiftmask,   SLANG_INT_TYPE, 1),
   MAKE_VARIABLE("Mod1Mask",    &mod1mask,    SLANG_INT_TYPE, 1),
   MAKE_VARIABLE("Mod4Mask",    &mod4mask,    SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("CURRENT_DESKTOP", &current_desktop, SLANG_INT_TYPE, 1),
   SLANG_END_TABLE
 };
 

@@ -211,16 +211,6 @@ class Xsrv
     Xfollow_client (desk);
   end
 
-  def __desktop_change () public proc
-    variable desk, k = qualifier ("key");
-    if ('F' == k[0])
-      desk = 9 + atoi (k[[1:]]);
-    else
-      desk = atoi (k);
-
-    Xchange_desk (desk);
-  end
-
   def Srv_on_keypress (modifier, kstr) public proc
     variable _mod = string (modifier);
     ifnot (assoc_key_exists (COMMANDS, _mod))
@@ -250,6 +240,21 @@ class Xsrv
 
       Xspawn (get_struct_field (DESKTOP_CLASSES, cls[i]));
       }
+  end
+
+  def __desktop_change () public proc
+    variable desk, k = qualifier ("key");
+    if ('F' == k[0])
+      desk = 9 + atoi (k[[1:]]);
+    else
+      desk = atoi (k);
+
+    variable cur = CURRENT_DESKTOP;
+
+    Xchange_desk (desk);
+
+    ifnot (cur == CURRENT_DESKTOP)
+      Srv_on_desktop_change (CURRENT_DESKTOP);
   end
 
   def start ()

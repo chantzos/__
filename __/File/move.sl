@@ -87,8 +87,8 @@ private define move (self, source, dest, opts)
 
   if (-1 == chmod (dest, mode))
     {
-    IO.tostderr ("failed to set executable bits on " + dest +
-           ",\n" + errno_string (errno), 1);
+    IO.tostderr (sprintf ("failed to set mode bits (0%o) on %s, %s",
+      mode, dest, errno_string (errno)));
     return -1;
     }
 
