@@ -206,8 +206,8 @@ private define __classcompile__ (argv)
       ern = 1;
       continue;
       }
-    
-    ifnot (NULL == dont_remove)
+
+    if (NULL == dont_remove)
       if (-1 == remove (as))
         {
         IO.tostderr ("failed to remove", as);
