@@ -177,30 +177,37 @@ class Proc
           if (-1 == initgroups (s.user, s.gid))
             {
             IO.tostderr ("initgroups: " + errno_string (errno));
-            return NULL;
+            _exit (1);
             }
 
           if (-1 == setgid (s.gid))
             {
             IO.tostderr ("setgid: " + errno_string (errno));
-            return NULL;
+            _exit (1);
             }
 
           if (-1 == setuid (s.uid))
             {
             IO.tostderr ("setuid: " + errno_string (errno));
-            return NULL;
+            _exit (1);
             }
           }
-
+   % check (pleease...)
+   % my excuse is that I'm sending _specific_ checked argv here
       if (NULL == env)
         if (-1 == execv (argv[0], argv))
-          return NULL;
+          {
+          IO.tostderr ("error calling execv: ", errno_string (errno));
+          _exit (1);
+          }
         else
           {}
       else
         if (-1 == execve (argv[0], argv, env))
-          return NULL;
+          {
+          IO.tostderr ("error calling execve: ", errno_string (errno));
+          _exit (1);
+          }
       }
 
     if (NULL == bg)
