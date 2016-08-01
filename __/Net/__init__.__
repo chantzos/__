@@ -1,0 +1,218 @@
+class Net
+  let IP_BIN = Sys.which ("ip");
+  let IW_BIN = Sys.which ("iw");
+  let WP_SERV_BIN = Sys.which ("wpa_supplicant");
+  let WP_CLNT_BIN = Sys.which ("wpa_cli");
+  let DH_BIN = Sys.which ("dhcpcd");
+
+  subclass wifi
+    __init__
+      set_conf
+      is_up
+      bring_up
+      bring_down
+      start_server
+      at_exit
+    end
+
+    var DEV = "nl80211";
+    var SERVER_SOCK = "/run/wpa_supplicant";
+    var IFACE = NULL;
+    var IFACEDIR = NULL;
+    var SERVER_PID = NULL;
+    var SERVER_CONF = NULL;
+
+    def set_conf (conf)
+      if (-1 == access (conf, F_OK))
+        {
+        variable fd = open (conf, O_WRONLY|O_CREAT, File->PERM["_PRIVATE"]);
+        if (NULL == fd)
+          return -1;
+
+        if (-1 == write (fd,
+`ctrl_interface=` + SERVER_SOCK + `
+ctrl_interface_group=wheel
+eapol_version=1
+ap_scan=1
+fast_reauth=1
+update_config=1`))
+          return -1;
+       % check for group wheel, otherwise wpa_cli should be called
+       % with su rights
+
+        if (-1 == close (fd))
+          return -1;
+        }
+
+      variable st = stat_file (conf);
+      if (NULL == st)
+        return -1;
+
+      if (-1 == Sys.checkperm (st.st_mode, File->PERM["_PRIVATE"]))
+        return -1;
+
+      SERVER_CONF = conf;
+      0;
+    end
+
+    def find_iface () proc
+      NULL;
+    end
+
+#if Sys->OS == "Linux"
+    def find_iface () proc
+      variable or_dir = "/sys/class/net";
+      variable iface = listdir (or_dir);
+      if (NULL == iface || 0 == length (iface))
+        return;
+
+      variable i;
+      _for i (0, length (iface) - 1)
+        {
+        if (any (["lo", "ens32"] == iface[i]))
+          continue;
+
+        variable ifacedir = or_dir + "/" + iface[i];
+        variable liface = listdir (ifacedir);
+        if (NULL == liface || 0 == length (liface))
+          continue;
+
+        if (any ("wireless" == liface or "phy80211" == liface))
+          {
+          IFACE = iface[i];
+          IFACEDIR = ifacedir;
+          break;
+          }
+        }
+    end
+#endif
+
+    def is_up ()
+      if (NULL == Net->IP_BIN)
+        return NULL;
+
+      if (NULL == IFACE)
+        return NULL;
+
+      variable fp = popen (Net->IP_BIN + " link show " + IFACE, "r");
+      if (NULL == fp)
+        return NULL;
+
+      variable buf;
+      () = fgets (&buf, fp);
+
+      string_match (buf, "UP") ? 1 : 0;
+    end
+
+    def set_iface (self, what) proc
+      variable isup = self.is_up ();
+      if (NULL == isup ())
+        return NULL;
+
+      ifnot (isup)
+        {
+        if ("down" == what)
+          return 0;
+        }
+      else
+         if ("up" == what)
+           return 0;
+
+      variable argv = [Net->IP_BIN, "link", "set", IFACE, what];
+
+      variable passwd = __get_qualifier_as (String_Type, "passwd",
+        qualifier ("passwd"), NULL);
+
+      ifnot (NULL == passwd)
+        {
+        ifnot (passwd[-1] == '\n')
+          passwd += "\n";
+
+        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        }
+
+      variable p = Proc.init (NULL != passwd, 1, 1);
+
+      ifnot (NULL == passwd)
+        p.stdin.in = passwd;
+
+      variable status = p.execv (argv, NULL);
+
+      if (status.exit_status)
+        ifnot (NULL == p.stderr.out)
+          IO.tostdout (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+
+      self.is_up ()
+        ? "up" == what
+          ? 0
+          : -1
+        : "down" == what
+          ? 0
+          : -1;
+    end
+
+    def bring_up ()
+      set_iface (self, "up";;__qualifiers);
+    end
+
+    def bring_down ()
+      set_iface (self, "down";;__qualifiers);
+    end
+
+    def start_server ()
+      if (-1 == self.bring_up (;;__qualifiers))
+        return -1;
+
+      if (SERVER_PID)
+%        ifnot (qualifier_exists ("force"))  # for sys check_pid ()
+%          return 0;
+        return 0;
+
+      if (NULL == SERVER_CONF)
+        return -1;
+
+      if (-1 == access (SERVER_CONF, R_OK|W_OK))
+        return -1;
+
+      variable argv = [Net->WP_SERV_BIN, "-D" + DEV, "-i" + IFACE,
+         "-c" + SERVER_CONF];
+
+      variable passwd = __get_qualifier_as (String_Type, "passwd",
+        qualifier ("passwd"), NULL);
+
+      ifnot (NULL == passwd)
+        {
+        ifnot (passwd[-1] == '\n')
+          passwd += "\n";
+
+        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        }
+
+      variable p = Proc.init (NULL != passwd, 0, 0);
+
+      ifnot (NULL == passwd)
+        p.stdin.in = passwd;
+
+      SERVER_PID = p.execv (argv, 1);
+      IO.tostdout (SERVER_PID);
+      SERVER_PID;
+    end
+
+    def get_exit_pid () proc
+      if (NULL == SERVER_PID)
+        return -1;
+
+      variable pid = waitpid (SERVER_PID, 0);
+      SERVER_PID = NULL;
+      pid;
+    end
+
+    def at_exit ()
+      get_exit_pid ();
+    end
+
+    beg
+      find_iface;
+    end
+  end
+end
