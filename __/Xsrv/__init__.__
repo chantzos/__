@@ -15,10 +15,16 @@ class Xsrv
   def __desktop_change () public proc
   end
 
+  def __rotate_desk () public proc
+  end
+
   def __follow_client () public proc
   end
 
   def __client_to_desk () public proc
+  end
+
+  def __last_desk () public proc
   end
 
   % Config samples,
@@ -62,11 +68,11 @@ class Xsrv
       {
       struct {fun = &Xspawn, args = {[X_TERM_BIN]}},
       struct {fun = &Xspawn, args = {[X_TERM_BIN, "-name", "SHELL", "-e", "__shell"]}},
-      struct {fun = &Xrotate_desk, args = {1}},
-      struct {fun = &Xrotate_desk, args = {-1}},
+      struct {fun = &__rotate_desk, args = {1}},
+      struct {fun = &__rotate_desk, args = {-1}},
       struct {fun = &Xprev_win, args  = {}},
       struct {fun = &Xnext_win, args  = {}},
-      struct {fun = &Xlast_desk, args   = {}},
+      struct {fun = &__last_desk, args   = {}},
       }),
     Assoc.new (Struct_Type, ["Up", "Down", "Left", "Right"], {
       struct {fun = &Xresize_stack, args = {-12}},
@@ -95,8 +101,10 @@ class Xsrv
 
   include! __init__ from Xlocalxsrv as Xsrv
 
+  let DESKLEN = length (DESKTOP_CLASSES.class);
+
   beg
-    _for $5 (0, length (DESKTOP_CLASSES.class) - 1)
+    _for $5 (0, DESKLEN - 1)
       if ($5 > 9)
         {
         COMMANDS ()[string (Mod4Mask)]["F" + string ($5 - 9)] =
@@ -181,14 +189,14 @@ class Xsrv
   end
 
   def Srv_set_modes () public proc
-    variable ar = Integer_Type[length (DESKTOP_CLASSES.class)];
+    variable ar = Integer_Type[DESKLEN];
     ar++;
-    ar[length (DESKTOP_CLASSES.class)-1]++;
+    ar[DESKLEN-1]++;
     ar;
   end
 
   def Srv_set_desktops () public proc
-    length (DESKTOP_CLASSES.class);
+    DESKLEN;
   end
 
   def __client_to_desk () public proc
@@ -213,6 +221,7 @@ class Xsrv
 
   def Srv_on_keypress (modifier, kstr) public proc
     variable _mod = string (modifier);
+
     ifnot (assoc_key_exists (COMMANDS, _mod))
       return;
 
@@ -240,6 +249,23 @@ class Xsrv
 
       Xspawn (get_struct_field (DESKTOP_CLASSES, cls[i]));
       }
+  end
+
+  def __last_desk () public proc
+    variable cur = CURRENT_DESKTOP;
+    Xchange_desk (PREV_DESKTOP);
+    ifnot (cur == CURRENT_DESKTOP)
+      Srv_on_desktop_change (CURRENT_DESKTOP);
+  end
+
+  def __rotate_desk (dir) public proc
+    variable cur = CURRENT_DESKTOP;
+    variable desk = (CURRENT_DESKTOP + DESKLEN + dir) mod DESKLEN;
+
+    Xchange_desk (desk);
+
+    ifnot (cur == CURRENT_DESKTOP)
+      Srv_on_desktop_change (CURRENT_DESKTOP);
   end
 
   def __desktop_change () public proc

@@ -651,18 +651,6 @@ void change_desktop (int *desk)
   update_current ();
 }
 
-void last_desktop ()
-{
-  unsigned int desk = previous_desktop;
-  change_desktop (&desk);
-}
-
-void rotate_desktop (int *inc)
-{
-  unsigned int desk = (current_desktop + DESKNUM +  *inc) % DESKNUM;
-  change_desktop (&desk);
-}
-
 void follow_client_to_desktop (int *desk)
 {
   client_to_desktop (desk);
@@ -1246,6 +1234,7 @@ static SLang_Intrin_Var_Type xsrv_Variables [] =
   MAKE_VARIABLE("Mod1Mask",    &mod1mask,    SLANG_INT_TYPE, 1),
   MAKE_VARIABLE("Mod4Mask",    &mod4mask,    SLANG_INT_TYPE, 1),
   MAKE_VARIABLE("CURRENT_DESKTOP", &current_desktop, SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("PREV_DESKTOP", &previous_desktop, SLANG_INT_TYPE, 1),
   SLANG_END_TABLE
 };
 
@@ -1254,12 +1243,10 @@ static SLang_Intrin_Fun_Type xsrv_Intrinsics [] =
   MAKE_INTRINSIC_0("Xstart", startx_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("XGetDeskClassNames", XGetDeskClassNames, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("Xspawn", Xspawn, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_I("Xrotate_desk", rotate_desktop, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("Xkill_client", kill_client, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("Xquit", quit, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("Xnext_win", next_win, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("Xprev_win", prev_win, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("Xlast_desk", last_desktop, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("Xchange_desk", change_desktop, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("Xfollow_client", follow_client_to_desktop, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("Xclient_to_desk", client_to_desktop, SLANG_VOID_TYPE),
