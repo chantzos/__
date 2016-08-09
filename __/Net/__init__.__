@@ -12,6 +12,8 @@ class Net
       bring_up
       bring_down
       start_server
+      scan
+      terminate
       at_exit
     end
 
@@ -194,7 +196,6 @@ update_config=1`))
         p.stdin.in = passwd;
 
       SERVER_PID = p.execv (argv, 1);
-      IO.tostdout (SERVER_PID);
       SERVER_PID;
     end
 
@@ -202,13 +203,65 @@ update_config=1`))
       if (NULL == SERVER_PID)
         return -1;
 
-      variable pid = waitpid (SERVER_PID, 0);
+      variable status = waitpid (SERVER_PID, 0);
       SERVER_PID = NULL;
-      pid;
+      status.exit_status;
     end
 
     def at_exit ()
       get_exit_pid ();
+    end
+
+    def scan ()
+      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+        return NULL;
+
+      % no need for su if we are in wheel
+      variable argv = [Net->WP_CLNT_BIN, "scan"];
+      variable p = Proc.init (0, 1, 1);
+
+      variable status = p.execv (argv, NULL);
+      if (status.exit_status)
+        {
+        IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+        return NULL;
+        }
+
+      p = Proc.init (0, 1, 1);
+      argv = [Net->WP_CLNT_BIN, "scan_results"];
+      status = p.execv (argv, NULL);
+
+      if (status.exit_status)
+        {
+        IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"));
+        return NULL;
+        }
+
+      if (NULL == p.stdout.out)
+        return String_Type[0];
+
+      strtok (p.stdout.out, "\n");
+    end
+
+    def terminate ()
+      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+        return -1;
+
+      if (NULL == SERVER_PID)
+        return 0;
+
+      variable argv = [Net->WP_CLNT_BIN, "terminate"];
+      variable p = Proc.init (0, 1, 1);
+      variable status = p.execv (argv, NULL);
+
+      if (status.exit_status)
+        {
+        IO.tostderr (strjoin (strtok (p.stderr.out, "\n"), "\n"),
+        "exit_status:", status.exit_status);
+        return -1;
+        }
+
+      get_exit_pid == -1 ? -1: 0;
     end
 
     beg
