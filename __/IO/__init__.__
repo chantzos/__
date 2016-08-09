@@ -1,4 +1,53 @@
 class IO
+
+  let PIP_CAP = 65535;
+
+  def print (str)
+    variable std = __get_qualifier_as (File_Type, "std",
+      qualifier ("std"), stdout);
+
+    variable ufd = _fileno (std);
+
+    if (1 > ufd > 2)
+      throw ClassError, sprintf ("IO::print: unacceptable stream");
+
+    variable tofp = NULL == (tofp = __get_qualifier_as (
+        File_Type, "fp", qualifier ("fp"), NULL), tofp)
+      ? This.is.tty ()
+        ? std
+        : NULL
+      : tofp;
+
+    ifnot (NULL == tofp)
+      {
+      if (any (-1 == array_map (Integer_Type, &fprintf, tofp, "%s", str)))
+        throw ClassError, sprintf ("IO_WriteError:%S, %s",
+          ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
+      }
+    else
+      {
+      variable fd = __get_qualifier_as (FD_Type, "fd", qualifier ("fd"),
+        [This.is.std.out.fd, This.is.std.err.fd][ufd - 1]);
+
+      if (-1 == lseek (fd, 0, SEEK_END))
+        throw ClassError, sprintf ("IO_LseekError:%S, %s",
+          ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
+
+      if (Array_Type == typeof (str))
+        {
+        variable i;
+        _for i (0, length (str) - 1)
+          if (-1 == write (fd, str[i]))
+            throw ClassError, sprintf ("IO_WriteError:%S, %s",
+              ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
+        }
+      else
+        if (-1 == write (fd, str))
+          throw ClassError, sprintf ("IO_WriteError:%S, %s",
+            ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
+      }
+  end
+
   def fmt (args)
     variable str;
 
@@ -39,14 +88,14 @@ class IO
 
     variable len = strlen (str);
 
-    if (65535 < len)
+    if (PIP_CAP < len)
       {
       variable pos = 1;
-      variable str_ar = String_Type[len / 65535 + (len mod 65535 ? 1 : 0)];
+      variable str_ar = String_Type[len / PIP_CAP + (len mod PIP_CAP ? 1 : 0)];
       _for i (0, length (str_ar) - 1)
         {
-        str_ar[i] = substr (str, pos, 65535);
-        pos += 65535;
+        str_ar[i] = substr (str, pos, PIP_CAP);
+        pos += PIP_CAP;
         }
 
       return str_ar;
