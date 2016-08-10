@@ -192,8 +192,7 @@ class Proc
             _exit (1);
             }
           }
-   % check (pleease...)
-   % my excuse is that I'm sending _specific_ checked argv here
+
       if (NULL == env)
         if (-1 == execv (argv[0], argv))
           {

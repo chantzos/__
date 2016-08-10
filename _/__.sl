@@ -1134,6 +1134,8 @@ private define parse_subclass_init (methods, tokens, line, fp)
       break;
       }
 
+% or the syntax should be clear like C
+
     tokens = strtok (lline);
     if (1 < length (tokens))
       throw ClassError, "Class::__INIT__::subclass, " +

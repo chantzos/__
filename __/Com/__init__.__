@@ -8,6 +8,7 @@ class Com
     rehash  = 1,
     eval    = 1,
     ved     = 1,
+    sigint  = 1,
     };
 
   subclass Fork from Com
@@ -430,7 +431,15 @@ class Com
      "stderrfile=" + This.is.std.err.fn, "stderrflags=>>|"];
 
     ifnot (isbg)
-      self.Fork.tofg (p, argv, env);
+      if (COM_OPTS.sigint)
+        {
+        variable handl;
+        signal (SIGINT, SIG_IGN, &handl);
+        self.Fork.tofg (p, argv, env);
+        signal (SIGINT, handl);
+        }
+      else
+        self.Fork.tofg (p, argv, env);
     else
       {
       ifnot (COM_OPTS.bg_jobs)

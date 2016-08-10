@@ -750,7 +750,26 @@ __initrline ();
 
 Smg.init ();
 
-Input.init ();
+Input.init (); % an error_handler expected there
+
+public define sigint_handler ();
+public define sigint_handler (sig)
+{
+  Input.at_exit ();
+  Input.init ();
+  if ('q' == IO.ask (["q[uit " + This.is.my.name + "] | c[ontinue]"], ['q', 'c']))
+    App.quit_me ();
+
+  signal (sig, &sigint_handler);
+  variable rl = Ved.get_cur_rline ();
+  Rline.prompt (rl, rl._lin, rl._col);
+}
+
+if (COM_OPTS.sigint)
+  {
+  sigprocmask (SIG_UNBLOCK, [SIGINT]);
+  signal (SIGINT, &sigint_handler);
+  }
 
 (@__get_reference ("init_" + This.is.my.name));
 
