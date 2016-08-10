@@ -2,7 +2,7 @@ __use_namespace ("__APP__");
 
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
-public variable DEBUG, APP_ERR, I, App;
+public variable DEBUG, APP_ERR, I, App, X;
 
 public define exit_me (x)
 {
@@ -68,17 +68,6 @@ Class.load ("Api");
 Class.load ("App");
 
 This.at_exit = &_exit_;
-
-if (This.request.X)
-  Class.load ("Xclnt");
-
-Class.load ("X";force);
-
-This.is.at.X = X.is_running ();
-
-if (This.request.X)
-  ifnot (This.is.at.X)
-    Class.load ("Xsrv");
 
 Class.load ("I";force);
 
@@ -712,6 +701,17 @@ ifnot (access (Env->USER_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
 else
   ifnot (access (Env->STD_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
     Load.file (Env->STD_LIB_PATH + "/wind/" + This.is.my.name);
+
+if (This.request.X)
+  Class.load ("Xclnt");
+
+Class.load ("X";force);
+
+This.is.at.X = X.is_running ();
+
+if (This.request.X)
+  ifnot (This.is.at.X)
+    Class.load ("Xsrv");
 
 public define __initrline ()
 {

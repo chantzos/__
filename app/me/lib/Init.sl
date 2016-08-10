@@ -7,6 +7,8 @@ COM_OPTS.bg_jobs   = 0;
 COM_OPTS.search    = 1;
 COM_OPTS.rehash    = 0;
 
+This.request.X = 0;
+
 Class.load ("Sync");
 
 public define on_wind_new (w)
