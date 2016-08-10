@@ -462,6 +462,15 @@ private define __module_compile__ (argv)
   __messages;
 }
 
+private define __search_project__ (argv)
+{
+  variable pat = Opt.Arg.getlong ("pat", NULL, &argv;del_arg);
+  if (NULL == pat)
+    return;
+
+  runcom (["search", "--pat=" + pat, "--recursive", Env->SRC_PATH], NULL);
+}
+
 private define my_commands ()
 {
   variable a = init_commands ();
@@ -505,6 +514,11 @@ private define my_commands ()
     "--debug void add debug flags when compiling",
     "--cflags= string append flags",
     "--dont-install void do not install the module"];
+
+  a["search_project"] = @Argvlist_Type;
+  a["search_project"].func = &__search_project__;
+  a["search_project"].args = ["--pat= pattern pattern"];
+
   a;
 }
 
