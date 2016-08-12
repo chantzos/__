@@ -1,37 +1,8 @@
 class Smg
-  var public LINES     = NULL;
-  var public COLUMNS   = NULL;
-  var public PROMPTROW = NULL;
-  var public MSGROW    = NULL;
+  var public MSGROW    = LINES - 1;
+  var public PROMPTROW = MSGROW - 1;
 
   let COLOR = NULL;
-
-  def get_screen_size ()
-    variable retval, fp, bts;
-
-    % there is a bug when executing from a process and creating new process
-    % which opens standard input (message is: inappropriate ioctl device)
-    try
-      {
-      fp = popen ("stty size", "r");
-      }
-    catch AnyError:
-      {
-      IO.tostderr ("stty failed:", Exc.fmt (NULL));
-      return [20, 74];
-      }
-
-    bts = fgets (&retval, fp);
-
-    if (-1 == bts)
-      retval = "20 74";
-
-    () = pclose (fp);
-
-    retval = strtok (retval);
-
-    integer (retval[0]), integer (retval[1]);
-  end
 
   def __HLINE__ ()
     repeat (char (8212), COLUMNS);
@@ -50,11 +21,5 @@ class Smg
 
   def send_msg (msg)
     IO.tostdout (msg);
-  end
-
-  beg
-    (LINES, COLUMNS) = get_screen_size (NULL);
-    PROMPTROW = LINES - 2;
-    MSGROW = LINES - 1;
   end
 end

@@ -408,6 +408,8 @@ set_import_module_path (foo + "/std/C:" + get_import_module_path);
 
 import (foo + "/std/C/__");
 
+__WNsize;
+
 () = evalfile (foo + "/std/__/__");
 
 private define dont_exit ()

@@ -328,6 +328,8 @@ ifnot (DONT_COMPILE_MODULES)
 
 import (SRC_TMP_PATH + "/__", "Global");
 
+__WNsize ();
+
 SRC_PATH       = realpath (SRC_PATH);
 SRC_TMP_PATH   = realpath (SRC_TMP_PATH);
 SRC_C_PATH     = realpath (SRC_C_PATH);

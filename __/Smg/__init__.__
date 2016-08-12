@@ -1,10 +1,13 @@
 class Smg
   import slsmg
 
-  var public LINES     = SLsmg_Screen_Rows;
-  var public COLUMNS   = SLsmg_Screen_Cols;
-  var public PROMPTROW = SLsmg_Screen_Rows - 2;
-  var public MSGROW    = SLsmg_Screen_Rows - 1;
+  var public MSGROW = LINES - 1;;
+  var public PROMPTROW = MSGROW - 1;
+
+  def __init () proc
+    MSGROW    = LINES - 1;
+    PROMPTROW  = MSGROW - 1;
+  end
 
   var __COLOR__ = struct
     {
@@ -52,6 +55,8 @@ class Smg
   end
 
   def init ()
+    __init ();
+
     if (SMGINITED)
       return;
 

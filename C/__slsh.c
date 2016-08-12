@@ -42,6 +42,7 @@ getpwnam, getpwuid, getgrnam, getgrgid,
 #include <pwd.h>
 #include <grp.h>
 #include <sys/file.h>
+#include <sys/ioctl.h>
 #include <errno.h>
 #include <slang.h>
 
@@ -503,6 +504,23 @@ static void exit_intrin (void)
    c_exit (status);
 }
 
+static int Lines;
+static int Columns;
+
+static void __wnsize (void)
+{
+  struct winsize ws;
+
+  if (ioctl(1, TIOCGWINSZ, &ws) == -1)
+    {
+    Lines = 24;
+    Columns = 78;
+    }
+
+  Lines = ws.ws_row;
+  Columns = ws.ws_col;
+}
+
 static void stat_mode_to_string (void)
 {
    int mode, opts;
@@ -578,6 +596,13 @@ static int try_to_load_file (SLFUTURE_CONST char *path, char *file, char *ns)
    return -1;
 }
 
+static SLang_Intrin_Var_Type Variables [] =
+{
+  MAKE_VARIABLE("LINES", &Lines, SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("COLUMNS", &Columns, SLANG_INT_TYPE, 1),
+  SLANG_END_TABLE
+};
+ 
 /* Create the Table that S-Lang requires */
 static SLang_Intrin_Fun_Type Intrinsics [] =
 {
@@ -590,6 +615,7 @@ static SLang_Intrin_Fun_Type Intrinsics [] =
   MAKE_INTRINSIC_I("getpwuid", getpwuid_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_S("getgrnam", getgrname_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("getgrgid", getgrgid_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("__WNsize", __wnsize, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_S("mkstemp", mkstemp_intrin, VOID_TYPE),
   /* upstream intrinsics */
   MAKE_INTRINSIC_0("stat_mode_to_string", stat_mode_to_string, VOID_TYPE),
@@ -598,6 +624,11 @@ static SLang_Intrin_Fun_Type Intrinsics [] =
 
   SLANG_END_INTRIN_FUN_TABLE
 };
+
+void __init (void)
+{
+  __wnsize ();
+}
 
 int main (int argc, char **argv)
 {
@@ -611,7 +642,8 @@ int main (int argc, char **argv)
 #ifndef SLSH_STATIC
       || (-1 == SLang_init_import ()) /* dynamic linking */
 #endif
-      || (-1 == SLadd_intrin_fun_table (Intrinsics, NULL)))
+      || (-1 == SLadd_intrin_fun_table (Intrinsics, NULL))
+      || (-1 == SLadd_intrin_var_table (Variables, NULL)))
     {
 	   fprintf(stderr, "Unable to initialize S-Lang.\n");
 	   return 1;
@@ -661,6 +693,8 @@ int main (int argc, char **argv)
     return 1;
 
  /*  (void) SLdefine_for_ifdef ("__INTERACTIVE__"); */
+ 
+  __init ();
 
   if (file != NULL)
     {

@@ -100,8 +100,10 @@ __TRACK
       (find from world symbols)     
 					 > ved: for Ctrl-k for digraphs, based om request and prioritie
 
- 
- 
+
+__C:
+   HEAD: CONSTANT ERRORS ([INIT_ERR,])
+   MAIN:
  
 LexPars:
       {:

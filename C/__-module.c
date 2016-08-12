@@ -14,6 +14,7 @@
 #include <grp.h>
 #include <sys/file.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <errno.h>
 #include <slang.h>
 
@@ -417,6 +418,30 @@ static void realpath_intrin (char *path)
    (void) SLang_push_null ();
 }
 
+static int Lines;
+static int Columns;
+
+static void __wnsize (void)
+{
+  struct winsize ws;
+
+  if (ioctl(1, TIOCGWINSZ, &ws) == -1)
+    {
+    Lines = 24;
+    Columns = 78;
+    }
+
+  Lines = ws.ws_row;
+  Columns = ws.ws_col;
+}
+
+static SLang_Intrin_Var_Type ___Variables [] =
+{
+  MAKE_VARIABLE("LINES", &Lines, SLANG_INT_TYPE, 1),
+  MAKE_VARIABLE("COLUMNS", &Columns, SLANG_INT_TYPE, 1),
+  SLANG_END_TABLE
+};
+ 
 static SLang_Intrin_Fun_Type ___Intrinsics [] =
 {
   MAKE_INTRINSIC_S("mkstemp", mkstemp_intrin, VOID_TYPE),
@@ -429,6 +454,7 @@ static SLang_Intrin_Fun_Type ___Intrinsics [] =
   MAKE_INTRINSIC_I("getpwuid", getpwuid_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_S("getgrnam", getgrname_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_I("getgrgid", getgrgid_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("__WNsize", __wnsize, SLANG_VOID_TYPE),
 
   SLANG_END_INTRIN_FUN_TABLE
 };
@@ -440,8 +466,9 @@ int init____module_ns (char *ns_name)
   if (NULL == (ns = SLns_create_namespace (ns_name)))
     return -1;
 
-  if (-1 == SLns_add_intrin_fun_table (ns, ___Intrinsics, NULL))
+  if (-1 == SLns_add_intrin_fun_table (ns, ___Intrinsics, NULL)
+      || -1 == SLadd_intrin_var_table (___Variables, NULL))
     return -1;
-
+  
   return 0;
 }

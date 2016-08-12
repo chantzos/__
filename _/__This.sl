@@ -1,6 +1,6 @@
 __use_namespace ("This");
 
-public variable This, Smg, Input, LINES, COLUMNS;
+public variable This, Smg, Input;
 
 private define __def_exit__ ()
 {
