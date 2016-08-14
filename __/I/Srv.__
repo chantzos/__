@@ -81,6 +81,12 @@ subclass Srv
     if (APP_ERR)
       break;
 
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
     forever
       {
       retval = self.mainloop (&issu);
@@ -102,6 +108,9 @@ subclass Srv
     }
 
     Api.restore_screen ();
+
+    if (This.has.sigint)
+      signal (SIGINT, handl);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -125,10 +134,21 @@ subclass Srv
         return;
 
       Api.reset_screen ();
+
+      if (This.has.sigint)
+        {
+        variable handl;
+        signal (SIGINT, SIG_IGN, &handl);
+        }
+
       variable retval = self.reconnect_to_app (s.argv[0]);
       if (1 == retval)
         {
         Api.restore_screen ();
+
+        if (This.has.sigint)
+          signal (SIGINT, handl);
+
         Rline.set (s);
         Rline.prompt (s, s._lin, s._col);
         return;

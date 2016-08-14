@@ -28,6 +28,13 @@ subclass Client
     if (any (apps == s.argv[0]))
       {
       Api.reset_screen ();
+
+      if (This.has.sigint)
+        {
+        variable handl;
+        signal (SIGINT, SIG_IGN, &handl);
+        }
+
       variable is_su = __get_qualifier_as (Integer_Type, "issu", qualifier ("issu"),
       0);
       Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
@@ -39,6 +46,9 @@ subclass Client
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
       if (retval == Api->GO_ATEXIT)
         exit_me (0);
+
+      if (This.has.sigint)
+        signal (SIGINT, handl);
       }
     else
       return;
@@ -69,13 +79,24 @@ subclass Client
         return;
 
       Api.reset_screen ();
+
+      if (This.has.sigint)
+        {
+        variable handl;
+        signal (SIGINT, SIG_IGN, &handl);
+        }
+
       Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
       () = Sock.get_int (SESSION_RDFIFO_FD);
       Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
 
       variable retval = Sock.get_int (SESSION_RDFIFO_FD);
+
       if (retval == Api->GO_ATEXIT)
         exit_me (0);
+
+      if (This.has.sigint)
+        signal (SIGINT, handl);
       }
     else
       return;
@@ -87,7 +108,18 @@ subclass Client
   end
 
   def idle ()
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
     Sock.send_int (SESSION_WRFIFO_FD, Api->GO_IDLED);
-    return Sock.get_int (SESSION_RDFIFO_FD);
+    variable retval = Sock.get_int (SESSION_RDFIFO_FD);
+
+    if (This.has.sigint)
+      signal (SIGINT, handl);
+
+    return retval;
   end
 end

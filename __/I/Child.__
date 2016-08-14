@@ -23,7 +23,18 @@ subclass Child
   end
 
   def idle ()
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
     Sock.send_int (PARENT_WRFIFO_FD, Api->GO_IDLED);
-    return Sock.get_int (PARENT_RDFIFO_FD);
+    variable retval = Sock.get_int (PARENT_RDFIFO_FD);
+
+    if (This.has.sigint)
+      signal (SIGINT, handl);
+
+    return retval;
   end
 end

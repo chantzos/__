@@ -765,7 +765,7 @@ public define sigint_handler (sig)
   Rline.prompt (rl, rl._lin, rl._col);
 }
 
-if (COM_OPTS.sigint)
+if (This.has.sigint)
   {
   sigprocmask (SIG_UNBLOCK, [SIGINT]);
   signal (SIGINT, &sigint_handler);

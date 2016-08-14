@@ -54,6 +54,7 @@ static define __INIT__ (role)
       {
       frames = 1,
       max_frames = 2,
+      sigint = 1,
       screenactive,
       argv = qualifier ("setargv")
         ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)

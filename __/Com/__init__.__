@@ -8,7 +8,6 @@ class Com
     rehash  = 1,
     eval    = 1,
     ved     = 1,
-    sigint  = 1,
     };
 
   subclass Fork from Com
@@ -431,7 +430,7 @@ class Com
      "stderrfile=" + This.is.std.err.fn, "stderrflags=>>|"];
 
     ifnot (isbg)
-      if (COM_OPTS.sigint)
+      if (This.has.sigint)
         {
         variable handl;
         signal (SIGINT, SIG_IGN, &handl);
