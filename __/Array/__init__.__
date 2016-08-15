@@ -4,8 +4,8 @@ class Array
       return 0;
 
     ifnot (NULL == type)
-      ifnot (_typeof (a) == type)
-        return 0;
+      return _typeof (a) == type;
+
     1;
   end
 
@@ -93,7 +93,7 @@ class Array
 
     ifnot (len)
       throw ClassError, "ArrayMapTypeMismatchError::" +  _function_name +
-        "::at least one argumrnt should be Array or List Type", NULL;
+        "::at least one argument should be Array or List Type", NULL;
 
     variable l;
     variable ii;
@@ -112,6 +112,8 @@ class Array
         else
           list_append (l, args[ii]);
 
+      variable dep = _stkdepth;
+
       try
         {
         (@ref) (__push_list (l);;__qualifiers ());
@@ -122,11 +124,15 @@ class Array
 
       ifnot (Void_Type == dtp)
         {
+        if (_stkdepth == dep)
+          throw ClassError, "ArrayMapRunTimeError::Stack underflow error. "
+            + "expected an item (of " + string (dtp) + ") in the stack";
+
         r = ();
 
         ifnot (typeof (r) == dtp)
           throw ClassError, "ArrayMapTypeMismatchError::" + _function_name + "::" + string (ref) +
-            " returned " + string (typeof (r)) + "instead of " + string (dtp), NULL;
+            " returned " + string (typeof (r)) + " instead of " + string (dtp), NULL;
 
         at[i] = r;
         }
