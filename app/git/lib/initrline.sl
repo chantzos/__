@@ -671,6 +671,74 @@ private define __clone__ (argv)
     () = chdir (cur_dir);
 }
 
+private define __merge__ (argv)
+{
+  if (1 == length (argv))
+    {
+    IO.tostderr ("merge needs an argument, a branch");
+    __messages;
+    return;
+    }
+
+  if (CUR_REPO == "NONE")
+    return;
+
+  variable br = argv[1];
+
+  ifnot (any (REPOS[CUR_REPO].branches == br))
+    {
+    IO.tostderr (br, ": not such branch");
+    __messages;
+    return;
+    }
+
+  if (br == REPOS[CUR_REPO].cur_branch)
+    {
+    IO.tostderr (br, ": is the current branch");
+    __messages;
+    return;
+    }
+
+  ifnot (Scm.Git.merge (br;redir_to_file = SCRATCH,
+      flags = ">|"))
+    __scratch (NULL);
+  else
+    __messages;
+}
+
+private define tabhook (s)
+{
+  ifnot (s._ind)
+    return -1;
+
+  ifnot (any (s.argv[0] == ["merge", "branchchange"]))
+    return -1;
+
+  if (strlen (s.argv[s._ind]) && '-' == s.argv[s._ind][0])
+    return -1;
+
+  if (CUR_REPO == "NONE")
+    return -1;
+
+  variable brs, i;
+
+  brs = @REPOS[CUR_REPO].branches;
+  if (1 == length (brs))
+    return -1;
+
+  Array.delete_at (&brs, wherefirst (brs == REPOS[CUR_REPO].cur_branch));
+
+  if ("merge" == s.argv[0])
+    _for i (0, length (brs) - 1)
+      brs[i] = brs[i] + " void " + "merge branch " + brs[i] +
+        " into current " + REPOS[CUR_REPO].cur_branch;
+  else
+    _for i (0, length (brs) - 1)
+      brs[i] = brs[i] + " void " + "change branch to " + brs[i];
+
+  return Rline.argroutine (s;args = brs, accept_ws);
+}
+
 private define my_commands ()
 {
   variable a = init_commands ();
@@ -736,6 +804,9 @@ private define my_commands ()
   a["branchdelete"] = @Argvlist_Type;
   a["branchdelete"].func = &__branchdelete__;
 
+  a["merge"] = @Argvlist_Type;
+  a["merge"].func = &__merge__;
+
   a;
 }
 
@@ -747,6 +818,7 @@ public define rlineinit ()
     histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_githistory",
     onnolength = &toplinedr,
     onnolengthargs = {""},
+    tabhook = &tabhook,
     on_lang = &toplinedr,
     on_lang_args = {" -- git --"}
     });
