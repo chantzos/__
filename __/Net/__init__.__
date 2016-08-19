@@ -15,6 +15,9 @@ class Net
       scan
       terminate
       get_ip
+      list_networks
+      reconfigure
+      scan_interval
       at_exit
       __geterr
     end
@@ -311,6 +314,90 @@ update_config=1
 
       variable status = p.execv (argv, NULL);
       status.exit_status;
+    end
+
+    def scan_interval (sec)
+      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+        {
+        ERR = "wpa_supplicant is not installed";
+        return -1;
+        }
+
+      if (SERVER_PID == NULL)
+        {
+        ERR = "wpa_supplicant hasn't been started";
+        return -1;
+        }
+
+      variable argv = [Net->WP_CLNT_BIN, "scan_interval", string (sec)];
+      variable p = Proc.init (0, 1, 1);
+
+      variable status = p.execv (argv, NULL);
+      if (status.exit_status)
+        {
+        ifnot (NULL == p.stderr.out)
+          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+        return -1;
+        }
+
+      0;
+    end
+
+    def reconfigure ()
+      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+        {
+        ERR = "wpa_supplicant is not installed";
+        return -1;
+        }
+
+      if (SERVER_PID == NULL)
+        {
+        ERR = "wpa_supplicant hasn't been started";
+        return -1;
+        }
+
+      variable argv = [Net->WP_CLNT_BIN, "reconfigure"];
+      variable p = Proc.init (0, 1, 1);
+
+      variable status = p.execv (argv, NULL);
+      if (status.exit_status)
+        {
+        ifnot (NULL == p.stderr.out)
+          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+        return -1;
+        }
+
+      0;
+    end
+
+    def list_networks ()
+      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+        {
+        ERR = "wpa_supplicant is not installed";
+        return NULL;
+        }
+
+      if (SERVER_PID == NULL)
+        {
+        ERR = "wpa_supplicant hasn't been started";
+        return NULL;
+        }
+      % no need for su if we are in wheel
+      variable argv = [Net->WP_CLNT_BIN, "list_networks"];
+      variable p = Proc.init (0, 1, 1);
+
+      variable status = p.execv (argv, NULL);
+      if (status.exit_status)
+        {
+        ifnot (NULL == p.stderr.out)
+          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+        return NULL;
+        }
+
+      if (NULL == p.stdout.out)
+        return String_Type[0];
+
+      strtok (p.stdout.out, "\n");
     end
 
     def scan ()
