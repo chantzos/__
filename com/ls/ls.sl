@@ -259,10 +259,12 @@ define get_type (mode)
 
 define print_to_screen (files, opts)
 {
-  variable
-    indices;
+  variable indices;
 
   files = files[wherenot ("." == files)];
+
+ ifnot (length (files))
+   return;
 
   %Arrays of structures are very expensive in memory; with a list
   % of 240.000 files took 300 MB of memory, some of the 12 fields from the
@@ -387,6 +389,9 @@ define print_to_screen (files, opts)
 
   files = files[indices];
   type = type[indices];
+
+  ifnot (length (files))
+    return;
 
   _for i (0, length (fields) - 1)
     {
