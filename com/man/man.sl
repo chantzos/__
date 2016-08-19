@@ -31,6 +31,27 @@ if (NULL == col)
   exit_me (1);
   }
 
+private define rm_head_ws__ (fn, ind)
+{
+  variable i, line, len, j, ar = File.readlines (fn);
+
+  _for i (0, length (ar) - 1)
+    {
+    line = ar[i];
+    len = strlen (line) - 1;
+    ifnot (len + 1)
+      continue;
+
+    j = 1;
+    while (j <= ind && j <= len &&
+        isblank (substr (line, j, 1)[0]))
+      j++;
+    ar[i] = substr (line, j, -1);
+    }
+
+  () = File.write (fn, ar);
+}
+
 define getpage (page)
 {
   variable
@@ -131,6 +152,12 @@ define getpage (page)
   p = initproc (1, openstdout, openstderr);
 
   p.stdin.file = outfn;
+
+  variable rm_head_ws = __get_qualifier_as (Integer_Type,
+    "rm_head_ws", qualifier ("rm_head_ws"), NULL);
+
+  ifnot (NULL == rm_head_ws)
+    rm_head_ws__ (outfn, rm_head_ws);
 
   status = p.execv ([col, "-b"], NULL);
 
@@ -263,7 +290,7 @@ define main ()
 
     if (1 == length (man_page))
       {
-      retval = getpage (man_page[0]);
+      retval = getpage (man_page[0];rm_head_ws = 3);
       exit_me (retval);
       }
 
@@ -306,7 +333,7 @@ define main ()
 
     man_page = man_page[retval];
 
-    retval = getpage (man_page);
+    retval = getpage (man_page;rm_head_ws = 3);
     exit_me (retval);
     }
 
@@ -324,7 +351,7 @@ define main ()
       exit_me (1);
       }
 
-    exit_me (getpage (from_file));
+    exit_me (getpage (from_file);rm_head_ws = 3);
    }
 
   if (i == __argc)
@@ -337,7 +364,7 @@ define main ()
 
   ifnot (access (page, F_OK))
     {
-    retval = getpage (page);
+    retval = getpage (page;rm_head_ws = 3);
     exit_me (retval);
     }
   else
@@ -371,7 +398,7 @@ define main ()
       exit_me (1);
       }
 
-    retval = getpage (man_page);
+    retval = getpage (man_page;rm_head_ws = 3);
     exit_me (retval);
     }
 }
