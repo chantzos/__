@@ -71,6 +71,12 @@ subclass Srv
 
     () = Rline.commandcmp (s, apps);
 
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
     loop (1)
     {
     if (any (apps == s.argv[0]))
@@ -80,12 +86,6 @@ subclass Srv
 
     if (APP_ERR)
       break;
-
-    if (This.has.sigint)
-      {
-      variable handl;
-      signal (SIGINT, SIG_IGN, &handl);
-      }
 
     forever
       {
@@ -178,6 +178,9 @@ subclass Srv
       }
 
     Api.restore_screen ();
+
+    if (This.has.sigint)
+      signal (SIGINT, handl);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
