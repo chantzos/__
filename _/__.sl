@@ -546,7 +546,7 @@ static define __ ()
     c = __getclass__ (from, 0);
     __f__ = c["__FUN__"];
 
-    if (0 == assoc_key_exists (__f__, fun))
+    ifnot (assoc_key_exists (__f__, fun))
       throw ClassError, "Class::__::" + fun + " is not defined";
 
     if (NULL == __f__[fun].funcref)
@@ -1263,7 +1263,9 @@ private define parse_subclass (
       continue;
 
     sub_buf += "\nprivate define " + cname + "_" + as + "_" + ms[i] + " (self)\n{\n" +
-      "struct {";
+      "struct {" +
+      "__name = \"" + cname + "_" + as + "_" + ms[i] + "\",\n" +
+      "err = &__->ERR,\n";
 
     _for j (0, length (m) - 1)
       sub_buf += m[j] + "= &" + cname + "_" + as + "_" + ms[i] + "_" + m[j] + ",\n";
@@ -1278,7 +1280,9 @@ private define parse_subclass (
           sub_buf += ms[j] + "= &" + cname + "_" + as + "_" + ms[j] +  ",\n";
         else
           {
-          sub_buf += ms[j] + " = struct {";
+          sub_buf += ms[j] + " = struct {" +
+          "__name = \"" + cname + "_" + as + "_" + ms[j] + "\",\n" +
+          "err = &__->ERR,\n";
           _for k (0, length (m) - 1)
             sub_buf += m[k] + "= &" + cname + "_" + as + "_" + ms[j] + "_" + m[k] + ",\n";
           sub_buf += "},\n";
@@ -1289,7 +1293,8 @@ private define parse_subclass (
     }
 
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
-    "  struct {";
+    "struct {\n__name = \"" + sub_cname + "\",\n" +
+    "err = &__->ERR,\n";
 
   _for i (0, length (ms) - 1)
     {
@@ -1492,6 +1497,11 @@ private define __Class_From_Init__ (classpath)
     funs["fun"] = @Fun_Type;
     funs["fun"].nargs = '?';
     funs["fun"].const = 1;
+
+    funs["err"] = @Fun_Type;
+    funs["err"].nargs = '?';
+    funs["err"].const = 1;
+
     parse_class (super, @classpath, &eval_buf, funs, &sub_funs, fp;;__qualifiers);
     }
   else
@@ -1519,6 +1529,7 @@ private define __Class_From_Init__ (classpath)
     eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
     eval_buf += cname + ".let = Class.let;\n";
     eval_buf += cname + ".fun = Class.fun;\n";
+    eval_buf += cname + ".err = &__->ERR;\n";
     eval_buf += "__uninitialize (&$9);";
     }
   else
