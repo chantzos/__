@@ -19,10 +19,8 @@ class Net
       reconfigure
       scan_interval
       at_exit
-      __geterr
     end
 
-    var ERR = NULL;
     var DEV = "nl80211";
     var SERVER_SOCK = "/run/wpa_supplicant";
     var IFACE = NULL;
@@ -30,17 +28,13 @@ class Net
     var SERVER_PID = NULL;
     var SERVER_CONF = NULL;
 
-    def __geterr ()
-      NULL == ERR ? "" : (ERR, ERR = NULL);
-    end
-
     def set_conf (conf)
       if (-1 == access (conf, F_OK))
         {
         variable fd = open (conf, O_WRONLY|O_CREAT, File->PERM["_PRIVATE"]);
         if (NULL == fd)
           {
-          ERR = "error opening " + conf + ", " + errno_string (errno);
+          self.err ("error opening " + conf + ", " + errno_string (errno));
           return -1;
           }
 
@@ -61,7 +55,7 @@ update_config=1
 #}
 `))
           {
-          ERR = "error writting " + conf + ", " + errno_string (errno);
+          self.err ("error writting " + conf + ", " + errno_string (errno));
           return -1;
           }
        % check for group wheel, otherwise wpa_cli should be called
@@ -69,7 +63,7 @@ update_config=1
 
         if (-1 == close (fd))
           {
-          ERR = "error closing file descriptor, " + errno_string (errno); 
+          self.err ("error closing file descriptor, " + errno_string (errno));
           return -1;
           }
         }
@@ -77,14 +71,14 @@ update_config=1
       variable st = stat_file (conf);
       if (NULL == st)
         {
-        ERR = "error stating " + conf + ", " + errno_string (errno);
+        self.err ("error stating " + conf + ", " + errno_string (errno));
         return -1;
         }
 
       if (-1 == Sys.checkperm (st.st_mode, File->PERM["_PRIVATE"]))
         {
-        ERR = "error while checking " + conf + " permissions, it isn't "
-          + string (File->PERM["_PRIVATE"]);
+        self.err ("error while checking " + conf +
+          " permissions, it isn't " + string (File->PERM["_PRIVATE"]));
         return -1;
         }
 
@@ -103,7 +97,7 @@ update_config=1
       variable iface = listdir (or_dir);
       if (NULL == iface || 0 == length (iface))
         {
-        ERR = "error finding iface on " + or_dir;
+        Net.wifi.err ("error finding iface on " + or_dir);
         return;
         }
 
@@ -131,20 +125,21 @@ update_config=1
     def is_up ()
       if (NULL == Net->IP_BIN)
         {
-        ERR = "ip is not installed";
+        self.err ("ip is not installed");
         return -1;
         }
 
       if (NULL == IFACE)
         {
-        ERR = "cannot find available iface";
+        self.err ("cannot find available iface");
         return -1;
         }
 
       variable fp = popen (Net->IP_BIN + " link show " + IFACE, "r");
       if (NULL == fp)
         {
-        ERR = "error while calling " + Net->IP_BIN + " link show " + IFACE;
+        self.err ("error while calling " + Net->IP_BIN +
+           " link show " + IFACE);
         return -1;
         }
 
@@ -191,7 +186,7 @@ update_config=1
       if (status.exit_status)
         ifnot (NULL == p.stderr.out)
           {
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n"));
           return -1;
           }
 
@@ -226,14 +221,14 @@ update_config=1
 
       if (NULL == SERVER_CONF)
         {
-        ERR = "you have to setup first a conf file";
+        self.err ("you have to setup first a conf file");
         return -1;
         }
 
       if (-1 == access (SERVER_CONF, R_OK|W_OK))
         {
-        ERR = "you dont have access rights on " + SERVER_CONF + ", "
-          + errno_string (errno);
+        self.err ("you dont have access rights on " + SERVER_CONF + ", "
+          + errno_string (errno));
         return -1;
         }
 
@@ -271,7 +266,7 @@ update_config=1
     def get_exit_pid () proc
       if (NULL == SERVER_PID)
         {
-        ERR = "server hasn't been started";
+        Net.wifi.err ("server hasn't been started");
         return -1;
         }
 
@@ -287,7 +282,7 @@ update_config=1
     def get_ip ()
       if (NULL == SERVER_PID)
         {
-        ERR = "wpa_supplicant hasn't been started";
+        self.err ("wpa_supplicant hasn't been started");
         return -1;
         }
 
@@ -319,13 +314,13 @@ update_config=1
     def scan_interval (sec)
       if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
         {
-        ERR = "wpa_supplicant is not installed";
+        self.err ("wpa_supplicant is not installed");
         return -1;
         }
 
       if (SERVER_PID == NULL)
         {
-        ERR = "wpa_supplicant hasn't been started";
+        self.err ("wpa_supplicant hasn't been started");
         return -1;
         }
 
@@ -336,7 +331,7 @@ update_config=1
       if (status.exit_status)
         {
         ifnot (NULL == p.stderr.out)
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n"));
         return -1;
         }
 
@@ -346,13 +341,13 @@ update_config=1
     def reconfigure ()
       if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
         {
-        ERR = "wpa_supplicant is not installed";
+        self.err ("wpa_supplicant is not installed");
         return -1;
         }
 
       if (SERVER_PID == NULL)
         {
-        ERR = "wpa_supplicant hasn't been started";
+        self.err ("wpa_supplicant hasn't been started");
         return -1;
         }
 
@@ -363,7 +358,7 @@ update_config=1
       if (status.exit_status)
         {
         ifnot (NULL == p.stderr.out)
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n"));
         return -1;
         }
 
@@ -373,15 +368,16 @@ update_config=1
     def list_networks ()
       if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
         {
-        ERR = "wpa_supplicant is not installed";
+        self.err ("wpa_supplicant is not installed");
         return NULL;
         }
 
       if (SERVER_PID == NULL)
         {
-        ERR = "wpa_supplicant hasn't been started";
+        self.err ("wpa_supplicant hasn't been started");
         return NULL;
         }
+
       % no need for su if we are in wheel
       variable argv = [Net->WP_CLNT_BIN, "list_networks"];
       variable p = Proc.init (0, 1, 1);
@@ -390,7 +386,7 @@ update_config=1
       if (status.exit_status)
         {
         ifnot (NULL == p.stderr.out)
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n"));
         return NULL;
         }
 
@@ -403,13 +399,13 @@ update_config=1
     def scan ()
       if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
         {
-        ERR = "wpa_supplicant is not installed";
+        self.err ("wpa_supplicant is not installed");
         return NULL;
         }
 
       if (SERVER_PID == NULL)
         {
-        ERR = "wpa_supplicant hasn't been started";
+        self.err ("wpa_supplicant hasn't been started");
         return NULL;
         }
       % no need for su if we are in wheel
@@ -420,7 +416,7 @@ update_config=1
       if (status.exit_status)
         {
         ifnot (NULL == p.stderr.out)
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n"));
         return NULL;
         }
 
@@ -431,7 +427,7 @@ update_config=1
       if (status.exit_status)
         {
         ifnot (NULL == p.stderr.out)
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n");
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n"));
         return NULL;
         }
 
@@ -444,7 +440,7 @@ update_config=1
     def terminate ()
       if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
         {
-        ERR = "wpa_supplicant is not installed";
+        self.err ("wpa_supplicant is not installed");
         return -1;
         }
 
@@ -458,8 +454,8 @@ update_config=1
       if (status.exit_status)
         {
         ifnot (NULL == p.stderr.out)
-          ERR = strjoin (strtok (p.stderr.out, "\n"), "\n") +
-            "exit_status: " + string (status.exit_status);
+          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n") +
+            "exit_status: " + string (status.exit_status));
         return -1;
         }
 

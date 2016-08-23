@@ -101,6 +101,12 @@ __TRACK
 					 > ved: for Ctrl-k for digraphs, based om request and prioritie
 
 
+__RLINE:
+
+00: on certain periods - look at a variable for any actions
+    specific - like a redraw
+
+
 __C:
    HEAD: CONSTANT ERRORS ([INIT_ERR,])
    MAIN:

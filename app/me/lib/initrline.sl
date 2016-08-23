@@ -468,7 +468,8 @@ private define __search_project__ (argv)
   if (NULL == pat)
     return;
 
-  runcom (["search", "--pat=" + pat, "--recursive", Env->SRC_PATH], NULL);
+  runcom (["search", "--pat=" + pat, "--recursive", "--excludedir=tmp",
+      Env->SRC_PATH], NULL);
 }
 
 private define my_commands ()
