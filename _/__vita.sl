@@ -1,3 +1,55 @@
+__use_namespace ("__");
+
+% probably temporary code, abstraction?
+private variable __ERR__ = Assoc_Type[List_Type];
+
+private define __err_get (nsname)
+{
+  ifnot (any (nsname == assoc_get_keys (__ERR__)))
+    return "";
+
+  ifnot (length (__ERR__[nsname]))
+    return "";
+
+  list_pop (__ERR__[nsname]);
+}
+
+private define __err_set (nsname, err)
+{
+  ifnot (assoc_key_exists (__ERR__, nsname))
+    __ERR__[nsname] = {err};
+  else
+    list_insert (__ERR__[nsname], err);
+}
+
+static define ERR ()
+{
+  variable nss, ref = &__err_get, args = {NULL}, err = NULL;
+
+  switch (_NARGS)
+    {case 1: nss = ();}
+    {case 2: ref = &__err_set; err = (); nss = ();}
+    {return "";}
+
+  variable t = typeof (nss);
+
+  ifnot (any ([Struct_Type, String_Type] == t))
+    return "";
+
+  if (t == Struct_Type)
+    if (NULL == wherefirst (get_struct_field_names (nss) == "__name"))
+      return "";
+    else
+      args[0] = nss.__name;
+  else
+    args[0] = nss;
+
+  ifnot (NULL == err)
+    list_append (args, err);
+
+  (@ref) (__push_list (args));
+}
+
 __use_namespace ("IO");
 
 private define tostderr ()
