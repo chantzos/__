@@ -9,7 +9,7 @@ private define __initclass__ (cname)
   __V__[cname]     = Assoc_Type[Var_Type];
   __CLASS__[cname]["__FUN__"]  = Assoc_Type[Fun_Type];
   __CLASS__[cname]["__R__"]    = @Class_Type;
-  __CLASS__[cname]["__SELF__"] = @Self_Type;
+  __CLASS__[cname]["__SELF__"] = struct {__name};
   __CLASS__[cname]["__SUB__"]  = String_Type[0];
 }
 
@@ -398,8 +398,7 @@ private define __setself__ (c, methods)
 
   variable
     i,
-    k = assoc_get_keys (f),
-    handler = c["__SELF__"].err_handler;
+    k = assoc_get_keys (f);
 
   _for i (0, length (k) - 1)
     if (NULL != f[k[i]].funcref || any (k[i] == c["__SUB__"]))
@@ -420,7 +419,6 @@ private define __setself__ (c, methods)
       else if (any (k[i] == selff))
         set_struct_field (c["__SELF__"], k[i], get_struct_field (selfm, k[i]));
 
-  c["__SELF__"].err_handler = handler;
   c["__SELF__"].__name = c["__R__"].name;
 }
 
@@ -428,12 +426,12 @@ private define __classnew__ (cname, super, classpath, isself, methods)
 {
   variable
     c = __getclass__ (cname, 1),
-    r = c ["__R__"];
+    r = c["__R__"];
 
   ifnot (NULL == r.name)
     ifnot (r.super == r.name)
       throw ClassError, "Class::__classnew::" + r.name +
-        "is super class and cannot be redefined";
+          "is super class and cannot be redefined";
     else
       return c;
 
@@ -504,14 +502,13 @@ private define err_handler (e, s)
   variable handler, args = {s};
 
   if (NULL == (handler = qualifier ("err_handler"), handler))
-    if (NULL == (handler = s.class["__SELF__"].err_handler, handler))
-      if (NULL == (handler = __get_reference (s.class["__R__"].name + "->err_handler"), handler))
-        if (NULL == (handler = __get_reference (current_namespace + "->err_handler"), handler))
-          if (NULL == (handler = __get_reference ("Error_Handler"), handler))
-            {
-            handler = This.err_handler;
-            list_insert (args, This);
-            }
+    if (NULL == (handler = __get_reference (s.class["__R__"].name + "->err_handler"), handler))
+      if (NULL == (handler = __get_reference (current_namespace + "->err_handler"), handler))
+        if (NULL == (handler = __get_reference ("Error_Handler"), handler))
+          {
+          handler = This.err_handler;
+          list_insert (args, This);
+          }
 
   ifnot (NULL == handler)
     if (Ref_Type == typeof (handler))

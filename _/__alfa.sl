@@ -16,12 +16,6 @@ typedef struct
 
 typedef struct
   {
-  __name,
-  err_handler,
-  } Self_Type;
-
-typedef struct
-  {
   name,
   super,
   path,
