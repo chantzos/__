@@ -579,6 +579,23 @@ private define lib_dir_callback (dir, st, src_path, dest_path)
   1;
 }
 
+private define __copy_files (src, dest, st_src)
+{
+  variable st_dest = stat_file (dest);
+  variable opts = struct
+      {
+      interactive = 0,
+      no_clobber = 0,
+      force = 1,
+      make_backup = 0,
+      only_update = 0,
+      permissions = 1,
+      no_dereference = 0,
+      };
+
+  return File.__copy__ (src, dest, st_src, st_dest, opts;verbose = 0));
+}
+
 private define file_callback_libs (file, st, src_path, dest_path, bytecompile)
 {
   if (any (exclude_files == path_basename (file)))
@@ -602,15 +619,9 @@ private define file_callback_libs (file, st, src_path, dest_path, bytecompile)
 
   ifnot (path_extname (file) == ".slc")
     {
-    variable is_exec = access (file, X_OK);
-    if (-1 == File.copy (file, dest))
-      This.exit ("failed to rename " + file + " to " + dest + "\n" +
+    if (-1 == __copy_files (file, dest, st))
+      This.exit ("failed to copy " + file + " to " + dest + "\n" +
         errno_string (errno), 1);
-
-    ifnot (is_exec)
-      if (-1 == chmod (dest, 0700))
-        This.exit ("failed to set executable bits on " + file +
-           ",\n" + errno_string (errno), 1);
     }
   else
     if (-1 == rename (file, dest))
