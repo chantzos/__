@@ -431,7 +431,7 @@ private define __classnew__ (cname, super, classpath, isself, methods)
   ifnot (NULL == r.name)
     ifnot (r.super == r.name)
       throw ClassError, "Class::__classnew::" + r.name +
-          "is super class and cannot be redefined";
+          " is super class and cannot be redefined";
     else
       return c;
 
@@ -1596,10 +1596,24 @@ private define __subclass__ (self, sub, super)
     from = __get_qualifier_as  (String_Type, "from", qualifier ("from"), super));
 }
 
+private define __getclass (self, cname)
+{
+  variable c = NULL;
+
+  try
+    {
+    c = __getclass__ (cname, 0);
+    }
+  catch ClassError: {}
+
+  c;
+}
+
 public variable Class = struct
   {
   load = &__load__,
   subclass = &__subclass__,
+  get = &__getclass,
   let = &vlet,
   fun = &addFun
   };
