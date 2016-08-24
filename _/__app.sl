@@ -83,6 +83,15 @@ This.is.my.name      = strtrim_beg (path_basename_sans_extname (This.has.argv[0]
 This.is.my.basedir   = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
 This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;
 This.is.my.tmpdir    = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
+
+This.is.my.genconf.file = Env->USER_DATA_PATH + "/SetGen/setgen.conf";
+if (-1 == access (This.is.my.genconf.file, F_OK|R_OK) ||
+    -1 == Sys.checkperm (stat_file (This.is.my.genconf.file).st_mode,
+       File->PERM["_PRIVATE"]))
+  This.is.my.genconf.set = String_Type[0];
+else
+  This.is.my.genconf.set = File.readlines (This.is.my.genconf.file);
+
 This.is.std.out.type = "ashell";
 
 if (-1 == access (This.is.my.basedir, F_OK))

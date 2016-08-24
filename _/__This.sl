@@ -88,6 +88,11 @@ static define __INIT__ (role)
         tmpdir,
         basedir,
         datadir,
+        genconf = struct
+          {
+          file,
+          set,
+          },
         },
       std = struct
         {
