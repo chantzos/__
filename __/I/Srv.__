@@ -128,6 +128,8 @@ subclass Srv
 
     () = Rline.commandcmp (s, apps);
 
+    variable handl;
+
     if (any (apps == s.argv[0]))
       {
       if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
@@ -136,10 +138,7 @@ subclass Srv
       Api.reset_screen ();
 
       if (This.has.sigint)
-        {
-        variable handl;
         signal (SIGINT, SIG_IGN, &handl);
-        }
 
       variable retval = self.reconnect_to_app (s.argv[0]);
       if (1 == retval)
@@ -155,7 +154,51 @@ subclass Srv
         }
       }
     else
-      return;
+      {
+      variable a = This.is.my.genconf.set[wherenot (strncmp (
+        This.is.my.genconf.set,
+        "ON_RECONNECT_REQ_DEF_APPS::", strlen (
+        "ON_RECONNECT_REQ_DEF_APPS::")))];
+
+      ifnot (length (a))
+        return;
+
+      a = strtok (a[0], "::");
+      ifnot (2 == length (a))
+        return;
+
+      a = strtok (a[1], ",");
+
+      variable j, app = NULL;
+      _for j (0, length (a) - 1)
+        ifnot (a[j] == This.is.my.name)
+          {
+          app = a[j];
+          break;
+          }
+
+      if (NULL == app)
+        return;
+
+      Api.reset_screen ();
+
+      if (This.has.sigint)
+        signal (SIGINT, SIG_IGN, &handl);
+
+      self.connect_to_app (app;;__qualifiers);
+
+      if (APP_ERR)
+        {
+        Api.restore_screen ();
+
+        if (This.has.sigint)
+          signal (SIGINT, handl);
+
+        Rline.set (s);
+        Rline.prompt (s, s._lin, s._col);
+        return;
+        }
+      }
 
     variable issu;
     forever
@@ -272,7 +315,11 @@ subclass Srv
     variable clfifo = This.is.my.tmpdir + "/__" + app + "_client_" +
       string (_time)[[5:]] + ".fifo";
 
-    () = mkfifo (clfifo, 0755);
+    if (-1 == mkfifo (clfifo, 0755))
+      {
+      APP_ERR = 1;
+      return;
+      }
 
     variable clpid = App.Run.as.client ([app], SRV_FIFO, clfifo;;
       struct {@__qualifiers, bg});
@@ -280,6 +327,7 @@ subclass Srv
     if (NULL == clpid)
       {
       () = remove (clfifo);
+      APP_ERR = 1;
       return;
       }
 

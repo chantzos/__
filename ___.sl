@@ -593,7 +593,7 @@ private define __copy_files (src, dest, st_src)
       no_dereference = 0,
       };
 
-  return File.__copy__ (src, dest, st_src, st_dest, opts;verbose = 0));
+  return File.__copy__ (src, dest, st_src, st_dest, opts;verbose = 0);
 }
 
 private define file_callback_libs (file, st, src_path, dest_path, bytecompile)
