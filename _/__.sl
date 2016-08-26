@@ -526,6 +526,26 @@ private define err_class_type ()
   s;
 }
 
+public variable __defINIT__ = struct {args,fun,qual,retval};
+
+public variable __INITS__ = Assoc_Type[Struct_Type, @__defINIT__];
+
+public define __init__ (__name__)
+{
+  __INITS__[__name__];
+}
+
+public define __execFun (ref)
+{
+  (@ref);
+}
+
+public define __execFunProf (ref)
+{
+  % profile
+  (@ref);
+}
+
 static define __ ()
 {
   variable c = NULL, lexi = NULL, fun = NULL, args = NULL, from = NULL, caller = NULL;

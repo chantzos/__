@@ -63,6 +63,7 @@ static define __INIT__ (role)
     request = struct
       {
       X,
+      profile,
       },
     is = struct
       {
