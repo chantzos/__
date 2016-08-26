@@ -49,6 +49,16 @@ if (NULL == Env->HOME_PATH)
   This.exit (1);
   }
 
+$5 = stat_file (Env->HOME_PATH);
+if (NULL == $5 || -1 == Sys.checkperm (
+     $5.st_mode, File->PERM["PRIVATE"]) ||
+     $5.st_uid != Env->UID ||
+     ($5.st_gid, __uninitialize (&$5)) != Env->GID)
+  {
+  IO.tostderr ("$HOME (env): wrong permissions for", Env->HOME_PATH);
+  This.exit (1);
+  }
+
 if (NULL == Env->OS_PATH)
   {
   IO.tostderr ("PATH environment variable isn't set");
