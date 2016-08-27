@@ -31,7 +31,7 @@ subclass Eval
       try
         {
         res = eval (substr (rl.argv[0], 1, strlen (rl.argv[0]) - 1));
-        if (typeof (res) == Struct_Type)
+        if (any (typeof (res) == [Struct_Type, Ftype_Type]))
           ar = get_struct_field_names (res);
         }
       catch AnyError:
