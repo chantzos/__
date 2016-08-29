@@ -128,6 +128,46 @@ public variable Exc = struct
   __name, isnot = &isnot, print = &print, fmt = &fmt
   };
 
+__use_namespace ("Array");
+
+private define Array_push (self, a)
+{
+  variable i;
+  _for i (0, length (a) - 1)
+    a[i];
+}
+
+public variable Array = struct {__name, push = &Array_push};
+
+__use_namespace ("Stack");
+
+private define Stack_reverse ()
+{
+  variable args = __pop_list (_NARGS - 1);
+  pop ();
+  variable i;
+  _for i (length (args) - 1, 0, -1)
+    args[i];
+}
+
+public variable Stack = struct {__name, reverse = &Stack_reverse};
+
+__use_namespace ("Struct");
+
+private define Struct_to_string (self, s)
+{
+  variable fields = get_struct_field_names (s);
+  variable fmt = "";
+  loop (length (fields))
+    fmt += "%S : %%S\n";
+
+  fmt = sprintf (fmt[[:-2]], Array.push (fields));
+
+  sprintf (fmt, Stack.reverse (_push_struct_field_values (s), pop ()));
+}
+
+public variable Struct = struct {__name, to_string = &Struct_to_string};
+
 __use_namespace ("Env");
 
 static define STD_LIB_PATH ()

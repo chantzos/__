@@ -1,8 +1,22 @@
 class Stack
-  def reverse ()
-    variable args = __pop_list (_NARGS);
-    variable i;
-    _for i (length (args) - 1, 0, -1)
-      args[i];
+  def reverse (?)
+    variable self, l = _NARGS - 1, i, s, args = {};
+
+    ifnot (l)
+      {
+      l = _stkdepth - 1;
+      self = ();
+      }
+
+    _for i (1, l)
+      {
+      s = ();
+      list_append (args, s);
+      }
+
+    ifnot (1 == _NARGS)
+      self = ();
+
+    __push_list  (args);
   end
 end

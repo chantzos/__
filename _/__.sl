@@ -449,44 +449,45 @@ private define __classnew__ (cname, super, classpath, isself, methods)
   c;
 }
 
-private define push_array (a)
-{
-  variable i;
-  _for i (0, length (a) - 1)
-    a[i];
-}
-
-private define stk_reverse ()
-{
-  variable i, args = __pop_list (_NARGS);
-  _for i (length (args) - 1, 0, -1)
-    args[i];
-}
-
-public define struct_tostring ()
-{
-  ifnot (_NARGS)
-    return "";
-
-  variable s = ();
-
-  ifnot (typeof (s) == Struct_Type)
-    return s;
-
-  variable fields = get_struct_field_names (s);
-  variable fmt = "";
-
-  loop (length (fields))
-    fmt += "%S : %%S\n";
-
-  fmt = sprintf (fmt[[:-2]], push_array (fields));
-
-  sprintf (fmt, stk_reverse (_push_struct_field_values (s), pop ()));
-}
+%private define push_array (a)
+%{
+%  variable i;
+%  _for i (0, length (a) - 1)
+%    a[i];
+%}
+%
+%
+%private define stk_reverse ()
+%{
+%  variable i, args = __pop_list (_NARGS);
+%  _for i (length (args) - 1, 0, -1)
+%    args[i];
+%}
+%
+%public define struct_tostring ()
+%{
+%  ifnot (_NARGS)
+%    return "";
+%
+%  variable s = ();
+%
+%  ifnot (typeof (s) == Struct_Type)
+%    return s;
+%
+%  variable fields = get_struct_field_names (s);
+%  variable fmt = "";
+%
+%  loop (length (fields))
+%    fmt += "%S : %%S\n";
+%
+%  fmt = sprintf (fmt[[:-2]], push_array (fields));
+%
+%  sprintf (fmt, stk_reverse (_push_struct_field_values (s), pop ()));
+%}
 
 private define err_handler (e, s)
 {
-  IO.tostderr (struct_tostring (s));
+  IO.tostderr (Struct.to_string (s));
   IO.tostderr ("Args: ";n);
   IO.tostderr (s.args);
   Exc.print (e);
