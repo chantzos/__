@@ -65,6 +65,11 @@ static define __INIT__ (role)
       X,
       profile,
       },
+    on = struct
+      {
+      reconnect,
+      disconnect,
+      },
     is = struct
       {
       me,

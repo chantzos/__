@@ -827,3 +827,22 @@ public define rlineinit ()
 
   rl;
 }
+
+private define on_reconnect ()
+{
+  if ("NONE" == CUR_REPO)
+    return;
+
+  variable info = __write_info__ (REPOS[CUR_REPO]);
+  variable std = __write_std__;
+
+  if (NULL == std)
+    __messages;
+  else
+    {
+    draw (info);
+    draw (std);
+    }
+}
+
+This.on.reconnect = &on_reconnect;

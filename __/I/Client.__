@@ -25,35 +25,31 @@ subclass Client
 
     () = Rline.commandcmp (s, apps);
 
-    if (any (apps == s.argv[0]))
-      {
-      Api.reset_screen ();
-
-      if (This.has.sigint)
-        {
-        variable handl;
-        signal (SIGINT, SIG_IGN, &handl);
-        }
-
-      variable is_su = __get_qualifier_as (Integer_Type, "issu", qualifier ("issu"),
-      0);
-      Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
-      () = Sock.get_int (SESSION_RDFIFO_FD);
-      Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
-      () = Sock.get_int (SESSION_RDFIFO_FD);
-      Sock.send_int (SESSION_WRFIFO_FD, is_su);
-
-      variable retval = Sock.get_int (SESSION_RDFIFO_FD);
-      if (retval == Api->GO_ATEXIT)
-        exit_me (0);
-
-      if (This.has.sigint)
-        signal (SIGINT, handl);
-      }
-    else
+    ifnot (any (apps == s.argv[0]))
       return;
 
-    Api.restore_screen ();
+    Api.reset_app ();
+
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
+    variable is_su = __get_qualifier_as (Integer_Type, "issu",
+      qualifier ("issu"), 0);
+
+    Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
+    () = Sock.get_int (SESSION_RDFIFO_FD);
+    Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+    () = Sock.get_int (SESSION_RDFIFO_FD);
+    Sock.send_int (SESSION_WRFIFO_FD, is_su);
+
+    variable retval = Sock.get_int (SESSION_RDFIFO_FD);
+    if (retval == Api->GO_ATEXIT)
+      exit_me (0);
+
+    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -73,35 +69,30 @@ subclass Client
 
     () = Rline.commandcmp (s, apps);
 
-    if (any (apps == s.argv[0]))
-      {
-      if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
-        return;
-
-      Api.reset_screen ();
-
-      if (This.has.sigint)
-        {
-        variable handl;
-        signal (SIGINT, SIG_IGN, &handl);
-        }
-
-      Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
-      () = Sock.get_int (SESSION_RDFIFO_FD);
-      Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
-
-      variable retval = Sock.get_int (SESSION_RDFIFO_FD);
-
-      if (retval == Api->GO_ATEXIT)
-        exit_me (0);
-
-      if (This.has.sigint)
-        signal (SIGINT, handl);
-      }
-    else
+    ifnot (any (apps == s.argv[0]))
       return;
 
-    Api.restore_screen ();
+    if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
+      return;
+
+    Api.reset_app ();
+
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
+    Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
+    () = Sock.get_int (SESSION_RDFIFO_FD);
+    Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+
+    variable retval = Sock.get_int (SESSION_RDFIFO_FD);
+
+    if (retval == Api->GO_ATEXIT)
+      exit_me (0);
+
+    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);

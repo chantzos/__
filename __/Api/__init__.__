@@ -18,18 +18,21 @@ class Api
   subclass Eval from Api
   subclass Prev from Api
 
-  def reset_screen ()
+  def reset_app ()
     if (Input.is_inited ())
       Input.at_exit ();
 
     if (Smg.is_inited ())
-      ifnot (Smg.suspend_state ())
-        Smg.suspend ();
+      if (qualifier_exists ("deinit"))
+        Smg.at_exit ();
+      else
+        ifnot (Smg.suspend_state ())
+          Smg.suspend ();
 
     This.has.screenactive = 0;
   end
 
-  def restore_screen ()
+  def restore_app ()
     ifnot (Input.is_inited ())
       Input.init ();
 
@@ -38,6 +41,18 @@ class Api
     else
       if (Smg.suspend_state ())
         Smg.resume ();
+
+    variable sigint_handl = qualifier ("sigint");
+    ifnot (NULL == sigint_handl)
+      if (Ref_Type == typeof (sigint_handl))
+        if (__is_callable (sigint_handl))
+          signal (SIGINT, sigint_handl);
+
+    variable f = This.on.reconnect;
+    ifnot (NULL == f)
+      if (Ref_Type == typeof (f))
+        if (__is_callable (f))
+          (@f)(;;__qualifiers);
 
     This.has.screenactive = 1;
   end

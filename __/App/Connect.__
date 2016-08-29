@@ -8,7 +8,7 @@ subclass Connect
     ifnot (assoc_key_exists (App->CHILDREN, chpid))
       return;
 
-    Api.reset_screen ();
+    Api.reset_app ();
 
     variable s = App->CHILDREN[chpid];
     Sock.send_int (s.fd, 0);
@@ -28,7 +28,7 @@ subclass Connect
     else
       throw ClassError, "Connect.to.child::unexpected retval from pipe";
 
-    Api.restore_screen ();
+    Api.restore_app ();
 
     ifnot (qualifier_exists ("goto_rline"))
       return;

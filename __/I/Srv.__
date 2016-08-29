@@ -107,10 +107,7 @@ subclass Srv
       }
     }
 
-    Api.restore_screen ();
-
-    if (This.has.sigint)
-      signal (SIGINT, handl);
+    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -135,7 +132,7 @@ subclass Srv
       if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
         return;
 
-      Api.reset_screen ();
+      Api.reset_app ();
 
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
@@ -143,10 +140,7 @@ subclass Srv
       variable retval = self.reconnect_to_app (s.argv[0]);
       if (1 == retval)
         {
-        Api.restore_screen ();
-
-        if (This.has.sigint)
-          signal (SIGINT, handl);
+        Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
         Rline.set (s);
         Rline.prompt (s, s._lin, s._col);
@@ -180,7 +174,7 @@ subclass Srv
       if (NULL == app)
         return;
 
-      Api.reset_screen ();
+      Api.reset_app ();
 
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
@@ -189,10 +183,7 @@ subclass Srv
 
       if (APP_ERR)
         {
-        Api.restore_screen ();
-
-        if (This.has.sigint)
-          signal (SIGINT, handl);
+        Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
         Rline.set (s);
         Rline.prompt (s, s._lin, s._col);
@@ -220,10 +211,7 @@ subclass Srv
         break;
       }
 
-    Api.restore_screen ();
-
-    if (This.has.sigint)
-      signal (SIGINT, handl);
+    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);

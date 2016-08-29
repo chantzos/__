@@ -88,14 +88,14 @@ class App
 
   def detach ()
     ifnot (This.is.me == "MASTER")
-      Api.reset_screen ();
+      Api.reset_app ();
 
     variable retval = (@__get_reference ("I->app_idle")) ();
 
     ifnot (retval)
       {
       ifnot (This.is.me == "MASTER")
-        Api.restore_screen ();
+        Api.restore_app ();
       return;
       }
 

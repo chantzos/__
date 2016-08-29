@@ -42,7 +42,7 @@ subclass Run
       if (-1 == mkfifo (App->PARENT_FIFO, 0755))
         {
         App->PARENT_FIFO = NULL;
-        throw ClassError, "Run.as.child::cannot crate Parent's fifo, " +
+        throw ClassError, "Run.as.child::cannot create Parent's fifo, " +
           errno_string (errno);
         }
       }
@@ -65,11 +65,21 @@ subclass Run
       "PARENT_RDFIFO=" + chfifo,
       "ISACHILD=1"];
 
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
     variable chpid = self.app (argv, env;;struct {@__qualifiers, bg});
 
     if (NULL == chpid)
       {
       () = remove (chfifo);
+
+      if (This.has.sigint)
+        signal (SIGINT, handl);
+
       return;
       }
 
@@ -100,7 +110,7 @@ subclass Run
     else
       throw ClassError, "Run.as.child::unexpected retval from pipe";
 
-    Api.restore_screen ();
+    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     ifnot (qualifier_exists ("goto_rline"))
       return;
@@ -144,14 +154,14 @@ subclass Run
         variable isgoingtoreset = 0;
         ifnot (This.has.screenactive)
           {
-          Api.restore_screen ();
+          Api.restore_app ();
           isgoingtoreset = 1;
           }
 
           passwd = Os.__getpasswd ();
 
           if (isgoingtoreset)
-            Api.reset_screen ();
+            Api.reset_app ();
 
           if (NULL == passwd)
             {
@@ -165,10 +175,16 @@ subclass Run
       argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
       }
 
-    Api.reset_screen ();
-
     variable status;
     variable bg = qualifier_exists ("bg") ? 1 : NULL;
+
+    Api.reset_app ();
+
+    if (NULL == bg && This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
 
     ifnot (NULL == env)
       status = p.execve (argv, env, bg);
@@ -176,7 +192,7 @@ subclass Run
       status = p.execv (argv, bg);
 
     if (NULL == bg)
-      Api.restore_screen ();
+      Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     status;
   end
