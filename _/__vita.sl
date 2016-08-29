@@ -52,7 +52,7 @@ static define ERR ()
 
 __use_namespace ("IO");
 
-private define tostderr ()
+private define IO_tostderr ()
 {
   variable args = __pop_list (_NARGS - 1);
   pop ();
@@ -79,18 +79,18 @@ private define tostderr ()
       throw ClassError, sprintf ("IO_WriteError::tostderr::%s", errno_string (errno));
 }
 
-public variable IO = struct {__name = NULL, tostderr = &tostderr};
+public variable IO = struct {__name = NULL, tostderr = &IO_tostderr};
 
 __use_namespace ("Exc");
 
-private define isnot (self, e)
+private define Exc_isnot (self, e)
 {
   NULL == e || Struct_Type != typeof (e) ||
   NULL == wherefirst (get_struct_field_names (e) == "object") ||
   8 != length (get_struct_field_names (e));
 }
 
-private define fmt (self, e)
+private define Exc_fmt (self, e)
 {
   if (NULL == e)
     e = __get_exception_info;
@@ -110,7 +110,7 @@ Error:       %d",
     _push_struct_field_values (e)), '\n', 0);
 }
 
-private define print (self, e)
+private define Exc_print (self, e)
 {
   if (0 == self.isnot (e) ||
      (0 == (e = __get_exception_info, self.isnot (e))))
@@ -125,7 +125,7 @@ private define print (self, e)
 
 public variable Exc = struct
   {
-  __name, isnot = &isnot, print = &print, fmt = &fmt
+  __name, isnot = &Exc_isnot, print = &Exc_print, fmt = &Exc_fmt
   };
 
 __use_namespace ("Array");
