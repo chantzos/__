@@ -297,7 +297,8 @@ class Sync
       {
       link = readlink (source);
 
-      if (NULL == stat_file (source))
+      if (NULL == stat_file ((path_is_absolute (link)) ?
+          link : path_dirname (source) + "/" + link))
         {
         IO.tostderr (sprintf
           ("source `%s' points to the non existing file `%s', aborting ...", source, link));
@@ -306,15 +307,32 @@ class Sync
 
         return -1;
         }
-      else
-        if (-1 == symlink (link, dest))
-          {
-          clean (force, s.backup, backup, dest;;__qualifiers);
 
+      variable tmpd = NULL;
+      ifnot (path_is_absolute (link))
+        {
+        tmpd = getcwd ();
+        if (-1 == chdir (path_dirname (dest)))
+          {
+          IO.tostderr ("cannot chdir to", path_dirname (dest),
+            errno_string (errno));
+          clean (force, s.backup, backup, dest;;__qualifiers);
           return -1;
           }
-        else
-          return 1;
+        }
+
+      if (-1 == symlink (link, dest))
+        {
+        IO.tostderr ("cannot create symbolic link", link, "->", dest);
+        clean (force, s.backup, backup, dest;;__qualifiers);
+        ifnot (NULL == tmpd)
+          () = chdir (tmpd);
+        return -1;
+        }
+
+      ifnot (NULL == tmpd)
+        () = chdir (tmpd);
+      return 1;
       }
     else if (any ([File.is_fifo (source;st = st_source),
       File.is_sock (source;st = st_source),
@@ -469,13 +487,14 @@ class Sync
           return -1;
           }
 
-      () = file_callback (source, stat_file (source), s, source, dest, &exit_code;;__qualifiers);
+      () = file_callback (source, lstat_file (source), s, source, dest, &exit_code;;__qualifiers);
 
       return exit_code;
       }
 
     Path.walk (source, &dir_callback, &file_callback;;struct {
-      dargs = {s, source, dest, &exit_code}, fargs = {s, source, dest, &exit_code}, @__qualifiers});
+      dargs = {s, source, dest, &exit_code}, fargs = {s, source, dest, &exit_code},
+      @__qualifiers, uselstat});
 
     ifnot (exit_code)
       if (s.rmextra)
