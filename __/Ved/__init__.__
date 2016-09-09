@@ -45,8 +45,8 @@ class Ved
   let EN_MAP  = [['a':'z'], ['A':'Z']];
   let MAPS    = [EL_MAP, EN_MAP];
   let WCHARS  = array_map (String_Type, &char, [['0':'9'], EN_MAP, EL_MAP, '_']);
-  let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':'];
-  let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';'];
+  let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':', '>'];
+  let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';', '<'];
 
   var public MARKS        = Assoc_Type[Pos_Type];
   var public VED_WIND     = Assoc_Type[Wind_Type];
