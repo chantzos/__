@@ -119,7 +119,7 @@ private define ln (self, source, dest, opts)
       }
     }
   else
-    opts.backup = 0;
+    opts.make_backup = 0;
 
   if (NULL != st_dest)
     {
