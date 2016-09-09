@@ -50,14 +50,13 @@ if (NULL == Env->HOME_PATH)
   }
 
 $5 = stat_file (Env->HOME_PATH);
+if (Env->UID)
 if (NULL == $5 || -1 == Sys.checkperm (
      $5.st_mode, File->PERM["PRIVATE"]) ||
      $5.st_uid != Env->UID ||
      ($5.st_gid, __uninitialize (&$5)) != Env->GID)
-  {
-  IO.tostderr ("$HOME (env): wrong permissions for", Env->HOME_PATH);
-  This.exit (1);
-  }
+  IO.tostderr (sprintf ("Warning: %s: permissions are not 0%o",
+    Env->HOME_PATH, File->PERM["PRIVATE"]));
 
 if (NULL == Env->OS_PATH)
   {
