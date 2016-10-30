@@ -247,7 +247,7 @@ private define tabhook (s)
 public define rlineinit ()
 {
   variable rl = Rline.init (&my_commands;;struct {
-    histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_vedhistory",
+    histfile = This.is.my.histfile,
     historyaddforce = 1,
     tabhook = &tabhook,
     %totype = "Func_Type",

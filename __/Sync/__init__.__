@@ -323,7 +323,8 @@ class Sync
 
       if (-1 == symlink (link, dest))
         {
-        IO.tostderr ("cannot create symbolic link", link, "->", dest);
+        IO.tostderr ("cannot create symbolic link", link, "->", dest,
+          "\n", errno_string (errno));
         clean (force, s.backup, backup, dest;;__qualifiers);
         ifnot (NULL == tmpd)
           () = chdir (tmpd);
@@ -393,7 +394,7 @@ class Sync
     variable
       i,
       retval,
-      st_dest = stat_file (dest);
+      st_dest = lstat_file (dest);
 
     if (NULL == st_dest)
       {

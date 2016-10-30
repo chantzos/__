@@ -4,7 +4,7 @@ private define mainloop ()
     {
     Rline.set (Ved.get_cur_rline ());
     Rline.readline (Ved.get_cur_rline ());
-    topline (" -- git --");
+    topline (" -- " + This.is.my.name + " --");
     }
 }
 

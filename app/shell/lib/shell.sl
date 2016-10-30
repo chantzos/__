@@ -4,7 +4,7 @@ private define mainloop ()
     {
     Rline.set (Ved.get_cur_rline ());
     Rline.readline (Ved.get_cur_rline ());
-    topline (" -- shell --");
+    topline (" -- " + This.is.my.name + " --");
     }
 }
 
@@ -21,7 +21,7 @@ public define shell ()
     () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
     }
 
-  topline (" -- shell --");
+  topline (" -- " + This.is.my.name + " --");
 
   Com.post_header ();
 

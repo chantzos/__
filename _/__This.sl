@@ -94,6 +94,7 @@ static define __INIT__ (role)
         tmpdir,
         basedir,
         datadir,
+        histfile,
         genconf = struct
           {
           file,

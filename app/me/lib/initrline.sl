@@ -528,7 +528,7 @@ public define rlineinit ()
   variable rl = Rline.init (&my_commands;;struct
     {
     @__qualifiers (),
-    histfile = Env->USER_DATA_PATH + "/.__" + Env->USER + "_mehistory",
+    histfile = This.is.my.histfile,
     onnolength = &toplinedr,
     onnolengthargs = {""},
     on_lang = &toplinedr,

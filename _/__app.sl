@@ -82,8 +82,10 @@ ifnot (access (Env->LOCAL_CLASS_PATH + "/__app.slc", F_OK))
 
 This.is.my.name      = strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
 This.is.my.basedir   = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
-This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;
 This.is.my.tmpdir    = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
+This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;
+This.is.my.histfile  = Env->USER_DATA_PATH + "/.__" + Env->USER +
+    "_" + This.is.my.name + "history";
 
 This.is.my.genconf.file = Env->USER_DATA_PATH + "/SetGen/setgen.conf";
 if (-1 == access (This.is.my.genconf.file, F_OK|R_OK) ||
