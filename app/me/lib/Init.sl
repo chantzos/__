@@ -1,14 +1,3 @@
-VED_OPTS.new_frame = 0;
-VED_OPTS.del_frame = 0;
-VED_OPTS.new_wind  = 0;
-
-COM_OPTS.chdir     = 0;
-COM_OPTS.bg_jobs   = 0;
-COM_OPTS.search    = 1;
-COM_OPTS.rehash    = 0;
-
-This.request.X = 0;
-
 Class.load ("Sync");
 
 public define on_wind_new (w)
@@ -40,8 +29,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = aved._fd;
 
-  topline (" -- me --");
-
+  topline (" -- " + This.is.my.name + " --");
   (@__get_reference ("__initrline"));
 
   Ved.draw_wind ();
@@ -67,4 +55,4 @@ private define _myframesize_ ()
 
 This.framesize = &_myframesize_;
 
-Load.file (This.is.my.basedir + "/lib/me", NULL);
+Load.file (This.is.my.basedir + "/lib/" + This.is.my.name, NULL);

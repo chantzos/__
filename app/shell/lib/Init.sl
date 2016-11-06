@@ -1,6 +1,6 @@
 public define on_wind_change (w)
 {
-  topline (" -- shell --");
+  topline (" -- " + This.is.my.name + " --");
   Ved.setbuf (w.frame_names[w.cur_frame]);
   This.is.std.out.fd = Ved.get_cur_buf ()._fd;
 }
@@ -25,7 +25,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = oved._fd;
 
-  topline (" -- shell --");
+  topline (" -- " + This.is.my.name + " --");
 
   Com.post_header ();
 

@@ -46,7 +46,7 @@ public define on_wind_change (w)
   else
     CUR_REPO == "NONE";
 
-  topline (" -- git --");
+  topline (" -- " + This.is.my.name + " --");
 }
 
 public define on_wind_new (w)
@@ -82,7 +82,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = aved._fd;
 
-  topline (" -- git --");
+  topline (" -- " + This.is.my.name + " --");
 
   (@__get_reference ("__initrline"));
 
@@ -109,4 +109,4 @@ private define _myframesize_ ()
 
 This.framesize = &_myframesize_;
 
-Load.file (This.is.my.basedir + "/lib/git", NULL);
+Load.file (This.is.my.basedir + "/lib/" + This.is.my.name, NULL);

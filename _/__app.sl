@@ -118,6 +118,8 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
+Class.load ("Com");
+
 Load.file (This.is.my.basedir + "/" + This.is.my.name);
 
 VED_RLINE       = 0;
@@ -167,8 +169,6 @@ if (-1 == mkfifo (RDFIFO, 0644))
 
 if (-1 == mkfifo (WRFIFO, 0644))
   This.err_handler (WRFIFO + ": cannot create, " + errno_string (errno));
-
-Class.load ("Com");
 
 private define com_execute (argv)
 {

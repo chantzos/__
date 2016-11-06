@@ -405,7 +405,7 @@ define __vmessages ()
   VED_ISONLYPAGER = 1;
   Ved.setbuf (s._abspath);
 
-  topline (" -- pager -- ( MESSAGES BUF) --";row = s.ptr[0], col = s.ptr[1]);
+  topline (" -- pager -- (MESSAGES BUF) --";row = s.ptr[0], col = s.ptr[1]);
 
   variable st = fstat (s._fd);
 
