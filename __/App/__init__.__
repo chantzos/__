@@ -171,13 +171,14 @@ class App
   def draw (s) public proc
     variable st = NULL == s._fd ? lstat_file (s._abspath) : fstat (s._fd);
 
-    if (NULL == st ||
-      (s.st_.st_size && st.st_atime == s.st_.st_atime && st.st_size == s.st_.st_size))
-      {
-      s._i = s._ii;
-      s.draw ();
-      return;
-      }
+    if (NULL == st || (s.st_.st_size && st.st_atime == s.st_.st_atime
+        && st.st_size == s.st_.st_size))
+      ifnot (qualifier_exists ("force_a_redraw"))
+        {
+        s._i = s._ii;
+        s.draw ();
+        return;
+        }
 
     s.st_ = st;
     s.lines = Ved.getlines (s._abspath, s._indent, st);

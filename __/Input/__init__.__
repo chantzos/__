@@ -48,6 +48,8 @@ class Input
   let CTRL_BRACKETRIGHT = 0x1d;
   let ESC_esc = 0x1001a;
   let ESC_q = 0x10070;
+  let ESC_up = 0x10100;
+  let ESC_down = 0x10101;
 
   let PPAGE = strncmp ("st-", Env->TERM, 3) ? 0x105 : 0x10a;
   let NPAGE = strncmp ("st-", Env->TERM, 3) ? 0x106 : 0x10d;

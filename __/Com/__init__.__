@@ -1,14 +1,14 @@
 class Com
 
-  var public COM_OPTS = struct
-    {
-    bg_jobs = 1,
-    chdir   = 1,
-    search  = 1,
-    rehash  = 1,
-    eval    = 1,
-    ved     = 1,
-    };
+ var public COM_OPTS = struct
+  {
+  bg_jobs = 1,
+  chdir   = 1,
+  search  = 1,
+  rehash  = 1,
+  eval    = 1,
+  ved     = 1,
+  };
 
   subclass Fork from Com
 

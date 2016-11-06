@@ -1,7 +1,8 @@
 class Rand
   import rand
+
   def new_ar (rtype, num) proc
-    return rand (rtype, num * 2);
+    rand (rtype, num * 2);
   end
 
   def _putar_ (ar, randar, index, imin, num) proc
@@ -22,7 +23,7 @@ class Rand
   end
 
   def rand_int_ar (imin, imax, num)
-    if (imin >= imax)
+    if (imin >= imax || 0 >= num)
       return NULL;
 
     variable
@@ -51,5 +52,33 @@ class Rand
       }
 
     strjoin (array_map (String_Type, &char, self.rand_int_ar (imin, imax, len)));
+  end
+
+  def int_array_uniq (imin, imax, num)
+    if (0 == imin || imin >= imax || 0 >= num || num > imax - imin + 1)
+      return NULL;
+
+    variable
+      i,
+      ar,
+      randar = Integer_Type[num],
+      index = 0,
+      rtype = rand_new ();
+
+    % loops forever if imin == 0
+    forever
+      {
+      ar = rand (rtype, num * 2) mod (imax + 1);
+      _for i (0, length (ar) - 1)
+        if (any (ar[i] == randar) || ar[i] < imin)
+          continue;
+        else
+          {
+          randar[index] = ar[i];
+          index++;
+          if (index == num)
+            return randar;
+          }
+      }
   end
 end
