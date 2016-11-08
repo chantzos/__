@@ -1,0 +1,87 @@
+class Hw
+  let AMIXER = Sys.which ("amixer");
+  var AMIXER_ARGV = NULL;
+  var SOUNDCARDS = NULL;
+  var SOUNDCHANNELS = Assoc_Type[Array_Type];
+  var CUR_SOUNDCARD = NULL;
+
+  def set_soundcard () proc
+    if (NULL == AMIXER)
+      return;
+
+    variable is_crouton = Sys.which ("croutonversion");
+    ifnot (NULL == is_crouton)
+      {
+      SOUNDCARDS = [0];
+      SOUNDCHANNELS["0"] = ["Master"];
+      }
+    else
+      {
+      variable i = 0, k, fp, buf;
+      SOUNDCARDS = Integer_Type[0];
+
+      forever
+        {
+        fp = popen (sprintf ("%s -c %d controls 2>/dev/null", AMIXER, i), "r");
+        variable channels = Assoc_Type[Char_Type];
+
+        while (-1 != fgets (&buf, fp))
+          {
+          ifnot (strncmp (buf, "Usage", 5))
+            break 2;
+
+          if (strncmp (buf, "numid", 5))
+            continue;
+
+          buf = strtok (buf, "'");
+          if (1 == length (buf))
+            continue;
+
+          buf = strtok (buf[1])[0];
+          ifnot (any (["Master", "PCM", "Speakers"] == buf))
+            continue;
+
+          channels[buf] = 1;
+          }
+        SOUNDCHANNELS[string (i)] = assoc_get_keys (channels);
+        SOUNDCARDS = [SOUNDCARDS, i];
+        i++;
+        }
+      }
+
+    if (1 == length (SOUNDCARDS))
+      CUR_SOUNDCARD = SOUNDCARDS[0];
+    else
+      CUR_SOUNDCARD = length (SOUNDCARDS) - 1;
+
+    ifnot (NULL == is_crouton)
+      AMIXER_ARGV = sprintf ("%s -q sset %%s", AMIXER);
+    else
+      AMIXER_ARGV = sprintf ("%s -q -c %d sset %%s", AMIXER,
+        CUR_SOUNDCARD);
+  end
+
+  def volume_up ()
+    if (NULL == AMIXER || NULL == CUR_SOUNDCARD)
+      return;
+
+    variable i;
+    _for i (0, length (SOUNDCHANNELS[string (CUR_SOUNDCARD)]) - 1)
+      () = popen (sprintf (AMIXER_ARGV + " 8%%+ 2>/dev/null",
+        SOUNDCHANNELS[string (CUR_SOUNDCARD)][i]), "w");
+  end
+
+  def volume_down ()
+    if (NULL == AMIXER || NULL == CUR_SOUNDCARD)
+      return;
+
+    variable i;
+    _for i (0, length (SOUNDCHANNELS[string (CUR_SOUNDCARD)]) - 1)
+      () = popen (sprintf (AMIXER_ARGV + " 8%%- 2>/dev/null",
+        SOUNDCHANNELS[string (CUR_SOUNDCARD)][i]), "w");
+  end
+
+  beg
+    set_soundcard ();
+  end
+end
