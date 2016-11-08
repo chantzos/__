@@ -13,6 +13,7 @@ class Net
       bring_down
       start_server
       scan
+      parse_scan
       terminate
       get_ip
       list_networks
@@ -89,6 +90,70 @@ update_config=1
     def find_iface () proc
       IFACE = NULL;
       IFACEDIR = NULL;
+    end
+
+    def parse_scan (scan)
+      scan = strtok (scan, "\n");
+
+      variable isassoc = NULL, netw = Assoc_Type[Struct_Type];
+      variable i, line, bss, ssid, tok, len = length (scan);
+
+      _for i (0, length (scan) - 1)
+        {
+        isassoc = NULL;
+        line = scan[i];
+        ifnot ("BSS" == line[[:2]])
+          continue;
+
+        tok = strtok (line);
+        if (1 == length (tok))
+          continue;
+
+        if (i == len - 1)
+          break;;
+
+        bss = tok[1];
+
+        if (tok[-1] == "associated")
+          isassoc = 1;
+
+        variable newbss = struct {bss = bss, signal, freq};
+        ssid = NULL;
+        i++;
+
+        while (i < len)
+          {
+          line = scan[i];
+
+          if ("BSS" == line[[:2]])
+            break;
+
+          i++;
+
+          tok = strtok (line);
+
+          if (1 == length (tok))
+            continue;
+
+          ifnot (any (tok[0] == ["SSID:", "signal:", "freq:"]))
+            continue;
+
+          if ("SSID:" == tok[0])
+            {
+            ssid = tok[1];
+            continue;
+            }
+
+          set_struct_field (newbss, tok[0][[:-2]], strjoin (tok[[1:]], " "));
+          }
+
+        if (NULL == ssid)
+          continue;
+
+        netw[ssid] = newbss;
+        }
+
+       netw;
     end
 
 #if Sys->OS == "Linux"

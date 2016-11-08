@@ -1,4 +1,52 @@
-This is a very first draft of a proper README.
+This!!! is the very first draft of a proper README.
+
+## About This, __, and I.
+### About This Code Product.
+#### (LONG) STORY (ALA) (LONG)
+It was a little bit more than seven years - the spring of 2010 -,
+just a bit before the major change in our lives. 
+Around That time, I was doing the last (I knew that they were) 
+editions for BLFS when I was updating S-Lang. It was because of mutt,
+which happily uses S-Lang's terminal routines.  I liked the language
+probably because of it's C like syntax (which made me feel a bit like
+a programmer).
+
+Untill that time, I was written a significant umount of code,
+first in shell (during the first Linux days in 2004/5) and later in
+vimL - the glorius days from 2006 to 2009. But I also wrote some bits
+in many languages, especially in Lua. What I have in mind is the beauty
+of Ruby, the Python-pragma-tosini, the expressionism of scheme.
+
+But there wasn't a serious exprosure in any kind in any of them,
+because something was missing to let myself to dive in with dedication,
+and that unfortunatelly for me, it was C.
+See, while it was, even with some few lines of code, to get at least
+an impression and to understand the basic logic in other languages,
+with C I couldn't even write a single line. 
+ 
+Thinking about this later, perhaps, it was because, I first read about
+C, not by sources in the internet but in a book (K&R) written in
+greek language. Something (might) happened with my mind while
+was trying to associate the programming terms written in greek with
+the english ones. This is not a joke. It's a belief. The lack of
+expressionism in English is what it makes it perfect for computer
+language.
+
+The main program was a package manager to help me build the books,
+which it was implemented in sh first and later in vimL in 2006 when
+I've started to use seriously vim, which it was perfect because
+with vim I had a UI for free and the unparrarel modal interface.
+So I wrote all kind of personal scripts, including a web browser
+(which worked great for the specific pages I was visiting, I got
+just the text formated like a newspaper article).
+
+But vimL is slow and the mix with normal commands produces
+(somehow) _ugly_ code.
+
+... to be continued
+_______________________________________________________
+
+That was the very first draft of a(n im:)proper README.
 
 ## Introduction
 This project is a prototype of some ideas of a way to interact with a computer.  

@@ -80,7 +80,9 @@ ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
 ifnot (access (Env->LOCAL_CLASS_PATH + "/__app.slc", F_OK))
   Load.file (Env->LOCAL_CLASS_PATH + "/__app.slc");
 
-This.is.my.name      = strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
+This.is.my.name = "____" == path_basename_sans_extname (
+    This.has.argv[0]) ? "__" : strtrim_beg (path_basename_sans_extname (
+    This.has.argv[0]), "_");
 This.is.my.basedir   = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
 This.is.my.tmpdir    = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
 This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;

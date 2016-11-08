@@ -8,7 +8,7 @@ private define mainloop ()
     }
 }
 
-public define init_me ()
+public define init___ ()
 {
   wind_init ("a", 2;force, on_wind_new);
 
