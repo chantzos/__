@@ -12,3 +12,6 @@ public variable W_REPOS = Assoc_Type[String_Type];
 public variable CUR_REPO = "NONE";
 public variable PREV_REPO = NULL;
 public variable COM_NO_SETREPO = NULL;
+public variable DIFF;
+public variable DIFF_VED;
+public variable AUTHORS = Assoc_Type[String_Type];

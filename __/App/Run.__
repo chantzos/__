@@ -123,7 +123,6 @@ subclass Run
   def app (argv, env)
     APP_ERR = 0;
 
-IO.tostderr (argv[0]);
     if (strncmp (argv[0], "__", 2) || "__" == argv[0])
       argv[0] = "__" + argv[0];
 

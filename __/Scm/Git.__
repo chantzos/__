@@ -300,9 +300,14 @@ subclass Git
     variable
       msg = files[-1],
       status,
+      author = qualifier ("author"),
       argv = @funcs["commit"];
 
     argv[-1] += msg;
+
+    ifnot (NULL == author)
+      argv = [argv, "--author=" + author];
+
     argv = [argv, list_to_array (files[[:-2]], String_Type)];
 
     variable p = __exec__ (argv, &status;;__qualifiers);
@@ -313,9 +318,14 @@ subclass Git
   def commitall (msg)
     variable
       status,
+      author = qualifier ("author"),
       argv = @funcs["commitall"];
 
     argv[-1] += msg;
+
+    ifnot (NULL == author)
+      argv = [argv, "--author=" + author];
+
     variable p = __exec__ (argv, &status;;__qualifiers);
 
    __print__ (p, status;;__qualifiers);

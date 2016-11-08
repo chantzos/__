@@ -236,8 +236,14 @@ private define __commitall__ (argv)
     return;
     }
 
-  ifnot (Scm.Git.commitall (strjoin (lines, "\n");redir_to_file = DIFF,
-      flags = ">|"))
+  variable qual = struct {redir_to_file = DIFF, flags = ">|"};
+
+  variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
+  ifnot (NULL == author)
+    if (any (author == assoc_get_keys (AUTHORS)))
+      qual = struct {@qual, author = author};
+
+  ifnot (Scm.Git.commitall (strjoin (lines, "\n");;qual))
     {
     () = Scm.Git.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
       redir_to_file = DIFF, flags = ">>");
@@ -260,6 +266,8 @@ private define __commitall__ (argv)
 
 private define __commit__ (argv)
 {
+  variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
+
   if (length (argv) == 1)
     {
     Smg.send_msg_dr ("argument is required", 1, NULL, NULL);
@@ -309,8 +317,12 @@ private define __commit__ (argv)
     return;
     }
 
-  ifnot (Scm.Git.commit (__push_list (l), strjoin (lines, "\n");redir_to_file = DIFF,
-      flags = ">|"))
+  variable qual = struct {redir_to_file = DIFF, flags = ">|"};
+  ifnot (NULL == author)
+    if (any (author == assoc_get_keys (AUTHORS)))
+      qual = struct {@qual, author = author};
+
+  ifnot (Scm.Git.commit (__push_list (l), strjoin (lines, "\n");;qual))
     {
     () = Scm.Git.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
       redir_to_file = DIFF, flags = ">>");
@@ -711,14 +723,32 @@ private define tabhook (s)
   ifnot (s._ind)
     return -1;
 
-  ifnot (any (s.argv[0] == ["merge", "branchchange"]))
-    return -1;
-
-  if (strlen (s.argv[s._ind]) && '-' == s.argv[s._ind][0])
+  ifnot (any (s.argv[0] == ["merge", "branchchange", "commit", "commitall"]))
     return -1;
 
   if (CUR_REPO == "NONE")
     return -1;
+
+  if (strlen (s.argv[s._ind]) && '-' == s.argv[s._ind][0])
+    if (any (["merge", "branchchange"] == s.argv[0]))
+      return -1;
+    else
+      {
+      if (strncmp (s.argv[s._ind], "--author=", 9))
+        return -1;
+
+      variable authors = assoc_get_keys (AUTHORS);
+      ifnot (length (authors))
+        return -1;
+
+      variable values = assoc_get_values (AUTHORS);
+
+      variable k;
+      _for k (0, length (authors) - 1)
+        authors[k] = "--author=" + authors[k] + " void " + values[k];
+
+      return Rline.argroutine (s;args = authors);
+      }
 
   variable brs, i;
 
@@ -788,9 +818,11 @@ private define my_commands ()
 
   a["commit"] = @Argvlist_Type;
   a["commit"].func = &__commit__;
+  a["commit"].args = ["--author= void commit author"];
 
   a["commitall"] = @Argvlist_Type;
   a["commitall"].func = &__commitall__;
+  a["commitall"].args = ["--author= void commit author"];
 
   a["branch"] = @Argvlist_Type;
   a["branch"].func = &__branch__;

@@ -4,12 +4,29 @@ COM_NO_SETREPO = Opt.Arg.compare ("--no-setrepo", &This.has.argv;del_arg);
 
 public define setrepo ();
 
-public variable DIFF = This.is.my.tmpdir + "/__DIFF__.diff";
-public variable DIFF_VED = Ved.init_ftype ("diff");
+private define init ()
+{
+  DIFF = This.is.my.tmpdir + "/__DIFF__.diff";
+  DIFF_VED = Ved.init_ftype ("diff");
 
-DIFF_VED._fd = IO.open_fn (DIFF);
-diff_settype (DIFF_VED, DIFF, VED_ROWS, NULL;
-  _autochdir = 0, show_tilda = 0, show_status_line = 0);
+  DIFF_VED._fd = IO.open_fn (DIFF);
+  diff_settype (DIFF_VED, DIFF, VED_ROWS, NULL;
+    _autochdir = 0, show_tilda = 0, show_status_line = 0);
+
+  variable authors = File.readlines (This.is.my.datadir + "/authors.txt");
+  ifnot (NULL == authors)
+    {
+    variable i, tok;
+    _for i (0, length (authors) - 1)
+      {
+      tok = strtok (authors[i], ":");
+      if (1 < length (tok))
+        AUTHORS[tok[0]] = tok[1];
+      }
+    }
+}
+
+init ();
 
 private variable i_colors = [Smg->COLOR.infobg];
 
