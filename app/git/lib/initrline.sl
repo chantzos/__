@@ -750,6 +750,9 @@ private define tabhook (s)
       return Rline.argroutine (s;args = authors);
       }
 
+  if (any (["commit", "commitall"] == s.argv[0]))
+    return -1;
+
   variable brs, i;
 
   brs = @REPOS[CUR_REPO].branches;
