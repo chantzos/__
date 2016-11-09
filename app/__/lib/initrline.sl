@@ -267,7 +267,7 @@ private define __install_distribution (argv)
   Smg.send_msg_dr ("exit status: " + string (status.exit_status),
       status.exit_status, NULL, NULL);
 
-  __scratch (NULL);
+  __scratch (NULL;_i = 1000);
 }
 
 private define __myrepo (argv)

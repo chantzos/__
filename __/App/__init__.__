@@ -195,7 +195,12 @@ class App
       (s.ptr[1] = 0, s.ptr[0] = s._len + 1 <= len ? s.rows[0] : s.rows[-2]);
 
     ifnot (NULL == _i)
+      {
       s._i = _i;
+
+      if (s._i > s._len)
+        s._i = s._len - length (s.rows) + 2;
+      }
     else
       s._i = s._len + 1 <= len ? 0 : s._len + 1 - len;
 
@@ -282,9 +287,12 @@ class App
 
   def scratch (ved)
     if (qualifier_exists ("draw") && qualifier ("draw") == 0)
-    return;
+      return;
 
-    viewfile (SCRATCH_VED, "SCRATCH", [1, 0], 0);
+    variable __i = __get_qualifier_as (Integer_Type, "_i", qualifier (
+      "_i"), 0);
+
+    viewfile (SCRATCH_VED, "SCRATCH", [1, 0], __i);
     Ved.setbuf (ved._abspath);
     ved.draw ();
 
@@ -299,7 +307,7 @@ class App
   def __scratch (argv) public proc
     variable ved = @Ved.get_cur_buf ();
 
-    App.scratch (ved);
+    App.scratch (ved;;__qualifiers);
 
     NEEDSWINDDRAW = 0;
     Ved.draw_wind ();
