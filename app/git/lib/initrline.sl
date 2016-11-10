@@ -151,9 +151,9 @@ private define __diffrevision__ (argv)
     return;
     }
 
-  ifnot (Scm.Git.diffrevision (argv[1];redir_to_file = SCRATCH,
+  ifnot (Scm.Git.diffrevision (argv[1];redir_to_file = DIFF,
       flags = ">|"))
-    __scratch (NULL);
+    viewdiff;
   else
     __messages;
 }
