@@ -1,15 +1,84 @@
-This!!! is the very first draft of a proper README.
+## SYNOPSIS
+This application offers a set of applications and commands, under
+a common ala vim interface with a custom readline implementation.
 
-## About This, __, and I.
-### About This Code Product.
-#### (LONG) STORY (ALA) (LONG)
+Available applications are a shell, an editor, a media player,
+and an application to work with git repositories, as well an application
+to manage the distribution itself.
+
+Available commands are the basic system commands found in any Unix
+like system, with some extensions but which are common to any of them.
+
+Available is also a fullscreen window manager for the X environment.
+ 
+Stable pieces of code (some kind of an Application Layer) exists in
+places but some code is at the prototype level while some needs
+optimization, but some are really buggy, like editing lines longer
+than $COLUMNS in the editor, or limited (like the undo/redo feature)
+which ended up like this by making wrong decisions during initial
+development. 
+
+It is implemented by using S-Lang programming language, with some C
+(usually functions wrappers around C functions).
+
+## Installation
+
+Note that this application follows continuously S-Lang develpment.
+So install it if you haven't already, which by default if you issue:
+
+```bash
+git clone git://git.jedsoft.org/git/slang.git &&
+cd slang &&
+./configure && make && sudo make install
+```
+
+will install S-Lang into /usr/local namespace and it won't class with existing
+installations: (note however, if there are problems to load the right libraries, try
+to adjust and point to them by (at least in Linux) using LD_LIBRARY_PATH, and also
+note that the slsh interpeter will be used once at the initial installation and it won't
+be needed again)
+
+To install this distribution issue: 
+(assuming foo is an existing directory with read/write/execute access rights)
+
+```bash
+cd foo
+git clone https://github.com/chantzos/__.git
+cd __
+slsh ___.sl --verbose
+```
+
+Applications and symbolic links to command will be installed in foo/bin, prefixed
+with two underscores.
+
+## Samples
+
+```bash
+# starts a shell
+__shell
+# start an ala vim editor
+__ved
+
+# list directory
+__ls
+__touch a
+__rm a
+__mkdir foo
+__rmdir foo
+```
+
+## About This, __, and I. A Long Story (rather) Long!
+
+Note, That _This_ is the very first draft of a proper README.
+
 It was a little bit more than seven years - the spring of 2010 -,
 just a bit before the major change in our lives. 
 Around That time, I was doing the last (I knew that they were) 
 editions for BLFS when I was updating S-Lang. It was because of mutt,
 which happily uses S-Lang's terminal routines.  I liked the language
 probably because of it's C like syntax (which made me feel a bit like
-a programmer).
+a programmer) and because of its simplicity I could write extensible
+code within a couple of hours.
 
 Untill that time, I was written a significant umount of code,
 first in shell (during the first Linux days in 2004/5) and later in
@@ -32,16 +101,21 @@ the english ones. This is not a joke. It's a belief. The lack of
 expressionism in English is what it makes it perfect for computer
 language.
 
-The main program was a package manager to help me build the books,
-which it was implemented in sh first and later in vimL in 2006 when
-I've started to use seriously vim, which it was perfect because
-with vim I had a UI for free and the unparrarel modal interface.
-So I wrote all kind of personal scripts, including a web browser
-(which worked great for the specific pages I was visiting, I got
-just the text formated like a newspaper article).
+The main program was a package manager, which helped me to build the books.
+It was implemented in POSIX sh first and later (in 2006) in vimL when
+I've started to use vim. And it was perfect, because with vim I had a UI
+for free and with vimL, for first time I could work with rich datatypes,
+like dictionaries, which allow me to write in object oriented way and to get
+the benefits of such systems such simplicity, organization and extensebility. 
 
-But vimL is slow and the mix with normal commands produces
-(somehow) _ugly_ code.
+So I wrote in vimL all kind of personal scripts, including a web browser
+(which worked great for the specific pages I was visiting, I got
+just the text formated like a newspaper article, by using the powerfull
+vim patterns).
+But vimL is slow and the mix with normal commands produces (somehow) _ugly_
+code. So I just moved naturally to S-Lang, which as plus I could initialize the
+slsmg routines withing S-Lang, so there was no need to even touch C.
+ 
 
 ... to be continued
 _______________________________________________________
@@ -238,7 +312,8 @@ interface, which offers:
 Readline but also the editor accepts and Greek input besides English.
 There is a Greek map builted in, in Input class, so there is no need for using
 system specific keystroke to change the language. In fact getch () possible is not
-going to work for language layouts other than en_US, but I might be wrong.
+going to work for language layouts other than en_US, but I might be wrong - I'm not
+(but I may behave a solution).
 Anyway, to built a specific language map is trivial and is going to work
 and should work, the same under a linux terminal.
 By the way, the application will error and exits at startup in a locale
