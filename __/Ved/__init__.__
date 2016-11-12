@@ -963,8 +963,8 @@ class Ved
           % maybe add a check for NULL
           % my opinion is that the check hides the code mistake
           % somewhere in the pattern related code, independently
-          % of the designed highliting implementation (which in that
-          % state needs improvement),   the code should provide expected
+          % of the designed highlighting implementation (which in that
+          % state needs improvement),the code should provide expected
           % results, (assuming the toolchain has no weakness, (which in that
           % case it has (and I have to find why (and I'm boring for that
           % kind of thing (...

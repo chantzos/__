@@ -260,12 +260,19 @@ private define __install_distribution (argv)
   variable p = Proc.init (0, 1, 1);
 
   p.stdout.file = SCRATCH;
-  p.stderr.file = SCRATCH;
 
   variable status = p.execve (myargv, Env.defenv (), NULL);
 
   Smg.send_msg_dr ("exit status: " + string (status.exit_status),
       status.exit_status, NULL, NULL);
+
+  if (status.exit_status)
+    ifnot (NULL == p.stderr.out)
+      {
+      variable buf = "ERROR:\n" +  strjoin (strtok (p.stderr.out, "\n"),
+        "\n");
+      () = File.append (SCRATCH, buf);
+      }
 
   __scratch (NULL;_i = 1000);
 }

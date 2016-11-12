@@ -5,6 +5,7 @@ class Hw
   var SOUNDCHANNELS = Assoc_Type[Array_Type];
   var CUR_SOUNDCARD = NULL;
 
+  % if Linux then look at /proc/asound
   def set_soundcard () proc
     if (NULL == AMIXER)
       return;
