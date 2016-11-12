@@ -449,42 +449,6 @@ private define __classnew__ (cname, super, classpath, isself, methods)
   c;
 }
 
-%private define push_array (a)
-%{
-%  variable i;
-%  _for i (0, length (a) - 1)
-%    a[i];
-%}
-%
-%
-%private define stk_reverse ()
-%{
-%  variable i, args = __pop_list (_NARGS);
-%  _for i (length (args) - 1, 0, -1)
-%    args[i];
-%}
-%
-%public define struct_tostring ()
-%{
-%  ifnot (_NARGS)
-%    return "";
-%
-%  variable s = ();
-%
-%  ifnot (typeof (s) == Struct_Type)
-%    return s;
-%
-%  variable fields = get_struct_field_names (s);
-%  variable fmt = "";
-%
-%  loop (length (fields))
-%    fmt += "%S : %%S\n";
-%
-%  fmt = sprintf (fmt[[:-2]], push_array (fields));
-%
-%  sprintf (fmt, stk_reverse (_push_struct_field_values (s), pop ()));
-%}
-
 private define err_handler (e, s)
 {
   IO.tostderr (Struct.to_string (s));
@@ -527,7 +491,7 @@ private define err_class_type ()
   s;
 }
 
-public variable __defINIT__ = struct {args,fun,qual,retval};
+public variable __defINIT__ = struct {args, fun, qual, retval};
 
 public variable __INITS__ = Assoc_Type[Struct_Type, @__defINIT__];
 
@@ -1478,16 +1442,12 @@ private define __Class_From_Init__ (classpath)
     throw ClassError, "Class::__INIT__::class identifier is missing";
 
   variable isclass = "class" == tokens[0];
-  variable super, tmp, i, cname = tokens[1];
+  variable super, tmp, tmpnam, i, cname = tokens[1];
 
   if (isclass)
     {
     super = cname;
-
-    ifnot (qualifier_exists ("dont_eval"))
-      if (any (cname == assoc_get_keys (__CLASS__)))
-        ifnot (NULL == (tmp = __get_reference (cname), (@tmp).__name))
-          throw ClassError, "Class::__INIT__::" + cname + " is already defined";
+    tmpnam = cname;
     }
   else
     {
@@ -1495,11 +1455,13 @@ private define __Class_From_Init__ (classpath)
     if (NULL == super)
       throw ClassError, "Class::__INIT__::awaiting super qualifier";
 
-    ifnot (qualifier_exists ("dont_eval"))
-      if (any (super + cname == assoc_get_keys (__CLASS__)))
-        ifnot (NULL == (tmp = __get_reference (super + cname), (@tmp).__name))
-          throw ClassError, "Class::__INIT__::" + super + cname + " is already defined";
+    tmpnam = super + cname;
     }
+
+  ifnot (qualifier_exists ("dont_eval"))
+    if (any (tmpnam == assoc_get_keys (__CLASS__)))
+      ifnot (NULL == (tmp = __get_reference (tmp), (@tmp).__name))
+        throw ClassError, "Class::__INIT__::" + tmpnam + " is already defined";
 
   variable
     funs     = Assoc_Type[Fun_Type],
@@ -1556,6 +1518,7 @@ private define __Class_From_Init__ (classpath)
     " __->__ (\"" + super + "\", \"" + cname + "\", &" + cname +
     ", 0, 1, \"Class::setfun::__initfun__\";submethod = 1);\n" +
     "__->__ (\"" + super + "\", [\"" + cname + "\"], \"Class::setself::subclass\");\n" +
+
     __assignself__ (super;return_buf) + "\n\n" + eval_buf;
     }
 
@@ -1568,12 +1531,27 @@ private define __Class_From_Init__ (classpath)
   __in__ = @classpath + "/" + as + ".sl";
 
   variable dump = fopen (__in__, "w");
-  () = fprintf (dump, "%S\n", eval_buf);
-  () = fclose (dump);
+  if (NULL == dump)
+    throw ClassError, "Class::__INIT__::" + cname + " fopen, cannot open input file " +
+      errno_string (errno);
 
-  byte_compile_file (__in__, 0);
+  ifnot (fprintf (dump, "%S\n", eval_buf) == strbytelen (eval_buf) + 1)
+    throw ClassError, "Class::__INIT__::" + cname + " fprintf, cannot write buffer " + 
+      errno_string (errno);
 
-  ifnot (qualifier_exists ("keep_compiled"))
+  if (-1 == fclose (dump))
+    throw ClassError, "Class::__INIT__::" + cname + " fclose, cannot close input file " +
+      errno_string (errno);
+
+  try
+    {
+    byte_compile_file (__in__, 0);
+    }
+  catch AnyError:
+    throw ClassError, "Class::__INIT__::" + cname + " error while bytecompiling input " +
+      "file ", __get_exception_info ();
+
+  ifnot (qualifier_exists ("keep_input_file"))
     () = remove (__in__);
 }
 

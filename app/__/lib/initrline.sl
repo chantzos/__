@@ -145,7 +145,7 @@ private define __classcompile__ (argv)
     variable qualif = struct {from = cpath, force, return_buf, dont_eval};
 
     ifnot (NULL == dont_remove)
-      qualif = struct {@qualif, keep_compiled};
+      qualif = struct {@qualif, keep_input_file};
 
     buf = NULL;
     buf = Class.load (cname;;qualif);
