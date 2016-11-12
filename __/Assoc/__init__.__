@@ -52,4 +52,19 @@ class Assoc
 
     a;
   end
+
+  def put (assoc, key, val)
+    ifnot (Assoc_Type == typeof (assoc))
+      return -1;
+
+    ifnot (String_Type == typeof (key))
+      return -1;
+
+    try
+      assoc[key] = val;
+    catch TypeMismatchError:
+      return -1;
+
+    return 0;
+  end
 end
