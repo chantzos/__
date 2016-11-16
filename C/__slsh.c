@@ -653,24 +653,6 @@ int main (int argc, char **argv)
   (void) SLsignal (SIGPIPE, SIG_IGN);
 #endif
 
-  while (argc > 1)
-    {
-    char *arg = argv[1];
-
-    if (0 == strncmp (arg, "-D", 2))
-      {
-      char *prep = arg + 2;
-      if (*prep != 0)
-         (void) SLdefine_for_ifdef (prep);
-
-      argc--;
-      argv++;
-      continue;
-      }
-
-   break;
-   }
-
   if (argc == 1)
     {
     fprintf (stderr, "argument (a file with S-Lang code) is required\n");
@@ -684,26 +666,20 @@ int main (int argc, char **argv)
     }
 
   if (SLang_Version < SLANG_VERSION)
-    {
     fprintf (stderr, "***Warning: Executable compiled against S-Lang %s but linked to %s\n",
       SLANG_VERSION_STRING, SLang_Version_String);
-    }
 
   if (-1 == SLang_set_argc_argv (argc, argv))
     return 1;
 
- /*  (void) SLdefine_for_ifdef ("__INTERACTIVE__"); */
- 
   __init ();
 
   if (file != NULL)
-    {
     if (0 == try_to_load_file (NULL, file, NULL))
       {
       fprintf (stderr, "%s: file not found\n", file);
       exit (1);
       }
-    }
 
   exit_val = SLang_get_error ();
   c_exit (exit_val);
