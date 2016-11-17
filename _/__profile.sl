@@ -47,7 +47,7 @@ static define __ ()
     __->err_handler (NULL, __->err_class_type (c, lexi, fun, from, caller, args);;__qualifiers);
 }
 
-static define __profile_parse ()
+private define __profile_parse (s)
 {
   variable a = Assoc_Type[Struct_Type];
   if (-1 == fseek (__profile_fp__, 0, SEEK_SET))
@@ -74,16 +74,16 @@ static define __profile_parse ()
   a;
 }
 
-private define __sort_by_exec_tim (fun, val)
+private define __sort_by_total_executed_time (s, fun, val)
 {
-  __sorted = "Sorted by execution times";
+  __sorted = "Sorted by total executed time";
   variable tim = array_map (Double_Type, &get_struct_field, @val, "tim");
   variable sort = array_sort (tim;dir = -1);
   @fun = (@fun)[sort];
   @val = (@val)[sort];
 }
 
-private define __sort_by_name (fun, val)
+private define __sort_by_name (s, fun, val)
 {
   __sorted = "Sorted by Name";
   variable sort = array_sort (@fun);
@@ -91,16 +91,16 @@ private define __sort_by_name (fun, val)
   @val = (@val)[sort];
 }
 
-private define __sort_by_total_exec (fun, val)
+private define __sort_by_total_executions (s, fun, val)
 {
-  __sorted = "Sorted by total executions time";
+  __sorted = "Sorted by total executions";
   variable called = array_map (Integer_Type, &get_struct_field, @val, "called");
   variable sort = array_sort (called;dir = -1);
   @fun = (@fun)[sort];
   @val = (@val)[sort];
 }
 
-private define __sort_by_averg_exec_tim (fun, val)
+private define __sort_by_averg_executed_time (s, fun, val)
 {
   __sorted = "Sorted by average execution time";
   variable tim = array_map (Double_Type, &get_struct_field, @val, "tim");
@@ -112,23 +112,23 @@ private define __sort_by_averg_exec_tim (fun, val)
 
 }
 
-static define __profile_get ()
+private define __profile_get (s)
 {
-  variable a = __profile_parse;
+  variable a = s.parse ();
   ifnot (length (a))
     return;
 
   variable funs = assoc_get_keys (a);
   variable vals = assoc_get_values (a);
 
-  if (qualifier_exists ("sort_by_exec_tim"))
-    __sort_by_exec_tim (&funs, &vals);
-  else if (qualifier_exists ("sort_by_total_exec"))
-    __sort_by_total_exec (&funs, &vals);
-  else if (qualifier_exists ("sort_by_averg_exec_tim"))
-    __sort_by_averg_exec_tim (&funs, &vals);
+  if (qualifier_exists ("sort_by_total_executed_time"))
+    __sort_by_total_executed_time (s, &funs, &vals);
+  else if (qualifier_exists ("sort_by_total_executions"))
+    __sort_by_total_executions (s, &funs, &vals);
+  else if (qualifier_exists ("sort_by_averg_executed_time"))
+    __sort_by_averg_executed_time (s, &funs, &vals);
   else
-    __sort_by_name (&funs, &vals);
+    __sort_by_name (s, &funs, &vals);
 
   variable i, l, m = 1;
 
@@ -154,7 +154,31 @@ static define __profile_get ()
   _for i (0, length (funs) - 1)
     ar = [ar, sprintf ("%-" + w + "s  %-" + m + "s  %f\n", funs[i], vals[i].called, vals[i].tim)];
 
-  () = File.write (SCRATCH, "\0");
+  () = File.write (SCRATCH, "     Profiling Results\n");
   toscratch (ar);
   __scratch (NULL);
 }
+
+private define __get_by_averg_executed_time (s)
+{
+  __profile_get (s;sort_by_averg_executed_time);
+}
+
+private define __get_by_total_executions (s)
+{
+  __profile_get (s;sort_by_total_executions);
+}
+
+private define __get_by_total_executed_time (s)
+{
+  __profile_get (s;sort_by_total_executed_time);
+}
+
+public variable Profile = struct
+  {
+  parse = &__profile_parse,
+  get_by_total_executions = &__get_by_total_executions,
+  get_by_averg_executed_time =  &__get_by_averg_executed_time,
+  get_by_function_name = &__profile_get,
+  get_by_total_executed_time = &__get_by_total_executed_time,
+  };
