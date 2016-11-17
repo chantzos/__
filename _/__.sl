@@ -13,7 +13,7 @@ private define __initclass__ (cname)
   __CLASS__[cname]["__SUB__"]  = String_Type[0];
 }
 
-private define __getclass__ (cname, init)
+static define __getclass__ (cname, init)
 {
   ifnot (assoc_key_exists (__CLASS__, cname))
     if (init)
@@ -237,7 +237,7 @@ private define __my_read__ (fname)
   str;
 }
 
-private define __initfun__ (cl, funname, funcref)
+static define __initfun__ (cl, funname, funcref)
 {
   variable
     eval_buf,
@@ -449,7 +449,7 @@ private define __classnew__ (cname, super, classpath, isself, methods)
   c;
 }
 
-private define err_handler (e, s)
+static define err_handler (e, s)
 {
   IO.tostderr (Struct.to_string (s));
   IO.tostderr ("Args: ";n);
@@ -481,7 +481,7 @@ private define err_handler (e, s)
         (@handler) (__push_list (args);;__qualifiers);
 }
 
-private define err_class_type ()
+static define err_class_type ()
 {
   variable s, args = __pop_list (_NARGS);
 
@@ -489,26 +489,6 @@ private define err_class_type ()
     s), __push_list (args));
 
   s;
-}
-
-public variable __defINIT__ = struct {args, fun, qual, retval};
-
-public variable __INITS__ = Assoc_Type[Struct_Type, @__defINIT__];
-
-public define __init__ (__name__)
-{
-  __INITS__[__name__];
-}
-
-public define __execFun (ref)
-{
-  (@ref);
-}
-
-public define __execFunProf (ref)
-{
-  % profile
-  (@ref);
 }
 
 static define __ ()

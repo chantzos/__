@@ -11,13 +11,6 @@ like system, with some extensions but which are common to any of them.
 
 Available is also a fullscreen window manager for the X environment.
  
-Stable pieces of code (some kind of an Application Layer) exists in
-places but some code is at the prototype level while some needs
-optimization, but some are really buggy, like editing lines longer
-than $COLUMNS in the editor, or limited (like the undo/redo feature)
-which ended up like this by making wrong decisions during initial
-development. 
-
 It is implemented by using S-Lang programming language, with some C
 (usually functions wrappers around C functions).
 
@@ -66,6 +59,17 @@ __rm a
 __mkdir foo
 __rmdir foo
 ```
+
+## About the code
+Stable pieces of code (some kind of an Application Layer) exists in
+places but some code is at the prototype level, while some needs
+optimization, but some are really buggy, like editing lines longer
+than $COLUMNS in the editor, or limited (like the undo/redo feature)
+which ended up like this by making wrong decisions during initial
+development.
+But what it matters (at this stage) it's the idea and not that much
+the implementation code, which is not always that optimal, because the
+idea has the priority, even if it costs in some cases.
 
 ## About This, __, and I. A Long Story (rather) Long!
 
