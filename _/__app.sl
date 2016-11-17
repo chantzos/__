@@ -121,12 +121,24 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-ifnot (NULL == This.request.profile)
+private define __profile_set ()
+{
+  if (NULL == This.request.profile)
+    ifnot (qualifier_exists ("set"))
+      return;
+    else
+      This.request.profile = 1;
+
   ifnot (access (Env->STD_CLASS_PATH + "/__profile.slc", F_OK|R_OK))
     Load.file (Env->STD_CLASS_PATH + "/__profile.slc", "__");
   else
     ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
       Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
+}
+
+public variable Profile = struct {set = &__profile_set};
+
+Profile.set ();
 
 Class.load ("Com");
 
