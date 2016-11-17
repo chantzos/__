@@ -70,6 +70,7 @@ Class.load ("App");
 This.at_exit = &_exit_;
 
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
+
 DEBUG = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 
 Class.load ("I";force);
@@ -119,6 +120,13 @@ if (-1 == Dir.make_parents (This.is.my.datadir + "/config", File->PERM["PRIVATE"
 if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
+
+ifnot (NULL == This.request.profile)
+  ifnot (access (Env->STD_CLASS_PATH + "/__profile.slc", F_OK|R_OK))
+    Load.file (Env->STD_CLASS_PATH + "/__profile.slc", "__");
+  else
+    ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
+      Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
 
 Class.load ("Com");
 

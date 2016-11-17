@@ -1,0 +1,160 @@
+This.is.my.profilefile = This.is.my.tmpdir + "/__PROFILE";
+
+private variable __separator = "@";
+private variable __sorted = "Sorted by average execution time";
+
+private variable __profile_fp__ = fopen (This.is.my.profilefile, "w+");
+
+if (NULL == __profile_fp__)
+  This.err_handler ("cannot open " + This.is.my.profilefile + ", errno: " +
+    errno_string (errno));
+
+private define __profile__ (fun, exec_tim)
+{
+  () = fprintf (__profile_fp__, "%s%s%f\n", fun, __separator, exec_tim);
+}
+
+static define __ ()
+{
+  variable c = NULL, lexi = NULL, fun = NULL, args = NULL, from = NULL, caller = NULL;
+  variable __f__ = NULL, n;
+
+  try
+    {
+    lexi = ();
+    args = __pop_list (_NARGS - 1);
+    n = sscanf (lexi, "%[a-zA-Z]::%[a-zA-Z_]::%s", &from, &fun, &caller);
+
+    ifnot (1 < n)
+      throw ClassError, "FuncDefinitionParseError::__::" + lexi;
+
+    c = __->__getclass__ (from, 0);
+    __f__ = c["__FUN__"];
+
+    ifnot (assoc_key_exists (__f__, fun))
+      throw ClassError, "Class::__::" + fun + " is not defined";
+
+    if (NULL == __f__[fun].funcref)
+      __->__initfun__ (c["__R__"].name, fun, NULL;nargs = __f__[fun].nargs);
+
+    tic;
+    (@__f__[fun].funcref) (__push_list (args);;__qualifiers);
+    __profile__ (fun, toc);
+    }
+  catch ClassError:
+    __->err_handler (NULL, __->err_class_type (c, lexi, fun, from, caller, args);;__qualifiers);
+  catch AnyError:
+    __->err_handler (NULL, __->err_class_type (c, lexi, fun, from, caller, args);;__qualifiers);
+}
+
+static define __profile_parse ()
+{
+  variable a = Assoc_Type[Struct_Type];
+  if (-1 == fseek (__profile_fp__, 0, SEEK_SET))
+    return a;
+
+  variable tok, i, fun, tim, buf;
+
+  while (-1 != fgets (&buf, __profile_fp__))
+    {
+    tok = strtok (buf, __separator);
+    ifnot (2 == length (tok))
+      continue;
+
+    (fun, tim) = Array.push (tok);
+    if (assoc_key_exists (a, fun))
+      {
+      a[fun].tim += atof (tim);
+      a[fun].called++;
+      }
+    else
+      a[fun] = struct {tim = atof (tim), called = 1};
+    }
+
+  a;
+}
+
+private define __sort_by_exec_tim (fun, val)
+{
+  __sorted = "Sorted by execution times";
+  variable tim = array_map (Double_Type, &get_struct_field, @val, "tim");
+  variable sort = array_sort (tim;dir = -1);
+  @fun = (@fun)[sort];
+  @val = (@val)[sort];
+}
+
+private define __sort_by_name (fun, val)
+{
+  __sorted = "Sorted by Name";
+  variable sort = array_sort (@fun);
+  @fun = (@fun)[sort];
+  @val = (@val)[sort];
+}
+
+private define __sort_by_total_exec (fun, val)
+{
+  __sorted = "Sorted by total executions time";
+  variable called = array_map (Integer_Type, &get_struct_field, @val, "called");
+  variable sort = array_sort (called;dir = -1);
+  @fun = (@fun)[sort];
+  @val = (@val)[sort];
+}
+
+private define __sort_by_averg_exec_tim (fun, val)
+{
+  __sorted = "Sorted by average execution time";
+  variable tim = array_map (Double_Type, &get_struct_field, @val, "tim");
+  variable exec = array_map (Integer_Type, &get_struct_field, @val, "called");
+  tim = tim / exec;
+  variable sort = array_sort (tim;dir = -1);
+  @fun = (@fun)[sort];
+  array_map (Void_Type, &set_struct_field, @val, "tim", tim[sort]);
+
+}
+
+static define __profile_get ()
+{
+  variable a = __profile_parse;
+  ifnot (length (a))
+    return;
+
+  variable funs = assoc_get_keys (a);
+  variable vals = assoc_get_values (a);
+
+  if (qualifier_exists ("sort_by_exec_tim"))
+    __sort_by_exec_tim (&funs, &vals);
+  else if (qualifier_exists ("sort_by_total_exec"))
+    __sort_by_total_exec (&funs, &vals);
+  else if (qualifier_exists ("sort_by_averg_exec_tim"))
+    __sort_by_averg_exec_tim (&funs, &vals);
+  else
+    __sort_by_name (&funs, &vals);
+
+  variable i, l, m = 1;
+
+  _for i (0, length (vals) - 1)
+    {
+    vals[i].called = string (vals[i].called);
+    l = strlen (vals[i].called);
+    if (l > m)
+      m = l;
+    }
+
+  if (m < 6)
+    m = 6;
+  m = string (m);
+
+  variable w = string (max (strlen (funs)));
+
+  variable ar = [
+    __sorted + "\n",
+    sprintf ("%-" + w + "s  %s  %s", "FUNCTION", "CALLED", "EXEC_TIME\n")
+    ];
+
+  _for i (0, length (funs) - 1)
+    ar = [ar, sprintf ("%-" + w + "s  %-" + m + "s  %f\n", funs[i], vals[i].called, vals[i].tim)];
+
+  () = File.write (SCRATCH, "\0");
+  toscratch (ar);
+  __scratch (NULL);
+}

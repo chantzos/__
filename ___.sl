@@ -91,10 +91,15 @@ private variable THESE = Assoc_Type[String_Type];
 
 THESE["__me__"] = `public variable This = This->__INIT__ ("__INSTALL__";` +
     `shell = 0, smg = 0, ved = 0, err_handler = NULL, at_exit = NULL, exit = NULL);`;
+
 THESE["__"] = `public variable This = This->__INIT__ ("__");`;
+
 THESE["__COMMAND__"] = `public variable This = This->__INIT__ ("__COMMAND__";` +
     `shell = 0, smg = 0, ved = 0);`;
-THESE["__APP__"] = `public variable This = This->__INIT__ ("__APP__";setargv);`;
+
+THESE["__APP__"] =
+`public variable This = This->__INIT__ ("__APP__";setargv);
+`;
 
 public variable This, io;
 
@@ -500,14 +505,24 @@ private define __app__ ()
   __bytecompile__ (SRC_TMP_PATH + "/__app.sl");
 }
 
+private define __profile__ ()
+{
+  variable __buf__ = readfile (SRC_PROTO_PATH + "/__profile.sl");
+
+  writefile (SRC_TMP_PATH + "/__profile.sl", __buf__);
+
+  __bytecompile__ (SRC_TMP_PATH + "/__profile.sl");
+}
+
 private variable LIBS = Assoc_Type[Ref_Type];
 
 LIBS["__me__"] = &__me__;
 LIBS["__"] = &__;
 LIBS["__com__"] = &__com__;
 LIBS["__app__"] = &__app__;
+LIBS["__profile__"] = &__profile__;
 
-private variable BYTECOMPILED = ["__", "__com", "__app"];
+private variable BYTECOMPILED = ["__", "__com", "__app", "__profile"];
 
 private define __build__ (l)
 {
@@ -556,7 +571,7 @@ private define __install_bytecompiled__ ()
 private variable exclude_dirs = [".git", "dev", "C"];
 private variable exclude_files = ["README.md", "___.sl"];
 private variable exclude_class_for_removal =
-  ["__app.slc", "__.slc", "__com.slc"];
+  array_map (String_Type, &sprintf, "%s.slc", BYTECOMPILED);
 
 private define clean_classes (file, st)
 {
@@ -777,6 +792,11 @@ private define __main__ ()
     io.tostdout ("bytecompiling __app");
 
   __build__ ("__app__");
+
+  if (VERBOSE)
+    io.tostdout ("bytecompiling __profile");
+
+  __build__ ("__profile__");
 
   if (VERBOSE)
     io.tostdout ("compiling " + SRC_C_PATH + "/__slsh.c");

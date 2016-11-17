@@ -50,6 +50,11 @@ static define __INIT__ (role)
       Ref_Type, "at_exit", qualifier ("at_exit"), &__def_at_exit__),
     exit        = __get_qualifier_as (
       Ref_Type, "exit", qualifier ("exit"), &__def_exit__),
+    request = struct
+      {
+      X,
+      profile,
+      },
     has = struct
       {
       frames = 1,
@@ -59,11 +64,6 @@ static define __INIT__ (role)
       argv = qualifier ("setargv")
         ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)
         : __argv,
-      },
-    request = struct
-      {
-      X,
-      profile,
       },
     on = struct
       {
@@ -95,6 +95,7 @@ static define __INIT__ (role)
         basedir,
         datadir,
         histfile,
+        profilefile,
         genconf = struct
           {
           file,
