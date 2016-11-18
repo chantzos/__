@@ -69,7 +69,10 @@ subclass Srv
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
 
+    variable saved = Input->rmap.right;
+    Input->rmap.right = [saved, Input->F2];
     () = Rline.commandcmp (s, apps);
+    Input->rmap.right = saved;
 
     if (This.has.sigint)
       {
@@ -123,7 +126,10 @@ subclass Srv
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
 
+    variable saved = Input->rmap.right;
+    Input->rmap.right = [saved, Input->F1];
     () = Rline.commandcmp (s, apps);
+    Input->rmap.right = saved;
 
     variable handl;
 

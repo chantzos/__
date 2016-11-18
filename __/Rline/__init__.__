@@ -788,13 +788,14 @@ class Rline
 
     chr = Input.getch (;disable_langchange);
 
-    ifnot (len || any (['\t', [Input->UP:Input->RIGHT], Input->PPAGE, Input->NPAGE] == chr))
+    ifnot (len || any (['\t', [Input->rmap.right],
+        [Input->UP:Input->LEFT], Input->PPAGE, Input->NPAGE] == chr))
       {
       restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
       return chr;
       }
 
-    while ( any (['\t', [Input->UP:Input->RIGHT], Input->PPAGE, Input->NPAGE] == chr))
+    while ( any (['\t', [Input->rmap.right], [Input->UP:Input->LEFT], Input->PPAGE, Input->NPAGE] == chr))
       {
       if ('\t' == chr)
         if (lines >= length (car) && page == 0)
@@ -923,7 +924,7 @@ class Rline
              ((page) * ((lines - 1) * items)) + ((lines - 1) * items) + items - 1;
         }
 
-      if (Input->RIGHT == chr)
+      if (any (Input->rmap.right == chr))
         if (index + 1 > length (ar) - 1)
           (irow, icol, index) =
             lrow - (length (car) > lines ? lines : length (car)),

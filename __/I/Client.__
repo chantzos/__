@@ -23,7 +23,10 @@ subclass Client
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
 
+    variable saved = Input->rmap.right;
+    Input->rmap.right = [saved, Input->F2];
     () = Rline.commandcmp (s, apps);
+    Input->rmap.right = saved;
 
     ifnot (any (apps == s.argv[0]))
       return;
@@ -67,7 +70,10 @@ subclass Client
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
 
+    variable saved = Input->rmap.right;
+    Input->rmap.right = [saved, Input->F1];
     () = Rline.commandcmp (s, apps);
+    Input->rmap.right = saved;
 
     ifnot (any (apps == s.argv[0]))
       return;
