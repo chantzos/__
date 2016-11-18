@@ -74,7 +74,8 @@ subclass Eval
     if (1 == length (_v_))
       return retval;
 
-    _v_ = _v_[0];
+    _v_ = strtok (_v_[0]);
+    _v_ = strtrim (_v_[1 < length (_v_)]);
 
     try
       {

@@ -439,7 +439,7 @@ private define __module_compile__ (argv)
       flags = NULL == cflags ? " " : cflags;
       }
 
-    flags = Me-> DEF_FLAGS + " " + flags +
+    flags = Me->DEF_FLAGS + " " + flags +
           (debug ? " " + Me->DEB_FLAGS :  "");
 
     p = Proc.init (0, 1, 1);
