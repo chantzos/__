@@ -9,9 +9,9 @@ if (NULL == __profile_fp__)
   This.err_handler ("cannot open " + This.is.my.profilefile + ", errno: " +
     errno_string (errno));
 
-private define __profile__ (fun, exec_tim)
+private define __profile__ (class, fun, exec_tim)
 {
-  () = fprintf (__profile_fp__, "%s%s%f\n", fun, __separator, exec_tim);
+  () = fprintf (__profile_fp__, "%s.%s%s%f\n", class, fun, __separator, exec_tim);
 }
 
 static define __ ()
@@ -39,7 +39,7 @@ static define __ ()
 
     tic;
     (@__f__[fun].funcref) (__push_list (args);;__qualifiers);
-    __profile__ (fun, toc);
+    __profile__ (c["__R__"].name, fun, toc);
     }
   catch ClassError:
     __->err_handler (NULL, __->err_class_type (c, lexi, fun, from, caller, args);;__qualifiers);
@@ -50,18 +50,22 @@ static define __ ()
 private define __profile_parse (s)
 {
   variable a = Assoc_Type[Struct_Type];
+
   if (-1 == fseek (__profile_fp__, 0, SEEK_SET))
     return a;
 
-  variable tok, i, fun, tim, buf;
+  variable tok, fun, tim, buf;
 
+  % if something is gonna change in future, keep in mind that if
+  % __->__ will be called through this code, the file pointer will change
   while (-1 != fgets (&buf, __profile_fp__))
     {
     tok = strtok (buf, __separator);
     ifnot (2 == length (tok))
       continue;
 
-    (fun, tim) = Array.push (tok);
+    fun = tok[0];tim = tok[1];
+
     if (assoc_key_exists (a, fun))
       {
       a[fun].tim += atof (tim);
@@ -76,7 +80,7 @@ private define __profile_parse (s)
 
 private define __sort_by_total_executed_time (s, fun, val)
 {
-  __sorted = "Sorted by total executed time";
+  __sorted = "Sorted by Total Executed Time";
   variable tim = array_map (Double_Type, &get_struct_field, @val, "tim");
   variable sort = array_sort (tim;dir = -1);
   @fun = (@fun)[sort];
@@ -93,7 +97,7 @@ private define __sort_by_name (s, fun, val)
 
 private define __sort_by_total_executions (s, fun, val)
 {
-  __sorted = "Sorted by total executions";
+  __sorted = "Sorted by Total Executions";
   variable called = array_map (Integer_Type, &get_struct_field, @val, "called");
   variable sort = array_sort (called;dir = -1);
   @fun = (@fun)[sort];
@@ -102,14 +106,13 @@ private define __sort_by_total_executions (s, fun, val)
 
 private define __sort_by_averg_executed_time (s, fun, val)
 {
-  __sorted = "Sorted by average execution time";
+  __sorted = "Sorted by Average Execution Time";
   variable tim = array_map (Double_Type, &get_struct_field, @val, "tim");
   variable exec = array_map (Integer_Type, &get_struct_field, @val, "called");
   tim = tim / exec;
   variable sort = array_sort (tim;dir = -1);
   @fun = (@fun)[sort];
   array_map (Void_Type, &set_struct_field, @val, "tim", tim[sort]);
-
 }
 
 private define __profile_get (s)
@@ -145,17 +148,18 @@ private define __profile_get (s)
   m = string (m);
 
   variable w = string (max (strlen (funs)));
+  variable h = ["Profiling Results, " + __sorted,
+    sprintf ("%-" + w + "s  %s  %s", "FUNCTION", "CALLED", "EXEC_TIME")];
+  variable lh = length (h);
+  variable ar = String_Type[length (funs) + lh];
 
-  variable ar = [
-    __sorted + "\n",
-    sprintf ("%-" + w + "s  %s  %s", "FUNCTION", "CALLED", "EXEC_TIME\n")
-    ];
+  ar[[0:lh-1]] = h;
 
   _for i (0, length (funs) - 1)
-    ar = [ar, sprintf ("%-" + w + "s  %-" + m + "s  %f\n", funs[i], vals[i].called, vals[i].tim)];
+    ar[i+lh] = sprintf ("%-" + w + "s  %-" + m + "s  %f",
+      funs[i], vals[i].called, vals[i].tim);
 
-  () = File.write (SCRATCH, "     Profiling Results\n");
-  toscratch (ar);
+  () = File.write (SCRATCH, ar);
   __scratch (NULL);
 }
 
