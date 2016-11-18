@@ -49,11 +49,23 @@ class Array
     i[j];
   end
 
-  def getsize (ar)
-    ifnot (istype (self, ar, String_Type))
-      throw ClassError, "Array::getsize::array should be of String_Type[]";
+  subclass String
+    __init__
+      len
+      __len
+    end
 
-    int (sum (strbytelen (ar)) + length (ar));
+    def len (ar)
+    ifnot (istype (self, ar, String_Type))
+      throw ClassError, "ArrayString.size::array should be of String_Type[]";
+
+    variable newlines = qualifier_exists ("n") * length (ar);
+    int (sum (strbytelen (ar)) + newlines);
+    end
+
+    def __len (ar, newlines)
+      int (sum (strbytelen (ar)) + newlines);
+    end
   end
 
   def map (?)
