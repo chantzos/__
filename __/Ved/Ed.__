@@ -107,7 +107,7 @@ subclass Ed
         Ved.newline_str (s, &indent, line),
         s.lines[["next" == dir ? lnr + 1 : lnr:]]];
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     s._i = lnr == 0 ? 0 : s._ii;
 
@@ -156,7 +156,7 @@ subclass Ed
 
     s._i = lnr == 0 ? 0 : s._ii;
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     set_modified (s);
 
@@ -191,7 +191,7 @@ subclass Ed
 
     s._i = lnr == 0 ? 0 : s._ii;
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     set_modified (s);
 
@@ -373,7 +373,7 @@ subclass Ed
     s.lins[s.ptr[0] - s.rows[0]] = line;
     s.lines[i] = line;
 
-    s.st_.st_size = Array.getsize (s.lines);
+   s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     set_modified (s);
 
@@ -407,7 +407,7 @@ subclass Ed
     s._index = s._indent + len;
     s.ptr[1] = s._index;
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     set_modified (s);
 
@@ -463,7 +463,7 @@ subclass Ed
       Ved.Vundo.set (s, [Ved.Reg.get (reg)], [i]);
       set_modified (s);
 
-      s.st_.st_size = Array.getsize (s.lines);
+      s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
       waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
 
@@ -480,7 +480,7 @@ subclass Ed
     s.lins[s.ptr[0] - s.rows[0]] = line;
     s.lines[i] = line;
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     s.ptr[1]--;
     s._index--;
@@ -523,7 +523,7 @@ subclass Ed
 
     set_modified (s);
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
 

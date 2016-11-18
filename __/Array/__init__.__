@@ -57,7 +57,7 @@ class Array
 
     def len (ar)
     ifnot (istype (self, ar, String_Type))
-      throw ClassError, "ArrayString.size::array should be of String_Type[]";
+      throw ClassError, "ArrayString.len::array should be of String_Type[]";
 
     variable newlines = qualifier_exists ("n") * length (ar);
     int (sum (strbytelen (ar)) + newlines);

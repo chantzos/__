@@ -28,7 +28,7 @@ subclass Vundo
     else
       v.lines[Redo.inds] = Redo.data;
 
-    v.st_.st_size = Array.getsize (v.lines);
+    v.st_.st_size = Array.String.__len (v.lines, v._len + 1);
 
     v._flags |= VED_MODIFIED;
 
@@ -87,7 +87,7 @@ subclass Vundo
     Ved.restorePos (v, Rec[Level].pos);
 
     v._len = length (v.lines) - 1;
-    v.st_.st_size = Array.getsize (v.lines);
+    v.st_.st_size = Array.String.__len (v.lines, v._len + 1);
 
     Level--;
 

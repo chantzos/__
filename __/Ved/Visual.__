@@ -371,7 +371,7 @@ subclass Visual
             if (strlen (s.lines[vs.lnrs[i]]))
               s.lines[vs.lnrs[i]] = repeat (" ", s._shiftwidth) + s.lines[vs.lnrs[i]];
 
-        s.st_.st_size = Array.getsize (s.lines);
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
         ifnot (size == s.st_.st_size)
           set_modified (s);
         else
@@ -393,7 +393,8 @@ subclass Visual
             s.lines[vs.lnrs[i]] = l;
             }
 
-        s.st_.st_size = Array.getsize (s.lines);
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+
         ifnot (size == s.st_.st_size)
           set_modified (s);
         else
@@ -422,7 +423,7 @@ subclass Visual
           s._len = 0;
           }
 
-        s.st_.st_size = Array.getsize (s.lines);
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
         set_modified (s);
         Ved.Vundo.set (s, vs.lines, vs.lnrs;deleted);
         s.draw ();
@@ -692,7 +693,7 @@ subclass Visual
         s.ptr[0] = vs.ptr[0];
         s.ptr[1] = index;
 
-        s.st_.st_size = Array.getsize (s.lines);
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
         set_modified (s);
 

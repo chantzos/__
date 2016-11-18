@@ -586,7 +586,7 @@ subclass Insert
 
       set_modified (s);
 
-      s.st_.st_size = Array.getsize (s.lines);
+      s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
       }
 
     topline (" -- pager --");
@@ -817,7 +817,7 @@ subclass Insert
     @line = (i ? substr (@line, 1, i) : "") + fn +
       (s._index + 1 == strlen (@line) ? "" : substr (@line, s._index + 2, -1));
     s.lines[lnr] = @line;
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     set_modified (s);
 
@@ -858,7 +858,7 @@ subclass Insert
       s.lines = [s.lines[[:lnr]], 1 == length (ar) ? String_Type[0] : ar[[1:]],
         lnr == s._len ? String_Type[0] :  s.lines[[lnr+1:]]];
       s._len = length (s.lines) - 1;
-      s.st_.st_size = Array.getsize (s.lines);
+      s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
       set_modified (s);
 
@@ -936,7 +936,7 @@ subclass Insert
         {
         s.lins[s.ptr[0] - s.rows[0]] = @line;
         s.lines[is.lnr] = @line;
-        s.st_.st_size = Array.getsize (s.lines);
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
         Ved.writefile (s, NULL, s.ptr, NULL, NULL);
         s._flags &= ~VED_MODIFIED;
         Smg.send_msg_dr (s._abspath + " written", 0, s.ptr[0], s.ptr[1]);

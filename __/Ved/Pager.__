@@ -77,7 +77,7 @@ subclass Pager
 
     set_modified (s);
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     waddline (s, line, 0, s.ptr[0]);
 

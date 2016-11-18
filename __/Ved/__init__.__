@@ -1212,7 +1212,7 @@ class Ved
       s.lines[i] = line;
       set_modified (s);
 
-      s.st_.st_size = Array.getsize (s.lines);
+      s.st_.st_size = Array.String.__len (s.lines, s._len);
 
       waddline (s, line, 0, s.ptr[0]);
 
@@ -1248,7 +1248,7 @@ class Ved
 
     set_modified (s);
 
-    s.st_.st_size = Array.getsize (s.lines);
+    s.st_.st_size = Array.String.__len (s.lines, s._len);
 
     waddline (s, line, 0, s.ptr[0]);
 
@@ -1447,7 +1447,7 @@ class Ved
       buf._len = 0;
       }
 
-    buf.st_.st_size = Array.getsize (buf.lines);
+    buf.st_.st_size = Array.String.__len (buf.lines, buf._len + 1);
     set_modified (buf);
     buf.draw ();
   end
@@ -1530,7 +1530,8 @@ class Ved
       else
         buf.lines[lnrs] = ar;
 
-      buf.st_.st_size = Array.getsize (buf.lines);
+      buf.st_.st_size = Array.String.__len (buf.lines, buf._len + 1);
+
       set_modified (buf);
       buf.draw ();
       }
