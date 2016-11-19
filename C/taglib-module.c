@@ -3,8 +3,8 @@
   * http://developer.kde.org/~wheeler/taglib.html
   *
   * Initial code written by Agathoklis D. Chatzimanikas
-  * You may distribute this code under the terms of the GNU General Public
-  * License.
+  * You may distribute this code under the terms of the
+  * GNU General Public License.
   */
 
 #include <taglib/tag_c.h>

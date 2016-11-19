@@ -64,9 +64,10 @@ public  variable DEBUG = any ("--debug" == __argv);
 private variable X = any ("--no-x" == __argv) ? 0 : 1;
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
-  "iconv", "json"];
+  "iconv", "json", "taglib"];
 private variable FLAGS = [
-  "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", ""];
+  "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
+  "-ltag_c"];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable DEB_FLAGS =
@@ -74,6 +75,8 @@ private variable DEB_FLAGS =
  -Winline -Wmissing-prototypes -Wnested-externs -Wpointer-arith\
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
+private variable MODULES_THAT_DONT_EXIT_ON_ERR = ["taglib"];
+private variable MODULES_THAT_FAILED = String_Type[0];
 private variable CLASSES = [
   "Input",  "Smg",   "Rand", "Crypt",  "Os",   "Opt",
   "String", "Rline", "Re",   "Proc",   "Sock", "Subst",
@@ -319,7 +322,14 @@ private define __build_module__ (i)
     io.tostdout ("compiling " + SRC_C_PATH + "/" + MODULES[i] + "-module.c");
 
   if (system (CC_COM))
-    This.exit ("failed to compile " + MODULES[i] + "-module.c", 1);
+    ifnot (any (MODULES[i] == MODULES_THAT_DONT_EXIT_ON_ERR))
+      This.exit ("failed to compile " + MODULES[i], 1);
+    else
+      {
+      MODULES_THAT_FAILED = [MODULES_THAT_FAILED, MODULES[i]];
+      io.tostderr ("failed to compile " + MODULES[i] +
+        " module, but which is not mandatory");
+      }
 }
 
 __build_module__ (0);
@@ -549,12 +559,12 @@ private define __install_modules__ ()
 {
   variable i;
   _for i (0, length (MODULES) - 1)
-    {
     if (-1 == rename (SRC_TMP_PATH + "/" + MODULES[i] + "-module.so",
         STD_C_PATH + "/" + MODULES[i] + "-module.so"))
-      This.exit ("failed to rename " + SRC_TMP_PATH + "/" + MODULES[i] + "-module.so to " +
-        STD_C_PATH + "\n" + errno_string (errno), 1);
-    }
+      if (0 == any (MODULES[i] == MODULES_THAT_DONT_EXIT_ON_ERR) ||
+          0 == any (MODULES[i] == MODULES_THAT_FAILED))
+        This.exit ("failed to rename " + SRC_TMP_PATH + "/" + MODULES[i] + "-module.so to " +
+          STD_C_PATH + "\n" + errno_string (errno), 1);
 }
 
 private define __install_bytecompiled__ ()
