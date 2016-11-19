@@ -1,5 +1,13 @@
 Load.module ("pcre");
 
+try
+  Load.module ("taglib");
+catch ClassError:
+  {
+  Load.file (This.is.my.basedir + "/lib/" + "taglib", NULL);
+  HAS_TAGLIB = 0;
+  }
+
 Class.load ("Hw";force);
 
 if (NULL == MED_EXEC)

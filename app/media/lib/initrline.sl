@@ -193,8 +193,8 @@ private define play_audio (argv)
   __write_lyric__ (;usecur);
 }
 
-% there is a bug somewhere in the toolchain
-% fails (and hangs (aparrently with no reason)) when "pt_step 1"
+% there is a bug somewhere in the toolchain,
+% it fails (and hangs (aparrently with no reason)) when "pt_step 1"
 % is written later in the fifo 
 private define play_video (argv)
 {
@@ -239,7 +239,9 @@ private define play_video (argv)
 
 private define __show_list (argv)
 {
-  () = File.copy (MED_LIST, SCRATCH);
+  variable ar = File.readlines (MED_LIST);
+  ar = array_map (String_Type, &path_basename_sans_extname, ar);
+  () = File.write (SCRATCH, ar);
   __scratch (NULL);
 }
 
@@ -293,6 +295,63 @@ private define _volume_up (argv)
   Hw.volume_up ();
 }
 
+private define __tagread (argv)
+{
+  if (1 == length (argv))
+    return;
+
+  variable files = argv[[1:]];
+  variable file, i, tag, buf = "";
+
+  _for i (0, length (files) - 1)
+    {
+    file = files[i];
+    tag = tagread (file);
+
+    if (NULL == tag)
+      continue;
+
+    buf += "Tag Properties for " +
+     path_basename_sans_extname  (file) + "\n";
+    buf += "Title   : " + tag.title + "\n";
+    buf += "Artist  : " + tag.artist + "\n";
+    buf += "Album   : " + tag.album + "\n";
+    buf += "Comment : " + tag.comment + "\n";
+    buf += "Genre   : " + tag.genre + "\n";
+    buf += "Year    : " + string (tag.year) + "\n";
+    buf += "Track   : " + string (tag.track) + "\n";
+    }
+
+  () = File.write (SCRATCH, buf);
+  __scratch (NULL);
+}
+
+private define __tagwrite (argv)
+{
+  variable s = @TagLib_Type;
+  s.title = Opt.Arg.getlong ("title", NULL, &argv;del_arg, defval = "");
+  s.artist = Opt.Arg.getlong ("artist", NULL, &argv;del_arg,
+    defval = "");
+  s.album = Opt.Arg.getlong ("album", NULL, &argv;del_arg, defval = "");
+  s.comment = Opt.Arg.getlong ("comment", NULL, &argv;del_arg, defval = "");
+  s.genre = Opt.Arg.getlong ("genre", NULL, &argv;del_arg, defval = "");
+  s.track = Opt.Arg.getlong ("track", "int", &argv;del_arg, defval = 0);
+  s.year = Opt.Arg.getlong ("year", "int", &argv;del_arg, defval = 0);
+
+  if (1 == length (argv))
+    return;
+
+  variable fname = argv[1];
+  variable retval = tagwrite (fname, s);
+  if (-1 == retval)
+    {
+    Smg.send_msg_dr (fname + ": failed to write tags", 1, NULL, NULL);
+    return;
+    }
+
+  __tagread ([NULL, fname]);
+}
+
 private define my_commands ()
 {
   variable a = init_commands ();
@@ -340,6 +399,23 @@ private define my_commands ()
 
   a["0"] = @Argvlist_Type;
   a["0"].func = &_volume_up;
+
+  if (HAS_TAGLIB)
+    {
+    a["tagread"] = @Argvlist_Type;
+    a["tagread"].func = &__tagread;
+
+    a["tagwrite"] = @Argvlist_Type;
+    a["tagwrite"].func = &__tagwrite;
+    a["tagwrite"].args = [
+      "--title= String song title",
+      "--artist= String artist",
+      "--album= String album",
+      "--comment= String comment",
+      "--genre= String genre",
+      "--track= int track",
+      "--year= int year"];
+    }
 
   a;
 }

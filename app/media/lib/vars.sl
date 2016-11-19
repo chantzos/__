@@ -18,6 +18,18 @@ variable MED_ARGV = [
   "-input", sprintf ("file=%s", MED_FIFO),
   "-input", sprintf ("nodefault-bindings:conf=%s", MED_CONF)];
 
+typedef struct
+  {
+  title,
+  artist,
+  album,
+  comment,
+  genre,
+  track,
+  year,
+  }TagLib_Type;
+
+variable HAS_TAGLIB = 1;
 variable MED_VID_EXT = [".mkv", ".mp4", ".avi"];
 variable MED_AUD_EXT = [".ogg", ".mp3"];
 variable MED_AUD_DIR;
