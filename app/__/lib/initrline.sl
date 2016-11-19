@@ -459,9 +459,14 @@ private define __module_compile__ (argv)
     else
     % getkey segfaults
       if (NULL == dont_inst && "getkey" != mdl && 0 == pabs)
-        if (-1 == File.copy (This.is.my.tmpdir + "/" + mdlout,
-          Env->STD_C_PATH + "/" + mdlout))
-            err = 1;
+        if (-1 == File.copy (largv[-1], Env->STD_C_PATH + "/" + mdlout))
+          err = 1;
+
+    if (NULL == dont_inst && "getkey" != mdl && err == 0 == pabs)
+      IO.tostderr (mdl + " was installed in " + Env->STD_C_PATH);
+    else
+      ifnot (err)
+        IO.tostderr (mdl + " was compiled at " + largv[-1]);
     }
 
   Smg.send_msg_dr ("exit status: " + string (err), err, NULL, NULL);
