@@ -15,14 +15,14 @@ subclass Arg
   end
 
   def getlong (arg, type, argv)
-    variable opt, ind, err_msg;
+    variable opt, ind, err_msg, defval = qualifier ("defval");
     (opt, ind) = self.compare ("--" + arg + "=", argv;;struct {@__qualifiers, ret_arg});
 
     if (NULL == ind)
       {
       err_msg = __get_qualifier_as (String_Type, "exists_err", qualifier ("exists_err"),
           NULL);
-      return NULL;
+      return defval;
       }
 
     opt = strtok (opt, "=");
@@ -30,7 +30,7 @@ subclass Arg
     if (2 > length (opt))
       {
       err = "No value specified";
-      return NULL;
+      return defval;
       }
 
     opt = strjoin (opt[[1:]], "=");
@@ -47,7 +47,7 @@ subclass Arg
       {
       case "int" || case "integer":
         if (1 != __is_datatype_numeric (_slang_guess_type (opt)))
-  	       return NULL;
+  	       return defval;
 
    	    return atoi (opt);
       }
@@ -57,7 +57,7 @@ subclass Arg
         ifnot (Dir.isdirectory (opt))
           {
           err = "--" + arg + "=" + opt + ", doesn't specify a directory";
-          return NULL;
+          return defval;
           }
 
         return opt;
@@ -66,13 +66,13 @@ subclass Arg
       {
       case "fname" || case "filename":
         ifnot (File.is_reg (opt))
-          return NULL;
+          return defval;
 
         return opt;
       }
 
       {
-      return NULL;
+      return defval;
       }
   end
 
