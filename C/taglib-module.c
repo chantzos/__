@@ -127,7 +127,7 @@ static void tagread_intrinsic (char *fname)
 static SLang_Intrin_Fun_Type taglib_Intrinsics [] =
 {
   MAKE_INTRINSIC_S("tagread", tagread_intrinsic, VOID_TYPE),
-  MAKE_INTRINSIC_0("tagwrite", tagwrite_intrinsic, VOID_TYPE),
+  MAKE_INTRINSIC_0("tagwrite", tagwrite_intrinsic, SLANG_INT_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
 
