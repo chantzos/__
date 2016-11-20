@@ -448,9 +448,11 @@ class Com
       isscratch = NULL;
       }
 
-    if ((NULL != isscratch || 0 == This.is.shell) &&
-      0 == EXITSTATUS &&
-      0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
+    if (NULL != isscratch || 0 == This.is.shell)
+      if (EXITSTATUS)
+        __messages;
+      else
+        if (0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
           App.scratch (Ved.get_cur_buf ());
 
     ifnot (isbg)
