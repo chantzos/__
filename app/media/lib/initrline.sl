@@ -313,6 +313,9 @@ private define play_video (argv)
 private define __show_list (argv)
 {
   variable ar = File.readlines (MED_LIST);
+  if (NULL == ar || 0 == length (ar))
+    return;
+
   ar = array_map (String_Type, &path_basename_sans_extname, ar);
   () = File.write (SCRATCH, ar);
   __scratch (NULL);
@@ -321,11 +324,15 @@ private define __show_list (argv)
 private define __prev (argv)
 {
   () = write (MED_FD, "pt_step -1\n");
+  __write_info__;
+  __write_lyric__ (;usecur);
 }
 
 private define __next (argv)
 {
   () = write (MED_FD, "pt_step 1\n");
+  __write_info__;
+  __write_lyric__ (;usecur);
 }
 
 private define __pause (argv)
@@ -342,6 +349,8 @@ private define __seek (argv)
 {
   () = write (MED_FD, "seek " + (argv[0] == "forward" ? "+" : "-")
      + "14\n");
+  __write_info__;
+  __write_lyric__ (;usecur);
 }
 
 private define _lyric_up (argv)
@@ -515,19 +524,21 @@ private define starthook (s)
     if (1 == length (s.argv))
       ifnot (strlen (s.argv[0]))
         if (any (['f', 'b', ' ', 'p', 'n', 'r', Input->PPAGE, Input->ESC_up, 'k',
-             Input->NPAGE, Input->ESC_down, 'j', '9', '0', 'l', 'a'] == s._chr))
+             Input->NPAGE, Input->ESC_down, 'j', '9', '0', 'l', 'a', 't']
+               == s._chr))
           {
           s.argv[0] = [
             "forward", "backward",  "pause",  "prev", "next",
             "redisplay", "lyrics_up", "lyrics_up", "lyrics_up",
-            "lyrics_down", "lyrics_down", "lyrics_down", "9", "0", "playlist", "audioplay"]
+            "lyrics_down", "lyrics_down", "lyrics_down", "9", "0",
+            "playlist", "audioplay", "tagwrite"]
             [wherefirst (s._chr == ['f', 'b', ' ', 'p', 'n', 'r', Input->PPAGE,
              Input->ESC_up, 'k', Input->NPAGE, Input->ESC_down, 'j', '9', '0',
-             'l', 'a'])];
+             'l', 'a', 't'])];
 
-          if (s.argv[0] == "audioplay")
+          if (any (s.argv[0] == ["audioplay", "tagwrite"]))
             {
-            s._col = strlen ("audioplay") + 2 + strlen (MED_AUD_DIR[0]);
+            s._col = strlen (s.argv[0]) + 2 + strlen (MED_AUD_DIR[0]);
             s.argv = [s.argv, MED_AUD_DIR[0]];
             Rline.parse_args (NULL, s);
             Rline.prompt (NULL, s, s._lin, s._col);
