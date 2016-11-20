@@ -1,4 +1,5 @@
 private variable CUR_PLAYING = struct {fname, time_len, time_left};
+private variable CUR_LYRIC = NULL;
 private variable CUR_PLAYLIST = NULL;
 private variable CUR_STR = "get_file_name\nget_time_length\nget_time_pos\n";
 
@@ -76,15 +77,79 @@ private define __write_info__ ()
     buf = "\n";
   else
     buf =
-    "\nfilename : " + path_basename_sans_extname (CUR_PLAYING.fname) +
-    "\ntime len : " + CUR_PLAYING.time_len +
-    "\ntime left: " + CUR_PLAYING.time_left + "\n";
+    "\nFilename: " + path_basename_sans_extname (CUR_PLAYING.fname) +
+    "\nTime len: " + CUR_PLAYING.time_len + " Time left: " + CUR_PLAYING.time_left + "\n";
 
   ifnot (NULL == cur)
     ifnot (NULL == CUR_PLAYING.fname)
       if (CUR_PLAYING.fname == cur.fname && CUR_PLAYING.time_left ==
           cur.time_left)
         return;
+
+  variable tag = NULL, tmp = 1, i, ar, fname = NULL;
+  loop (1)
+    {
+    if (NULL == CUR_PLAYING.fname)
+      break;
+
+    ar = File.readlines (MED_LIST);
+    _for i (0, length (ar) - 1)
+      if (path_basename_sans_extname (ar[i]) ==
+          path_basename_sans_extname (CUR_PLAYING.fname))
+        {
+        fname = ar[i];
+        break;
+        }
+
+    if (NULL == fname)
+      break;
+
+    tag = tagread (fname);
+    if (NULL == tag)
+      break;
+
+    if (strlen (tag.title))
+      {
+      buf += "Title: " + tag.title;
+      tmp++;
+      }
+
+    if (strlen (tag.artist))
+      {
+      buf += (tmp mod 2 ? " " : "\n") + "Artist: " + tag.artist;
+      tmp++;
+      }
+
+    if (strlen (tag.album))
+      {
+      buf += (tmp mod 2 ? " " : "\n") + "Album: " + tag.album;
+      tmp++;
+      }
+
+    if (strlen (tag.genre))
+      {
+      buf += (tmp mod 2 ? " " : "\n") + "Genre: " + tag.genre;
+      tmp++;
+      }
+
+    if (strlen (tag.comment))
+      {
+      buf += (tmp mod 2 ? " " : "\n") + "Comment: " + tag.comment;
+      tmp++;
+      }
+
+    if (tag.year)
+      {
+      buf += (tmp mod 2 ? " " : "\n") + "Year: " + string (tag.year);
+      tmp++;
+      }
+
+    if (tag.track)
+      {
+      buf += (tmp mod 2 ? " " : "\n") + "Track: " + string (tag.track);
+      tmp++;
+      }
+    }
 
   variable info = Ved.get_frame_buf (1);
 
@@ -99,14 +164,19 @@ private define __write_lyric__ ()
   if (NULL == CUR_PLAYING.fname)
     return;
 
+  variable cur_song = path_basename_sans_extname (CUR_PLAYING.fname);
+
+  ifnot (NULL == CUR_LYRIC)
+    if (cur_song == CUR_LYRIC)
+      return;
+
   variable lyrics = listdir (MED_LYRICS);
   if (NULL == lyrics || 0 == length (lyrics))
     return;
 
   try
     {
-    variable pat = pcre_compile (path_basename_sans_extname (CUR_PLAYING.fname),
-        PCRE_CASELESS);
+    variable pat = pcre_compile (cur_song, PCRE_CASELESS);
     }
   catch ParseError:
     return;
@@ -120,14 +190,17 @@ private define __write_lyric__ ()
       break;
       }
 
-  if (NULL == found)
-    return;
-
   variable lyricbuf = Ved.get_frame_buf (0);
-  variable lyric = File.read (MED_LYRICS + "/" + lyrics[i]);
-  variable title = path_basename_sans_extname (CUR_PLAYING.fname);
-  () = File.write (lyricbuf._abspath, "   " + title + "\n" +
-      "   " + repeat ("=", strlen (title)) + "\n" + lyric);
+  variable lyric;
+  if (NULL == found)
+    lyric = "";
+  else
+    {
+    CUR_LYRIC = cur_song;
+    lyric = File.read (MED_LYRICS + "/" + lyrics[i]);
+    }
+
+  () = File.write (lyricbuf._abspath, lyric);
 
   draw (lyricbuf;_i = 0);
 }
@@ -328,20 +401,33 @@ private define __tagread (argv)
 
 private define __tagwrite (argv)
 {
-  variable s = @TagLib_Type;
-  s.title = Opt.Arg.getlong ("title", NULL, &argv;del_arg, defval = "");
-  s.artist = Opt.Arg.getlong ("artist", NULL, &argv;del_arg,
-    defval = "");
-  s.album = Opt.Arg.getlong ("album", NULL, &argv;del_arg, defval = "");
-  s.comment = Opt.Arg.getlong ("comment", NULL, &argv;del_arg, defval = "");
-  s.genre = Opt.Arg.getlong ("genre", NULL, &argv;del_arg, defval = "");
-  s.track = Opt.Arg.getlong ("track", "int", &argv;del_arg, defval = 0);
-  s.year = Opt.Arg.getlong ("year", "int", &argv;del_arg, defval = 0);
-
-  if (1 == length (argv))
+  variable fname = wherefirst (0 != strncmp (argv[[1:]], "--", 2));
+  if (NULL == fname)
     return;
 
-  variable fname = argv[1];
+  fname = argv[fname + 1];
+
+  variable s = tagread (fname);
+  if (NULL == s)
+    s = struct {
+      title = "",   artist = "", album = "",
+      comment = "", genre = "",  track = 0, year = 0};
+
+  s.title = Opt.Arg.getlong ("title", NULL, &argv;del_arg,
+    defval = s.title);
+  s.artist = Opt.Arg.getlong ("artist", NULL, &argv;del_arg,
+    defval = s.artist);
+  s.album = Opt.Arg.getlong ("album", NULL, &argv;del_arg,
+    defval = s.album);
+  s.comment = Opt.Arg.getlong ("comment", NULL, &argv;del_arg,
+    defval = s.comment);
+  s.genre = Opt.Arg.getlong ("genre", NULL, &argv;del_arg,
+    defval = s.genre);
+  s.track = Opt.Arg.getlong ("track", "int", &argv;del_arg,
+   defval = s.track);
+  s.year = Opt.Arg.getlong ("year", "int", &argv;del_arg,
+    defval = s.year);
+
   variable retval = tagwrite (fname, s);
   if (-1 == retval)
     {

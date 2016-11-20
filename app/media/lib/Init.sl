@@ -61,7 +61,7 @@ if (-1 == Init_Process ())
 private variable i_colors = [Smg->COLOR.infobg];
 
 private variable i_regexps = [
-  pcre_compile ("(^((filename|time le(n|ft))\s?:)|(^————.*$))"R, 0)];
+  pcre_compile ("(((Filename|Title|Album|Artist|Year|Track|Genre|Comment|Time le(n|ft))\s?:)|(^————.*$))"R, 0)];
 
 private define info_lexicalhl (s, lines, vlines)
 {
@@ -118,8 +118,8 @@ private define _myframesize_ ()
   loop (_NARGS) pop ();
 
   variable f = Array_Type[2];
-  f[0] = [1:LINES - 9];
-  f[1] = [LINES - 8:LINES - 3];
+  f[0] = [1:LINES - 10];
+  f[1] = [LINES - 9:LINES - 3];
   f;
 }
 

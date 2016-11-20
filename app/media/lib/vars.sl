@@ -7,17 +7,20 @@ variable MED_LIST   = This.is.my.tmpdir + "/__MED_playlist";
 variable MED_STDOUT = This.is.my.tmpdir + "/__MED_STDOUT";
 variable MED_LYRICS = This.is.my.datadir + "/lyrics";
 variable MED_CONF   = This.is.my.datadir + "/__MED_CONF";
-variable MED_EXEC = Sys.which ("mplayer");
+variable MED_EXEC   = Sys.which ("mplayer");
 variable MED_ARGV = [
   "-utf8",
   "-slave",
   "-idle",
   "-fs",
   "-noconsolecontrols",
+  "-pausing", "0",
   "-msglevel", "all=-1:global=5",
   "-input", sprintf ("file=%s", MED_FIFO),
   "-input", sprintf ("nodefault-bindings:conf=%s", MED_CONF)];
 
+% UNUSED - in any case it should be an exact copy of the same type
+% which is declared in taglib-module
 typedef struct
   {
   title,
