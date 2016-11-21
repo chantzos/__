@@ -1,3 +1,14 @@
+public define __return (retval)
+{
+  throw Return, "", retval;
+}
+
+public define __return__ ()
+{
+  variable retval = 1 == _NARGS ? () : NULL;
+  struct {Return = retval};
+}
+
 __use_namespace ("__");
 
 % probably temporary code, abstraction?
@@ -20,6 +31,9 @@ private define __err_set (nsname, err)
     __ERR__[nsname] = {err};
   else
     list_insert (__ERR__[nsname], err);
+
+  if (qualifier_exists ("Return"))
+    __return (qualifier ("Return"));
 }
 
 static define ERR ()
@@ -47,7 +61,7 @@ static define ERR ()
   ifnot (NULL == err)
     list_append (args, err);
 
-  (@ref) (__push_list (args));
+  (@ref) (__push_list (args);;__qualifiers);
 }
 
 __use_namespace ("IO");

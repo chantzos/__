@@ -516,6 +516,8 @@ static define __ ()
 
     (@__f__[fun].funcref) (__push_list (args);;__qualifiers);
     }
+  catch Return:
+    return __get_exception_info.object;
   catch ClassError:
     err_handler (NULL, err_class_type (c, lexi, fun, from, caller, args);;__qualifiers);
   catch AnyError:

@@ -1,4 +1,5 @@
 new_exception ("ClassError", AnyError, "Base Class Error");
+new_exception ("Return", ClassError, "Return");
 
 typedef struct
   {

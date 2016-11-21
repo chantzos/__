@@ -41,6 +41,11 @@ static define __ ()
     (@__f__[fun].funcref) (__push_list (args);;__qualifiers);
     __profile__ (c["__R__"].name, fun, toc);
     }
+  catch Return:
+    {
+    __profile__ (c["__R__"].name, fun, toc);
+    return __get_exception_info.object;
+    }
   catch ClassError:
     __->err_handler (NULL, __->err_class_type (c, lexi, fun, from, caller, args);;__qualifiers);
   catch AnyError:
