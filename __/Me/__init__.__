@@ -27,4 +27,17 @@ class Me
      ifnot (is_local)
        return strreplace (path, Env->LOCAL_PATH, Env->SRC_LOCAL_PATH);
   end
+
+  def generate_base_script (__this__)
+    `private variable CLASSPATH = "` + Env->STD_CLASS_PATH + `";` + "\n" +
+    `set_import_module_path (realpath (CLASSPATH + "/../C") + ":" + get_import_module_path);`
+    + "\n\n" +
+    File.read (Env->SRC_PROTO_PATH + "/__alfa.sl") +
+    File.read (Env->SRC_PROTO_PATH + "/__slang.sl") +
+    File.read (Env->SRC_PROTO_PATH + "/__This.sl") +
+    File.read (Env->SRC_PROTO_PATH + "/__vita.sl") +
+    __this__ +
+    File.read (Env->SRC_PROTO_PATH + "/__.sl") +
+    File.read (Env->SRC_PROTO_PATH + "/__gama.sl");
+  end
 end
