@@ -121,7 +121,7 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-private define __profile_set ()
+private define __profile_set (self)
 {
   if (NULL == This.request.profile)
     ifnot (qualifier_exists ("set"))
