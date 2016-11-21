@@ -35,6 +35,23 @@ static SLang_CStruct_Field_Type TagLib_Struct [] =
   SLANG_END_CSTRUCT_TABLE
 };
 
+typedef struct
+  {
+  int bitrate;
+  int length;
+  int channels;
+  int samplerate;
+  } TagLib_Audio_Properties;
+
+static SLang_CStruct_Field_Type TagLib_AudioProperties_Struct [] =
+{
+  MAKE_CSTRUCT_INT_FIELD(TagLib_Audio_Properties, bitrate, "bitrate", 0),
+  MAKE_CSTRUCT_INT_FIELD(TagLib_Audio_Properties, length, "length", 0),
+  MAKE_CSTRUCT_INT_FIELD(TagLib_Audio_Properties, channels, "channels", 0),
+  MAKE_CSTRUCT_INT_FIELD(TagLib_Audio_Properties, samplerate, "samplerate", 0),
+  SLANG_END_CSTRUCT_TABLE
+};
+
 static int tagwrite_intrinsic (void)
 {
   TagLib tags;
@@ -60,10 +77,17 @@ static int tagwrite_intrinsic (void)
     return -1;
     }
 
+  if (!taglib_file_is_valid (file))
+    {
+    SLang_free_cstruct ((VOID_STAR)&tags, TagLib_Struct);
+    taglib_file_free (file);
+    return -1;
+    }
+
   taglib_set_strings_unicode (1);
   tag = taglib_file_tag (file);
 
-  if (tag == NULL)
+  if (!tag)
     {
     SLang_free_cstruct ((VOID_STAR)&tags, TagLib_Struct);
     taglib_file_free (file);
@@ -102,12 +126,20 @@ static void tagread_intrinsic (char *fname)
     return;
     }
 
-  tag = taglib_file_tag (file);
-
-  if (tag == NULL)
+  if (!taglib_file_is_valid (file))
     {
     taglib_file_free (file);
     (void) SLang_push_null ();
+    return;
+    }
+
+  tag = taglib_file_tag (file);
+  
+  if (!tag)
+    {
+    taglib_file_free (file);
+    (void) SLang_push_null ();
+    return;
     }
 
   tags.title = taglib_tag_title (tag);
@@ -124,10 +156,52 @@ static void tagread_intrinsic (char *fname)
   taglib_file_free (file);
 }
 
+static void audio_properties_intrin (char *fname)
+{
+  TagLib_Audio_Properties p;
+  const TagLib_AudioProperties *prop;
+  TagLib_File *file;
+
+  file = taglib_file_new (fname);
+
+  if (file == NULL)
+    {
+    (void) SLang_push_null ();
+    return;
+    }
+
+  if (!taglib_file_is_valid (file))
+    {
+    taglib_file_free (file);
+    (void) SLang_push_null ();
+    return;
+    }
+
+  prop = taglib_file_audioproperties (file);
+  
+  if (!prop)
+    {
+    taglib_file_free (file);
+    (void) SLang_push_null ();
+    return;
+    }
+
+  p.bitrate = taglib_audioproperties_bitrate (prop);
+  p.length  = taglib_audioproperties_length (prop);
+  p.channels = taglib_audioproperties_channels (prop);
+  p.samplerate = taglib_audioproperties_samplerate (prop);
+
+  SLang_push_cstruct ((VOID_STAR) &p, TagLib_AudioProperties_Struct);
+
+  taglib_tag_free_strings ();
+  taglib_file_free (file);
+} 
+
 static SLang_Intrin_Fun_Type taglib_Intrinsics [] =
 {
   MAKE_INTRINSIC_S("tagread", tagread_intrinsic, VOID_TYPE),
   MAKE_INTRINSIC_0("tagwrite", tagwrite_intrinsic, SLANG_INT_TYPE),
+  MAKE_INTRINSIC_S("audioproperties", audio_properties_intrin, VOID_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
 
