@@ -4,8 +4,7 @@ class Slang
       byte_compile_file (file, 0);
     catch AnyError:
       {
-      IO.tostderr ("failed to byte compile");
-      Exc.print (__get_exception_info);
+      self.err ([file + ": failed to byte compile it", Exc.fmt (__get_exception_info)]);
       return -1;
       }
 

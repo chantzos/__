@@ -38,6 +38,7 @@ private define __bytecompile__ (argv)
 
     if (-1 == Slang.bytecompile (slib))
       {
+      IO.tostderr (Slang.err ());
       ern = 1;
       continue;
       }
@@ -163,6 +164,7 @@ private define __classcompile__ (argv)
 
    if (-1 == Slang.bytecompile (as))
      {
+     IO.tostderr (Slang.err ());
      ern = 1;
      continue;
      }
