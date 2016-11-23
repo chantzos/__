@@ -90,13 +90,29 @@ This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;
 This.is.my.histfile  = Env->USER_DATA_PATH + "/.__" + Env->USER +
     "_" + This.is.my.name + "history";
 
-This.is.my.genconf.file = Env->USER_DATA_PATH + "/SetGen/setgen.conf";
-if (-1 == access (This.is.my.genconf.file, F_OK|R_OK) ||
-    -1 == Sys.checkperm (stat_file (This.is.my.genconf.file).st_mode,
-       File->PERM["_PRIVATE"]))
-  This.is.my.genconf.set = String_Type[0];
-else
-  This.is.my.genconf.set = File.readlines (This.is.my.genconf.file);
+This.is.my.genconf = Env->USER_DATA_PATH + "/Generic/conf";
+This.is.my.conf    = This.is.my.datadir  + "/config/conf";
+
+Anon->Fun (`
+  variable ar = String_Type[0];
+  if (0 == access (This.is.my.genconf, F_OK|R_OK) &&
+      0 == Sys.checkperm (stat_file (This.is.my.genconf).st_mode,
+        File->PERM["_PRIVATE"]))
+    ar = File.readlines (This.is.my.genconf);
+
+  if (0 == access (This.is.my.conf, F_OK|R_OK) &&
+      0 == Sys.checkperm (stat_file (This.is.my.conf).st_mode,
+        File->PERM["_PRIVATE"]))
+    ar = [ar, File.readlines (This.is.my.conf)];
+
+  variable tok, i;
+  _for i (0, length (ar) - 1)
+    {
+    tok = strtok (ar[i], "::");
+    ifnot (2 == length (tok))
+      continue;
+    This.is.my.settings[tok[0]] = tok[1];
+    }`);
 
 This.is.std.out.type = "ashell";
 

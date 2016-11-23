@@ -155,25 +155,17 @@ subclass Srv
       }
     else
       {
-      variable a = This.is.my.genconf.set[wherenot (strncmp (
-        This.is.my.genconf.set,
-        "ON_RECONNECT_REQ_DEF_APPS::", strlen (
-        "ON_RECONNECT_REQ_DEF_APPS::")))];
-
-      ifnot (length (a))
+      variable defapp = This.is.my.settings["ON_RECONNECT_REQ_DEF_APPS"];
+      ifnot (strlen (defapp))
         return;
 
-      a = strtok (a[0], "::");
-      ifnot (2 == length (a))
-        return;
-
-      a = strtok (a[1], ",");
+      defapp = strtok (defapp, ",");
 
       variable j, app = NULL;
-      _for j (0, length (a) - 1)
-        ifnot (a[j] == This.is.my.name)
+      _for j (0, length (defapp) - 1)
+        ifnot (defapp[j] == This.is.my.name)
           {
-          app = a[j];
+          app = defapp[j];
           break;
           }
 

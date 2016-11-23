@@ -96,11 +96,9 @@ static define __INIT__ (role)
         datadir,
         histfile,
         profilefile,
-        genconf = struct
-          {
-          file,
-          set,
-          },
+        settings = Assoc_Type[String_Type],
+        genconf,
+        conf,
         },
       std = struct
         {
