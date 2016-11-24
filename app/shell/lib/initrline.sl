@@ -15,6 +15,7 @@ private define my_commands ()
 
 private define filtercommands (s, ar)
 {
+  ar = __APP__->__filtercommands (s, ar, ['~']);
   ar[where (1 < strlen (ar))];
 }
 

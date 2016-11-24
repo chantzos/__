@@ -56,6 +56,8 @@ class Input
   let HOME  = strncmp ("st-", Env->TERM, 3) ? 0x107 : 0x109;
   let END   = strncmp ("st-", Env->TERM, 3) ? 0x108 : 0x10c;
 
+  let DETACH = [0xa];
+
   let rmap = struct
     {
     osappnew    = [F2, 0x10065], % Esc_f

@@ -2213,7 +2213,7 @@ class Rline
         initdone = 1;
         }
 
-      if (Input->CTRL_j == s._chr)
+      if (any (Input->DETACH == s._chr))
         {
         App.detach ();
         continue;
@@ -2268,19 +2268,21 @@ class Rline
         break;
         }
 
-      if (0 == s._ind && '~' == s._chr)
-        {
-        commands = assoc_get_keys (s.argvlist);
-        commands = commands[wherenot (strncmp (commands, "~", 1))];
-
-        if (commandcmp (NULL, s, commands) == 1)
+      if (s._ind == 0 == strlen (s.argv[0]))
+        if (any (['~', '!'] == s._chr))
           {
-          s.execline (;;__qualifiers ());
-          return;
-          }
+          commands = assoc_get_keys (s.argvlist);
+          commands = commands[wherenot (strncmp (commands,
+            ["~", "!"][wherefirst (['~', '!'] == s._chr)], 1))];
 
-        continue;
-        }
+          if (commandcmp (NULL, s, commands) == 1)
+            {
+            s.execline (;;__qualifiers ());
+            return;
+            }
+
+          continue;
+          }
 
       if ('\r' == s._chr)
         {

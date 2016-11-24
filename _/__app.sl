@@ -302,10 +302,12 @@ private define __echo__ (argv)
   ifnot (len)
     return;
 
-  variable tostd = This.is.shell ? __->__
-    ("IO", "tostdout", "Class::getfun::__echo").funcref : &toscratch;
+  variable isshell = "shell" == This.is.my.name;
+  variable tostd = isshell
+    ? Class.__FUNCREF__ ("IO", "tostdout")
+    : &toscratch;
 
-  variable args = This.is.shell ? {IO} : {};
+  variable args = [{}, {IO}][isshell];
 
   if (1 == len)
     {
@@ -375,6 +377,9 @@ private define __echo__ (argv)
     }
 
   Com.post_builtin ();
+
+  ifnot (isshell)
+    __scratch (NULL);
 }
 
 private define __cd__ (argv)
