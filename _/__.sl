@@ -1590,11 +1590,23 @@ private define __getclass (self, cname)
   c;
 }
 
+private define __get_funcref (self, cname, fun)
+{
+  try
+    {
+    variable f = qualifier ("class", __getclass__ (cname, 0)) ["__FUN__"];
+    assoc_key_exists (f, fun) ? f[fun].funcref : NULL;
+    }
+  catch ClassError:
+    NULL;
+}
+
 public variable Class = struct
   {
   load = &__load__,
   subclass = &__subclass__,
   get = &__getclass,
+  __FUNCREF__ = &__get_funcref,
   let = &vlet,
   fun = &addFun
   };
