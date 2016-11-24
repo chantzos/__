@@ -232,20 +232,22 @@ private define _build_comlist_ (a)
 
     ifnot (NULL == c)
       _for ii (0, length (c) - 1)
-        {
-        a[(ex ? "!" : "") + c[ii]]      = @Argvlist_Type;
-        a[(ex ? "!" : "") + c[ii]].dir  = d[i] + "/" + c[ii];
-        a[(ex ? "!" : "") + c[ii]].func = &com_execute;
-        }
+        if (Dir.isdirectory (d[i] + "/" + c[ii]))
+          {
+          a[(ex ? "!" : "") + c[ii]]      = @Argvlist_Type;
+          a[(ex ? "!" : "") + c[ii]].dir  = d[i] + "/" + c[ii];
+          a[(ex ? "!" : "") + c[ii]].func = &com_execute;
+          }
     }
 
   c = listdir (Env->LOCAL_COM_PATH);
   _for i (0, length (c) - 1)
-    {
-    a["~" + c[i]]      = @Argvlist_Type;
-    a["~" + c[i]].dir  = Env->LOCAL_COM_PATH + "/" + c[i];
-    a["~" + c[i]].func = &com_execute;
-    }
+    if (Dir.isdirectory (Env->LOCAL_COM_PATH + "/" + c[i]))
+      {
+      a["~" + c[i]]      = @Argvlist_Type;
+      a["~" + c[i]].dir  = Env->LOCAL_COM_PATH + "/" + c[i];
+      a["~" + c[i]].func = &com_execute;
+      }
 }
 
 private define __rehash__ ();
@@ -719,13 +721,23 @@ public define init_commands ()
   a;
 }
 
-private define filterexcom (s, ar)
+static define __filtercommands (s, ar, chars)
 {
-  ifnot ('!' == s._chr)
+  variable i;
+  ifnot (any (chars == s._chr))
     ifnot (strlen (s.argv[0]))
-      ar = ar[where (strncmp (ar, "!", 1))];
-
+      _for i (0, length (chars) - 1)
+        ar = ar[where (strncmp (ar, char (chars[i]), 1))];
   ar;
+}
+
+private define filtercommands (s, ar)
+{
+  variable chars = [0, '~'];
+  ifnot ("shell" == This.is.my.name)
+    chars[0] = '!';
+
+  __filtercommands (s, ar, chars);
 }
 
 private define filterexargs (s, args, type, desc)
@@ -782,7 +794,7 @@ public define __initrline ()
     childrec = __get_reference ("App->child_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
     filterargs = &filterexargs,
-    filtercommands = &filterexcom);
+    filtercommands = &filtercommands);
 }
 
 private define __rehash__ ()
