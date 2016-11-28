@@ -200,6 +200,8 @@ class App
 
       if (s._i > s._len)
         s._i = s._len - length (s.rows) + 2;
+
+      s._i = 0 > s._i ?  0 : s._i;
       }
     else
       s._i = s._len + 1 <= len ? 0 : s._len + 1 - len;
