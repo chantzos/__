@@ -1,8 +1,6 @@
  /*
- * This code was written by Agathoklis D. Chatzimanikas
- * with some ideas and code from various sources around the OS universe
- * You may distribute it under the terms of the GNU General Public
- * License.
+ * You may distribute this code under the terms of the
+ * GNU General Public License.
  */
 
 #include <limits.h>
@@ -441,7 +439,7 @@ static SLang_Intrin_Var_Type ___Variables [] =
   MAKE_VARIABLE("COLUMNS", &Columns, SLANG_INT_TYPE, 1),
   SLANG_END_TABLE
 };
- 
+
 static SLang_Intrin_Fun_Type ___Intrinsics [] =
 {
   MAKE_INTRINSIC_S("mkstemp", mkstemp_intrin, VOID_TYPE),
@@ -469,6 +467,6 @@ int init____module_ns (char *ns_name)
   if (-1 == SLns_add_intrin_fun_table (ns, ___Intrinsics, NULL)
       || -1 == SLadd_intrin_var_table (___Variables, NULL))
     return -1;
-  
+
   return 0;
 }

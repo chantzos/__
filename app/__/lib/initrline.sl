@@ -361,6 +361,13 @@ private define __sync_gen__ (argv, type)
 
 private define __sync_to (argv)
 {
+  if (strlen (This.is.my.settings["___BACKUP_DIR"]))
+    {
+    variable i = Opt.Arg.getlong ("to", NULL, &argv);
+    if (NULL == i)
+      argv = [argv, "--to=" + This.is.my.settings["___BACKUP_DIR"]];
+    }
+
   ifnot (__sync_gen__ (argv, "to"))
     __scratch (NULL);
   else
@@ -369,6 +376,13 @@ private define __sync_to (argv)
 
 private define __sync_from (argv)
 {
+  if (strlen (This.is.my.settings["___BACKUP_DIR"]))
+    {
+    variable i = Opt.Arg.getlong ("from", "dir", &argv);
+    if (NULL == i)
+      argv = [argv, "--from=" + This.is.my.settings["___BACKUP_DIR"]];
+    }
+
   ifnot (__sync_gen__ (argv, "from"))
     __scratch (NULL);
   else

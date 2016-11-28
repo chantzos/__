@@ -58,7 +58,7 @@ static int tagwrite_intrinsic (void)
   TagLib_File *file;
   TagLib_Tag *tag;
   char *fname;
-  
+
   if (-1 == SLang_pop_cstruct ((VOID_STAR)&tags, TagLib_Struct))
     return -1;
 
@@ -70,7 +70,7 @@ static int tagwrite_intrinsic (void)
 
   file = taglib_file_new (fname);
   SLfree (fname);
-  
+
   if (file == NULL)
     {
     SLang_free_cstruct ((VOID_STAR)&tags, TagLib_Struct);
@@ -105,7 +105,7 @@ static int tagwrite_intrinsic (void)
   taglib_file_save (file);
   taglib_tag_free_strings ();
   taglib_file_free (file);
-  
+
   SLang_free_cstruct ((VOID_STAR)&tags, TagLib_Struct);
   return 0;
 }
@@ -134,7 +134,7 @@ static void tagread_intrinsic (char *fname)
     }
 
   tag = taglib_file_tag (file);
-  
+
   if (!tag)
     {
     taglib_file_free (file);
@@ -178,7 +178,7 @@ static void audio_properties_intrin (char *fname)
     }
 
   prop = taglib_file_audioproperties (file);
-  
+
   if (!prop)
     {
     taglib_file_free (file);
@@ -195,7 +195,7 @@ static void audio_properties_intrin (char *fname)
 
   taglib_tag_free_strings ();
   taglib_file_free (file);
-} 
+}
 
 static SLang_Intrin_Fun_Type taglib_Intrinsics [] =
 {
@@ -214,6 +214,6 @@ int init_taglib_module_ns (char *ns_name)
 
   if (-1 == SLns_add_intrin_fun_table (ns, taglib_Intrinsics, NULL))
     return -1;
-  
+
   return 0;
 }
