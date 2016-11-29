@@ -266,7 +266,7 @@ class App
     IO.print (str;fd = SCRATCHFD);
   end
 
-  def __eval () public proc
+  def __console () public proc
     Api.Eval.run (;;__qualifiers ());
   end
 

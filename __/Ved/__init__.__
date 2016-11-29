@@ -123,7 +123,7 @@ class Ved
   def toplinedr () public proc
   end
 
-  def __eval () public proc
+  def __console () public proc
   end
 
   subclass Reg from Ved

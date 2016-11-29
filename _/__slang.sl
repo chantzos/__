@@ -53,6 +53,30 @@ public define __get_qualifier_as (dtype, nameq, q, value)
   q;
 }
 
+public define __eval (__buf__, __ns__)
+{
+  try
+    eval (__buf__, __ns__);
+  catch AnyError:
+    {
+    variable err_buf;
+    variable fun = (fun = qualifier ("fun"),
+      NULL == fun
+        ? _function_name
+        : String_Type == typeof (fun)
+          ? fun
+          : _function_name);
+
+    throw ClassError, sprintf (
+      "Class::%S::eval buffer: \n%S\nmessage: %S\nline: %d\n",
+      fun, (err_buf = strchop (__buf__, '\n', 0),
+        strjoin (array_map (String_Type, &sprintf, "%d| %s",
+        [1:length (err_buf)], err_buf), "\n")),
+        __get_exception_info.message, __get_exception_info.line),
+        __get_exception_info;
+    }
+}
+
 __use_namespace ("Anon");
 
 static define function ();
@@ -62,7 +86,7 @@ static define Fun ()
   variable buf = ();
   buf = "static define function ()\n{\n" +
   buf + "\n}";
-  eval (buf, "Anon");
+  __eval (buf, "Anon");
   Anon->function (__push_list (args);;__qualifiers);
   eval ("static define function ();");
 }

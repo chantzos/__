@@ -655,7 +655,7 @@ public define init_commands ()
   if (COM_OPTS.eval)
     {
     a["eval"] = @Argvlist_Type;
-    a["eval"].func = &__eval;
+    a["eval"].func = &__console;
     a["eval"].type = "Func_Type";
     }
 

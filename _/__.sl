@@ -24,30 +24,6 @@ static define __getclass__ (cname, init)
   __CLASS__[cname];
 }
 
-private define __eval__ (__buf__, __ns__)
-{
-  try
-    eval (__buf__, __ns__);
-  catch AnyError:
-    {
-    variable err_buf;
-    variable fun = (fun = qualifier ("fun"),
-      NULL == fun
-        ? _function_name
-        : String_Type == typeof (fun)
-          ? fun
-          : _function_name);
-
-    throw ClassError, sprintf (
-      "Class::%S::eval buffer: \n%S\nmessage: %S\nline: %d\n",
-      fun, (err_buf = strchop (__buf__, '\n', 0),
-        strjoin (array_map (String_Type, &sprintf, "%d| %s",
-        [1:length (err_buf)], err_buf), "\n")),
-        __get_exception_info.message, __get_exception_info.line),
-        __get_exception_info;
-    }
-}
-
 private define __vset__ (cname, varname, varval)
 {
   ifnot (all (String_Type == [typeof (varname), typeof (cname)]))
@@ -137,7 +113,7 @@ private define __assignself__ (name)
   if (qualifier_exists ("return_buf"))
     return __buf__;
 
-  __eval__ (__buf__, name);
+  __eval (__buf__, name);
 }
 
 private define __getfun__ (from, fun)
@@ -213,7 +189,7 @@ private define __eval_method__ (cname, funname, nargs)
   if (qualifier_exists ("return_buf"))
     return eval_buf;
 
-  __eval__ (eval_buf, cname);
+  __eval (eval_buf, cname);
 }
 
 private define __my_read__ (fname)
@@ -351,7 +327,7 @@ static define __initfun__ (cl, funname, funcref)
       `", &` + funcrefname + `, ` + string (nargs) + `, ` + string (const) +
       `, "Class::setfun::__initfun__");`;
 
-    __eval__ (eval_buf, c["__R__"].name);
+    __eval (eval_buf, c["__R__"].name);
     }
 
   ifnot (c["__R__"].isself)
@@ -557,7 +533,7 @@ private define vlet (self, varname, varval)
     self.__name + "\",  \"" + varname + "\", \"Class::vget::" + varname +
     "\";getref);\n}\n";
 
-  __eval__ (eval_buf, self.__name);
+  __eval (eval_buf, self.__name);
 }
 
 private define __get_fun_head__ (

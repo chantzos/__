@@ -73,7 +73,7 @@ struct OnMap
   unsigned int desk, follow;
   };
 
-SLang_CStruct_Field_Type OnMap_Type [] = 
+SLang_CStruct_Field_Type OnMap_Type [] =
 {
 MAKE_CSTRUCT_FIELD(OnMap, class, "class", SLANG_STRING_TYPE, 0),
 MAKE_CSTRUCT_FIELD(OnMap, desk, "desk", SLANG_INT_TYPE, 0),
@@ -90,7 +90,7 @@ struct Positional
   unsigned int x, y, width, height;
   };
 
-SLang_CStruct_Field_Type Positional_Type [] = 
+SLang_CStruct_Field_Type Positional_Type [] =
 {
 MAKE_CSTRUCT_FIELD(Positional, class, "class", SLANG_STRING_TYPE, 0),
 MAKE_CSTRUCT_FIELD(Positional, x, "x", SLANG_INT_TYPE, 0),
@@ -109,7 +109,7 @@ struct key
   KeySym keysym;
   };
 
-SLang_CStruct_Field_Type Key_Type [] = 
+SLang_CStruct_Field_Type Key_Type [] =
 {
 MAKE_CSTRUCT_FIELD(key, modifier, "modifier", SLANG_INT_TYPE, 0),
 MAKE_CSTRUCT_FIELD(key, keysym, "key", SLANG_STRING_TYPE, 0),
@@ -397,7 +397,7 @@ void add_window (Window w, unsigned int tw, client *cl)
     {
     XClassHint ch = {0};
     unsigned int j = 0;
-    Positional *p;    
+    Positional *p;
 
     if (XGetClassHint (dpy, w, &ch))
       {
@@ -818,7 +818,7 @@ void grabkeys ()
   XUngrabKey (dpy, AnyKey, AnyModifier, root);
 
   key *k;
-  for (k = KEYS; k; k = k->next) 
+  for (k = KEYS; k; k = k->next)
     {
     code = XKeysymToKeycode (dpy, k->keysym);
     XGrabKey (dpy, code, k->modifier, root, True, GrabModeAsync, GrabModeAsync);
@@ -835,7 +835,7 @@ void keypress (XEvent *e)
   XKeyEvent *ev = &e->xkey;
 
   keysym = XkbKeycodeToKeysym (dpy, (KeyCode)ev->keycode, 0, 0);
- 
+
   key *k;
 
   for (k = KEYS; k; k = k->next)
@@ -1141,7 +1141,7 @@ void Xspawn ()
     }
 
   command[i] = NULL;
-	
+
   if (fork () == 0)
     {
     if (fork () == 0)
