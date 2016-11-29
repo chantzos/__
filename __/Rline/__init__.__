@@ -1333,8 +1333,9 @@ class Rline
 
       ar = commands[[indices]];
 
-      ifnot (NULL == s.filtercommands)
-        ar = (@s.filtercommands) (s, ar);
+      ifnot (qualifier_exists ("already_filtered"))
+        ifnot (NULL == s.filtercommands)
+          ar = (@s.filtercommands) (s, ar);
 
       ifnot (length (ar))
         {
@@ -2275,7 +2276,7 @@ class Rline
           commands = commands[wherenot (strncmp (commands,
             ["~", "!"][wherefirst (['~', '!'] == s._chr)], 1))];
 
-          if (commandcmp (NULL, s, commands) == 1)
+          if (commandcmp (NULL, s, commands;already_filtered) == 1)
             {
             s.execline (;;__qualifiers ());
             return;

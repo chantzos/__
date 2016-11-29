@@ -18,7 +18,7 @@ subclass Reg
       return Ved.get_cur_buf ()._abspath;
 
     if ("=" == reg)
-      return __eval (;return_str);
+      return __console (;return_str);
 
     variable k = assoc_get_keys (REG);
 
