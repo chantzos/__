@@ -746,7 +746,7 @@ static define __filtercommands (s, ar, chars)
 
 private define filtercommands (s, ar)
 {
-  variable chars = [0, '~'];
+  variable chars = [0, '~', '_'];
   ifnot ("shell" == This.is.my.name)
     chars[0] = '!';
 

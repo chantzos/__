@@ -44,6 +44,7 @@ public define init_git ()
     exit_me (1);
     }
 
+  topline (" -- " + This.is.my.name + " --");
   mainloop ();
 }
 

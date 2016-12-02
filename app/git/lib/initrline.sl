@@ -120,7 +120,7 @@ private define __setrepo__(argv)
 {
   if (1 == length (argv))
     {
-    Smg.send_msg_dr ("__setrepo__ argument is required", 1, NULL, NULL);
+    Smg.send_msg_dr ("setrepo: argument is required", 1, NULL, NULL);
     return;
     }
 
@@ -146,7 +146,7 @@ private define __diffrevision__ (argv)
 
   if (1 == length (argv))
     {
-    IO.tostderr ("__diffrevision__ needs an argument, a revision");
+    IO.tostderr ("diffrevision: needs an argument, a revision");
     __messages;
     return;
     }

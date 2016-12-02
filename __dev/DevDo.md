@@ -71,7 +71,9 @@ __APP:
           or  v
           or x and v
        if run as user
- 
+
+01: export settings -> to json
+
 __TRACK
  
 00: ids [or|and] for [numbering|viewing] based on priority
