@@ -638,29 +638,23 @@ private define __exit_me (argv)
   App.quit_me ();
 }
 
-public define init_commands ()
+private define __builtins__ (a)
 {
-  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+  a["__scratch"] = @Argvlist_Type;
+  a["__scratch"].func = &__scratch;
 
-  _build_comlist_ (a;;__qualifiers ());
-
-  X.comlist (a);
-
-  a["scratch"] = @Argvlist_Type;
-  a["scratch"].func = &__scratch;
-
-  a["edit"] = @Argvlist_Type;
-  a["edit"].func = &__edit__;
+  a["__edit"] = @Argvlist_Type;
+  a["__edit"].func = &__edit__;
 
   if (COM_OPTS.eval)
     {
-    a["eval"] = @Argvlist_Type;
-    a["eval"].func = &__console;
-    a["eval"].type = "Func_Type";
+    a["__eval"] = @Argvlist_Type;
+    a["__eval"].func = &__console;
+    a["__eval"].type = "Func_Type";
     }
 
-  a["messages"] = @Argvlist_Type;
-  a["messages"].func = &__messages;
+  a["__messages"] = @Argvlist_Type;
+  a["__messages"].func = &__messages;
 
   if (COM_OPTS.ved)
     {
@@ -670,16 +664,16 @@ public define init_commands ()
 
   if (COM_OPTS.rehash)
     {
-    a["rehash"] = @Argvlist_Type;
-    a["rehash"].func = &__rehash__;
-    a["rehash"].type = "Func_Type";
+    a["__rehash"] = @Argvlist_Type;
+    a["__rehash"].func = &__rehash__;
+    a["__rehash"].type = "Func_Type";
     }
 
-  a["echo"] = @Argvlist_Type;
-  a["echo"].func = &__echo__;
+  a["__echo"] = @Argvlist_Type;
+  a["__echo"].func = &__echo__;
 
-  a["&"] = @Argvlist_Type;
-  a["&"].func = &__detach;
+  a["__&"] = @Argvlist_Type;
+  a["__&"].func = &__detach;
 
   a["w"] = @Argvlist_Type;
   a["w"].func = &__write__;
@@ -689,11 +683,11 @@ public define init_commands ()
 
   if (COM_OPTS.bg_jobs)
     {
-    a["bgjobs"] = @Argvlist_Type;
-    a["bgjobs"].func = &list_bg_jobs;
+    a["__bgjobs"] = @Argvlist_Type;
+    a["__bgjobs"].func = &list_bg_jobs;
 
-    a["killbgjob"] = @Argvlist_Type;
-    a["killbgjob"].func = &kill_bg_job;
+    a["__killbgjob"] = @Argvlist_Type;
+    a["__killbgjob"].func = &kill_bg_job;
     }
 
   a["q"] = @Argvlist_Type;
@@ -705,24 +699,38 @@ public define init_commands ()
     a["cd"].func = &__cd__;
     }
 
-  a["which"] = @Argvlist_Type;
-  a["which"].func = &__which__;
+  a["__which"] = @Argvlist_Type;
+  a["__which"].func = &__which__;
 
   if (COM_OPTS.search)
     {
-    a["search"] = @Argvlist_Type;
-    a["search"].func = &__search__;
-    a["search"].dir = Env->STD_COM_PATH + "/search";
+    a["__search"] = @Argvlist_Type;
+    a["__search"].func = &__search__;
+    a["__search"].dir = Env->STD_COM_PATH + "/search";
     }
 
   variable pj = "PROJECT_" + strup (This.is.my.name);
   variable f = __get_reference (pj);
   ifnot (NULL == f)
     {
-    a["project_new"] = @Argvlist_Type;
-    a["project_new"].func = f;
-    a["project_new"].args = ["--from-file= filename read from filename"];
+    a["__project_new"] = @Argvlist_Type;
+    a["__project_new"].func = f;
+    a["__project_new"].args = ["--from-file= filename read from filename"];
     }
+
+  a;
+}
+
+public define init_commands ()
+{
+  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+
+  _build_comlist_ (a;;__qualifiers ());
+
+  X.comlist (a);
+
+  __builtins__ (a);
+
   a;
 }
 

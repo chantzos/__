@@ -13,7 +13,7 @@ if (any ("--help" == __argv or  "-h" == __argv))
      "PREQUISITIES:",
      "",
      "  pcre libs and headers",
-     "  ssl libs and headers",
+     "  ssl libs and headers (can also be libressl, as that is what Void Linux uses)",
      "  curl libs and headers",
      "  git",
      "",
@@ -40,9 +40,9 @@ is_enough = 20301 == vers_int;
 
 if (is_enough)
   ifnot (strncmp (vers_str, "pre2.3.1-", 9))
-    if (atoi (vers_str[[9:]]) < 71)
+    if (atoi (vers_str[[9:]]) < 85)
       {
-      () = fprintf (stderr, "S-Lang atleast patchlevel 2.3.1-71 is needed\n");
+      () = fprintf (stderr, "S-Lang atleast patchlevel 2.3.1-85 is needed\n");
       exit (1);
       }
 

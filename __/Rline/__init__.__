@@ -2270,11 +2270,11 @@ class Rline
         }
 
       if (s._ind == 0 == strlen (s.argv[0]))
-        if (any (['~', '!'] == s._chr))
+        if (any (['~', '!', '_'] == s._chr))
           {
           commands = assoc_get_keys (s.argvlist);
           commands = commands[wherenot (strncmp (commands,
-            ["~", "!"][wherefirst (['~', '!'] == s._chr)], 1))];
+            ["~", "!", "_"][wherefirst (['~', '!', '_'] == s._chr)], 1))];
 
           if (commandcmp (NULL, s, commands;already_filtered) == 1)
             {
