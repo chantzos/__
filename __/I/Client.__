@@ -25,7 +25,7 @@ subclass Client
 
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->F2];
-    () = Rline.commandcmp (s, apps);
+    () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
     ifnot (any (apps == s.argv[0]))
@@ -72,7 +72,7 @@ subclass Client
 
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->F1];
-    () = Rline.commandcmp (s, apps);
+    () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
     ifnot (any (apps == s.argv[0]))

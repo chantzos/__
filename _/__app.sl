@@ -223,8 +223,7 @@ private define _build_comlist_ (a)
     d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
  ifnot (ex)
-   ifnot (This.is.shell)
-     ex = 1;
+   ex = "shell" != This.is.my.name;
 
   _for i (0, length (d) - 1)
     {
@@ -239,6 +238,8 @@ private define _build_comlist_ (a)
           a[(ex ? "!" : "") + c[ii]].func = &com_execute;
           }
     }
+
+  array_map (Void_Type, &assoc_delete_key, a, ["xstart", "!xstart"]);
 
   c = listdir (Env->LOCAL_COM_PATH);
   _for i (0, length (c) - 1)
@@ -264,8 +265,7 @@ private define draw_wind (argv)
 
 private define scratch_to_stdout (argv)
 {
-  File.copy (SCRATCH, This.is.std.out.fn;flags = "ab", verbose = 1);
-  pop ();
+  () = File.copy (SCRATCH, This.is.std.out.fn;flags = "ab", verbose = 1);
   draw (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
 }
 
@@ -448,7 +448,7 @@ private define __which__ (argv)
 
   variable msg = NULL != path ? path : com + " hasn't been found in PATH";
 
-  if (This.is.shell)
+  if (This.is.my.name == "shell")
     IO.tostdout (msg;n);
   else
     toscratch (msg);
@@ -721,19 +721,6 @@ private define __builtins__ (a)
   a;
 }
 
-public define init_commands ()
-{
-  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
-
-  _build_comlist_ (a;;__qualifiers ());
-
-  X.comlist (a);
-
-  __builtins__ (a);
-
-  a;
-}
-
 static define __filtercommands (s, ar, chars)
 {
   variable i;
@@ -746,6 +733,9 @@ static define __filtercommands (s, ar, chars)
 
 private define filtercommands (s, ar)
 {
+  ar = ar[where (1 < strlen (ar))];
+  ar = ar[wherenot (ar == "w!")];
+
   variable chars = [0, '~', '_'];
   ifnot ("shell" == This.is.my.name)
     chars[0] = '!';
@@ -760,6 +750,19 @@ private define filterexargs (s, args, type, desc)
       [desc, "execute command as superuser", "viewoutput in a scratch buffer"];
 
   args, type, desc;
+}
+
+public define init_commands ()
+{
+  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+
+  _build_comlist_ (a;;__qualifiers ());
+
+  X.comlist (a);
+
+  __builtins__ (a);
+
+  a;
 }
 
 ifnot (access (This.is.my.basedir + "/lib/vars.slc", F_OK))

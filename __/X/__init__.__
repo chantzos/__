@@ -51,8 +51,8 @@ class X
   end
 
   def comlist (a)
-    a["Xstart"] = @Argvlist_Type;
-    a["Xstart"].func = &Xstart;
+    a["!Xstart"] = @Argvlist_Type;
+    a["!Xstart"].func = &Xstart;
   end
 #endif
 

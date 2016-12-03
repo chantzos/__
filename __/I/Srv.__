@@ -71,7 +71,7 @@ subclass Srv
 
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->F2];
-    () = Rline.commandcmp (s, apps);
+    () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
     if (This.has.sigint)
@@ -128,7 +128,7 @@ subclass Srv
 
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->F1];
-    () = Rline.commandcmp (s, apps);
+    () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
     variable handl;

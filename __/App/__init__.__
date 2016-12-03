@@ -128,7 +128,7 @@ class App
     Rline.prompt (s, s._lin, s._col);
 
     if (Rline.commandcmp (s, ar;accept_one_len, accept_space_as_return,
-        accept_ws) == 1)
+        accept_ws, already_filtered) == 1)
       if (NULL != s.argv && length (s.argv) && strlen (s.argv[0]) &&
         (i = wherefirst (ar == s.argv[0]), NULL != i))
           App.Connect.to.child (chs[i]);
