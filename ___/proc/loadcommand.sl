@@ -3,7 +3,7 @@ private variable classpath =  realpath (path_dirname (__FILE__) + "/../../__");
 % FATAL
 () = evalfile (classpath + "/__");
 
-private variable COM = __argv[1];
+private variable COM = strtrim_beg (__argv[1], "_");;
 
 __set_argc_argv (__argv[[1:]]);
 
