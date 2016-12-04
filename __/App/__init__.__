@@ -278,10 +278,12 @@ class App
     ifnot (any (commands == argv[0]))
      ifnot (any (commands == (argv[0] = "~" + orig, argv[0])))
       ifnot (any (commands == (argv[0] = "`" + orig, argv[0])))
-        {
-        IO.tostderr (argv[0] + ": no such command");
-        return;
-        }
+       ifnot (any (commands == (argv[0] = "!" + orig, argv[0])))
+        ifnot (any (commands == (argv[0] = "__" + orig, argv[0])))
+          {
+          IO.tostderr (argv[0] + ": no such command");
+          return;
+          }
 
     rl.argv = argv;
     (@rl.argvlist[argv[0]].func) (rl.argv;;struct {issu = issu, @__qualifiers ()});

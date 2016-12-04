@@ -496,8 +496,13 @@ private define __search_project__ (argv)
   if (NULL == pat)
     return;
 
-  runcom (["search", "--pat=" + pat, "--recursive", "--excludedir=tmp",
-      Env->SRC_PATH], NULL);
+  variable _argv = ["!search", "--pat=" + pat, "--recursive",
+    "--excludedir=tmp", "--excludedir=C", Env->SRC_PATH];
+
+  ifnot (NULL == Opt.Arg.exists ("--include_c", &argv;del_arg))
+    Array.delete_at (&_argv, -2);
+
+  runcom (_argv, NULL);
 }
 
 private define my_commands ()
@@ -546,7 +551,9 @@ private define my_commands ()
 
   a["search_project"] = @Argvlist_Type;
   a["search_project"].func = &__search_project__;
-  a["search_project"].args = ["--pat= pattern pattern"];
+  a["search_project"].args = [
+    "--pat= pattern pattern",
+    "--include_c void include in searching the C namespace"];
 
   a;
 }

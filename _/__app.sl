@@ -704,9 +704,9 @@ private define __builtins__ (a)
 
   if (COM_OPTS.search)
     {
-    a["__search"] = @Argvlist_Type;
-    a["__search"].func = &__search__;
-    a["__search"].dir = Env->STD_COM_PATH + "/search";
+    a["!search"] = @Argvlist_Type;
+    a["!search"].func = &__search__;
+    a["!search"].dir = Env->STD_COM_PATH + "/search";
     }
 
   variable pj = "PROJECT_" + strup (This.is.my.name);

@@ -17,7 +17,7 @@ private define filtercommands (s, ar)
 {
   ar = ar[where (1 < strlen (ar))];
   ar = ar[wherenot (ar == "w!")];
-  ar = __APP__->__filtercommands (s, ar, ['~', '_']);
+  __APP__->__filtercommands (s, ar, ['~', '_']);
 }
 
 private define filterargs (s, args, type, desc)
