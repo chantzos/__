@@ -1,6 +1,6 @@
 define _topline_ (str, columns)
 {
-  variable d = NULL == DEBUG
+  variable d = NULL == This.request.debug
     ? ""
     : "depth [" + string (_stkdepth) + "] ";
 

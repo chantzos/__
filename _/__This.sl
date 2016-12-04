@@ -54,6 +54,7 @@ static define __INIT__ (role)
       {
       X,
       profile,
+      debug,
       },
     has = struct
       {

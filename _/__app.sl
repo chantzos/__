@@ -2,7 +2,7 @@ __use_namespace ("__APP__");
 
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
-public variable DEBUG, APP_ERR, I, App, X;
+public variable APP_ERR, I, App, X;
 
 public define exit_me (x)
 {
@@ -69,11 +69,10 @@ Class.load ("App");
 
 This.at_exit = &_exit_;
 
-This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
-
-DEBUG = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
-
 Class.load ("I";force);
+
+This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
+This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 
 ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
   Load.file (Env->USER_CLASS_PATH + "/__app.slc");
