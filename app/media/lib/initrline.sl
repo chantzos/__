@@ -515,6 +515,17 @@ private define my_commands ()
   a;
 }
 
+private define populate_audiodir ()
+{
+  MED_AUD_DIR = MED_AUD_ORIG_DIR[wherenot (array_map (Integer_Type, &access,
+    MED_AUD_ORIG_DIR, F_OK|R_OK))];
+
+  if (length (MED_AUD_DIR))
+    MED_AUD_DIR = [MED_AUD_DIR[0]];
+  else
+    MED_AUD_DIR = [""];
+}
+
 private define starthook (s)
 {
   if (s._ind || s._col != 1)
@@ -538,6 +549,7 @@ private define starthook (s)
 
           if (any (s.argv[0] == ["audioplay", "tagwrite"]))
             {
+            populate_audiodir;
             s._col = strlen (s.argv[0]) + 2 + strlen (MED_AUD_DIR[0]);
             s.argv = [s.argv, MED_AUD_DIR[0]];
             Rline.parse_args (NULL, s);

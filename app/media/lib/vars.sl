@@ -36,11 +36,13 @@ variable HAS_TAGLIB = 1;
 variable MED_VID_EXT = [".mkv", ".mp4", ".avi"];
 variable MED_AUD_EXT = [".ogg", ".mp3"];
 variable MED_AUD_DIR;
+variable MED_AUD_ORIG_DIR = String_Type[0];
 
 ifnot (access (This.is.my.datadir + "/audio_dir.txt", F_OK|R_OK))
-  MED_AUD_DIR = File.readlines (This.is.my.datadir + "/audio_dir.txt");
+  MED_AUD_ORIG_DIR = File.readlines (This.is.my.datadir + "/audio_dir.txt");
 
-MED_AUD_DIR = MED_AUD_DIR[wherenot (array_map (Integer_Type, &access, MED_AUD_DIR, F_OK|R_OK))];
+MED_AUD_DIR = MED_AUD_ORIG_DIR[wherenot (array_map (Integer_Type, &access,
+  MED_AUD_ORIG_DIR, F_OK|R_OK))];
 
 if (length (MED_AUD_DIR))
   MED_AUD_DIR = [MED_AUD_DIR[0]];
