@@ -393,17 +393,10 @@ private define __module_compile__ (argv)
 {
   variable debug = Opt.Arg.exists ("--debug", &argv;del_arg);
   variable dont_inst = Opt.Arg.exists ("--dont-install", &argv;del_arg);
-  variable cflags, ind;
-  (cflags, ind) = Opt.Arg.compare ("--cflags=", &argv;del_arg, ret_arg);
+  variable cflags = Opt.Arg.getlong ("cflags", NULL, &argv;del_arg);
 
   ifnot (NULL == cflags)
-    {
-    variable tk = strchop (cflags, '=', 0);
-    if (1 == length (tk))
-      cflags = NULL;
-    else
-      cflags = tk[1];
-    }
+    cflags = strjoin (strchop (cflags, ',', 0), " ");
 
   if (1 == length (argv))
     {
@@ -413,7 +406,7 @@ private define __module_compile__ (argv)
     }
 
   variable modules = argv[[1:]];
-  variable i, mdl, mdlout, flags, err = 0;
+  variable i, ind, mdl, mdlout, flags, err = 0;
   variable p, largv, status, pabs;
 
   _for i (0, length (modules) - 1)
@@ -469,6 +462,8 @@ private define __module_compile__ (argv)
       mdl + "-module.c", "-o", This.is.my.tmpdir + "/" + mdlout];
 
     status = p.execv (largv, NULL);
+
+    IO.tostderr ("command:", strjoin (largv, " "));
 
     if (status.exit_status)
       err = 1;
