@@ -44,6 +44,12 @@ class Sys
   end
 
   def which (exec)
+    % relative discussion about the semantics
+    % Tue, 22 Nov 2016 04:32:41 +0000 (UTC)
+    % From: Mark Galeck <mark_galeck@pacbell.net>
+    % To: Austin-group-l <austin-group-l@opengroup.org>
+    % Subject: when does PATH search stop?
+
     variable ar, path = Env->OS_PATH;
 
     if (NULL == path)
@@ -54,10 +60,12 @@ class Sys
     path = path [wherenot (array_map (Integer_Type, Dir.isdirectory, NULL, path))];
     ar = wherenot (array_map (Integer_Type, &access, path, X_OK));
 
-    if (length (ar))
-      path[ar][0];
-    else
-      NULL;
+    length (ar) ? path[ar][0] : NULL;
+    % so, this which works like -
+    % prefix every file name with all the components in $PATH
+    % started from beginning, and check non directory files
+    % for the executable bit and return the first found -
+    % so it doesn't check if the process image can be loaded by exec*
    end
 
   def getgrname (gid)
