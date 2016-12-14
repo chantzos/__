@@ -93,7 +93,7 @@ private define __bytecompile__ (argv)
   if (ern)
     __messages;
 
-  __scratch (NULL);
+  __scratch (NULL;_i = 1000);
 }
 
 private define __classcompile__ (argv)
@@ -222,7 +222,7 @@ private define __classcompile__ (argv)
   if (ern)
     __messages;
 
-  __scratch (NULL);
+  __scratch (NULL;_i = 1000);
 }
 
 private define __loadlib__ (argv)
