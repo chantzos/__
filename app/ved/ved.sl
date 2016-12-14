@@ -4,6 +4,9 @@ This.is.shell = 0;
 % re-declare - see Ved/__init__.__
 private define init_ftype (self, ftype)
 {
+  if (NULL == ftype || 0 == any (assoc_get_keys (FTYPES) == ftype))
+    ftype = "txt";
+
   variable
     type = @Ftype_Type,
     f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +  ftype + "_functions";

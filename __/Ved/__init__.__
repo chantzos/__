@@ -240,7 +240,19 @@ class Ved
   end
 
   def get_ftype (fn)
-    variable ftype = substr (path_extname (fn), 2, -1);
+    variable ftype = qualifier ("ftype");
+    if (NULL == ftype)
+      if (NULL == fn)
+        ftype = "txt";
+      else
+        {
+        variable ext = path_extname (fn);
+        if (strlen (ext) < 2)
+          ftype = "txt";
+        else
+          ftype = substr (ext, 2, -1);
+        }
+
     ifnot (any (assoc_get_keys (FTYPES) == ftype))
       if ("mutt-" == substr (path_basename (fn), 1, 5))
         ftype = "mail";
@@ -251,8 +263,10 @@ class Ved
   end
 
   def! init_ftype (ftype)
-    variable type = @Ftype_Type;
+    if (NULL == ftype || 0 == any (assoc_get_keys (FTYPES) == ftype))
+      ftype = "txt";
 
+    variable type = @Ftype_Type;
     variable f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +
       ftype + "_functions";
 
@@ -1056,14 +1070,13 @@ class Ved
 
   def on_wind_new (w) public proc
     variable fn = VED_DIR + "/" + string (_time) + ".noname";
-    variable s = Ved.init_ftype ("txt");
+    variable s = Ved.init_ftype (NULL;;__qualifiers);
+    s.set (fn, w.frame_rows[0], NULL;_autochdir = 0);
+
+    Ved.setbuf (fn;;__qualifiers);
 
     SPECIAL = [SPECIAL, fn];
 
-    variable func = __get_reference ("txt_settype");
-    (@func) (s, fn, w.frame_rows[0], NULL;_autochdir = 0);
-
-    Ved.setbuf (fn);
     (@__get_reference ("__initrline"));
     topline (" -- ved --");
     Ved.draw_wind ();
@@ -1595,15 +1608,13 @@ class Ved
           }
 
       owns = @nwns;
-      variable cw = Ved.get_cur_wind ();
-      variable ft = qualifier ("ftype");
-      if (NULL == ft)
-        ft = Ved.get_ftype (fn);
-      variable s = Ved.init_ftype (ft);
-      variable func = __get_reference (sprintf ("%s_settype", ft));
-      (@func) (s, fn, cw.frame_rows[Ved.get_cur_frame ()], NULL);
 
-      Ved.setbuf (s._abspath);
+      variable cw, ft, s;
+      cw = Ved.get_cur_wind ();
+      ft = Ved.get_ftype (fn;;__qualifiers);
+      s = Ved.init_ftype (ft;;__qualifiers);
+      s.set (fn, cw.frame_rows[Ved.get_cur_frame ()], NULL;;__qualifiers);
+      Ved.setbuf (s._abspath;;__qualifiers);
       }
 
     if (NULL == w)

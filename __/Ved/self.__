@@ -391,12 +391,10 @@ beg
 
     variable ft = self.get_ftype (fn);
     s = self.init_ftype (ft);
-    variable func = __get_reference (sprintf ("%s_settype", ft));
-    (@func) (s, fn, w.frame_rows[-1], NULL;;__qualifiers);
+    s.set (fn, w.frame_rows[-1], NULL;;__qualifiers);
+    self.setbuf (s._abspath;;__qualifiers);
 
     w.frame_names = [w.frame_names, fn];
-
-    self.setbuf (s._abspath);
 
     % fine tuning maybe is needed
     _for i (0, w.cur_frame - 1)

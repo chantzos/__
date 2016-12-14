@@ -78,17 +78,16 @@ public define on_wind_new (w)
   SPECIAL = [SPECIAL, This.is.std.out.fn];
 
   variable aved = Ved.init_ftype (This.is.std.out.type);
-  variable bved = Ved.init_ftype ("txt");
+  variable bved = Ved.init_ftype (NULL);
 
   aved._fd = IO.open_fn (This.is.std.out.fn);
   bved._fd = IO.open_fn (b);
 
-  (@__get_reference (This.is.std.out.type + "_settype"))
-    (aved, This.is.std.out.fn, w.frame_rows[0], NULL;
+  aved.set (This.is.std.out.fn, w.frame_rows[0], NULL;
     indent = 2, _autochdir = 0, show_tilda = 0,
     show_status_line = 0, lexicalhl = &stat_lexicalhl);
 
-  txt_settype (bved, b, w.frame_rows[1], NULL;
+  bved.set (b, w.frame_rows[1], NULL;
     _autochdir = 0, show_tilda = 0, show_status_line = 0,
     lexicalhl = &info_lexicalhl);
 

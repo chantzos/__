@@ -16,7 +16,7 @@ public define on_wind_new (w)
 
   oved._fd = IO.open_fn (This.is.std.out.fn);
 
-  (@__get_reference (This.is.std.out.type + "_settype")) (oved, This.is.std.out.fn, VED_ROWS, NULL);
+  oved.set (This.is.std.out.fn, VED_ROWS, NULL);
 
   oved.opt_show_tilda = 0;
   oved.opt_show_status_line = 0;

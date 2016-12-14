@@ -163,32 +163,36 @@ VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
 This.is.std.err.fn   = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
 This.is.std.out.fn   = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
+
 This.is.std.out.fd   = IO.open_fn (This.is.std.out.fn);
 This.is.std.err.fd   = IO.open_fn (This.is.std.err.fn);
+
 SCRATCH         = This.is.my.tmpdir + "/__SCRATCH__.txt";
 STDOUTBG        = This.is.my.tmpdir + "/__STDOUTBG__.txt";
 GREPFILE        = This.is.my.tmpdir + "/__GREP__.list";
 BGDIR           = This.is.my.tmpdir + "/__PROCS__";
 RDFIFO          = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
 WRFIFO          = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
+
 SCRATCHFD       = IO.open_fn (SCRATCH);
 STDOUTFDBG      = IO.open_fn (STDOUTBG);
-SCRATCH_VED     = Ved.init_ftype ("txt");
-ERR_VED         = Ved.init_ftype ("txt");
+
+ERR_VED         = Ved.init_ftype (NULL);
 OUT_VED         = Ved.init_ftype (This.is.std.out.type);
 OUTBG_VED       = Ved.init_ftype (This.is.std.out.type);
+SCRATCH_VED     = Ved.init_ftype (NULL);
+
 SCRATCH_VED._fd = SCRATCHFD;
 OUTBG_VED._fd   = STDOUTFDBG;
 ERR_VED._fd     = This.is.std.err.fd;
 OUT_VED._fd     = This.is.std.out.fd;
+
 SPECIAL         = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn, STDOUTBG];
 
-txt_settype  (SCRATCH_VED, SCRATCH, VED_ROWS, NULL;_autochdir = 0);
-txt_settype  (ERR_VED, This.is.std.err.fn, VED_ROWS, NULL;_autochdir = 0);
-(@__get_reference (This.is.std.out.type + "_settype"))
-  (OUT_VED, This.is.std.out.fn, VED_ROWS, NULL;_autochdir = 0);
-(@__get_reference (This.is.std.out.type + "_settype"))
-  (OUTBG_VED, STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
+ERR_VED.set (This.is.std.err.fn, VED_ROWS, NULL;_autochdir = 0);
+OUT_VED.set (This.is.std.out.fn, VED_ROWS, NULL;_autochdir = 0);
+OUTBG_VED.set (STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
+SCRATCH_VED.set (SCRATCH, VED_ROWS, NULL;_autochdir = 0);
 
 if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory", BGDIR);

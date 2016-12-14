@@ -15,11 +15,10 @@ public define on_wind_new (w)
   aved._fd = IO.open_fn (This.is.std.out.fn);
   bved._fd = IO.open_fn (b);
 
-  (@__get_reference (This.is.std.out.type + "_settype"))
-    (aved, This.is.std.out.fn, w.frame_rows[0], NULL;
+  aved.set (This.is.std.out.fn, w.frame_rows[0], NULL;
     _autochdir = 0, show_tilda = 0, show_status_line = 0);
 
-  txt_settype (bved, b, w.frame_rows[1], NULL;
+  bved.set (b, w.frame_rows[1], NULL;
     _autochdir = 0, show_tilda = 0, show_status_line = 0);
 
   Ved.setbuf (b;frame = 1);

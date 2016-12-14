@@ -26,13 +26,9 @@ private define addfname (fname)
 
   ifnot (any (w.bufnames == absfname))
     {
-    variable ft = qualifier ("ftype");
-    if (NULL == ft)
-      ft = Ved.get_ftype (fname);
-
-    s = Ved.init_ftype (ft);
-    variable func = __get_reference (sprintf ("%s_settype", ft));
-    (@func) (s, fname, w.frame_rows[Ved.get_cur_frame ()], NULL);
+    variable ft = Ved.get_ftype (fname;;__qualifiers);
+    s = Ved.init_ftype (ft;;__qualifiers);
+    s.set (fname, w.frame_rows[Ved.get_cur_frame ()], NULL);
     }
   else
     {
@@ -618,6 +614,7 @@ public define init_ved ()
   PROJECT_VED ([NULL, files];ftype = ftype);
 
   Ved.del_wind ("a");
+
   Ved.get_cur_buf ().ved (files[-1]);
   This.exit (0);
 }
