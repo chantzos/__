@@ -6,7 +6,7 @@ class Ved
     undo, undoset, ptr, rows, cols, clrs, lins, lnrs, vlins,lines,
     st_,
     vedloop,vedloopcallback,
-    ved,
+    ved, set,
     draw, lexicalhl, autoindent, pairs,
     opt_show_tilda,
     opt_show_status_line,
@@ -251,9 +251,6 @@ class Ved
   end
 
   def! init_ftype (ftype)
-    ifnot (FTYPES[ftype])
-      FTYPES[ftype] = 1;
-
     variable type = @Ftype_Type;
 
     variable f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +
@@ -262,9 +259,14 @@ class Ved
     if (-1 == access (f + ".slc", F_OK))
       f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" + ftype + "_functions";
 
+    % allow the exception, that merely means a generous fatal on any error
     Load.file (f, NULL);
 
+    ifnot (FTYPES[ftype])
+      FTYPES[ftype] = 1;
+
     type._type = ftype;
+    type.set = __get_reference (ftype + "_settype");
     type;
   end
 
@@ -495,9 +497,9 @@ class Ved
   end
 
   def _draw_ (s) proc
-    if (-1 == s._len) % this shouldn't occur
+    if (0 > s._len) % this shouldn't occur
       {
-      Smg.send_msg ("_draw_ (), caught -1 == s._len condition" + s._fname, 1);
+      Smg.send_msg ("_draw_ (), caught unacceptable s._len condition, " + s._fname, 1);
       s.lins = [__get_null_str (s._indent)];
       s.lnrs = [0];
       s._ii = 0;
@@ -998,11 +1000,8 @@ class Ved
       s.ptr[0] = s.rows[0];
       }
     else if (s._ii < s._len)
-      {
-      s._i = s._ii;
       while (s.ptr[0] - s.rows[0] + s._ii > s._len)
         s.ptr[0]--;
-      }
     else
       {
       while (s._ii > s._len)

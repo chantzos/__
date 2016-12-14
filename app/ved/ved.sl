@@ -16,6 +16,7 @@ private define init_ftype (self, ftype)
   Load.file (f, NULL);
 
   type._type = ftype;
+  type.set = __get_reference (ftype + "_settype");
 
   f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/ved";
 

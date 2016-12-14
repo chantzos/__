@@ -62,8 +62,8 @@ private define _edit_other ()
 
   variable args = list_to_array (__pop_list (_NARGS));
 
-  variable ft = NULL, ind = Opt.Arg.compare ("--ftype=", &args);
-  ifnot (NULL == ind)
+  variable ft = Opt.Arg.getlong ("ftype", NULL, &args;del_arg);
+  ifnot (NULL == ft)
     {
     if (1 == _NARGS) % code needs to be written (change the filetype) 
       {
@@ -71,15 +71,8 @@ private define _edit_other ()
       return;
       }
 
-    ft = args[ind];
-    args[ind] = NULL;
-    args = args[wherenot (_isnull (args))];
-    ft = strchop (ft, '=', 0);
-    if (1 == length (ft))
+    ifnot (any (ft == assoc_get_keys (FTYPES)))
       return;
-   ft = ft[1];
-   ifnot (any (ft == assoc_get_keys (FTYPES)))
-     return;
     }
 
   % one filename
@@ -206,7 +199,7 @@ private define my_commands ()
   a["global"].args =
     ["--action= string supported actions [delete] (required)",
      "--pat= pattern pcre pattern (required)",
-     "--whenNotMatch void perform action on lines that dont match pattern",
+     "--whenNotMatch void perform action on lines that dont match pattern (negate)",
      "--range= int first linenr, last linenr, or % for the whole buffer"];
 
   a;
