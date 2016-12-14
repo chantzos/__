@@ -529,10 +529,9 @@ This.err_handler = &ved_err_handler;
 
 public define init_ved ()
 {
-  variable __stdin = any (This.has.argv == "-");
-  variable fn;
-  variable pj;
+  variable __stdin = Opt.Arg.exists ("-", &This.has.argv;del_arg);
   variable ft = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
+  variable fn;
 
   ifnot (NULL == ft)
     ifnot (any (ft == assoc_get_keys (FTYPES)))
@@ -544,6 +543,9 @@ public define init_ved ()
       ft = "txt";
 
     fn = Ved->VED_DIR + "/__STDIN__." + ft;
+
+    if (isatty (fileno (stdin)))
+      This.exit (1);
 
     __stdin = File.read (fileno (stdin));
 
@@ -561,7 +563,7 @@ public define init_ved ()
     This.exit (0);
     }
 
-  pj = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
+  variable pj = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
 
   ifnot (NULL == pj)
     {

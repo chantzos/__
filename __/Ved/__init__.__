@@ -262,11 +262,14 @@ class Ved
     % allow the exception, that merely means a generous fatal on any error
     Load.file (f, NULL);
 
-    ifnot (FTYPES[ftype])
-      FTYPES[ftype] = 1;
-
     type._type = ftype;
     type.set = __get_reference (ftype + "_settype");
+    if (NULL == type.set)
+      %fatal
+      throw ClassError, "Fatal: " + ftype + "_settype (), missing function declaration";
+
+    FTYPES[ftype] = 1;
+
     type;
   end
 

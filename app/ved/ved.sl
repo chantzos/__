@@ -1,11 +1,9 @@
 This.is.ved = 1;
 This.is.shell = 0;
 
+% re-declare - see Ved/__init__.__
 private define init_ftype (self, ftype)
 {
-  ifnot (FTYPES[ftype])
-    FTYPES[ftype] = 1;
-
   variable
     type = @Ftype_Type,
     f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +  ftype + "_functions";
@@ -17,6 +15,9 @@ private define init_ftype (self, ftype)
 
   type._type = ftype;
   type.set = __get_reference (ftype + "_settype");
+  if (NULL == type.set)
+    %fatal
+    throw ClassError, "Fatal: " + ftype + "_settype (), missing function declaration";
 
   f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/ved";
 
@@ -26,6 +27,11 @@ private define init_ftype (self, ftype)
   Load.file (f, NULL);
 
   type.ved = __get_reference (ftype + "_ved");
+  if (NULL == type.ved)
+    %fatal
+    throw ClassError, "Fatal: " + ftype + "_ved (), missing function declaration";
+
+  FTYPES[ftype] = 1;
 
   type;
 }
