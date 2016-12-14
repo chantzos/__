@@ -16,18 +16,7 @@ private define add (self, s, rows)
     {
     w.cur_frame = 0;
     c = Ved.init_ftype (ftype);
-
-    variable f = Env->USER_DATA_PATH  + "/ftypes/" + ftype + "/" +
-      ftype + "_settype";
-
-    if (-1 == access (f + ".slc", F_OK|R_OK))
-      f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" + ftype + "_settype";
-
-    Load.file (f, NULL);
-
-    variable func = __get_reference (sprintf ("%s_settype", ftype));
-    (@func) (c, s.fname, rows, NULL);
-
+    c.set (s.fname, rows, NULL);
     c._i = c._len >= s.lnr - 1 ? s.lnr - 1 : 0;
     c.ptr[0] = 1;
     c.ptr[1] = s.col - 1 + c._indent;
