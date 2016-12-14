@@ -530,19 +530,19 @@ This.err_handler = &ved_err_handler;
 public define init_ved ()
 {
   variable __stdin = Opt.Arg.exists ("-", &This.has.argv;del_arg);
-  variable ft = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
-  variable fn;
+  variable ftype = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
+  variable fname, files;
 
-  ifnot (NULL == ft)
-    ifnot (any (ft == assoc_get_keys (FTYPES)))
-      ft = NULL;
+  ifnot (NULL == ftype)
+    ifnot (any (ftype == assoc_get_keys (FTYPES)))
+      ftype = NULL;
 
   if (__stdin)
     {
-    if (ft == NULL)
-      ft = "txt";
+    if (ftype == NULL)
+      ftype = "txt";
 
-    fn = Ved->VED_DIR + "/__STDIN__." + ft;
+    fname = Ved->VED_DIR + "/__STDIN__." + ftype;
 
     if (isatty (fileno (stdin)))
       This.exit (1);
@@ -550,9 +550,9 @@ public define init_ved ()
     __stdin = File.read (fileno (stdin));
 
     ifnot (NULL == __stdin)
-      () = File.write(fn, __stdin);
+      () = File.write(fname, __stdin);
 
-    Ved.init_ftype (ft).ved (fn);
+    Ved.init_ftype (ftype).ved (fname);
 
     This.exit (0);
     }
@@ -563,28 +563,42 @@ public define init_ved ()
     This.exit (0);
     }
 
-  variable pj = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
+  files = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
 
-  ifnot (NULL == pj)
+  ifnot (NULL == files)
     {
-    pj = strchopr (pj, ',', 0);
-    _for fn (0, length (pj) - 1)
-      ifnot (path_is_absolute (pj[fn]))
-        pj[fn] = path_concat (getcwd, pj[fn]);
+    files = strchopr (files, ',', 0);
+    _for fname (0, length (files) - 1)
+      ifnot (path_is_absolute (files[fname]))
+        files[fname] = path_concat (getcwd, files[fname]);
 
-    PROJECT_VED ([NULL, pj];ftype = ft);
+    PROJECT_VED ([NULL, files];ftype = ftype);
 
     Ved.del_wind ("a");
-    Ved.get_cur_buf ().ved (pj[-1]);
+    Ved.get_cur_buf ().ved (files[-1]);
     This.exit (0);
     }
 
-  fn = This.has.argv[-1];
+  files = This.has.argv[[1:]];
 
-  if (NULL == ft)
-    ft = Ved.get_ftype (fn);
+  if (1 == length (files))
+    {
+    if (NULL == ftype)
+      ftype = Ved.get_ftype (files[0]);
 
-  ft = Ved.init_ftype (ft);
+    ftype = Ved.init_ftype (ftype);
 
-  ft.ved (fn);
+    ftype.ved (files[0]);
+    This.exit (0);
+    }
+
+  _for fname (0, length (files) - 1)
+    ifnot (path_is_absolute (files[fname]))
+      files[fname] = path_concat (getcwd, files[fname]);
+
+  PROJECT_VED ([NULL, files];ftype = ftype);
+
+  Ved.del_wind ("a");
+  Ved.get_cur_buf ().ved (files[-1]);
+  This.exit (0);
 }
