@@ -1,9 +1,9 @@
 public define txt_ved (s, fname)
 {
   ifnot (SCRATCH == fname)
-    txt_settype (s, fname, VED_ROWS, NULL);
+    s.set (fname, VED_ROWS, NULL;;__qualifiers);
 
-  Ved.setbuf (s._abspath);
+  Ved.setbuf (s._abspath;;__qualifiers);
 
   Ved.write_prompt (" ", 0);
 

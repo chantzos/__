@@ -222,7 +222,13 @@ beg
     s._undolevel = 0;
     s.undoset = {};
 
-    s._i = 0;
+    s._i = qualifier ("_i", 0);
+
+    if (s._i > s._len)
+      s._i = 0;
+    else if (-1 == s._i)
+      s._i = s._len;
+
     s._ii = 0;
     __addbuf__ (s);
   end

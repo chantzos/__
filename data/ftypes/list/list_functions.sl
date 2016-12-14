@@ -124,3 +124,10 @@ public define list_set (s, mys)
   variable w = Ved.get_cur_wind ();
   () = add (s, mys, w.frame_rows[1];row = w.frame_rows[1][0], col = 0);
 }
+
+% defined for code completeness but not used
+public define list_settype ()
+{
+  Smg.send_msg_dr (_function_name + ", this shouldn't be called", 1, NULL, NULL);
+  loop (_NARGS) pop ();
+}

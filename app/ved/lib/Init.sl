@@ -550,7 +550,8 @@ public define init_ved ()
     __stdin = File.read (fileno (stdin));
 
     ifnot (NULL == __stdin)
-      () = File.write(fname, __stdin);
+      if (-1 == File.write (fname, __stdin))
+        This.exit (1);
 
     Ved.init_ftype (ftype).ved (fname);
 
@@ -579,6 +580,9 @@ public define init_ved ()
     This.exit (0);
     }
 
+  variable lnr;
+  (lnr, ) = Opt.Arg.compare ("+", &This.has.argv;del_arg, ret_arg);
+
   files = This.has.argv[[1:]];
 
   if (1 == length (files))
@@ -588,7 +592,22 @@ public define init_ved ()
 
     ftype = Ved.init_ftype (ftype);
 
-    ftype.ved (files[0]);
+    ifnot (NULL == lnr)
+      {
+      if (1 < strlen  (lnr))
+        {
+        lnr = substr (lnr, 2, -1);
+        if (__is_datatype_numeric (_slang_guess_type (lnr)))
+          ftype.ved (files[0];_i = atoi (lnr));
+        else
+          ftype.ved (files[0]);
+        }
+      else
+        ftype.ved (files[0];_i = -1);
+      }
+    else
+      ftype.ved (files[0]);
+
     This.exit (0);
     }
 

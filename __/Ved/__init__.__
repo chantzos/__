@@ -500,8 +500,8 @@ class Ved
   end
 
   def _draw_ (s) proc
-    if (0 > s._len) % this shouldn't occur
-      {
+    if (0 > s._len) % this shouldn't never occur
+      {             % so something needs fixing
       Smg.send_msg ("_draw_ (), caught unacceptable s._len condition, " + s._fname, 1);
       s.lins = [__get_null_str (s._indent)];
       s.lnrs = [0];

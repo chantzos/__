@@ -1,8 +1,7 @@
 public define mail_ved (s, fname)
 {
-  mail_settype (s, fname, VED_ROWS, NULL);
-
-  Ved.setbuf (s._abspath);
+  s.set (fname, VED_ROWS, NULL;;__qualifiers);
+  Ved.setbuf (s._abspath;;__qualifiers);
 
   Ved.write_prompt (" ", 0);
 
