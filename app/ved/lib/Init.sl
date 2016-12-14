@@ -539,21 +539,11 @@ public define init_ved ()
   variable __stdin = any (This.has.argv == "-");
   variable fn;
   variable pj;
-  variable ft = Opt.Arg.compare ("--ftype=", &This.has.argv);
+  variable ft = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
 
   ifnot (NULL == ft)
-    {
-    ft = strchop (This.has.argv[ft], '=', 0);
-    if (2 == length (ft))
-      {
-      ft = ft[1];
-
-      ifnot (any (ft == assoc_get_keys (FTYPES)))
-        ft = NULL;
-      }
-    else
+    ifnot (any (ft == assoc_get_keys (FTYPES)))
       ft = NULL;
-    }
 
   if (__stdin)
     {
@@ -578,19 +568,11 @@ public define init_ved ()
     This.exit (0);
     }
 
-  pj = Opt.Arg.compare ("--pj=", &This.has.argv);
+  pj = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
 
   ifnot (NULL == pj)
     {
-    pj = strchop (This.has.argv[pj], '=', 0);
-
-    if (1 == length (pj))
-      {
-      IO.tostderr ("Error loading project");
-      This.exit (0);
-      }
-
-    pj = strchopr (pj[1], ',', 0);
+    pj = strchopr (pj, ',', 0);
     _for fn (0, length (pj) - 1)
       ifnot (path_is_absolute (pj[fn]))
         pj[fn] = path_concat (getcwd, pj[fn]);
