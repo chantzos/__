@@ -67,4 +67,30 @@ class Assoc
 
     return 0;
   end
+
+  def to_string (a)
+    variable keys = assoc_get_keys (a);
+    variable values = assoc_get_values (a);
+    variable sorted = qualifier_exists ("sort");
+    if (sorted)
+      {
+      variable sort_fun = __get_qualifier_as (Ref_Type,
+        "sort_fun", qualifier ("sort_fun"), NULL);
+      ifnot (NULL == sort_fun)
+        sorted = array_sort (keys, sort_fun;;__qualifiers);
+      else
+        sorted = array_sort (keys;;__qualifiers);
+
+      keys = keys[sorted];
+      values = values[sorted];
+      }
+
+    variable fmt = "";
+    loop (length (keys))
+      fmt += "%S : %%S\n";
+
+    fmt = sprintf (fmt[[:-2]], Array.push (keys));
+
+    sprintf (fmt, Array.push (values));
+  end
 end
