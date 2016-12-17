@@ -495,7 +495,12 @@ private define ved_err_handler (t, _s_)
   ERR_STACK++;
 
   variable fd = open (Env->TMP_PATH + "/ERRORS.txt", O_WRONLY|O_CREAT, File->PERM["PUBLIC"]);
-  () = lseek (fd, 0, SEEK_END);
+  if (NULL == fd)
+    This.exit (1);
+
+  if (-1 == lseek (fd, 0, SEEK_END))
+    This.exit (1);
+
   IO.tostdout (Smg.__HLINE__ ();fd = fd);
   IO.tostdout (Env->PID, ERR_STACK;fd = fd);
   IO.tostdout (t;fd = fd);
@@ -614,7 +619,6 @@ public define init_ved ()
   PROJECT_VED ([NULL, files];ftype = ftype);
 
   Ved.del_wind ("a");
-
   Ved.get_cur_buf ().ved (files[-1]);
   This.exit (0);
 }
