@@ -535,21 +535,24 @@ private define starthook (s)
     if (1 == length (s.argv))
       ifnot (strlen (s.argv[0]))
         if (any (['f', 'b', ' ', 'p', 'n', 'r', Input->PPAGE, Input->ESC_up, 'k',
-             Input->NPAGE, Input->ESC_down, 'j', '9', '0', 'l', 'a', 't']
+             Input->NPAGE, Input->ESC_down, 'j', '9', '0', 'l', 'a', 't', 's']
                == s._chr))
           {
           s.argv[0] = [
             "forward", "backward",  "pause",  "prev", "next",
             "redisplay", "lyrics_up", "lyrics_up", "lyrics_up",
             "lyrics_down", "lyrics_down", "lyrics_down", "9", "0",
-            "playlist", "audioplay", "tagwrite"]
+            "playlist", "audioplay", "tagwrite", "stop"]
             [wherefirst (s._chr == ['f', 'b', ' ', 'p', 'n', 'r', Input->PPAGE,
              Input->ESC_up, 'k', Input->NPAGE, Input->ESC_down, 'j', '9', '0',
-             'l', 'a', 't'])];
+             'l', 'a', 't', 's'])];
 
           if (any (s.argv[0] == ["audioplay", "tagwrite"]))
             {
             populate_audiodir;
+            ifnot ('/' == MED_AUD_DIR[0][-1])
+              MED_AUD_DIR[0] += "/";
+
             s._col = strlen (s.argv[0]) + 2 + strlen (MED_AUD_DIR[0]);
             s.argv = [s.argv, MED_AUD_DIR[0]];
             Rline.parse_args (NULL, s);
