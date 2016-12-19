@@ -626,14 +626,16 @@ class Rline
       index = "." == pat ? 0 : strlen (pat),
       len = strlen (ar[0]),
       new_str = len > index ? ar[0][[0:index]] : NULL,
-      indices = NULL != new_str ? array_map (Char_Type, &string_match, ar,
-        str_quote_string (sprintf ("^%s", new_str), ".+[]()?", '\\')) : [0];
+      indices = NULL != new_str
+        ? array_map (Char_Type, &string_match, ar,
+            str_quote_string (sprintf ("^%s", new_str), ".+[]()?", '\\'))
+        : [0];
 
     ifnot (length (ar) == length (where (indices)))
       return;
 
     if ("." != pat)
-      @str +=pat;
+      @str += pat;
     else
       @str = "";
 
@@ -1101,36 +1103,23 @@ class Rline
       }
   end
 
-  def is_uniq (file, pat) proc
-    if ('/' == (@file)[-1])
+  def is_uniq (file) proc
+    if ('/' == (file)[-1])
       return 1;
 
-    variable lpat = path_basename (@file);
+    variable lpat = path_basename (file);
     ifnot (strlen (lpat))
-      {
-      Smg.send_msg_dr ("is_uniq () case 0 == strlen (pat), press any key", 1, NULL, NULL);
-      () = Input.getch ();
-      @file = path_dirname (@file) + "/";
       return 0;
-      }
 
-    variable lfile = path_dirname (@file);
-    variable dir = strlen (lfile) ? lfile : getcwd;
+    file = path_dirname (file);
+    variable dir = strlen (file) ? file : getcwd;
     variable files = listdir (dir);
 
     if (NULL == files || 0 == length (files))
-      {
-      Smg.send_msg_dr ("is_uniq () case NULL == files, press any key", 1, NULL, NULL);
-      () = Input.getch ();
-      return -1;
-      }
+      return 1;
 
     if (2 > length (wherenot (strncmp (files, lpat, strlen (lpat)))))
-      {
-      @file = lfile;
-      @pat = lpat;
       return 0;
-      }
 
      1;
   end
@@ -1164,11 +1153,8 @@ class Rline
     loop (1)
       ifnot (' ' == start[0])
         {
-        ifnot (is_uniq (&start, &pat))
-          {
-          start += pat;
+        if (is_uniq (start))
           break;
-          }
 
         tmp = appendslash (start);
 
@@ -1191,16 +1177,11 @@ class Rline
         if ("./" == file[[0:1]] && 0 == strlen (s.argv[s._ind]))
           file = file[[2:]];
 
-      ifnot (access (file, F_OK))
-        {
-        tmp = file;
-        variable p = pat;
-        () = is_uniq (&file, &pat);
-        }
+%      ifnot (access (file, F_OK))
+%        () = is_uniq (&file, &pat);
 
       if (access (file, F_OK) || '/' != (s._lin)[-1])
         {
-        tmp = file;
         pat = path_basename (file);
         file = path_dirname (file);
         }
@@ -1226,8 +1207,7 @@ class Rline
           str = path_concat (file, str);
           s.argv[s._ind] = str;
 
-          file = s.argv[s._ind];
-          ifnot (is_uniq (&file, &pat))
+          if (1 == length (wherenot (strncmp (ar, str, strlen (str)))))
             s.argv[s._ind] += appendslash (str);
 
           if ("./" == s.argv[s._ind][[0:1]])
@@ -1292,7 +1272,6 @@ class Rline
         {
         restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
         prompt (NULL, s, s._lin, s._col);
-
         return 0;
         }
 
@@ -1319,6 +1298,8 @@ class Rline
             continue;
             }
           }
+        else
+          Smg.send_msg_dr (sprintf ("!!!ERROR fnamecmp (), STAT FAILED", file), 1, NULL, NULL);
         }
 
       if (any (Input->rmap.backspace == chr) && strlen (s._lin))
@@ -1340,8 +1321,7 @@ class Rline
           if (length (ar))
             {
             s.argv[s._ind] = ar[0];
-            file = ar[0];
-            ifnot (is_uniq (&file, &pat))
+            if (1 == length (wherenot (strncmp (ar, pat, strlen (pat)))))
               s.argv[s._ind] += appendslash (ar[0]);
 
             s._col = strlen (strjoin (s.argv[[:s._ind]], " ")) + 1;
@@ -1369,10 +1349,10 @@ class Rline
 
       insert_at (s;chr = chr);
 
-      file = s.argv[s._ind];
-      ifnot (is_uniq (&file, &pat))
-        if (strlen (appendslash (s.argv[s._ind])))
-          insert_at (s;chr = '/');
+      ifnot (' ' == chr)
+        if (1 == length (wherenot (strncmp (ar, pat, strlen (pat)))))
+          if (strlen (appendslash (s.argv[s._ind])))
+            insert_at (s;chr = '/');
 
       parse_args (NULL, s);
       restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
