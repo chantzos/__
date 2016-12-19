@@ -1108,6 +1108,8 @@ class Rline
     variable lpat = path_basename (@file);
     ifnot (strlen (lpat))
       {
+      Smg.send_msg_dr ("is_uniq () case 0 == strlen (pat), press any key", 1, NULL, NULL);
+      () = Input.getch ();
       @file = path_dirname (@file) + "/";
       return 0;
       }
@@ -1116,8 +1118,14 @@ class Rline
     variable dir = strlen (lfile) ? lfile : getcwd;
     variable files = listdir (dir);
 
-    if (NULL == files || 0 == length (files) ||
-        2 > length (wherenot (strncmp (files, lpat, strlen (lpat)))))
+    if (NULL == files || 0 == length (files))
+      {
+      Smg.send_msg_dr ("is_uniq () case NULL == files, press any key", 1, NULL, NULL);
+      () = Input.getch ();
+      return -1;
+      }
+
+    if (2 > length (wherenot (strncmp (files, lpat, strlen (lpat)))))
       {
       @file = lfile;
       @pat = lpat;
@@ -1140,22 +1148,38 @@ class Rline
       sort = "name",
       pat = "";
 
-   loop (1)
-     ifnot (' ' == start[0])
-       {
-       if (is_uniq (&start, &pat))
-         break;
+    if (strlen (start) > 2)
+      if ("../" == start[[:2]])
+        if (s._ind)
+          ifnot (s.argv[0] == "ln") % ln is the only exception for now
+            {                       % else path is absolute
+            tmp = start;
+            start = sprintf ("%s/%s", realpath (".."), substr (start, 4, -1));
+            s.argv[s._ind] = start;
+            s._col += strlen (start) - strlen (tmp);
+            parse_args (NULL, s);
+            prompt (NULL, s, s._lin, s._col);
+            }
 
-       tmp = appendslash (start);
+    loop (1)
+      ifnot (' ' == start[0])
+        {
+        ifnot (is_uniq (&start, &pat))
+          {
+          start += pat;
+          break;
+          }
 
-       if ("/" == tmp)
-         {
-         s.argv[s._ind] += tmp;
-         s._col += strlen (tmp);
-         parse_args (NULL, s);
-         prompt (NULL, s, s._lin, s._col);
-         }
-       }
+        tmp = appendslash (start);
+
+        if ("/" == tmp)
+          {
+          s.argv[s._ind] += tmp;
+          s._col += strlen (tmp);
+          parse_args (NULL, s);
+          prompt (NULL, s, s._lin, s._col);
+          }
+        }
 
     forever
       {
@@ -1168,10 +1192,15 @@ class Rline
           file = file[[2:]];
 
       ifnot (access (file, F_OK))
+        {
+        tmp = file;
+        variable p = pat;
         () = is_uniq (&file, &pat);
+        }
 
       if (access (file, F_OK) || '/' != (s._lin)[-1])
         {
+        tmp = file;
         pat = path_basename (file);
         file = path_dirname (file);
         }
