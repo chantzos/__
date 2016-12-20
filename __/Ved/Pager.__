@@ -30,8 +30,9 @@ subclass Pager
     ifnot (strlen (fname))
       return;
 
-    if (-1 == access (fname, F_OK|R_OK))
-      return;
+    % let it open
+    % if (-1 == access (fname, F_OK|R_OK))
+    %   return;
 
     if (Dir.isdirectory (fname))
       return;

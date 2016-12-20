@@ -84,9 +84,7 @@ class Ved
   var public VEDCOUNT;
 
   def build_ftype_table () proc
-    variable i;
-    variable ii;
-    variable ft;
+    variable i, ii, ft;
     variable nss = [Env->USER_DATA_PATH, Env->STD_DATA_PATH];
 
     _for i (0, length (nss) - 1)
