@@ -95,7 +95,7 @@ class Rline
         ar = listdir (dirname);
 
         ar = ar[where (array_map (Integer_Type, &string_match, ar,
-              sprintf ("%s$", basename) ))];
+            sprintf ("%s$", basename) ))];
 
         ar = ar[array_sort (ar)];
 
@@ -173,16 +173,12 @@ class Rline
       if (-1 == access (histfile, W_OK))
         return;
 
-    variable fp = fopen (histfile, "w");
-    () = array_map (Integer_Type, &fprintf, fp, "%s\n", hist);
-    () = fclose (fp);
+    if (-1 == File.write (histfile, hist))
+      Smg.send_msg_dr ("Error while writing to the history file", 1, NULL, NULL);
   end
 
   def readhistory (histfile)
-    if (NULL == histfile)
-      return String_Type[0];
-
-    if (-1 == access (histfile, F_OK|R_OK))
+    if (NULL == histfile || -1 == access (histfile, F_OK|R_OK))
       return String_Type[0];
 
     File.readlines (histfile);
@@ -369,9 +365,7 @@ class Rline
   end
 
   def parse_args (s)
-    variable
-      i,
-      found = NULL;
+    variable i, found = NULL;
 
     (s._lin, s._ind) = s._pchar, NULL;
 
@@ -413,10 +407,7 @@ class Rline
   end
 
   def delete_at (s) proc
-    variable
-      i,
-      arglen,
-      len = 0;
+    variable i, arglen, len = 0;
 
     ifnot (qualifier_exists ("is_delete"))
       s._col--;
@@ -634,7 +625,7 @@ class Rline
     ifnot (length (ar) == length (where (indices)))
       return;
 
-    if ("." != pat)
+    ifnot ("." == pat)
       @str += pat;
     else
       @str = "";
@@ -766,11 +757,6 @@ class Rline
       i++;
 
     bcol = acol - (s._columns * i);
-
-%    ifnot (qualifier_exists ("dont_format"))
-%      formar (items, fmt, ar, &bar);
-%    else
-%      bar = @ar;
 
     len = length (bar);
     @item = ar[index];
@@ -1118,10 +1104,7 @@ class Rline
     if (NULL == files || 0 == length (files))
       return 1;
 
-    if (2 > length (wherenot (strncmp (files, lpat, strlen (lpat)))))
-      return 0;
-
-     1;
+    2 > length (wherenot (strncmp (files, lpat, strlen (lpat))));
   end
 
   def fnamecmp (s, start) proc
@@ -1176,9 +1159,6 @@ class Rline
       if (2 < strlen (file))
         if ("./" == file[[0:1]] && 0 == strlen (s.argv[s._ind]))
           file = file[[2:]];
-
-%      ifnot (access (file, F_OK))
-%        () = is_uniq (&file, &pat);
 
       if (access (file, F_OK) || '/' != (s._lin)[-1])
         {
@@ -1299,7 +1279,7 @@ class Rline
             }
           }
         else
-          Smg.send_msg_dr (sprintf ("!!!ERROR fnamecmp (), STAT FAILED", file), 1, NULL, NULL);
+          Smg.send_msg_dr ("!!!ERROR in fnamecmp (), stat failed when it shouldn't", 1, NULL, NULL);
         }
 
       if (any (Input->rmap.backspace == chr) && strlen (s._lin))
@@ -1483,15 +1463,19 @@ class Rline
       chr = 0,
       pat = "";
 
-    if (' ' != (@fname)[0])
-      @fname += appendslash (@fname);
+    if (strlen (@fname) > 2)
+      if ("../" == (@fname)[[:2]])
+        @fname = sprintf ("%s/%s", realpath (".."), substr (@fname, 4, -1));
+
+    ifnot (' ' == (@fname)[0])
+      ifnot (is_uniq (@fname))
+        @fname += appendslash (@fname);
 
     forever
       {
       pat = "";
       tmp = strlen (@fname) ? @fname : "";
-      file = ' ' == (@fname)[-1] ? getcwd () :
-        sprintf ("%s%s", Dir.eval (tmp;dont_change), appendslash (tmp));
+      file = ' ' == (@fname)[-1] ? getcwd () : Dir.eval (tmp;dont_change);
 
       if (2 < strlen (file))
         if ("./" == file[[0:1]] && 0 == strlen (@fname))
@@ -1533,7 +1517,9 @@ class Rline
         if (strlen (str))
           {
           str = path_concat (file, str);
-          @fname = sprintf ("%s%s", str, appendslash (str));
+          if (1 == length (wherenot (strncmp (ar, str, strlen (str)))))
+            @fname = sprintf ("%s%s", str, appendslash (str));
+
           if ("./" == (@fname)[[0:1]])
             @fname = substr (@fname, 3, -1);
           }
@@ -1585,8 +1571,10 @@ class Rline
           ar = array_map (String_Type, &path_concat, file, ar);
           ar = ar[wherenot (array_map (Char_Type, &strncmp, ar,
             @fname + " ", strlen (@fname) + 1))];
+
           if (length (ar))
-            @fname = sprintf ("%s%s", ar[0], appendslash (ar[0]));
+            if (1 == length (wherenot (strncmp (ar, pat, strlen (pat)))))
+              @fname = sprintf ("%s%s", ar[0], appendslash (ar[0]));
           }
         else
           return 0;
@@ -1598,12 +1586,15 @@ class Rline
         }
 
       @fname += char (chr);
-      @fname += appendslash (@fname);
+
+      ifnot (' ' == chr)
+        if (1 == length (wherenot (strncmp (ar, pat + char (chr), strlen (pat) + 1))))
+          @fname += appendslash (@fname);
       }
   end
 
   def _null_ () proc
-    return NULL;
+    NULL;
   end
 
   % - buggy -
