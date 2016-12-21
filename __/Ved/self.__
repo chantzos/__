@@ -178,6 +178,7 @@ beg
     s.autoindent  = qualifier ("autoindent", t.autoindent);
     s._autochdir  = qualifier ("_autochdir", t._autochdir);
     s.lexicalhl   = qualifier ("lexicalhl", t.lexicalhl);
+    s.comment_str = qualifier ("comment_str", t.comment_str);
     s.draw = t.draw;
     s.vedloop = t.vedloop;
     s.vedloopcallback = t.vedloopcallback;
@@ -444,6 +445,7 @@ beg
       _maxlen = COLUMNS,
       _autochdir = 1,
       _autoindent = 0,
+      comment_str = [char (127)],
       autoindent = &autoindent,
       draw = &_draw_,
       lexicalhl = &lexicalhl,

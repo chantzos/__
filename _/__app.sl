@@ -490,10 +490,8 @@ private define __write__ (argv)
   file = length (argv) - 1 ? argv[1] : NULL;
 
   if (any (["w", "w!", "W"]  == command))
-    {
     Ved.writefile (b, "w!" == command, [PROMPTROW, 1], file, append;
       lines = b.lines[lnrs]);
-    }
 }
 
 private define __edit__ (argv)

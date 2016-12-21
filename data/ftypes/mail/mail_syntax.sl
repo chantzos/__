@@ -17,6 +17,6 @@ private variable regexps = [
 
 define mail_lexicalhl (s, lines, vlines)
 {
-  __hl_groups (lines, vlines, colors, regexps);
+  __hl_groups (s, lines, vlines, colors, regexps);
 }
 

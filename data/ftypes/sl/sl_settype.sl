@@ -9,6 +9,7 @@ public define sl_settype (s, fname, rows, lines)
   def._shiftwidth = 2;
   def._expandtab = 1;
   def.lexicalhl = &sl_lexicalhl;
+  def.comment_str = ["%"];
 
   Ved.initbuf (s, fname, rows, lines, def;;__qualifiers);
 }

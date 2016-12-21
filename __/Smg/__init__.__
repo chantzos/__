@@ -26,6 +26,7 @@ class Smg
   diffpl = "brown",
   diffmn = "brightred",
   visual = "blackonbrown",
+  comment = "brown",
   };
 
   var static IMG = List_Type[LINES - 2];
@@ -434,12 +435,12 @@ class Smg
     array_map (Void_Type, &set_basic_color,
       ["normal", "error", "success", "warn", "prompt",
        "border", "focus", "hlchar",   "hlregion", "topline",
-       "infofg", "infobg", "diffpl", "diffmn", "visual"
+       "infofg", "infobg", "diffpl", "diffmn", "visual", "comment"
       ],
       [__COLOR__.normal, __COLOR__.error, __COLOR__.success, __COLOR__.warn,
        __COLOR__.prompt, __COLOR__.border, __COLOR__.focus, __COLOR__.hlchar,
        __COLOR__.hlregion, __COLOR__.topline, __COLOR__.infofg, __COLOR__.infobg,
-       __COLOR__.diffpl, __COLOR__.diffmn, __COLOR__.visual]);
+       __COLOR__.diffpl, __COLOR__.diffmn, __COLOR__.visual, __COLOR__.comment]);
 
     SLsmg_Tab_Width = 1;
     array_map (Void_Type, &slsmg_define_color, [0:14:1],

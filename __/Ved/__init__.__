@@ -3,8 +3,8 @@ class Ved
     _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
     _linlen,_avlins,_findex,_index,_shiftwidth,_expandtab,_undolevel,
     _autoindent,_dir,_autochdir,_is_wrapped_line,
-    undo, undoset, ptr, rows, cols, clrs, lins, lnrs, vlins,lines,
-    st_,
+    undo, undoset, ptr, rows, cols, clrs, lins, lnrs, vlins, lines,
+    st_, comment_str,
     vedloop,vedloopcallback,
     ved, set,
     draw, lexicalhl, autoindent, pairs,
@@ -74,7 +74,7 @@ class Ved
   var VED_INFOCLRFG = Smg->COLOR.infofg;
   var VED_INFOCLRBG = Smg->COLOR.infobg;
   var VED_PROMPTCLR = Smg->COLOR.prompt;
-  var VED_PREV_WIND;
+  var VED_PREV_WIND = NULL;
 
   def __invalid__ () proc
     pop ();
@@ -271,9 +271,9 @@ class Ved
     if (-1 == access (f + ".slc", F_OK))
       f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" + ftype + "_functions";
 
-    % allow the exception, that merely means a generous fatal on any error
-    Load.file (f, NULL);
-
+    % allow the exception, 
+    Load.file (f, NULL); % that merely means a generous fatal
+                         % on any error
     type._type = ftype;
     type.set = __get_reference (ftype + "_settype");
     if (NULL == type.set)
@@ -299,13 +299,15 @@ class Ved
   end
 
   def __vwritetofile (file, lines, indent, bts) public proc
-    variable
-      i,
-      retval,
-      fp = fopen (file, NULL == qualifier ("append") ? "w" : "a+");
+    variable i, retval,
+      append = qualifier_exists ("append")
+        ? __get_qualifier_as (Integer_Type, "append", qualifier ("append"),
+          0)
+        : 0,
+      fp = fopen (file, ["w", "a+"][append > 0]);
 
-    if (NULL == fp) % fopen dont set errno
-      return 5;     % set an I/O error
+    if (NULL == fp) % fopen sets errno
+      return errno;
 
     _for i (0, length (lines) - 1)
       if (retval = __write_line (fp, lines[i] + "\n", indent), retval == -1)
@@ -379,9 +381,7 @@ class Ved
     f[*] = len / frames;
     f[0] += len mod frames;
 
-    variable i;
-    variable istart = 0;
-    variable iend;
+    variable i, iend, istart = 0;
 
     _for i (0, length (f) - 1)
       {
@@ -398,8 +398,7 @@ class Ved
   end
 
   def _loop_ (s) proc
-    variable ismsg = 0;
-    variable rl;
+    variable rl, ismsg = 0;
 
     forever
       {
@@ -441,8 +440,8 @@ class Ved
         topline (" -- command --");
         rl = Ved.get_cur_rline ();
         Rline.set (rl);
-        Rline.readline (rl;
-          ved = s, draw = (@__get_reference ("SCRATCH")) == s._abspath ? 0 : 1);
+        Rline.readline (rl;ved = s,
+          draw = (@__get_reference ("SCRATCH")) != s._abspath);
 
         if ('!' == Ved.get_cur_rline ().argv[0][0] &&
            (@__get_reference ("SCRATCH")) == s._abspath)
@@ -507,7 +506,7 @@ class Ved
       Smg.hlregion (1, s.ptr[0], COLUMNS - 2, 1, 2);
 
     Smg.atrcaddnstrdr (Ved.tail (s;;__qualifiers ()),
-      (s.opt_show_status_line ? VED_INFOCLRFG : Smg->NOCOLOR),
+      [Smg->NOCOLOR, VED_INFOCLRFG][s.opt_show_status_line > 0],
       s.rows[-1], 0, s.ptr[0], s.ptr[1], COLUMNS);
   end
 
@@ -572,7 +571,7 @@ class Ved
 
     ar = [ar, Ved.tail (s;;__qualifiers ())];
 
-    clrs[-1] = s.opt_show_status_line ? VED_INFOCLRFG : Smg->NOCOLOR;
+    clrs[-1] = [Smg->NOCOLOR, VED_INFOCLRFG][s.opt_show_status_line > 0];
 
     Smg.set_img (s.rows, ar, clrs, s.cols);
 
@@ -840,8 +839,7 @@ class Ved
 
     ifnot (qualifier_exists ("in_bg"))
       {
-      ifnot (NULL == VED_CUR_WIND)
-        VED_PREV_WIND = VED_CUR_WIND;
+      VED_PREV_WIND = VED_CUR_WIND;
       VED_CUR_WIND = name;
       }
 
@@ -942,7 +940,7 @@ class Ved
     Ved.Mark.backtick (s);
   end
 
-  def __hl_groups (lines, vlines, colors, regexps) public proc
+  def __hl_groups (s, lines, vlines, colors, regexps) public proc
     variable
       i,
       ii,
@@ -961,7 +959,8 @@ class Ved
       if (0 == strlen (line) || "\000" == line)
         continue;
 
-      iscomment = '%' == strtrim_beg (line)[0];
+      iscomment = any (0 == array_map (Integer_Type, &strncmp,
+        strtrim_beg (line), s.comment_str, strlen (s.comment_str)));
 
       _for ii (0, length (regexps) - 1)
         {
@@ -997,9 +996,8 @@ class Ved
           }
 
         ifnot (ii)
-          if (col)
-            line = substr (line, 1, match[0] + 1); % + 1 is to avoid the error pattern
-                                                   % to match it as eol
+          if (col)                  % + 1 is to avoid the error pattern
+            line = substr (line, 1, match[0] + 1); % to match it as eol
         }
       }
   end

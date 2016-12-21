@@ -35,7 +35,7 @@ private variable i_regexps = [
 
 private define info_lexicalhl (s, lines, vlines)
 {
-  __hl_groups (lines, vlines, i_colors, i_regexps);
+  __hl_groups (s, lines, vlines, i_colors, i_regexps);
 }
 
 private variable s_regexps = [
@@ -43,7 +43,7 @@ private variable s_regexps = [
 
 private define stat_lexicalhl (s, lines, vlines)
 {
-  __hl_groups (lines, vlines, i_colors, s_regexps);
+  __hl_groups (s, lines, vlines, i_colors, s_regexps);
 }
 
 public define on_wind_change (w)
