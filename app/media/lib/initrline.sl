@@ -21,9 +21,11 @@ private define _cur_playing_ ()
   sleep (0.3);
 
   variable buf = NULL, bts;
+  variable timeout = 2.5;
   forever
     {
-    while (0 == (bts = read (MED_STDOUT_FD, &buf, 4096), bts));
+    while (0 == (bts = read (MED_STDOUT_FD, &buf, 4096), bts) &&
+    (timeout -= 0.5, timeout) > 0);
     if (bts == -1)
       if (errno == EINTR)
         continue;
@@ -170,35 +172,21 @@ private define __write_lyric__ ()
     if (cur_song == CUR_LYRIC)
       return;
 
-  variable lyrics = listdir (MED_LYRICS);
-  if (NULL == lyrics || 0 == length (lyrics))
-    return;
-
-  try
-    {
-    variable pat = pcre_compile (cur_song, PCRE_CASELESS);
-    }
-  catch ParseError:
-    return;
-
-  variable i, found = NULL;
-
-  _for i (0, length (lyrics) - 1)
-    if (pcre_exec (pat, lyrics[i]))
-      {
-      found = 1;
+  variable lyric = "", lyrics = listdir (MED_LYRICS);
+  loop (1)
+    if (NULL == lyrics || 0 == length (lyrics))
       break;
+    else
+      {
+      variable index = wherefirst (cur_song == array_map (String_Type,
+          &path_basename_sans_extname, lyrics));
+      if (NULL == index)
+        break;
+      lyric = File.read (MED_LYRICS + "/" + lyrics[index]);
+      CUR_LYRIC = cur_song;
       }
 
   variable lyricbuf = Ved.get_frame_buf (0);
-  variable lyric;
-  if (NULL == found)
-    lyric = "";
-  else
-    {
-    CUR_LYRIC = cur_song;
-    lyric = File.read (MED_LYRICS + "/" + lyrics[i]);
-    }
 
   () = File.write (lyricbuf._abspath, lyric);
 
@@ -262,6 +250,7 @@ private define play_audio (argv)
 
   () = File.write (MED_LIST, list);
   () = write (MED_FD, "loadlist " + MED_LIST + "\n");
+  sleep (0.3);
   __write_info__;
   __write_lyric__ (;usecur);
 }
