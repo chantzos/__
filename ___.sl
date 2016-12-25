@@ -104,7 +104,7 @@ THESE["__APP__"] =
 `public variable This = This->__INIT__ ("__APP__";setargv);
 `;
 
-public variable This, io;
+public variable io;
 
 public define exit_me (self, msg, code)
 {
@@ -119,6 +119,8 @@ public define exit_me (self, msg, code)
 private define at_exit (self)
 {
 }
+
+public variable This = struct {exit = &exit_me, at_exit = &at_exit};
 
 public variable APP_ERR, App;
 
