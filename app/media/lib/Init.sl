@@ -1,12 +1,13 @@
 Load.module ("pcre");
 
-try
-  Load.module ("taglib");
-catch ClassError:
-  {
+private define __import_err_handler ()
+{
+  loop (_NARGS) pop ();
   Load.file (This.is.my.basedir + "/lib/" + "taglib", NULL);
   HAS_TAGLIB = 0;
-  }
+}
+
+Load.module ("taglib";err_handler = &__import_err_handler, dont_print_err);
 
 Class.load ("Hw";force);
 
