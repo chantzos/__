@@ -15,6 +15,7 @@ Class.load ("Dir");
 Class.load ("Path");
 Class.load ("Stack");
 Class.load ("Struct");
+Class.load ("List");
 Class.load ("IO");
 Class.load ("Slang");
 Class.load ("Me");

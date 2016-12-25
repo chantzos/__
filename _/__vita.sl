@@ -182,6 +182,66 @@ private define Struct_to_string (self, s)
 
 public variable Struct = struct {__name, to_string = &Struct_to_string};
 
+__use_namespace ("Assoc");
+
+private define Assoc_to_string (self, a)
+{
+  variable keys = assoc_get_keys (a);
+  variable values = assoc_get_values (a);
+  variable sorted = qualifier_exists ("sort");
+  if (sorted)
+    {
+    variable sort_fun = __get_qualifier_as (Ref_Type,
+      "sort_fun", qualifier ("sort_fun"), NULL);
+    ifnot (NULL == sort_fun)
+      sorted = array_sort (keys, sort_fun;;__qualifiers);
+    else
+      sorted = array_sort (keys;;__qualifiers);
+
+    keys = keys[sorted];
+    values = values[sorted];
+    }
+
+  variable fmt = "";
+  loop (length (keys))
+    fmt += "%S : %%S\n";
+
+  fmt = sprintf (fmt[[:-2]], Array.push (keys));
+
+  sprintf (fmt, Array.push (values));
+}
+
+public variable Assoc = struct {__name, to_string = &Assoc_to_string};
+
+__use_namespace ("List");
+
+private define List_to_string (self, l)
+{
+  variable
+    str = "",
+    n = (qualifier_exists ("n") ? "" : "\n"),
+    pad = __get_qualifier_as (Integer_Type, "pad", qualifier ("pad"), 2),
+    sp = repeat (" ", pad),
+    t, i;
+
+  _for i (0, length (l) - 1)
+    if ((t = typeof (l[i]), t) == Struct_Type)
+      str += sprintf ("%s-= %S) =-\n%s%s", sp, t,
+        Struct.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+    else if (t == Assoc_Type)
+      str += sprintf ("%s-= (%S) =-\n%s%s", sp, t,
+        Assoc.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+    else if (t == List_Type)
+      str += sprintf ("%s-= (%S) =-\n%s%s", sp, t,
+        self.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+    else
+      str += sprintf ("%s-= (%S) =-\n%S%s", sp, t, l[i], n);
+
+  str;
+}
+
+public variable List = struct {__name, to_string = &List_to_string};
+
 __use_namespace ("Env");
 
 static define STD_LIB_PATH ()

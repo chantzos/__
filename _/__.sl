@@ -427,10 +427,12 @@ private define __classnew__ (cname, super, classpath, isself, methods)
 
 static define err_handler (e, s)
 {
-  IO.tostderr (Struct.to_string (s));
-  IO.tostderr ("Args: ";n);
-  IO.tostderr (s.args);
-  Exc.print (e);
+  ifnot (qualifier_exists ("dont_print_err"))
+    {
+    IO.tostderr (Struct.to_string (s), "\nArgs: ",
+      List.to_string (s.args));
+    Exc.print (e);
+    }
 
   if (NULL == s.class)
     return;
@@ -1418,7 +1420,7 @@ private define __Class_From_Init__ (classpath)
 
   ifnot (qualifier_exists ("dont_eval"))
     if (any (tmpnam == assoc_get_keys (__CLASS__)))
-      ifnot (NULL == (tmp = __get_reference (tmp), (@tmp).__name))
+      ifnot (NULL == (tmp = __get_reference (tmpnam), (@tmp).__name))
         throw ClassError, "Class::__INIT__::" + tmpnam + " is already defined";
 
   variable
