@@ -1,0 +1,25 @@
+class List
+  def to_string (l)
+    variable
+      str = "",
+      n = (qualifier_exists ("n") ? "" : "\n"),
+      pad = __get_qualifier_as (Integer_Type, "pad", qualifier ("pad"), 2),
+      sp = repeat (" ", pad),
+      t, i;
+
+    _for i (0, length (l) - 1)
+      if ((t = typeof (l[i]), t) == Struct_Type)
+        str += sprintf ("%s-= %S) =-\n%s%s", sp, t,
+          Struct.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+      else if (t == Assoc_Type)
+        str += sprintf ("%s-= (%S) =-\n%s%s", sp, t,
+          Assoc.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+      else if (t == List_Type)
+        str += sprintf ("%s-= (%S) =-\n%s%s", sp, t,
+          self.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+      else
+        str += sprintf ("%s-= (%S) =-\n%S%s", sp, t, l[i], n);
+
+    str;
+  end
+end
