@@ -1,15 +1,22 @@
 beg
   def tail (s)
-    variable
-      lnr = __vlnr (s, '.') + 1,
-      line = __vline (s, '.');
+    variable lnr = __vlnr (s, '.') + 1;
+    variable linlen = qualifier ("linlen", __vlinlen (s, '.'));
 
     sprintf (
-      "[%s] (row:%d col:%d lnr:%d/%d %.0f%% strlen:%d chr:%d) undo %d/%d",
-      path_basename (s._fname), s.ptr[0], s.ptr[1] - s._indent + 1, lnr,
-      s._len + 1, (100.0 / s._len) * (lnr - 1), __vlinlen (s, '.'),
-      qualifier ("chr", String.decode (substr (line, s._index + 1, 1))[0]),
-      s._undolevel, length (s.undo));
+     "[%s] (row:%d col:%d lnr:%d/%d %.0f%% strlen:%d chr:%d) undo %d/%d",
+        path_basename (s._fname),
+        s.ptr[0],
+        s.ptr[1] - s._indent + 1,
+        lnr,
+        s._len + 1,
+        (100.0 / s._len) * (lnr - 1),
+        linlen,
+        qualifier ("chr", String.decode (substr (__vline (s, '.'),
+          s._index + 1, 1))[0]),
+        s._undolevel,
+        length (s.undo)
+      );
   end
 
   def newline_str (s, indent, line)
@@ -205,7 +212,6 @@ beg
 
     s.lines = NULL == lines ? Ved.getlines (s._fname, s._indent, s.st_) : lines;
     s._flags = 0;
-    s._is_wrapped_line = 0;
 
     s.ptr = Integer_Type[2];
 

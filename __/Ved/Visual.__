@@ -6,17 +6,17 @@ subclass Visual
 
   var vis = struct
     {
-    _i,cur,ptr,mode,
+    _i, cur, ptr, mode,
     clr = Smg->COLOR.visual,
-    l_mode,l_down,l_up,l_page_up,l_page_down,
+    l_mode, l_down, l_up, l_page_up, l_page_down,
     l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', Input->DOWN, Input->UP,
       Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b, Input->HOME],
-    c_mode,c_left,c_right,
+    c_mode, c_left, c_right,
     c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT],
-    bw_mode,bw_down,bw_up,bw_left,bw_right,bw_maxlen,
+    bw_mode, bw_down, bw_up, bw_left, bw_right, bw_maxlen,
     bw_keys = ['x', 'I', 'i', 'd', 'y', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
-    needsdraw,startrow,startlnr,startcol,startindex,
-    vlins,lnrs,linlen,lines,sel,at_exit,
+    needsdraw, startrow, startlnr, startcol, startindex,
+    vlins, lnrs, linlen, lines, sel, at_exit,
     };
 
   def v_unhl_line (vs, s, index) proc
@@ -492,19 +492,24 @@ subclass Visual
   end
 
   def v_c_left (vs, s, cur) proc
-    variable retval = __left (s);
+    variable is_wrapped = __vis_wrapped (s, strlen (vs.lines[cur]),
+      vs.index[cur], vs.findex[cur]);
+
+    variable retval = __left (s, is_wrapped);
 
     if (-1 == retval)
       return;
 
     vs.index[cur]--;
+    vs.findex[cur] = s._findex;
 
     if (retval)
       {
       variable lline;
-      if (s._is_wrapped_line)
+      if ((is_wrapped = __vis_wrapped (s, strlen (vs.lines[cur]),
+          vs.index[cur], vs.findex[cur]), is_wrapped))
         {
-        lline = __vgetlinestr (s, vs.lines[cur], s._findex + 1 - s._indent);
+        lline = __vgetlinestr (s, vs.lines[cur], vs.findex[cur] + 1);
         vs.wrappedmot--;
         }
       else
@@ -513,52 +518,16 @@ subclass Visual
       waddline (s, lline, 0, s.ptr[0]);
       }
 
-    if (s.ptr[1] < vs.startcol[cur])
-      vs.col[cur] = s.ptr[1];
+    if (is_wrapped)
+      if (s.ptr[1] + vs.findex[cur] < vs.startcol[cur])
+        vs.col[cur] = s.ptr[1];
+      else
+        vs.col[cur] = vs.startcol[cur] - vs.wrappedmot;
     else
-      vs.col[cur] = vs.startcol[cur];
-
-  % if (s.ptr[1])
-  %   if (s.ptr[1] < vs.startcol[cur])
-  %     if (s._is_wrapped_line)
-  %       vs.col[cur] = vs.startcol[cur] - vs.wrappedmot;
-  %     else
-  %       vs.col[cur] = s.ptr[1];
-  %   else
-  %     if (s._is_wrapped_line)
-  %       vs.col[cur] = vs.startcol[cur] - vs.wrappedmot;
-  %     else
-  %      vs.col[cur] = vs.startcol[cur];
-  % else
-  %   if (s._is_wrapped_line)
-  %     vs.col[cur] = (l++, l - strlen (vs.sel[cur]) + 1);
-  %   else
-  %     vs.col[cur] = s.ptr[1];
-
-    %s.col[cur] = s.ptr[1] < vs.startcol[cur] ? s.ptr[1] : vs.startcol[cur];
-   % vs.col[cur] = s.ptr[1] < vs.startcol[cur]
-   %   ? s._is_wrapped_line
-   %     ? 0 == s.ptr[1]
-   %       ? vs.startcol[cur] - vs.wrappedmot
-   %       : vs.startcol[cur]
-   %     : s.ptr[1]
-   %   : s._is_wrapped_line
-   %     ? vs.startcol[cur] - vs.wrappedmot
-   %     : vs.startcol[cur];
-    vs.col[cur] = s.ptr[1] < vs.startcol[cur]
-      ? s._is_wrapped_line
-        ? vs.startcol[cur] - vs.wrappedmot
-        : s.ptr[1]
-      : s._is_wrapped_line
-        ? vs.startcol[cur] - vs.wrappedmot
-        : vs.startcol[cur];
-    vs.col[cur] = s.ptr[1] < vs.startcol[cur]
-      ? s._is_wrapped_line
-        ? vs.startcol[cur] - strlen (vs.sel[cur]) + 1
-        : s.ptr[1]
-      : s._is_wrapped_line
-        ? vs.startcol[cur] - vs.wrappedmot
-        : vs.startcol[cur];
+      if (s.ptr[1] + vs.findex[cur] < vs.startcol[cur])
+        vs.col[cur] = s.ptr[1];
+      else
+        vs.col[cur] = vs.startcol[cur];
 
     if (vs.index[cur] >= vs.startindex[cur])
       vs.sel[cur] = substr (vs.sel[cur], 1, strlen (vs.sel[cur]) - 1);
@@ -579,18 +548,21 @@ subclass Visual
       return;
 
     vs.index[cur]++;
+    vs.findex[cur] = s._findex;
+
+    variable is_wrapped = 0;
 
     if (retval)
       {
-      variable lline = __vgetlinestr (s, vs.lines[cur], s._findex + 1 - s._indent);
+      variable lline = __vgetlinestr (s, vs.lines[cur], vs.findex[cur] + 1);
       waddline (s, lline, 0, s.ptr[0]);
-      s._is_wrapped_line = 1;
       vs.wrappedmot++;
+      is_wrapped = 1;
       }
 
     vs.col[cur] = s.ptr[1] < vs.startcol[cur]
       ? s.ptr[1]
-      : s._is_wrapped_line
+      : is_wrapped
         ? vs.startcol[cur] - vs.wrappedmot
         : vs.startcol[cur];
 
@@ -616,6 +588,7 @@ subclass Visual
 
     vs.startcol = [vs.col[0]];
     vs.index = [vs.index];
+    vs.findex = [vs.findex];
 
     vs.sel = [substr (vs.lines[cur], vs.index[cur] + 1, 1)];
 
@@ -849,7 +822,6 @@ subclass Visual
       % still there is no care for wrapped lines (possible blockwise is unsuable
       % and bit of sensless for wrapped lines): very low priority
       %s._findex++;
-      %s._is_wrapped_line = 1;
       }
 
     s._index++;

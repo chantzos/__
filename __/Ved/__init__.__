@@ -2,7 +2,7 @@ class Ved
   typedef Ftype
     _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
     _linlen,_avlins,_findex,_index,_shiftwidth,_expandtab,_undolevel,
-    _autoindent,_dir,_autochdir,_is_wrapped_line,
+    _autoindent,_dir,_autochdir,
     undo, undoset, ptr, rows, cols, clrs, lins, lnrs, vlins, lines,
     st_, comment_str,
     vedloop,vedloopcallback,
@@ -170,22 +170,59 @@ class Ved
     substr (line, @i_ + 1 - s._indent, -1);
   end
 
-  def __left (s) proc
+%%%%%%% __private __vinterface
+  def __vdebug (s, msg) proc
+    Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
+    if (qualifier_exists ("hold"))
+      () = Input.getch ();
+  end
+
+  def __vset_col (s, linlen, dir) proc
+    if ('+' == dir)
+      if (s.ptr[1] + 1 < linlen - s._indent)
+        ifnot (s.ptr[1] + 1 == s._indent + s._maxlen) % -> cells/context
+          s.ptr[1]++;
+  end
+
+  def __vset_col_at_end (s, linlen) proc
+    if (linlen <= s._linlen)
+      s.ptr[1] = s._indent + linlen;
+    else
+      s.ptr[1] = s._indent + s._maxlen; % handle case when maxlen + indent > virtual cols
+  end
+
+  def __vis_wrapped (s, linlen, index, findex) proc
+    variable vlen = s._maxlen - s._indent;
+    if (linlen <= vlen)
+      return 0;
+
+    ifnot (NULL == index)
+      if (index >= vlen)
+        return 1;
+
+    ifnot (NULL == findex)
+      if (findex - s._indent)
+        return 1;
+
+    0;
+  end
+
+%%%% end
+
+  % -1 = abort, 1 = need refresh, 0 = nothing
+  def __left (s, is_wrap) proc
     ifnot (s.ptr[1] - s._indent)
-      ifnot (s._is_wrapped_line)
+      ifnot (is_wrap)
         return -1;
 
     s._index--;
 
-    if (s._is_wrapped_line && 0 == s.ptr[1] - s._indent)
-      {
-      s._findex--;
-
-      ifnot (s._findex)
-        s._is_wrapped_line = 0;
-
-      return 1;
-      }
+    if (is_wrap)
+      ifnot (s.ptr[1] - s._indent)
+        {
+        s._findex--;
+        return 1;
+        }
 
     s.ptr[1]--;
 
@@ -196,7 +233,7 @@ class Ved
     if (s._index - s._indent == linlen - 1 || 0 == linlen)
       return -1;
 
-    if (s.ptr[1] < s._maxlen - 1)
+    if (s.ptr[1] < s._maxlen - s._indent - 1)
       {
       s.ptr[1]++;
       s._index++;
@@ -225,7 +262,8 @@ class Ved
         }
     else if ((0 != plinlen && s.ptr[1] - s._indent == plinlen - 1 && (
         linlen < s.ptr[1] || linlen < s._linlen))
-       || (s.ptr[1] - s._indent && s.ptr[1] - s._indent >= linlen))
+       || (s.ptr[1] - s._indent && s.ptr[1] - s._indent >= linlen) ||
+         (__vis_wrapped (s, plinlen, s._index, s._findex)))
         {
         s.ptr[1] = linlen - 1 + s._indent;
         s._index = linlen - 1 + s._indent;
@@ -502,17 +540,19 @@ class Ved
   end
 
   def __vdraw_tail (s) proc
-    if (s._is_wrapped_line)
-      Smg.hlregion (1, s.ptr[0], COLUMNS - 2, 1, 2);
+    variable linlen = __vlinlen (s, '.');
 
-    Smg.atrcaddnstrdr (Ved.tail (s;;__qualifiers ()),
+    if (linlen > s._linlen && s._findex < linlen - s._linlen)
+      Smg.hlregion (2, s.ptr[0], s._indent + s._linlen - 2, 1, 2);
+
+    Smg.atrcaddnstrdr (Ved.tail (s;;struct {@__qualifiers (), linlen = linlen}),
       [Smg->NOCOLOR, VED_INFOCLRFG][s.opt_show_status_line > 0],
       s.rows[-1], 0, s.ptr[0], s.ptr[1], COLUMNS);
   end
 
   def _draw_ (s) proc
     if (0 > s._len) % this shouldn't never occur
-      {             % so something needs fixing
+      {             % something went wrong and needs fixing
       Smg.send_msg ("_draw_ (), caught unacceptable s._len condition, " + s._fname, 1);
       s.lins = [__get_null_str (s._indent)];
       s.lnrs = [0];
@@ -1178,9 +1218,9 @@ class Ved
 
     variable len = __vlinlen (s, '.');
     if (s.ptr[1] > len)
-      { % do: catch the if _is_wrapped_line condition
+      { % do: catch the if is_wrapped condition
       if (len > s._maxlen)
-        s.ptr[1] = s._maxlen; % probably wrong (unless _index changes too
+        s.ptr[1] = s._maxlen; % probably wrong (unless _index changes too)
       else
         s.ptr[1] = s._indent + len;
 

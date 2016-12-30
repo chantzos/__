@@ -105,18 +105,14 @@ subclass Pager
     variable
       lnr = __vlnr (s, '.'),
       linlen,
-      plinlen;
+      plinlen = __vlinlen (s, '.');
 
     if (lnr == s._len)
       return;
 
-    if (s._is_wrapped_line)
-      {
+    if (__vis_wrapped (s, plinlen, s._index, s._findex))
       waddline (s, __vgetlinestr (s, __vline (s, '.'), 1), 0, s.ptr[0]);
-      s._is_wrapped_line = 0;
-      }
 
-    plinlen = __vlinlen (s, '.');
 
     if (s.ptr[0] < s.vlins[-1])
       {
@@ -151,15 +147,11 @@ subclass Pager
   def up (s)
     variable
       linlen,
-      plinlen;
+      lline,
+      plinlen = __vlinlen (s, '.');
 
-    if (s._is_wrapped_line)
-      {
+    if (__vis_wrapped (s, plinlen, s._index, s._findex))
       waddline (s, __vgetlinestr (s, __vline (s, '.'), 1), 0, s.ptr[0]);
-      s._is_wrapped_line = 0;
-      }
-
-    plinlen = __vlinlen (s, '.');
 
     if (s.ptr[0] > s.vlins[0])
       {
@@ -265,27 +257,27 @@ subclass Pager
       {
       line = __vgetlinestr (s, line, s._findex + 1 - s._indent);
       waddline (s, line, 0, s.ptr[0]);
-      s._is_wrapped_line = 1;
       }
 
     __vdraw_tail (s);
   end
 
   def left (s)
-    variable retval = __left (s);
+    variable retval = __left (s, __vis_wrapped (
+      s, __vlinlen (s, '.'), s._index, s._findex));
 
     if (-1 == retval)
       return;
 
+    variable lline;
     if (retval)
       {
-      variable line;
-      if (s._is_wrapped_line)
-        line = __vgetlinestr (s, __vline (s, '.'), s._findex + 1);
+      ifnot (s._findex - s._indent)
+        lline = __vgetlinestr (s, __vline (s, '.'), 1);
       else
-        line = __vgetlinestr (s, __vline (s, '.'), 1);
+        lline = __vgetlinestr (s, __vline (s, '.'), s._findex + 1);
 
-      waddline (s, line, 0, s.ptr[0]);
+      waddline (s, lline, 0, s.ptr[0]);
       }
 
     __vdraw_tail (s);
@@ -303,7 +295,6 @@ subclass Pager
       {
       line = __vgetlinestr (s, line, s._findex + 1 - s._indent);
       waddline (s, line, 0, s.ptr[0]);
-      s._is_wrapped_line = 1;
       }
 
     __vdraw_tail (s);
@@ -316,7 +307,6 @@ subclass Pager
     if (s._chr == Input->CTRL_f)
       Ved.Mark.backtick (s);
 
-    s._is_wrapped_line = 0;
     s._i += (s._avlins);
 
     s.ptr[1] = s._indent;
@@ -338,7 +328,6 @@ subclass Pager
     else
       s._i = 0;
 
-    s._is_wrapped_line = 0;
     s.ptr[1] = s._indent;
     s._findex = s._indent;
     s._index = s._indent;
@@ -389,24 +378,23 @@ subclass Pager
       variable line = __vgetlinestr (s, __vline (s, '.'), s._findex + 1);
 
       waddline (s, line, 0, s.ptr[0]);
-
-      s._is_wrapped_line = 1;
       }
 
     __vdraw_tail (s);
   end
 
   def bol (s)
-    s.ptr[1] = s._indent;
-    s._findex = s._indent;
-    s._index = s._indent;
+    variable len = __vlinlen (s, '.');
 
-    if (s._is_wrapped_line)
+    if (__vis_wrapped (s, len, s._index, s._findex))
       {
       variable line = __vgetlinestr (s, __vline (s, '.'), 1);
       waddline (s, line, 0, s.ptr[0]);
-      s._is_wrapped_line = 0;
       }
+
+    s.ptr[1] = s._indent;
+    s._findex = s._indent;
+    s._index = s._indent;
 
     __vdraw_tail (s);
   end

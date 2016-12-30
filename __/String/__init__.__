@@ -8,7 +8,7 @@ class String
       NULL;
   end
 
-  % of course it can be optimized a bit, as it hasn't be to decode
+  % of course it can be optimized a bit, as it hasn't to decode
   % the whole string, but if a conditional logic will be inserted
   % then the optimization is gone, so this is mainly for array_map
   def is_chr_at_index (str, chr, index)
@@ -18,7 +18,7 @@ class String
 
   % upstream now provides string_to_wchars (), so we have to replace
   % the code (note that: upstream's function it doesn't return in case
-  % of error, so it has to be wrapped under a try)
+  % of an error, so it has to be wrapped under a try)
   def decode (str)
     variable
       d,

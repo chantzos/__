@@ -497,9 +497,8 @@ update_config=1
         self.err ("iw is not installed";;__return__);
 
       if (-1 == self.bring_up (;;__qualifiers))
-        return -1;
+        self.err ("bring up";;__return__ (-1));
 
-      % no need for su if we are in wheel
       variable argv = [Net->IW_BIN, "dev", IFACE, "scan"];
       variable p = Proc.init (0, 1, 1);
 

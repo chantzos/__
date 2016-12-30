@@ -4,9 +4,7 @@ private define _line_ (str)
 {
   variable b = Ved.get_cur_buf ();
 
-  @str += sprintf (" ftype (%s) LANG (%s) ", Ved.get_cur_buf ()._type,
-    Input.getmapname ());
-
+  @str += sprintf (" ftype (%s) LANG (%s) ", b._type, Input.getmapname ());
   b;
 }
 

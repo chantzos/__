@@ -6,36 +6,39 @@ subclass Insert
   var lang = Input.getmapname ();
 
   def ins_tab (is, s, line) proc
-    % not sure what to do in feature, but as a fair compromise
-    % and for now SLsmg_Tab_Width is set to 1 and nothing breaks
-    % if _expandtab is set, then _shiftwidth (spaces) are inserted,
+    % not sure about the feature, but as a fair compromise
+    % and for now SLsmg_Tab_Width is set to 1 and nothing breaks.
+    % If _expandtab is set, then _shiftwidth (`spaces') are inserted,
+    % but that also means that every tab is translated to `spaces',
+    % so for now the only way to write a tab is _expandtab set to NULL,
+    % but that also means that there is no way for the tab to get other
+    % than a single cell space 
 
     variable tab = NULL == s._expandtab ? "\t" : repeat (" ", s._shiftwidth);
-    variable len = strlen (tab);
+    variable tablen = strlen (tab);
 
     @line = substr (@line, 1, s._index) + tab + substr (@line, s._index + 1, - 1);
 
-    s._index += len;
+    s._index += tablen;
 
     is.modified = 1;
 
-    if (strlen (@line) < s._maxlen && s.ptr[1] + len  < s._maxlen)
+    if (strlen (@line) < s._linlen && s.ptr[1] + tablen <= s._linlen)
       {
-      s.ptr[1] += len;
+      s.ptr[1] += tablen;
       waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
       __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
       return;
       }
 
-    s._is_wrapped_line = 1;
-
+% -> readme: context editor
     variable i = 0;
     if (s.ptr[1] < s._maxlen)
-      while (s.ptr[1]++, i++, (s.ptr[1] < s._maxlen && i < len));
+      while (s.ptr[1]++, i++, (s.ptr[1] < s._maxlen && i < tablen));
     else
       i = 0;
 
-    s._findex += (len - i);
+    s._findex += (tablen - i);
 
     variable
       lline = __vgetlinestr (s, @line, s._findex + 1 - s._indent);
@@ -60,7 +63,7 @@ subclass Insert
 
     is.modified = 1;
 
-    if (strlen (@line) < s._maxlen && s.ptr[1] < s._maxlen)
+    if (strlen (@line) < s._linlen && s.ptr[1] < s._indent + s._linlen)
       {
       s.ptr[1]++;
       waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
@@ -68,9 +71,7 @@ subclass Insert
       return;
       }
 
-    s._is_wrapped_line = 1;
-
-    if (s.ptr[1] == s._maxlen)
+    if (s.ptr[1] == s._indent + s._linlen)
       s._findex++;
 
     variable
@@ -121,11 +122,10 @@ subclass Insert
         s.draw (;dont_draw);
 
         len = strlen (@line);
-        if (len > s._maxlen)
+        if (len > s._linlen)
           {
-          s._findex = len - s._maxlen;
-          s.ptr[1] = s._maxlen - (len - s._index);
-          s._is_wrapped_line = 1;
+          s._findex = len - s._linlen;
+          s.ptr[1] = s._linlen - (len - s._index);
           }
         else
           s._findex = s._indent;
@@ -149,21 +149,19 @@ subclass Insert
 
     ifnot (s.ptr[1])
       {
-      if (s._index > s._maxlen)
+      if (s._index > s._linlen)
         {
-        s.ptr[1] = s._maxlen;
-        s._findex = len - s._linlen;
+        s.ptr[1] = s._linlen;
+        s._findex--;
         lline = substr (@line, s._findex + 1, -1);
         waddline (s, lline, 0, s.ptr[0]);
         __vdraw_tail (s;chr = String.decode (substr (@line, s._index, 1))[0]);
         return;
         }
 
-      s._findex = s._indent;
-      s.ptr[1] = len;
-      waddline (s, @line, 0, s.ptr[0]);
+      s._findex--;
+      waddline (s, __vgetlinestr (s, @line, s._findex + 1), 0, s.ptr[0]);
       __vdraw_tail (s;chr = String.decode (substr (@line, s._index, 1))[0]);
-      s._is_wrapped_line = 0;
       return;
       }
 
@@ -216,13 +214,14 @@ subclass Insert
       if (is.lnr < s._len)
         {
         @line += __vgetlinestr (s, s.lines[is.lnr + 1], 1);
+        %% use Array interface
         s.lines[is.lnr + 1 ] = NULL;
         s.lines = s.lines[wherenot (_isnull (s.lines))];
         s._len--;
         s._i = s._ii;
         s.draw (;dont_draw);
         is.modified = 1;
-        if (s._is_wrapped_line)
+        if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
           waddline (s, __vgetlinestr (s, @line, s._findex + 1 - s._indent), 0, s.ptr[0]);
         else
           waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
@@ -233,12 +232,20 @@ subclass Insert
       return;
       }
 
-    @line = substr (@line, 1, s._index) + substr (@line, s._index + 2, - 1);
+    @line = substr (@line, 1, s._index) +
+            substr (@line, s._index + 2, -1);
 
-    if (s._is_wrapped_line)
-      waddline (s, __vgetlinestr (s, @line, s._findex + 1 - s._indent), 0, s.ptr[0]);
+    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+      {
+%      __vdebug (s, " + " + string (strlen (@line)));
+      waddline (s, __vgetlinestr (s, @line, s._findex + 1),
+        0, s.ptr[0]);
+      }
     else
+      {
+%      __vdebug (s, " - " + string (strlen (@line)));
       waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
+      }
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
     is.modified = 1;
@@ -258,8 +265,7 @@ subclass Insert
 
       waddline (s, lline, 0, s.ptr[0]);
 
-      s.ptr[1] = s._maxlen;
-      s._is_wrapped_line = 1;
+      s.ptr[1] = s._indent + s._linlen;
       }
     else
       s.ptr[1] = len;
@@ -273,11 +279,10 @@ subclass Insert
     s.ptr[1] = s._indent;
     waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
-    s._is_wrapped_line = 0;
   end
 
   def ins_completeline (is, s, line, comp_line) proc
-    if (s._is_wrapped_line)
+    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
       return;
 
     if (s._index < strlen (comp_line) - s._indent)
@@ -298,29 +303,25 @@ subclass Insert
   end
 
   def ins_right (is, s, line) proc
-    variable len = strlen (@line);
+    variable linlen = strlen (@line);
 
-    if (s._index + 1 > len || 0 == len)
+    if (s._index + 1 > linlen || 0 == linlen)
       return;
 
     s._index++;
 
-    ifnot (s.ptr[1] == s._maxlen)
-      s.ptr[1]++;
+    __vset_col (s, linlen + 1, '+');
 
-    if (s._index + 1 > s._maxlen)
-      {
-      s._findex++;
-      s._is_wrapped_line = 1;
-      }
+    s._findex += __vis_wrapped (s, linlen, s._index, s._findex);
 
     variable lline;
 
-    if (s.ptr[1] + 1 > s._maxlen)
+    if (s.ptr[1] + 1 == s._linlen)
       {
-      lline = __vgetlinestr (s, @line, s._findex - s._indent);
+      lline = __vgetlinestr (s, @line, s._findex  + 1);
       waddline (s, lline, 0, s.ptr[0]);
       }
+
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
   end
@@ -333,18 +334,16 @@ subclass Insert
       __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
       }
     else
-      if (s._is_wrapped_line)
+      if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
         {
         s._index--;
+        s._findex--;
         variable lline;
-        lline = __vgetlinestr (s, @line, s._index - s._indent);
+        lline = __vgetlinestr (s, @line, s._findex + 1);
 
         waddline (s, lline, 0, s.ptr[0]);
 
-        __vdraw_tail (s;chr = String.decode (substr (@line, s._index, 1))[0]);
-
-        if (s._index - 1 == s._indent)
-          s._is_wrapped_line = 0;
+        __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
         }
   end
 
@@ -389,8 +388,6 @@ subclass Insert
     s.lins[s.ptr[0] - s.rows[0]] = @line;
     s.lines[is.lnr] = @line;
 
-    s._findex = s._indent;
-
     is.lnr++;
 
     is.prev_l = @line;
@@ -399,24 +396,13 @@ subclass Insert
     else
       is.next_l = s.lines[is.lnr + 1];
 
-    if (s._is_wrapped_line)
-      {
+    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
       waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
-      s._is_wrapped_line = 0;
-      s.ptr[1] = s._maxlen;
-      }
 
-    s._index = s.ptr[1];
+    variable plen = strlen (@line);
+    variable len = (@line = s.lines[is.lnr], strlen (@line));
 
-    @line = s.lines[is.lnr];
-
-    variable len = strlen (@line);
-
-    if (s._index > len)
-      {
-      s.ptr[1] = len ? len : s._indent;
-      s._index = len ? len : s._indent;
-      }
+    __adjust_col (s, len, plen);
 
     if (s.ptr[0] < s.vlins[-1])
       {
@@ -467,24 +453,13 @@ subclass Insert
 
     s._findex = s._indent;
 
-    if (s._is_wrapped_line)
-      {
+    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
       waddline (s, __vgetlinestr (s, @line, s._indent + 1 - s._indent), 0, s.ptr[0]);
-      s._is_wrapped_line = 0;
-      s.ptr[1] = s._maxlen;
-      }
 
-    s._index = s.ptr[1];
+    variable plen = strlen (@line);
+    variable len = (@line = s.lines[is.lnr], strlen (@line));
 
-    @line = s.lines[is.lnr];
-
-    variable len = strlen (@line);
-
-    if (s._index > len)
-      {
-      s.ptr[1] = len ? len : s._indent;
-      s._index = len ? len : s._indent;
-      }
+    __adjust_col (s, len, plen);
 
     if (s.ptr[0] > s.vlins[0])
       {
@@ -573,11 +548,27 @@ subclass Insert
   end
 
   def ins_esc (is, s, line) proc
+    variable is_wrapped;
+
     if (0 < s.ptr[1] - s._indent)
       s.ptr[1]--;
 
-    if (0 < s._index - s._indent)
+    if ((is_wrapped = __vis_wrapped (s, strlen (@line), s._index, s._findex),
+        is_wrapped))
+      s._findex--;
+
+    if (s._index - s._indent)
       s._index--;
+
+    if (is_wrapped)
+      {
+      variable
+        lline = __vgetlinestr (s, @line, s._findex + 1 - s._indent);
+
+      waddline (s, lline, 0, s.ptr[0]);
+      __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
+      return;
+      }
 
     if (is.modified)
       {
