@@ -236,16 +236,10 @@ subclass Insert
             substr (@line, s._index + 2, -1);
 
     if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
-      {
-%      __vdebug (s, " + " + string (strlen (@line)));
       waddline (s, __vgetlinestr (s, @line, s._findex + 1),
         0, s.ptr[0]);
-      }
     else
-      {
-%      __vdebug (s, " - " + string (strlen (@line)));
       waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
-      }
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
     is.modified = 1;

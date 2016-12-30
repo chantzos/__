@@ -48,7 +48,7 @@ class Ved
   let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':', '>'];
   let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';', '<'];
 
-  var public MARKS        = Assoc_Type[Pos_Type];
+  var public MARKS        = Assoc_Type[Struct_Type];
   var public VED_WIND     = Assoc_Type[Wind_Type];
   var public FTYPES       = Assoc_Type[Integer_Type];
   var public REG          = Assoc_Type[String_Type];
@@ -973,7 +973,7 @@ class Ved
   subclass Mark from Ved
 
   beg
-    MARKS[string ('`')] = @Pos_Type;
+    MARKS[string ('`')] = struct {pos = @Pos_Type, linlen};
   end
 
   def preloop (s)
@@ -1204,30 +1204,34 @@ class Ved
     if (NULL == m)
       return;
 
-    if (m._i > s._len)
+    if (m.pos._i > s._len)
       return;
 
     Ved.Mark.backtick (s);
 
-    s._i = m._i;
-    s.ptr = m.ptr;
-    s._index = m._index;
-    s._findex = m._findex;
+    s._i = m.pos._i;
+    s.ptr = m.pos.ptr;
+    s._index = m.pos._index;
+    s._findex = m.pos._findex;
 
     s.draw ();
 
-    variable len = __vlinlen (s, '.');
-    if (s.ptr[1] > len)
-      { % do: catch the if is_wrapped condition
-      if (len > s._maxlen)
-        s.ptr[1] = s._maxlen; % probably wrong (unless _index changes too)
-      else
-        s.ptr[1] = s._indent + len;
+    variable line = __vline (s, '.');
+    variable linlen = __vlinlen (s, '.');
 
-      s._index = s.ptr[1];
+    % better safe
+    if (m.linlen > linlen)
+      {
+      s.ptr[1] = s._indent;
+      s._index = s._indent;
       s._findex = s._indent;
-      Smg.setrcdr (s.ptr[0], s.ptr[1]);
       }
+
+    if (__vis_wrapped (s, linlen, s._index, s._findex))
+      waddline (s, __vgetlinestr (s, line, s._findex + 1 - s._indent),
+        0, s.ptr[0]);
+
+    __vdraw_tail (s;chr = String.decode (substr (line, s._index + 1, 1))[0]);
   end
 
   def _set_nr_ (s, incrordecr) proc

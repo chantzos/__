@@ -7,11 +7,11 @@ subclass Mark
 
   def mark_init (m) proc
     ifnot (assoc_key_exists (MARKS, m))
-      MARKS[m] = @Pos_Type;
+      MARKS[m] = struct {pos = @Pos_Type, linlen};
   end
 
   def backtick (s)
-    Ved.storePos (s, MARKS[string ('`')]);
+    Ved.storePos (s, MARKS[string ('`')].pos);
   end
 
   def set (s)
@@ -21,7 +21,8 @@ subclass Mark
       {
       m = string (m);
       mark_init (m);
-      Ved.storePos (s, MARKS[m]);
+      Ved.storePos (s, MARKS[m].pos);
+      MARKS[m].linlen = __vlinlen (s, '.');
       }
   end
 
@@ -36,7 +37,7 @@ subclass Mark
 
     variable m = @MARKS[mark];
 
-    if (NULL == m._i)
+    if (NULL == m.pos._i)
       return NULL;
 
     m;
