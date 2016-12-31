@@ -60,16 +60,19 @@ subclass Ed
     else if ('A' == s._chr)
       {
       s._index = linlen;
-      if (linlen <= s._maxlen)
+      if (linlen <= s._linlen)
         s._findex = s._indent;
       else
-        s._findex = linlen - s._maxlen;
+        {
+        s._findex = linlen - s._linlen - s._indent;
+        is_wrapped = 1;
+        }
 
       __vset_col_at_end (s, linlen);
       }
 
     if (is_wrapped)
-      lline = __vgetlinestr (s, line, s._findex + 1);
+      lline = __vgetlinestr (s, line, s._findex + 1 - s._indent);
     else
       lline = __vgetlinestr (s, line, 1);
 

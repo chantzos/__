@@ -555,7 +555,7 @@ subclass Insert
       s._index--;
 
     if (is_wrapped)
-      waddline (s, __vgetlinestr (s, @line, s._findex + 1 - s._indent),
+      waddline (s, __vgetlinestr (s, @line, s._findex + 2 - s._indent),
         0, s.ptr[0]);
 
     if (is.modified)
