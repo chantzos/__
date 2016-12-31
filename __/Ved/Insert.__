@@ -553,7 +553,9 @@ subclass Insert
     if (s._index - s._indent)
       s._index--;
 
-    if (is_wrapped)
+    % the condition it might changed if findex == indent, so re call it
+    if ((is_wrapped = __vis_wrapped (s, strlen (@line), s._index, s._findex),
+        is_wrapped)) % or handle this case through the function
       waddline (s, __vgetlinestr (s, @line, s._findex + 2 - s._indent),
         0, s.ptr[0]);
 
@@ -617,7 +619,8 @@ subclass Insert
       {
       ifnot (indexchanged)
         if ("ins_linecompletion" == type)
-          ar = Re.unique_lines (s.lines, item, NULL;ign_lead_ws);
+          ar = Re.unique_lines (s.lines, item, NULL;ign_lead_ws,
+            dont_include_given_str);
         else if ("ins_wordcompletion" == type)
           ar = Re.unique_words (s.lines, item, NULL;ign_pat);
         else if ("blockcompletion" == type)

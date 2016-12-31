@@ -1,11 +1,20 @@
 class Re
   import pcre
 
+  def escape_str  (str, quote)
+    variable q = NULL == quote
+      ? '\\'
+      : quote;
+
+    str_quote_string (str, "()[]^\\+*.?", q);
+  end
+
   def unique_lines (ar, str, iend)
     variable i;
+    variable dont_include_str = qualifier_exists ("dont_include_given_str");
     variable lines = Assoc_Type[Null_Type];
     variable pat = sprintf ("^%s%s", qualifier_exists ("ign_lead_ws")
-      ? "\\s*" : "", str_quote_string (str, "()[]^\\+*.?", '\\'));
+      ? "\\s*" : "", self.escape_str (str, NULL));
 
     try
       {
@@ -21,11 +30,8 @@ class Re
 
     _for i (0, iend)
       if (pcre_exec (pat, ar[i]))
-        lines[ar[i]] = NULL;
-
-    if (qualifier_exists ("ign_pat"))
-      if (assoc_key_exists (lines, str))
-        assoc_delete_key (lines, str);
+        if (str != ar[i] || 0 == dont_include_str)
+          lines[ar[i]] = NULL;
 
     lines = assoc_get_keys (lines);
     lines[array_sort (lines)];
