@@ -55,6 +55,13 @@ subclass Ed
     else if ('a' == s._chr && linlen)
       {
       s._index++;
+      if (__vis_wrapped (s, strlen (line), s._index, s._findex))
+        {
+        s._findex++;
+        waddline (s, __vgetlinestr (s, line, s._findex + 1 - s._indent),
+          0, s.ptr[0]);
+        }
+
       __vset_col (s, linlen + 1, '+');
       }
     else if ('A' == s._chr)

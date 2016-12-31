@@ -310,12 +310,11 @@ subclass Insert
 
     variable lline;
 
-    if (s.ptr[1] + 1 == s._linlen)
+    if (s.ptr[1] + 1 == s._linlen + s._indent)
       {
-      lline = __vgetlinestr (s, @line, s._findex  + 1);
+      lline = __vgetlinestr (s, @line, s._findex  + 1 - s._indent);
       waddline (s, lline, 0, s.ptr[0]);
       }
-
 
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
   end
