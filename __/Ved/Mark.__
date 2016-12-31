@@ -3,6 +3,7 @@ subclass Mark
     get
     set
     backtick
+    goto
   end
 
   def mark_init (m) proc
@@ -12,6 +13,7 @@ subclass Mark
 
   def backtick (s)
     Ved.storePos (s, MARKS[string ('`')].pos);
+    MARKS[string ('`')].linlen = qualifier ("linlen", __vlinlen (s, '.'));
   end
 
   def set (s)
@@ -35,11 +37,52 @@ subclass Mark
     ifnot (any (mark == marks))
       return NULL;
 
-    variable m = @MARKS[mark];
+    variable m = @MARKS[mark]; % this doesn't make a new copy of pos
+    m = struct % so get it by hand             
+      {
+      pos = @m.pos,
+      linlen = m.linlen,
+      };
 
     if (NULL == m.pos._i)
       return NULL;
 
     m;
+  end
+
+  def goto (s)
+    variable m = self.get ();
+
+    if (NULL == m)
+      return;
+
+    if (m.pos._i > s._len)
+      return;
+
+    self.backtick (s);
+
+    s._i = m.pos._i;
+    s.ptr = m.pos.ptr;
+    s._index = m.pos._index;
+    s._findex = m.pos._findex;
+
+    s.draw ();
+
+    variable line = __vline (s, '.');
+    variable linlen = __vlinlen (s, '.');
+
+    % better safe
+    if (m.linlen > linlen)
+      {
+      s.ptr[1] = s._indent;
+      s._index = s._indent;
+      s._findex = s._indent;
+      }
+
+    if (__vis_wrapped (s, linlen, s._index, s._findex))
+      waddline (s, __vgetlinestr (s, line, s._findex + 1 - s._indent),
+        0, s.ptr[0]);
+
+    __vdraw_tail (s;chr = String.decode (substr (line, s._index + 1, 1))[0]);
   end
 end
