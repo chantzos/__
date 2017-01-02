@@ -180,7 +180,7 @@ class Ved
   def __vset_col (s, linlen, dir) proc
     if ('+' == dir)
       if (s.ptr[1] + 1 < linlen - s._indent)
-        ifnot (s.ptr[1] + 1 == s._indent + s._maxlen) % -> cells/context
+        ifnot (s.ptr[1] + 1 == s._indent + s._linlen) % -> cells/context
           s.ptr[1]++;
   end
 

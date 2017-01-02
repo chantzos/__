@@ -55,12 +55,18 @@ subclass Ed
     else if ('a' == s._chr && linlen)
       {
       s._index++;
-      if (__vis_wrapped (s, strlen (line), s._index, s._findex))
+      if ((is_wrapped = __vis_wrapped (s, strlen (line), s._index,
+          s._findex), is_wrapped))
         {
-        s._findex++;
-        waddline (s, __vgetlinestr (s, line, s._findex + 1 - s._indent),
-          0, s.ptr[0]);
-        }
+        if (s.ptr[1] + 1 == s._indent + s._linlen)
+          s._findex++;}
+      else
+        if (s.ptr[1] + 1 == s._indent + s._linlen &&
+             linlen + 1 > s._linlen)
+          {
+          s._findex++;
+          is_wrapped = 1;
+          }
 
       __vset_col (s, linlen + 1, '+');
       }
@@ -86,7 +92,7 @@ subclass Ed
     if (strlen (lline))
       {
       waddline (s, lline, 0, s.ptr[0]);
-      Smg.refresh ();
+      __vdraw_tail (s);
       }
 
     if ('C' == s._chr) % add to register? not really usefull
