@@ -70,7 +70,7 @@ private define getitem (s)
   struct {lnr = lnr, col = col, fname = fname};
 }
 
-public define __pg_on_carriage_return (s)
+public define __list_on_carriage_return (s)
 {
   ifnot (Ved.get_cur_frame ())
     return;

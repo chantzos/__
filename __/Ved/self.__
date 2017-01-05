@@ -190,6 +190,8 @@ beg
     s.vedloop = t.vedloop;
     s.vedloopcallback = t.vedloopcallback;
 
+    __init_fun_all__ (s;;__qualifiers);
+
     s.opt_show_tilda = qualifier ("show_tilda", t.opt_show_tilda);
     s.opt_show_status_line = qualifier ("show_status_line", t.opt_show_status_line);
 
@@ -457,6 +459,7 @@ beg
       lexicalhl = &lexicalhl,
       vedloop = &_vedloop_,
       vedloopcallback = &_vedloopcallback_,
+      __NOR__ = __init_fun_norm__ (;;__qualifiers),
       opt_show_tilda = 1,
       opt_show_status_line = 1,
       };

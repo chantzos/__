@@ -23,6 +23,7 @@ public define list_ved (s, fname)
     };
 
   list_set (s, mys);
+  s.__NOR__.on_carriage_return = &__list_on_carriage_return;
 
   s.draw ();
 

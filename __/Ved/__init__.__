@@ -2,14 +2,14 @@ class Ved
   typedef Ftype
     _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
     _linlen,_avlins,_findex,_index,_shiftwidth,_expandtab,_undolevel,
-    _autoindent,_dir,_autochdir,
+    _autoindent, _dir, _autochdir,
     undo, undoset, ptr, rows, cols, clrs, lins, lnrs, vlins, lines,
     st_, comment_str,
-    vedloop,vedloopcallback,
+    vedloop, vedloopcallback,
     ved, set,
     draw, lexicalhl, autoindent, pairs,
-    opt_show_tilda,
-    opt_show_status_line,
+    opt_show_tilda, opt_show_status_line,
+    __NOR__,
   end
 
   typedef Insert
@@ -171,7 +171,7 @@ class Ved
   end
 
 %%%%%%% __private __vinterface
-  def __vdebug (s, msg) proc
+  def __vdebug (s, msg) public proc
     Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
     if (qualifier_exists ("hold"))
       () = Input.getch ();
@@ -523,6 +523,24 @@ class Ved
     topline (" -- " + mode + " --");
     Smg.setrcdr (ptr[0], ptr[1]);
   end
+
+  def __on_carriage_return__ (s) proc
+  end
+
+  def __init_fun_norm__ () proc
+    struct {
+      on_carriage_return =
+        __get_qualifier_as (Ref_Type, "on_carriage_return",
+          qualifier ("on_carriage_return"), &__on_carriage_return__)
+        };
+  end
+
+  def __init_fun_all__ (s) proc
+    if (NULL == s.__NOR__)
+      s.__NOR__ = __init_fun_norm__ (;;__qualifiers);
+  end
+
+%%% ___v
 
   def __vlinlen (s, r) proc
     r = (r == '.' ? s.ptr[0] : r) - s.rows[0];
@@ -1189,6 +1207,7 @@ class Ved
   end
 
   def __pg_on_carriage_return (s) public proc
+      (@s.__NOR__.on_carriage_return) (s); % assuming sanity
   end
 
   def __write_on_esc__ (s) proc
