@@ -370,20 +370,28 @@ class Ved
     s._avlins = length (s.rows) - 2;
   end
 
-  def __addbuf__ (s) proc
-    ifnot (path_is_absolute (s._fname))
-      s._abspath = getcwd () + s._fname;
-    else
-      s._abspath = s._fname;
+  def __vaddbuf__ (s) proc
+    ifnot (access (s._fname, F_OK))
+      ifnot (path_is_absolute (s._fname))
+        s._abspath = realpath (getcwd () + s._fname);
+      else
+        s._abspath = realpath (s._fname);
+    else % bug on the application logic
+      ifnot (path_is_absolute (s._fname))  % cannot be stored as unique
+        s._abspath = getcwd () + s._fname;
+      else
+        s._abspath = s._fname;
 
     variable w = Ved.get_cur_wind ();
 
     if (any (s._abspath == w.bufnames))
-      return;
+      return w.buffers[s._abspath];
 
-    w.buffers[s._abspath] = s;
     w.bufnames = [w.bufnames,  s._abspath];
+    w.buffers[s._abspath] = s;
     w.buffers[s._abspath]._dir = realpath (path_dirname (s._abspath));
+
+    w.buffers[s._abspath];
   end
 
   def waddlineat (s, line, clr, row, col, len) proc
