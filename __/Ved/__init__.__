@@ -542,7 +542,7 @@ class Ved
 
 %%% ___v
 
-  def __vlinlen (s, r) proc
+  def __vlinlen (s, r) public proc
     r = (r == '.' ? s.ptr[0] : r) - s.rows[0];
     strlen (s.lins[r]) - s._indent;
   end
@@ -557,7 +557,7 @@ class Ved
     s.lnrs[r];
   end
 
-  def __vdraw_tail (s) proc
+  def __vdraw_tail (s) public proc
     variable linlen = __vlinlen (s, '.');
 
     if (linlen > s._linlen && s._findex < linlen - s._linlen)
