@@ -177,21 +177,21 @@ class Ved
       () = Input.getch ();
   end
 
-  def __vset_col (s, linlen, dir) proc
+  def __vset_col__ (s, linlen, dir) proc
     if ('+' == dir)
       if (s.ptr[1] + 1 < linlen - s._indent)
         ifnot (s.ptr[1] + 1 == s._indent + s._linlen) % -> cells/context
           s.ptr[1]++;
   end
 
-  def __vset_col_at_end (s, linlen) proc
+  def __vset_col_at_end__ (s, linlen) proc
     if (linlen <= s._linlen)
       s.ptr[1] = s._indent + linlen;
     else
       s.ptr[1] = s._indent + s._maxlen; % handle case when maxlen + indent > virtual cols
   end
 
-  def __vis_wrapped (s, linlen, index, findex) proc
+  def __vis_wrapped__ (s, linlen, index, findex) proc
     variable vlen = s._maxlen - s._indent;
     if (linlen <= vlen)
       return 0;
@@ -263,7 +263,7 @@ class Ved
     else if ((0 != plinlen && s.ptr[1] - s._indent == plinlen - 1 && (
         linlen < s.ptr[1] || linlen < s._linlen))
        || (s.ptr[1] - s._indent && s.ptr[1] - s._indent >= linlen) ||
-         (__vis_wrapped (s, plinlen, s._index, s._findex)))
+         (__vis_wrapped__ (s, plinlen, s._index, s._findex)))
         {
         s.ptr[1] = linlen - 1 + s._indent;
         s._index = linlen - 1 + s._indent;
@@ -359,7 +359,7 @@ class Ved
     0;
   end
 
-  def __initrowsbuffvars__ (s) proc
+  def __vinitrowsbuffvars__ (s) proc
     s.cols = Integer_Type[length (s.rows)];
     s.cols[*] = 0;
 
