@@ -42,6 +42,10 @@ private define grepit (lline, file)
 
 private define exec (file)
 {
+  file = realpath (file);
+  if (NULL == file)
+    return;
+
   INDEX = 1;
 
   variable

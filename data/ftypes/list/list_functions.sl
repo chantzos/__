@@ -12,7 +12,7 @@ private define add (self, s, rows)
 
   variable c;
 
-  ifnot ("list" == ftype)
+  ifnot (self._type == ftype)
     {
     w.cur_frame = 0;
     c = Ved.init_ftype (ftype);
@@ -61,6 +61,9 @@ private define getitem (s)
   else
     fname = tok[0];
 
+  if (NULL == (fname = realpath (fname), fname))
+    return NULL;
+
   if (-1 == access (fname, F_OK))
     {
     IO.tostderr (fname + ": No such filename");
@@ -72,26 +75,24 @@ private define getitem (s)
 
 public define __list_on_carriage_return (s)
 {
-  ifnot (Ved.get_cur_frame ())
+  ifnot (path_basename (path_dirname (__FILE__)) == s._type)
     return;
 
   variable l = getitem (s);
-
   if (NULL == l)
     return;
 
-  if (".list" == path_extname (l.fname))
+  if ("." + s._type == path_extname (l.fname))
     return;
 
   variable w = Ved.get_cur_wind ();
 
-  variable retval = add (NULL, l, w.frame_rows[0];force);
+  variable retval = add (s, l, w.frame_rows[0];force);
 
   if (exists == retval)
     {
     w.cur_frame = 0;
     s = Ved.get_buf (l.fname);
-    Ved.setbuf (s._abspath);
     s._i = s._len >= l.lnr - 1 ? l.lnr - 1 : 0;
     s.ptr[0] = 1;
     s.ptr[1] = l.col - 1 + s._indent;
@@ -105,6 +106,20 @@ public define __list_on_carriage_return (s)
   __vset_clr_bg (w.buffers[w.frame_names[1]], 1);
 
   s.draw ();
+
+  variable len = __vlinlen (s, '.');
+
+  if (s.ptr[1] >= len)
+    if (len > s._linlen)
+      (s.ptr[1] = s._indent, s._index = s.ptr[1]);
+    else
+      (s.ptr[1] = len - s._indent - (len ? 1 : 0), s._index = s.ptr[1]);
+  else
+    if (s._index + s._indent > s._linlen)
+      (s.ptr[1] = s._indent, s._index = s.ptr[1]);
+
+  __vdraw_tail (s);
+
   s.vedloop ();
 }
 
