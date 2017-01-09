@@ -93,6 +93,7 @@ public define __list_on_carriage_return (s)
     {
     w.cur_frame = 0;
     s = Ved.get_buf (l.fname);
+    Ved.setbuf (s._abspath);
     s._i = s._len >= l.lnr - 1 ? l.lnr - 1 : 0;
     s.ptr[0] = 1;
     s.ptr[1] = l.col - 1 + s._indent;
