@@ -31,7 +31,7 @@ subclass Search
         Ved.Mark.backtick (s);
         s_fcol = s_fcol > s._maxlen ? s._indent : s_fcol;
 
-        if (s_lnr < s._avlins)
+        if (s_lnr < s._avail_rows)
           {
           s._i = 0;
           s.ptr[0] = s.rows[0] + s_lnr;

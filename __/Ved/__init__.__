@@ -1,7 +1,7 @@
 class Ved
   typedef Ftype
     _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
-    _linlen,_avlins,_findex,_index,_shiftwidth,_expandtab,_undolevel,
+    _linlen,_avail_rows,_findex,_index,_shiftwidth,_expandtab,_undolevel,
     _autoindent, _dir, _autochdir,
     undo, undoset, ptr, rows, cols, clrs, lins, lnrs, vlins, lines,
     st_, comment_str,
@@ -368,7 +368,7 @@ class Ved
     s.clrs[*] = 0;
     s.clrs[-1] = VED_INFOCLRFG;
 
-    s._avlins = length (s.rows) - 2;
+    s._avail_rows = length (s.rows) - 2;
   end
 
   def __vaddbuf__ (s) proc

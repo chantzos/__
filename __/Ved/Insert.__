@@ -219,7 +219,7 @@ subclass Insert
         s._i = s._ii;
         s.draw (;dont_draw);
         is.modified = 1;
-        if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+        if (__vis_wrapped__ (s, strlen (@line), s._index, s._findex))
           waddline (s, __vgetlinestr (s, @line, s._findex + 1 - s._indent), 0, s.ptr[0]);
         else
           waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
@@ -233,7 +233,7 @@ subclass Insert
     @line = substr (@line, 1, s._index) +
             substr (@line, s._index + 2, -1);
 
-    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+    if (__vis_wrapped__ (s, strlen (@line), s._index, s._findex))
       waddline (s, __vgetlinestr (s, @line, s._findex + 1),
         0, s.ptr[0]);
     else
@@ -274,7 +274,7 @@ subclass Insert
   end
 
   def ins_completeline (is, s, line, comp_line) proc
-    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+    if (__vis_wrapped__ (s, strlen (@line), s._index, s._findex))
       return;
 
     if (s._index < strlen (comp_line) - s._indent)
@@ -302,9 +302,9 @@ subclass Insert
 
     s._index++;
 
-    __vset_col (s, linlen + 1, '+');
+    __vset_col__ (s, linlen + 1, '+');
 
-    s._findex += __vis_wrapped (s, linlen, s._index, s._findex);
+    s._findex += __vis_wrapped__ (s, linlen, s._index, s._findex);
 
     variable lline;
 
@@ -325,7 +325,7 @@ subclass Insert
       __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
       }
     else
-      if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+      if (__vis_wrapped__ (s, strlen (@line), s._index, s._findex))
         {
         s._index--;
         s._findex--;
@@ -387,7 +387,7 @@ subclass Insert
     else
       is.next_l = s.lines[is.lnr + 1];
 
-    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+    if (__vis_wrapped__ (s, strlen (@line), s._index, s._findex))
       waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
 
     variable plen = strlen (@line);
@@ -444,7 +444,7 @@ subclass Insert
 
     s._findex = s._indent;
 
-    if (__vis_wrapped (s, strlen (@line), s._index, s._findex))
+    if (__vis_wrapped__ (s, strlen (@line), s._index, s._findex))
       waddline (s, __vgetlinestr (s, @line, s._indent + 1 - s._indent), 0, s.ptr[0]);
 
     variable plen = strlen (@line);
@@ -512,7 +512,7 @@ subclass Insert
       s.ptr[1] = indent;
       s._i = s._ii;
 
-      if (s.ptr[0] == s.rows[-2] && s.ptr[0] + 1 > s._avlins)
+      if (s.ptr[0] == s.rows[-2] && s.ptr[0] + 1 > s._avail_rows)
         s._i++;
       else
         s.ptr[0]++;
@@ -547,7 +547,7 @@ subclass Insert
       s.ptr[1]--;
       }
 
-    if ((is_wrapped = __vis_wrapped (s, strlen (@line), s._index, s._findex),
+    if ((is_wrapped = __vis_wrapped__ (s, strlen (@line), s._index, s._findex),
         is_wrapped) && s.ptr[1] - s._indent == 0 == dcr)
       {
       s._findex--;
@@ -559,7 +559,7 @@ subclass Insert
       s._index--;
 
     % the condition it might changed if findex == indent, so re call it
-%    if ((is_wrapped = __vis_wrapped (s, strlen (@line), s._index, s._findex),
+%    if ((is_wrapped = __vis_wrapped__ (s, strlen (@line), s._index, s._findex),
 %        is_wrapped)) % or handle this case through the function
 %      waddline (s, __vgetlinestr (s, @line, s._findex + 1 - s._indent),
 %        0, s.ptr[0]);

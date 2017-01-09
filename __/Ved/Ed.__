@@ -27,7 +27,7 @@ subclass Ed
       lnr = __vlnr (s, '.'),
       line = __vline (s, '.'),
       linlen = __vlinlen (s, '.'),
-      is_wrapped = __vis_wrapped (s, linlen, s._index, s._findex);
+      is_wrapped = __vis_wrapped__ (s, linlen, s._index, s._findex);
 
     ifnot (lnr)
       prev_l = "";
@@ -48,14 +48,14 @@ subclass Ed
         if (linlen <= s._linlen)
           {
           s._findex = s._indent;
-          __vset_col_at_end (s, linlen);
+          __vset_col_at_end__ (s, linlen);
           is_wrapped = 0;
           }
       }
     else if ('a' == s._chr && linlen)
       {
       s._index++;
-      if ((is_wrapped = __vis_wrapped (s, strlen (line), s._index,
+      if ((is_wrapped = __vis_wrapped__ (s, strlen (line), s._index,
           s._findex), is_wrapped))
         {
         if (s.ptr[1] + 1 == s._indent + s._linlen)
@@ -68,7 +68,7 @@ subclass Ed
           is_wrapped = 1;
           }
 
-      __vset_col (s, linlen + 1, '+');
+      __vset_col__ (s, linlen + 1, '+');
       }
     else if ('A' == s._chr)
       {
@@ -81,7 +81,7 @@ subclass Ed
         is_wrapped = 1;
         }
 
-      __vset_col_at_end (s, linlen);
+      __vset_col_at_end__ (s, linlen);
       }
 
     if (is_wrapped)
@@ -368,7 +368,7 @@ subclass Ed
       i = __vlnr (s, '.'),
       line = __vline (s, '.'),
       linlen = strlen (line),
-      is_wrapped = __vis_wrapped (s, linlen, s._index, s._findex);
+      is_wrapped = __vis_wrapped__ (s, linlen, s._index, s._findex);
 
     if ((0 == s.ptr[1] - s._indent && 'X' == chr)
         || 0 > linlen - s._indent)
@@ -409,7 +409,7 @@ subclass Ed
 
     set_modified (s);
 
-    if (__vis_wrapped (s, strlen (line), s._index, s._findex))
+    if (__vis_wrapped__ (s, strlen (line), s._index, s._findex))
       waddline (s, __vgetlinestr (s, line, s._findex + 1 - s._indent), 0, s.ptr[0]);
     else
       {

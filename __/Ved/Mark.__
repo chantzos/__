@@ -79,7 +79,7 @@ subclass Mark
       s._findex = s._indent;
       }
 
-    if (__vis_wrapped (s, linlen, s._index, s._findex))
+    if (__vis_wrapped__ (s, linlen, s._index, s._findex))
       waddline (s, __vgetlinestr (s, line, s._findex + 1 - s._indent),
         0, s.ptr[0]);
 

@@ -110,7 +110,7 @@ subclass Pager
     if (lnr == s._len)
       return;
 
-    if (__vis_wrapped (s, plinlen, s._index, s._findex))
+    if (__vis_wrapped__ (s, plinlen, s._index, s._findex))
       waddline (s, __vgetlinestr (s, __vline (s, '.'), 1), 0, s.ptr[0]);
 
 
@@ -150,7 +150,7 @@ subclass Pager
       lline,
       plinlen = __vlinlen (s, '.');
 
-    if (__vis_wrapped (s, plinlen, s._index, s._findex))
+    if (__vis_wrapped__ (s, plinlen, s._index, s._findex))
       waddline (s, __vgetlinestr (s, __vline (s, '.'), 1), 0, s.ptr[0]);
 
     if (s.ptr[0] > s.vlins[0])
@@ -191,13 +191,13 @@ subclass Pager
 
     Ved.Mark.backtick (s);
 
-    s._i = s._len - s._avlins;
+    s._i = s._len - s._avail_rows;
 
     s.ptr[1] = s._indent;
     s._findex = s._indent;
     s._index = s._indent;
 
-    if (length (s.lins) < s._avlins - 1)
+    if (length (s.lins) < s._avail_rows - 1)
       {
       s.ptr[0] = s.vlins[-1];
       Smg.setrcdr (s.ptr[0], s.ptr[1]);
@@ -263,7 +263,7 @@ subclass Pager
   end
 
   def left (s)
-    variable retval = __left (s, __vis_wrapped (
+    variable retval = __left (s, __vis_wrapped__ (
       s, __vlinlen (s, '.'), s._index, s._findex));
 
     if (-1 == retval)
@@ -301,13 +301,13 @@ subclass Pager
   end
 
   def page_down (s)
-    if (s._i + s._avlins > s._len)
+    if (s._i + s._avail_rows > s._len)
       return;
 
     if (s._chr == Input->CTRL_f)
       Ved.Mark.backtick (s);
 
-    s._i += (s._avlins);
+    s._i += (s._avail_rows);
 
     s.ptr[1] = s._indent;
     s._index = s._indent;
@@ -323,8 +323,8 @@ subclass Pager
     if (s._chr == Input->CTRL_b)
       Ved.Mark.backtick (s);
 
-    if (s.lnrs[0] >= s._avlins)
-      s._i = s.lnrs[0] - s._avlins;
+    if (s.lnrs[0] >= s._avail_rows)
+      s._i = s.lnrs[0] - s._avail_rows;
     else
       s._i = 0;
 
@@ -386,7 +386,7 @@ subclass Pager
   def bol (s)
     variable len = __vlinlen (s, '.');
 
-    if (__vis_wrapped (s, len, s._index, s._findex))
+    if (__vis_wrapped__ (s, len, s._index, s._findex))
       {
       variable line = __vgetlinestr (s, __vline (s, '.'), 1);
       waddline (s, line, 0, s.ptr[0]);

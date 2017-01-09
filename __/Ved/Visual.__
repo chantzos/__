@@ -108,7 +108,7 @@ subclass Visual
   end
 
   def v_l_page_up (vs, s) proc
-    if (s._avlins > s._len)
+    if (s._avail_rows > s._len)
       return;
 
     variable count = qualifier ("count", 1);
@@ -118,9 +118,9 @@ subclass Visual
     while (i <= count && (s._i || (s._i == 0 && vs.lnrs[0] != 0)))
       {
       variable isnotiatfpg = 1;
-      ii = s._avlins;
+      ii = s._avail_rows;
 
-      if (0 == s._i || (s._i < s._avlins && s._i > 1))
+      if (0 == s._i || (s._i < s._avail_rows && s._i > 1))
         {
         s._i = 0;
         ii = vs.lnrs[0];
@@ -128,8 +128,8 @@ subclass Visual
           v_l_up (vs, s);
         break;
         }
-      else if (s._i - s._avlins >= 0)
-        s._i -= s._avlins;
+      else if (s._i - s._avail_rows >= 0)
+        s._i -= s._avail_rows;
       else
         {
         ii = s._i + (s.ptr[0] - s.vlins[0]);
@@ -202,10 +202,10 @@ subclass Visual
 
     while (i <= count && notend)
       {
-      if (vs.lnrs[-1] + s._avlins < s._len)
+      if (vs.lnrs[-1] + s._avail_rows < s._len)
         {
-        ii = s._avlins;
-        s._i += s._avlins;
+        ii = s._avail_rows;
+        s._i += s._avail_rows;
         }
       else
         {
@@ -334,7 +334,7 @@ subclass Visual
 
       if (chr == Input->HOME)
         {
-        vs.l_page_up (s;count = s._len / s._avlins + 1);
+        vs.l_page_up (s;count = s._len / s._avail_rows + 1);
         continue;
         }
 
@@ -346,7 +346,7 @@ subclass Visual
 
       if (chr == 'G')
         {
-        vs.l_page_down (s;count = s._len / s._avlins + 1);
+        vs.l_page_down (s;count = s._len / s._avail_rows + 1);
         continue;
         }
 
@@ -462,7 +462,8 @@ subclass Visual
       if ('w' == chr)
         {
         rl = Ved.get_cur_rline ();
-        argv = ["w", sprintf ("--range=%d,%d", vs.lnrs[0], vs.lnrs[-1])];
+        argv = ["w", "--bufname=" + s._abspath,
+          sprintf ("--range=%d,%d", vs.lnrs[0], vs.lnrs[-1])];
 
         Rline.set (rl;line = strjoin (argv, " "), argv = argv,
           col = int (sum (strlen (argv))) + length (argv),
@@ -492,7 +493,7 @@ subclass Visual
   end
 
   def v_c_left (vs, s, cur) proc
-    variable is_wrapped = __vis_wrapped (s, strlen (vs.lines[cur]),
+    variable is_wrapped = __vis_wrapped__ (s, strlen (vs.lines[cur]),
       vs.index[cur], vs.findex[cur]);
 
     variable retval = __left (s, is_wrapped);
@@ -506,7 +507,7 @@ subclass Visual
     if (retval)
       {
       variable lline;
-      if ((is_wrapped = __vis_wrapped (s, strlen (vs.lines[cur]),
+      if ((is_wrapped = __vis_wrapped__ (s, strlen (vs.lines[cur]),
           vs.index[cur], vs.findex[cur]), is_wrapped))
         {
         lline = __vgetlinestr (s, vs.lines[cur], vs.findex[cur] + 1);
