@@ -109,8 +109,8 @@ public define setrepo (repo)
     __messages;
   else
     {
-    draw (info);
     draw (std);
+    draw (info);
     }
 
   0;
@@ -202,12 +202,6 @@ private define __commitall__ (argv)
 {
   variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
 
-  if (length (argv) == 1)
-    {
-    Smg.send_msg_dr ("argument is required", 1, NULL, NULL);
-    return;
-    }
-
   () = File.write (SCRATCH, "\000\n-- DIFF --");
 
   if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">>"))
@@ -261,8 +255,8 @@ private define __commitall__ (argv)
       __messages;
     else
       {
-      draw (__write_info__ (REPOS[CUR_REPO]));
       draw (std);
+      draw (__write_info__ (REPOS[CUR_REPO]));
       }
     }
   else
@@ -338,8 +332,8 @@ private define __commit__ (argv)
       __messages;
     else
       {
-      draw (__write_info__ (REPOS[CUR_REPO]));
       draw (std);
+      draw (__write_info__ (REPOS[CUR_REPO]));
       }
     }
   else
@@ -457,8 +451,8 @@ private define __branchchange__ (argv)
       __messages;
     else
       {
-      draw (__write_info__ (REPOS[CUR_REPO]));
       draw (std);
+      draw (__write_info__ (REPOS[CUR_REPO]));
       }
     }
   else
@@ -561,8 +555,8 @@ private define __pull__ (argv)
     __messages;
   else
     {
-    draw (__write_info__ (REPOS[CUR_REPO]));
     draw (std);
+    draw (__write_info__ (REPOS[CUR_REPO]));
     }
 }
 
@@ -878,8 +872,8 @@ private define on_reconnect ()
     __messages;
   else
     {
-    draw (info);
     draw (std);
+    draw (info);
     }
 }
 
