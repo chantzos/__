@@ -10,6 +10,7 @@ class Ved
     draw, lexicalhl, autoindent, pairs,
     opt_show_tilda, opt_show_status_line,
     __NOR__,
+    __VAR__,
   end
 
   typedef Insert
@@ -546,6 +547,10 @@ class Ved
   def __init_fun_all__ (s) proc
     if (NULL == s.__NOR__)
       s.__NOR__ = __init_fun_norm__ (;;__qualifiers);
+  end
+
+  def __init_var__ () proc
+    Assoc.new (Any_Type, NULL, NULL);
   end
 
 %%% ___v
