@@ -13,7 +13,7 @@ private define login (self)
 
   group = Sys.setgrname (gid);
 
-  variable passwd = self.getpasswd ();
+  variable passwd = self.getpasswd (;uncached);
 
   if (-1 == self.authenticate (user, passwd))
     This.err_handler ("authentication error");

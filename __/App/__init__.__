@@ -148,7 +148,7 @@ class App
       }
   end
 
-  def _exit_ () public proc
+  def __exit () public proc
     __exit_children__;
 
     if (__is_initialized (&Input))
@@ -168,7 +168,7 @@ class App
       Rline.writehistory (list_to_array (searchhist), (@__get_reference ("SEARCH_HISTFILE")));
   end
 
-  def draw (s) public proc
+  def __draw_buf (s) public proc
     variable st = NULL == s._fd
       ? lstat_file (s._abspath)
       : fstat (s._fd);
@@ -194,7 +194,8 @@ class App
     ifnot (NULL == pos)
       (s.ptr[0] = pos[0], s.ptr[1] = pos[1]);
     else
-      (s.ptr[1] = 0, s.ptr[0] = s._len + 1 <= len ? s.rows[0] : s.rows[-2]);
+      (s.ptr[1] = 0, s.ptr[0] = s._len + 1 <= len
+        ? s.rows[0] : s.rows[-2]);
 
     ifnot (NULL == _i)
       {
@@ -211,14 +212,14 @@ class App
     s.draw ();
   end
 
-  def viewfile (s, type, pos, _i) public proc
+  def __viewfile  (s, type, pos, _i) public proc
     variable ismsg = 0;
 
     Ved.setbuf (s._abspath);
 
     topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
 
-    draw (s;pos = pos, _i = _i);
+    __draw_buf (s;pos = pos, _i = _i);
 
     forever
       {
@@ -265,7 +266,7 @@ class App
     Rline.prompt (s, s._lin, s._col);
   end
 
-  def toscratch (str) public proc
+  def __toscratch  (str) public proc
     IO.print (str;fd = SCRATCHFD);
   end
 
@@ -273,7 +274,7 @@ class App
     Api.Eval.run (;;__qualifiers ());
   end
 
-  def runcom (argv, issu) public proc
+  def __runcom  (argv, issu) public proc
     variable rl = Ved.get_cur_rline ();
     variable commands = assoc_get_keys (rl.argvlist);
     variable orig = argv[0];
@@ -299,7 +300,7 @@ class App
     variable __i = __get_qualifier_as (Integer_Type, "_i", qualifier (
       "_i"), 0);
 
-    viewfile (SCRATCH_VED, "SCRATCH", [1, 0], __i);
+    __viewfile  (SCRATCH_VED, "SCRATCH", [1, 0], __i);
     Ved.setbuf (ved._abspath);
     ved.draw ();
 
@@ -324,7 +325,7 @@ class App
     loop (_NARGS) pop ();
     variable ved = @Ved.get_cur_buf ();
 
-    viewfile (ERR_VED, "MSG", NULL, NULL);
+    __viewfile  (ERR_VED, "MSG", NULL, NULL);
     Ved.setbuf (ved._abspath);
 
     Ved.draw_wind ();

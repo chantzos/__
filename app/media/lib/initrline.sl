@@ -157,7 +157,7 @@ private define __write_info__ ()
 
   () = File.write (info._abspath, Smg.__HLINE__ () + buf);
 
-  draw (info;force_a_redraw);
+  __draw_buf (info;force_a_redraw);
 }
 
 private define __write_lyric__ ()
@@ -190,7 +190,7 @@ private define __write_lyric__ ()
 
   () = File.write (lyricbuf._abspath, lyric);
 
-  draw (lyricbuf;_i = 0);
+  __draw_buf (lyricbuf;_i = 0);
 }
 
 % declaring is an intention
@@ -582,7 +582,7 @@ private define __at_exit ()
   () = write (MED_FD, "quit\n");
   () = close (MED_FD);
   () = remove (MED_FIFO);
-  _exit_ ();
+  __exit ();
 }
 
 This.at_exit = &__at_exit;

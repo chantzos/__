@@ -22,14 +22,14 @@ class Com
     if (This.is.shell)
       IO.tostdout (strjoin (argv, " "));
     else
-      toscratch (strjoin (argv, " ") + "\n");
+      __toscratch  (strjoin (argv, " ") + "\n");
   end
 
   def post_header ()
     if (This.is.shell)
       IO.tostdout (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS); n);
     else
-      toscratch (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS));
+      __toscratch  (sprintf ("[%d](%s)[%d]$ ", IARG, getcwd, EXITSTATUS));
   end
 
   def post_exec (header)
@@ -45,7 +45,7 @@ class Com
       VED_WIND_NEEDS_DRAW = 0;
       }
     else
-      draw (Ved.get_cur_buf ());
+      __draw_buf (Ved.get_cur_buf ());
   end
 
   def pre_exec (argv, header, issu, env)
@@ -143,13 +143,13 @@ class Com
       if (This.is.shell)
         IO.tostdout ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
       else
-        toscratch ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
+        __toscratch  ("\n" + pid + ": " + strjoin (BGPIDS[pid].argv, " ") + "\n" +  out);
 
     ifnot (force)
       if (This.is.shell)
         IO.tostdout (pid + ": exit status " + string (status.exit_status));
       else
-        toscratch (pid + ": exit status " + string (status.exit_status) + "\n");
+        __toscratch  (pid + ": exit status " + string (status.exit_status) + "\n");
 
     BGPIDS[pid].atexit ();
 
@@ -176,7 +176,7 @@ class Com
     if (1 == length (argv))
       {
       self.post_header ();
-      draw (Ved.get_cur_buf ());
+      __draw_buf (Ved.get_cur_buf ());
       return;
       }
 
@@ -185,7 +185,7 @@ class Com
     ifnot (assoc_key_exists (BGPIDS, pid))
       {
       self.post_header ();
-      draw (Ved.get_cur_buf ());
+      __draw_buf (Ved.get_cur_buf ());
       return;
       }
 
@@ -197,7 +197,7 @@ class Com
       Smg.send_msg_dr (pid + ": killed", 0, PROMPTROW, 1);
 
     self.post_header ();
-    draw (Ved.get_cur_buf ());
+    __draw_buf (Ved.get_cur_buf ());
   end
 
   def list_bg_jobs (argv)
@@ -210,7 +210,7 @@ class Com
     ifnot (length (pids))
       {
       self.post_header ();
-      draw (Ved.get_cur_buf ());
+      __draw_buf (Ved.get_cur_buf ());
       return;
       }
 
@@ -221,7 +221,7 @@ class Com
 
     self.post_header ();
 
-    draw (Ved.get_cur_buf ());
+    __draw_buf (Ved.get_cur_buf ());
   end
 
   def pre_builtin (argv)
@@ -237,11 +237,11 @@ class Com
       if (This.is.shell)
         IO.tostdout (err);
       else
-        toscratch (err + "\n");
+        __toscratch  (err + "\n");
 
     self.post_header ();
 
-    draw (Ved.get_cur_buf ());
+    __draw_buf (Ved.get_cur_buf ());
   end
 
   var licom = 0;
@@ -397,7 +397,7 @@ class Com
         if (This.is.shell)
           IO.tostdout (err);
         else
-          toscratch (err + "\n");
+          __toscratch  (err + "\n");
 
         ERR_VED.st_.st_size += strbytelen (err) + 1;
         EXITSTATUS = 1;

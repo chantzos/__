@@ -45,7 +45,7 @@ class X
 
     variable status = p.execv (argv, NULL);
 
-    toscratch ("\nexit_status: " + string (status.exit_status) + "\n");
+    __toscratch  ("\nexit_status: " + string (status.exit_status) + "\n");
 
     __scratch (NULL);
   end

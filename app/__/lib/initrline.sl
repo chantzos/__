@@ -48,7 +48,7 @@ private define __bytecompile__ (argv)
 
     if (strncmp (slib, Env->SRC_PATH, splen))
       {
-      toscratch ("Warning:", slib, "is not a part of the distribution");
+      __toscratch  ("Warning:", slib, "is not a part of the distribution");
       continue;
       }
 
@@ -87,7 +87,7 @@ private define __bytecompile__ (argv)
       continue;
       }
 
-    toscratch ("bytecompiled: " + slib + "\n");
+    __toscratch  ("bytecompiled: " + slib + "\n");
     }
 
   if (ern)
@@ -174,7 +174,7 @@ private define __classcompile__ (argv)
 
     if (strncmp (class, Env->SRC_PATH, splen))
       {
-      toscratch ("Warning:", class, "is not a part of the distribution");
+      __toscratch  ("Warning:", class, "is not a part of the distribution");
       continue;
       }
 
@@ -216,7 +216,7 @@ private define __classcompile__ (argv)
         ern = 1;
         }
 
-    toscratch ("class compiled: " + orig + "\ninstalled as  : " + class + ".slc\n");
+    __toscratch  ("class compiled: " + orig + "\ninstalled as  : " + class + ".slc\n");
     }
 
   if (ern)
@@ -289,7 +289,7 @@ private define __myrepo (argv)
 
   Com.post_header ();
 
-  draw (Ved.get_cur_buf ());
+  __draw_buf (Ved.get_cur_buf ());
 }
 
 private define __exclude (sync)
@@ -497,7 +497,7 @@ private define __search_project__ (argv)
   ifnot (NULL == Opt.Arg.exists ("--include_c", &argv;del_arg))
     Array.delete_at (&_argv, -2);
 
-  runcom (_argv, NULL);
+  __runcom  (_argv, NULL);
 }
 
 private define my_commands ()

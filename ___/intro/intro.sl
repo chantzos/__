@@ -9,11 +9,11 @@ public define intro (rl, vd)
     "    EXAMPLE \n\n" +
 `public define intro (rl, vd)
 {
-  runcom (["moonphase", ">|" + SCRATCH], NULL;no_header);
+  __runcom  (["moonphase", ">|" + SCRATCH], NULL;no_header);
 
   () = File.append (SCRATCH, Smg.__HLINE__ () + "\n");
 
-  runcom (["battery",  ">>" + SCRATCH], NULL;no_header);;
+  __runcom  (["battery",  ">>" + SCRATCH], NULL;no_header);;
 
   __scratch (vd);
 }` + "\nPress q to exit from the pager for the shell command line";

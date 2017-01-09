@@ -142,7 +142,7 @@ subclass Ed
     s._i = lnr == 0 ? 0 : s._ii;
 
     if ("next" == dir)
-      if (s.ptr[0] == s.rows[-2] && s.ptr[0] + 1 > s._avlins)
+      if (s.ptr[0] == s.rows[-2] && s.ptr[0] + 1 > s._avail_rows)
         s._i++;
       else
         s.ptr[0]++;

@@ -1,5 +1,9 @@
 class Os
   let HASHEDDATA = NULL;
+  var do_cache = 1;
+  var last_request_time = 0;
+  var timeout = 30 * 60;
+  var cached_passwd = NULL;
 
   def getpasswd ()
     variable passwd = "";
@@ -38,6 +42,17 @@ class Os
   end
 
   def __getpasswd ()
+    if (do_cache)
+      ifnot (qualifier_exists ("uncached"))
+        ifnot (NULL == cached_passwd)
+          if (last_request_time)
+            if (_time - last_request_time < timeout)
+              ifnot (self.authenticate (Env->USER, cached_passwd))
+                {
+                last_request_time = _time;
+                return cached_passwd + "\n";
+                }
+
     variable passwd, retval;
 
     ifnot (NULL == HASHEDDATA)
@@ -67,6 +82,13 @@ class Os
         passwd += "\n";
         }
       }
+
+    ifnot (NULL == passwd)
+      if (do_cache)
+        {
+        cached_passwd = strtrim_end (passwd);
+        last_request_time = _time;
+        }
 
     passwd;
   end

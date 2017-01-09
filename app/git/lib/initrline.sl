@@ -33,7 +33,7 @@ private define __write_info__ (s)
 private define viewdiff ()
 {
   variable ved = @Ved.get_cur_buf ();
-  viewfile (DIFF_VED, "diff", [1, 0], 0);
+  __viewfile  (DIFF_VED, "diff", [1, 0], 0);
   Ved.setbuf (ved._abspath);
   Ved.draw_wind ();
 }
@@ -109,8 +109,8 @@ public define setrepo (repo)
     __messages;
   else
     {
-    draw (std);
-    draw (info);
+    __draw_buf (std);
+    __draw_buf (info);
     }
 
   0;
@@ -134,7 +134,7 @@ private define __status__ (argv)
 
   variable std = __write_std__;
   ifnot (NULL == std)
-    draw (std);
+    __draw_buf (std);
   else
     __messages;
 }
@@ -247,7 +247,7 @@ private define __commitall__ (argv)
     () = Scm.Git.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
       redir_to_file = DIFF, flags = ">>");
 
-    viewfile (DIFF_VED, "diff", [1, 0], 0);
+    __viewfile  (DIFF_VED, "diff", [1, 0], 0);
 
     variable std = __write_std__;
 
@@ -255,8 +255,8 @@ private define __commitall__ (argv)
       __messages;
     else
       {
-      draw (std);
-      draw (__write_info__ (REPOS[CUR_REPO]));
+      __draw_buf (std);
+      __draw_buf (__write_info__ (REPOS[CUR_REPO]));
       }
     }
   else
@@ -324,7 +324,7 @@ private define __commit__ (argv)
     () = Scm.Git.generic ("log", "--source", "--raw", "--log-size", "-1",  "-p";
       redir_to_file = DIFF, flags = ">>");
 
-    viewfile (DIFF_VED, "diff", [1, 0], 0);
+    __viewfile  (DIFF_VED, "diff", [1, 0], 0);
 
     variable std = __write_std__;
 
@@ -332,8 +332,8 @@ private define __commit__ (argv)
       __messages;
     else
       {
-      draw (std);
-      draw (__write_info__ (REPOS[CUR_REPO]));
+      __draw_buf (std);
+      __draw_buf (__write_info__ (REPOS[CUR_REPO]));
       }
     }
   else
@@ -367,7 +367,7 @@ private define __add__ (argv)
     if (NULL == std)
       __messages;
     else
-      draw (std);
+      __draw_buf (std);
     }
   else
     __messages;
@@ -395,7 +395,7 @@ private define __branch__ (argv)
 
   REPOS[CUR_REPO].branches = s.branches;
   REPOS[CUR_REPO].cur_branch = s.cur;
-  draw (__write_info__ (REPOS[CUR_REPO]));
+  __draw_buf (__write_info__ (REPOS[CUR_REPO]));
 }
 
 private define __branchnew__ (argv)
@@ -417,7 +417,7 @@ private define __branchnew__ (argv)
 
     REPOS[CUR_REPO].branches = s.branches;
     REPOS[CUR_REPO].cur_branch = s.cur;
-    draw (__write_info__ (REPOS[CUR_REPO]));
+    __draw_buf (__write_info__ (REPOS[CUR_REPO]));
     __scratch (NULL);
     }
   else
@@ -451,8 +451,8 @@ private define __branchchange__ (argv)
       __messages;
     else
       {
-      draw (std);
-      draw (__write_info__ (REPOS[CUR_REPO]));
+      __draw_buf (std);
+      __draw_buf (__write_info__ (REPOS[CUR_REPO]));
       }
     }
   else
@@ -479,7 +479,7 @@ private define __branchdelete__ (argv)
 
     REPOS[CUR_REPO].branches = s.branches;
     REPOS[CUR_REPO].cur_branch = s.cur;
-    draw (__write_info__ (REPOS[CUR_REPO]));
+    __draw_buf (__write_info__ (REPOS[CUR_REPO]));
     __scratch (NULL);
     }
   else
@@ -555,8 +555,8 @@ private define __pull__ (argv)
     __messages;
   else
     {
-    draw (std);
-    draw (__write_info__ (REPOS[CUR_REPO]));
+    __draw_buf (std);
+    __draw_buf (__write_info__ (REPOS[CUR_REPO]));
     }
 }
 
@@ -872,8 +872,8 @@ private define on_reconnect ()
     __messages;
   else
     {
-    draw (std);
-    draw (info);
+    __draw_buf (std);
+    __draw_buf (info);
     }
 }
 

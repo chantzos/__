@@ -172,6 +172,6 @@ subclass Fork
       if (This.is.shell)
         IO.tostdout (strtrim_end (err));
       else
-        toscratch (err);
+        __toscratch  (err);
   end
 end

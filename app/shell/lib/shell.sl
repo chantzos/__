@@ -17,7 +17,7 @@ public define shell ()
 
   if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
     {
-    runcom (["intro"], NULL);
+    __runcom  (["intro"], NULL);
     () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
     }
 
@@ -25,7 +25,7 @@ public define shell ()
 
   Com.post_header ();
 
-  draw (OUT_VED);
+  __draw_buf (OUT_VED);
 
   mainloop ();
 }
@@ -38,7 +38,7 @@ private define __err_handler__ (this, __r__)
 
   Com.post_header ();
 
-  draw (Ved.get_cur_buf ());
+  __draw_buf (Ved.get_cur_buf ());
 
   mainloop ();
 }

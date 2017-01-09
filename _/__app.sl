@@ -67,7 +67,7 @@ Class.load ("Ved");
 Class.load ("Api");
 Class.load ("App");
 
-This.at_exit = &_exit_;
+This.at_exit = &__exit;
 
 Class.load ("I";force);
 
@@ -258,7 +258,7 @@ private define __rehash__ ();
 
 private define draw_buf (argv)
 {
-  draw (Ved.get_cur_buf ());
+  __draw_buf (Ved.get_cur_buf ());
 }
 
 private define draw_wind (argv)
@@ -269,7 +269,7 @@ private define draw_wind (argv)
 private define scratch_to_stdout (argv)
 {
   () = File.copy (SCRATCH, This.is.std.out.fn;flags = "ab", verbose = 1);
-  draw (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
+  __draw_buf (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
 }
 
 private define __clear__ (argv)
@@ -308,7 +308,7 @@ private define __echo__ (argv)
   variable isshell = "shell" == This.is.my.name;
   variable tostd = isshell
     ? Class.__FUNCREF__ ("IO", "tostdout")
-    : &toscratch;
+    : &__toscratch;
 
   variable args = [{}, {IO}][isshell];
 
@@ -431,7 +431,7 @@ private define __search__ (argv)
     App.Run.as.child (["__ved", GREPFILE]);
 
   Com.post_header ();
-  draw (Ved.get_cur_buf ());
+  __draw_buf (Ved.get_cur_buf ());
 }
 
 private define __which__ (argv)
@@ -454,7 +454,7 @@ private define __which__ (argv)
   if (This.is.my.name == "shell")
     IO.tostdout (msg;n);
   else
-    toscratch (msg);
+    __toscratch  (msg);
 
   EXITSTATUS = NULL == path;
 
@@ -529,7 +529,7 @@ private define __ved__ (argv)
 
   Com.post_header ();
 
-  draw (Ved.get_cur_buf ());
+  __draw_buf (Ved.get_cur_buf ());
 }
 
 private define __lock__ (argv)
@@ -538,7 +538,7 @@ private define __lock__ (argv)
   Smg.atrcaddnstr (" --- locked -- ", 1, LINES / 2, COLUMNS / 2 - 10,
     COLUMNS);
 
-  while (NULL == Os.__getpasswd ());
+  while (NULL == Os.__getpasswd (;uncached));
 
   Ved.draw_wind ();
 }
@@ -566,7 +566,7 @@ private define __help (argv)
     {
     variable f = Me.get_src_path (k.dir) + "/help.txt";
     App.Run.as.child (["__ved", f]);
-    draw (Ved.get_cur_buf ());
+    __draw_buf (Ved.get_cur_buf ());
     return;
     }
 
@@ -584,7 +584,7 @@ private define __info (argv)
     {
     variable f = I.get_src_path (k.dir) + "/desc.txt";
     App.Run.as.child (["__ved", f]);
-    draw (Ved.get_cur_buf ());
+    __draw_buf (Ved.get_cur_buf ());
     return;
     }
 
@@ -605,7 +605,7 @@ private define __edit_history (argv)
     Rline.writehistory (rl.history, rl.histfile);
 
   App.Run.as.child (["__ved", rl.histfile]);
-  draw (Ved.get_cur_buf ());
+  __draw_buf (Ved.get_cur_buf ());
 
   rl.history = Rline.readhistory (rl.histfile);
 }
