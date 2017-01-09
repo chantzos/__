@@ -39,10 +39,10 @@ class Com
     if (header)
       self.post_header ();
 
-    if (NEEDSWINDDRAW)
+    if (VED_WIND_NEEDS_DRAW)
       {
       Ved.draw_wind ();
-      NEEDSWINDDRAW = 0;
+      VED_WIND_NEEDS_DRAW = 0;
       }
     else
       draw (Ved.get_cur_buf ());

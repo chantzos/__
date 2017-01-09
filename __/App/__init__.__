@@ -32,7 +32,7 @@ class App
   var public BGPIDS = Assoc_Type[Struct_Type];
   var public IARG = 0;
   var public ICOM = 0;
-  var public NEEDSWINDDRAW = 0;
+  var public VED_WIND_NEEDS_DRAW = 0;
   var public EXITSTATUS = 0;
 
   var static PARENT_FIFO    = NULL;
@@ -169,7 +169,9 @@ class App
   end
 
   def draw (s) public proc
-    variable st = NULL == s._fd ? lstat_file (s._abspath) : fstat (s._fd);
+    variable st = NULL == s._fd
+      ? lstat_file (s._abspath)
+      : fstat (s._fd);
 
     if (NULL == st || (s.st_.st_size && st.st_atime == s.st_.st_atime
         && st.st_size == s.st_.st_size))
@@ -211,6 +213,7 @@ class App
 
   def viewfile (s, type, pos, _i) public proc
     variable ismsg = 0;
+
     Ved.setbuf (s._abspath);
 
     topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
@@ -300,7 +303,7 @@ class App
     Ved.setbuf (ved._abspath);
     ved.draw ();
 
-    NEEDSWINDDRAW = 1;
+    VED_WIND_NEEDS_DRAW = 1;
   end
 
   def send_msg_dr (msg) public proc
@@ -313,7 +316,7 @@ class App
 
     App.scratch (ved;;__qualifiers);
 
-    NEEDSWINDDRAW = 0;
+    VED_WIND_NEEDS_DRAW = 0;
     Ved.draw_wind ();
   end
 
