@@ -200,7 +200,17 @@ private define __log__ (argv)
 
 private define __commitall__ (argv)
 {
-  if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">|"))
+  variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
+
+  if (length (argv) == 1)
+    {
+    Smg.send_msg_dr ("argument is required", 1, NULL, NULL);
+    return;
+    }
+
+  () = File.write (SCRATCH, "\000\n-- DIFF --");
+
+  if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">>"))
     {
     __messages;
     return;
@@ -212,12 +222,9 @@ private define __commitall__ (argv)
     return;
     }
 
-  variable lines = File.readlines (SCRATCH);
-  lines = ["\000", "-- DIFF --", lines];
-  () = File.write (DIFF, lines);
+  () = App.Run.as.child (["__ved", "--ftype=diff", SCRATCH]);
 
-  () = App.Run.as.child (["__ved", DIFF]);
-  lines = File.readlines (DIFF);
+  variable lines = File.readlines (SCRATCH);
 
   variable diffline = wherefirst ("-- DIFF --" == lines);
   if (NULL == diffline || diffline < 1)
@@ -237,8 +244,6 @@ private define __commitall__ (argv)
     }
 
   variable qual = struct {redir_to_file = DIFF, flags = ">|"};
-
-  variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
   ifnot (NULL == author)
     if (any (author == assoc_get_keys (AUTHORS)))
       qual = struct {@qual, author = author};
@@ -278,9 +283,9 @@ private define __commit__ (argv)
 
   variable l = Array.to_list (argv);
 
-  variable file = DIFF;
+  () = File.write (SCRATCH, "\000\n-- DIFF --");
 
-  if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">|"))
+  if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">>"))
     {
     __messages;
     return;
@@ -292,17 +297,15 @@ private define __commit__ (argv)
     return;
     }
 
-  variable lines = File.readlines (SCRATCH);
-  lines = ["\000", "-- DIFF --", lines];
-  () = File.write (DIFF, lines);
+  () = App.Run.as.child (["__ved", "--ftype=diff", SCRATCH]);
 
-  () = App.Run.as.child (["__ved", DIFF]);
-  lines = File.readlines (DIFF);
+  variable lines = File.readlines (SCRATCH);
 
   variable diffline = wherefirst ("-- DIFF --" == lines);
   if (NULL == diffline || diffline < 1)
     {
     IO.tostderr ("Aborted due to a wrong format message");
+    () = Input.getch ();
     __messages;
     return;
     }

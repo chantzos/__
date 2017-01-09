@@ -275,7 +275,7 @@ beg
   % the logic is to unveil any code errors.
   % like the test phase to a waterfall model.
 
-  def get_buf (name)
+  def get_buf (bufname)
     ifnot (qualifier_exists ("on_all_windows"))
       {
       variable w = self.get_cur_wind ();

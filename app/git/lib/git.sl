@@ -8,9 +8,31 @@ private define mainloop ()
     }
 }
 
+private define __init_me__ ()
+{
+  DIFF_VED = Ved.init_ftype ("diff");
+
+  DIFF_VED._fd = IO.open_fn (DIFF);
+  DIFF_VED.set (DIFF, VED_ROWS, NULL;
+    _autochdir = 0, show_tilda = 0, show_status_line = 0);
+
+  variable authors = File.readlines (This.is.my.datadir + "/authors.txt");
+  ifnot (NULL == authors)
+    {
+    variable i, tok;
+    _for i (0, length (authors) - 1)
+      {
+      tok = strtok (authors[i], ":");
+      if (1 < length (tok))
+        AUTHORS[tok[0]] = tok[1];
+      }
+    }
+}
+
 public define init_git ()
 {
   wind_init ("a", 2;force, on_wind_new);
+  __init_me__ ();
 
   variable default, found_repo = 0;
   (default, ) = Opt.Arg.compare ("--repo=", &This.has.argv;ret_arg, del_arg);
