@@ -463,8 +463,19 @@ private define __which__ (argv)
 
 private define __write__ (argv)
 {
-  variable b = Ved.get_cur_buf ();
-  variable lnrs = [0:b._len];
+  variable s;
+  variable bufname = Opt.Arg.getlong ("bufname", NULL, &argv;del_arg, ret_arg);
+
+  ifnot (NULL == bufname)
+    {
+    s = Ved.get_buf (bufname;on_all_windows);
+    if (NULL == s)
+      return;
+    }
+  else
+    s = Ved.get_cur_buf ();
+
+  variable lnrs = [0:s._len];
   variable range = NULL;
   variable append = NULL;
   variable ind;
@@ -476,7 +487,7 @@ private define __write__ (argv)
   (range_arg, ) = Opt.Arg.compare ("--range=", &argv;ret_arg, del_arg);
 
   ifnot (NULL == range_arg)
-    if (NULL == (lnrs = Ved.parse_arg_range (b, range_arg, lnrs), lnrs))
+    if (NULL == (lnrs = Ved.parse_arg_range (s, range_arg, lnrs), lnrs))
       return;
 
   ind = wherefirst (">>" == argv);
@@ -490,8 +501,8 @@ private define __write__ (argv)
   file = length (argv) - 1 ? argv[1] : NULL;
 
   if (any (["w", "w!", "W"]  == command))
-    Ved.writefile (b, "w!" == command, [PROMPTROW, 1], file, append;
-      lines = b.lines[lnrs]);
+    Ved.writefile (s, "w!" == command, [PROMPTROW, 1], file, append;
+      lines = s.lines[lnrs]);
 }
 
 private define __edit__ (argv)
