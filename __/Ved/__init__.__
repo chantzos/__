@@ -1074,7 +1074,7 @@ class Ved
   end
 
   def __vreread (s) public proc
-    s.lines = Ved.getlines (s._fname, s._indent, s.st_);
+    s.lines = Ved.getlines (s._abspath, s._indent, s.st_);
 
     s._len = length (s.lines) - 1;
 
