@@ -199,7 +199,10 @@ beg
 
     s._linlen = s._maxlen - s._indent;
 
-    s.st_ = stat_file (s._fname);
+    s = __vaddbuf__ (s);
+
+    s.st_ = stat_file (s._abspath);
+
     if (NULL == s.st_)
       s.st_ = struct
         {
@@ -212,7 +215,7 @@ beg
 
     s.rows = rows;
 
-    s.lines = NULL == lines ? Ved.getlines (s._fname, s._indent, s.st_) : lines;
+    s.lines = NULL == lines ? Ved.getlines (s._abspath, s._indent, s.st_) : lines;
     s._flags = 0;
 
     s.ptr = Integer_Type[2];
@@ -239,7 +242,6 @@ beg
       s._i = s._len;
 
     s._ii = 0;
-    __vaddbuf__ (s);
   end
 
   def draw_wind ()
@@ -289,7 +291,7 @@ beg
       if (any (bufname == VED_WIND[winds[i]].bufnames))
         return VED_WIND[winds[i]].buffers[bufname];
 
-    return NULL;
+    NULL;
   end
 
   def get_cur_buf ()
@@ -470,6 +472,7 @@ beg
       vedloop = &_vedloop_,
       vedloopcallback = &_vedloopcallback_,
       __NOR__ = __init_fun_norm__ (;;__qualifiers),
+      __VAR__ = __init_var__ (;;__qualifiers),
       opt_show_tilda = 1,
       opt_show_status_line = 1,
       };
