@@ -219,7 +219,7 @@ beg
 
     s._len = length (s.lines) - 1;
 
-    __initrowsbuffvars__ (s);
+    __vinitrowsbuffvars__ (s);
 
     s.ptr[0] = s.rows[0];
     s.ptr[1] = s._indent;
@@ -239,7 +239,7 @@ beg
       s._i = s._len;
 
     s._ii = 0;
-    __addbuf__ (s);
+    __vaddbuf__ (s);
   end
 
   def draw_wind ()
@@ -274,12 +274,22 @@ beg
   % like the test phase to a waterfall model.
 
   def get_buf (name)
-    variable w = self.get_cur_wind ();
+    ifnot (qualifier_exists ("on_all_windows"))
+      {
+      variable w = self.get_cur_wind ();
 
-    ifnot (any (name == w.bufnames))
-      return NULL;
+      ifnot (any (bufname == w.bufnames))
+        return NULL;
 
-    w.buffers[name];
+      return w.buffers[bufname];
+      }
+
+    variable i, winds = assoc_get_keys (VED_WIND);
+    _for i (0, length (winds) - 1)
+      if (any (bufname == VED_WIND[winds[i]].bufnames))
+        return VED_WIND[winds[i]].buffers[bufname];
+
+    return NULL;
   end
 
   def get_cur_buf ()
@@ -358,7 +368,7 @@ beg
       {
       s = w.buffers[w.frame_names[i]];
       s.rows = w.frame_rows[i];
-      __initrowsbuffvars__ (s);
+      __vinitrowsbuffvars__ (s);
 
       s._i = s._ii;
 
@@ -410,7 +420,7 @@ beg
       {
       s = w.buffers[w.frame_names[i]];
       s.rows = w.frame_rows[i];
-      __initrowsbuffvars__ (s);
+      __vinitrowsbuffvars__ (s);
       s._i = s._ii;
       s.clrs[-1] = VED_INFOCLRBG;
       s.ptr[0] = s.rows[0];
