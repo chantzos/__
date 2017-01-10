@@ -689,7 +689,9 @@ private define __builtins__ (a)
 
   a["w"] = @Argvlist_Type;
   a["w"].func = &__write__;
-  a["w"].args = ["--range= int first linenr, last linenr"];
+  a["w"].args = [
+    "--range= int first linenr, last linenr",
+    "--bufname= null bufname"];
 
   a["w!"] = a["w"];
 
@@ -753,6 +755,32 @@ private define filtercommands (s, ar)
     chars[0] = '!';
 
   __filtercommands (s, ar, chars);
+}
+
+public define __parse_argtype (s, arg, type, baselen)
+{
+  ifnot (any (s.argv[0] == ["w", "w!"]))
+    return 0;
+
+  ifnot ("--bufname=" == arg)
+    return;
+
+  variable bufnames = Ved.get_cur_wind ().bufnames;
+
+  variable rl = Rline.init (NULL);
+  Rline.set (rl);
+  Rline.prompt (rl, rl._lin, rl._col);
+
+  () = Rline.commandcmp (rl, bufnames;already_filtered);
+  if (strlen (rl.argv[0]))
+    {
+     s.argv[s._ind] += rl.argv[0];
+     s._col = baselen + strlen (s.argv[s._ind]) + 1;
+     Rline.parse_args (s);
+     return 1;
+     }
+
+  0;
 }
 
 private define filterexargs (s, args, type, desc)
@@ -821,6 +849,7 @@ public define __initrline ()
     osapprec = __get_reference ("I->app_reconnect"),
     childrec = __get_reference ("App->child_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
+    parse_argtype = &__parse_argtype,
     filterargs = &filterexargs,
     filtercommands = &filtercommands);
 }

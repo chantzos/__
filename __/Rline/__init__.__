@@ -310,6 +310,8 @@ class Rline
 
     ifnot (NULL == getcommands)
       rl.argvlist = (@getcommands);
+    else
+      rl.argvlist = Assoc.new (Argvlist_Type, NULL, NULL);
 
     rl._row = rl._prow;
 
@@ -1796,7 +1798,7 @@ class Rline
 
     if ("String" == type)
       {
-      Smg.atrcaddnstr ("arg should be a string with spaces ", 1, MSGROW, 0, s._columns);
+      Smg.atrcaddnstr ("arg should be a string", 1, MSGROW, 0, s._columns);
 
       prompt (NULL, s, s._lin, s._col);
 
@@ -1809,9 +1811,9 @@ class Rline
         parse_args (NULL, s);
         }
 
-       s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
-       restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
-       prompt (NULL, s, s._lin, s._col);
+      s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
+      restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
+      prompt (NULL, s, s._lin, s._col);
 
       return;
       }
@@ -1879,7 +1881,6 @@ class Rline
       return;
 
     __parse_argtype__ (s, arg, type, baselen;;__qualifiers);
-
   end
 
   def argcompletion (s) proc

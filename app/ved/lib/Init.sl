@@ -220,7 +220,7 @@ private define _filter_bufs_ (v)
 
 private define __parse_argtypes__ (s, arg, type, baselen)
 {
-  0; % needs code
+  __parse_argtype; % arguments are already on the stack
 }
 
 private define tabhook (s)
