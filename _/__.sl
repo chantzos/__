@@ -728,8 +728,11 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
       pop ();
     }
   else
-    @eval_buf += __Class_From_Init__ (path_dirname (lclasspath + "/");
+    {
+    variable cpath = path_dirname (lclasspath + "/");
+    @eval_buf += __Class_From_Init__ (&cpath;
       __init__ = path_basename_sans_extname (lfile), return_buf);
+    }
 }
 
 private define parse_import (eval_buf, tokens)

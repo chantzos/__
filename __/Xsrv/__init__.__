@@ -153,6 +153,7 @@ class Xsrv
         }
       }
 
+    % local
     ifnot (NULL == SETXKBMAP_BIN)
       () = system (SETXKBMAP_BIN + " -layout \"us,el\" -option \"grp:alt_space_toggle\"");
 
