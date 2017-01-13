@@ -259,6 +259,9 @@ private define __install_distribution (argv)
   if (NULL == install_mdls)
     myargv = [myargv, "--compile=no"];
 
+  variable handler;
+  signal (SIGINT, SIG_IGN, &handler);
+
   variable p = Proc.init (0, 1, 1);
 
   p.stdout.file = SCRATCH;
@@ -275,6 +278,8 @@ private define __install_distribution (argv)
         "\n");
       () = File.append (SCRATCH, buf);
       }
+
+  signal (SIGINT, handler);
 
   __scratch (NULL;_i = 1000);
 }

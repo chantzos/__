@@ -26,6 +26,8 @@ if (any ("--help" == __argv or  "-h" == __argv))
   exit (0);
   }
 
+public variable INSTALLATION = 1;  % required
+
 private variable vers_str = _slang_version_string;
 private variable vers_int = _slang_version;
 private variable is_enough = 20301 <= vers_int;
@@ -121,6 +123,13 @@ private define at_exit (self)
 }
 
 public variable This = struct {exit = &exit_me, at_exit = &at_exit};
+
+private define __sigint_handler__ (sig)
+{
+  This.exit ("process interrupted by the user", 130);
+}
+
+signal (SIGINT, &__sigint_handler__);
 
 public variable APP_ERR, App;
 
@@ -447,12 +456,23 @@ private define __bytecompile__ (__sl__)
 private define __read___ (this)
 {
   variable __buf__ =
-`private variable CLASSPATH = realpath (
-  (CLASSPATH = path_concat (getcwd (), path_dirname (__FILE__)),
-    CLASSPATH[[-2:]] == "/."
-      ? substr (CLASSPATH, 1, strlen (CLASSPATH) - 2)
-      : CLASSPATH));` + "\n\n" +
-`set_import_module_path (realpath (CLASSPATH + "/../C") + ":" + get_import_module_path);`
+`$0 = realpath ((($0 = path_concat (getcwd (), path_dirname (__FILE__)),
+    $0[[-2:]] == "/."
+      ? substr ($0, 1, strlen ($0) - 2)
+      : $0)) + "/../..");` + "\n\n" +
+`private variable __SRC_CPATHS = [
+  $0 + "/__/__",
+  $0 + "/__/local/__",
+  $0 + "/__/usr/__"];` + "\n\n" +
+`private variable __CPATHS = [
+  $0 + "/std/__",
+  $0 + "/local/__",
+  $0 + "/usr/__"];` + "\n\n" +
+`private variable __LPATHS = [
+  $0 + "/std/___",
+  $0 + "/local/___",
+  $0 + "/usr/___"];` + "\n\n" +
+`set_import_module_path ($0 + "/std/C:" + get_import_module_path);`
    + "\n\n";
 
   __buf__ += readfile (SRC_PROTO_PATH + "/__alfa.sl");
