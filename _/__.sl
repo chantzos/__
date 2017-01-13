@@ -645,9 +645,24 @@ private define parse_require (cname, classpath, funs, eval_buf, tokens)
     from = classpath + "/" + file;
   else
     {
-    from = Env->STD_LIB_PATH + "/" + from + "/" + file;
+    variable lfrom = from;
+    from = __LPATHS[0] + "/" + lfrom + "/" + file;
     if (-1 == access (from + ".slc", F_OK))
-      from = strreplace (from, Env->STD_LIB_PATH, Env->USER_LIB_PATH);
+      {
+      variable i, found = 0;
+      _for i (1, length (__LPATHS) - 1)
+        ifnot (access (__LPATHS[i] + "/" + lfrom + "/" + file + ".slc",
+            F_OK))
+          {
+          found = 1;
+          from = __LPATHS[i] + "/" + lfrom + "/" + file + ".slc";
+          break;
+          }
+
+      ifnot (found)
+        throw ClassError, "Class::__INIT__::" + _function_name +
+          ", cannot locate library, " + file + ", from " + lfrom;
+      }
     }
 
   variable ns = "Global";
@@ -675,7 +690,7 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
   variable
     lcname     = tokens[1],
     lfrom      = lcname,
-    lclasspath = CLASSPATH + "/" + lcname,
+    lclasspath = __CPATHS[0] + "/" + lfrom,
     lfile      = lclasspath + "/__init__.__",
     cont       = 0;
 
@@ -689,7 +704,7 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
         {
         cont = 1;
         lfrom = tokens[3];
-        lclasspath = CLASSPATH + "/" + lfrom;
+        lclasspath = __CPATHS[0] + "/" + lfrom;
         lfile = lclasspath + "/" + lcname + ".__";
         }
 
@@ -702,15 +717,23 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
       else
         lcname = tokens[5];
 
-  if (-1 == access (lfile, F_OK))
-    if (-1 == access ((lfile = strreplace (
-        lfile, CLASSPATH, CLASSPATH + "/../local/__"), lfile), F_OK))
-      if (-1 == access ((lfile = strreplace (
-          lfile, CLASSPATH, CLASSPATH + "/../usr/__"), lfile), F_OK))
-        ifnot ("include!" == tokens[0])
-          throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
-        else
-          return;
+  variable i, found = access (lfile, F_OK) + 1;
+
+  ifnot (found)
+    _for i (1, length (__CPATHS) - 1)
+      ifnot (access ((lfile = __CPATHS[i] + "/" + lfrom + "/" + tokens[1] +
+          ".__", lfile), F_OK))
+        {
+        found = 1;
+        lclasspath = __CPATHS[i] + "/" + lfrom;
+        break;
+        }
+
+  ifnot (found)
+    ifnot ("include!" == tokens[0])
+      throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
+    else
+      return;
 
   if (any (["include", "include!"] == tokens[0]))
     {
@@ -1138,22 +1161,24 @@ private define parse_subclass (
       from = from + "/" + as + ".__";
     else
       {
-      variable lfrom = from;
-      from = Env->STD_CLASS_PATH + "/" + lfrom + "/" + as + ".__";
-      if (-1 == access (from, F_OK|R_OK))
-       if (-1 == access ((from = CLASSPATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-        if (-1 == access ((from = Env->LOCAL_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-         if (-1 == access ((from = CLASSPATH + "/../local/__/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-          if (-1 == access ((from = Env->USER_CLASS_PATH + "/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-           if (-1 == access ((from = CLASSPATH + "/../usr/__/" + lfrom + "/" + as + ".__", from), F_OK|R_OK))
-             throw ClassError, "Class::__INIT__::subclass, cannot locate subclass " + as +
-               " from " + lfrom;
+      variable p, found = 0, lfrom = from;
+      _for p (0, length (__CPATHS) - 1)
+        ifnot (access ((from = __CPATHS[p] + "/" + lfrom + "/" + as +
+            ".__", from), F_OK))
+          {
+          found = 1;
+          break;
+          }
+
+      ifnot (found)
+        throw ClassError, "Class::__INIT__::subclass, cannot locate " +
+          "subclass " + as + ", from " + from;
        }
 
       fp = fopen (from, "r");
       if (NULL == fp)
-        throw ClassError, "Class::__INIT__::subclass, fopen failed for " + as +
-          " from " + from;
+        throw ClassError, "Class::__INIT__::subclass " + as + ", from " +
+          cname + " error:," + errno_string (errno);
 
       if (-1 == fgets (&line, fp))
         throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
@@ -1166,7 +1191,7 @@ private define parse_subclass (
 
   if (-1 == fgets (&line, fp))
     throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
-      " from " + lfrom;
+      " from " + from;
 
   variable methods;
   parse_subclass_init (&methods, tokens, line, fp);
@@ -1377,15 +1402,36 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 private define __Class_From_Init__ (classpath)
 {
   ifnot (path_is_absolute (@classpath))
-    @classpath = CLASSPATH + "/" + @classpath;
+    @classpath = __CPATHS[0] + "/" + @classpath;
 
   variable __init__ = __get_qualifier_as (String_Type, "__init__",
     qualifier ("__init__"), "__init__");
 
-  variable __in__ = @classpath + "/" + __init__ + ".__";
+  variable i, __in__ = @classpath + "/" + __init__ + ".__";
 
   if (-1 == access (__in__, F_OK|R_OK))
-    throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
+    ifnot (-2 == is_defined ("INSTALLATION"))
+      throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
+    else
+      {
+      variable found = 0;
+      _for i (0, length (__SRC_CPATHS) - 1)
+        {
+        @classpath = strreplace (@classpath, strjoin (strtok (
+          @classpath, "/")[[:-2]], "/"), __SRC_CPATHS[i]);
+
+        __in__ = @classpath + "/" + __init__ + ".__";
+
+        ifnot (access (__in__, F_OK))
+          {
+          found = 1;
+          break;
+          }
+        }
+
+       ifnot (found)
+         throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
+       }
 
   variable line, fp = fopen (__in__, "r");
 
@@ -1405,7 +1451,7 @@ private define __Class_From_Init__ (classpath)
     throw ClassError, "Class::__INIT__::class identifier is missing";
 
   variable isclass = "class" == tokens[0];
-  variable super, tmp, tmpnam, i, cname = tokens[1];
+  variable super, tmp, tmpnam, cname = tokens[1];
 
   if (isclass)
     {
@@ -1521,10 +1567,53 @@ private define __Class_From_Init__ (classpath)
 private define __LoadClass__ (cname)
 {
   variable classpath = __get_qualifier_as (String_Type,
-    "from", qualifier ("from"), CLASSPATH + "/" + cname);
+    "from", qualifier ("from"), __CPATHS[0] + "/" + cname);
 
   variable as = __get_qualifier_as (String_Type, "as",
     qualifier ("as"), cname);
+
+  if (NULL == classpath)
+    {
+    variable i, found_classpath = 0, found = 0;
+    _for i (0, length (__CPATHS) - 1)
+      ifnot (access ((classpath = __CPATHS[i] + "/" + cname, classpath) +
+          "/" + as + ".slc", F_OK))
+        {
+        found = 1;
+        break;
+        }
+      else
+        if (0 == access (__CPATHS[i] + "/" + cname + "/" + as + ".__", F_OK) ||
+            0 == access (__CPATHS[i] + "/" + cname + "/__init__.__", F_OK))
+          {
+          found_classpath = 1;
+          classpath = __CPATHS[i] + "/" + cname;
+          break;
+          }
+
+    ifnot (found)
+      ifnot (found_classpath)
+        {
+        _for i (0, length (__SRC_CPATHS) - 1)
+          if (0 == access (__SRC_CPATHS[i] + "/" + cname + "/" + as + ".__", F_OK) ||
+              0 == access (__SRC_CPATHS[i] + "/" + cname + "/__init__.__", F_OK))
+            {
+            found = 1;
+            break;
+            }
+
+        ifnot (found)
+          throw ClassError, sprintf ("%s (), classname: %s, unable to locate it, even after looking in the sources paths",
+              _function_name, cname);
+
+        ifnot (-2 == is_defined ("INSTALLATION"))
+          IO.tostderr (sprintf ("WARNING: %s (), classname: %s, unable to locate it",
+              _function_name, cname), "\nlooking (falling back) to",
+              __SRC_CPATHS[i], "\nyou might want to re-install");
+
+        classpath = __SRC_CPATHS[i] + "/" + cname;
+        }
+    }
 
   variable cpath = classpath + "/" + as + ".slc";
 

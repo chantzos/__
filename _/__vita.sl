@@ -242,30 +242,3 @@ private define List_to_string (self, l)
 
 public variable List = struct {__name, to_string = &List_to_string};
 
-__use_namespace ("Env");
-
-static define STD_LIB_PATH ()
-{
-  realpath (CLASSPATH + "/../___");
-}
-
-static define USER_LIB_PATH ()
-{
-  realpath (CLASSPATH + "/../usr/___");
-}
-
-static define STD_CLASS_PATH ()
-{
-  realpath (CLASSPATH);
-}
-
-static define USER_CLASS_PATH ()
-{
-  realpath (CLASSPATH + "/../usr/__");
-}
-
-static define LOCAL_CLASS_PATH ()
-{
-  realpath (CLASSPATH + "/../local/__");
-}
-

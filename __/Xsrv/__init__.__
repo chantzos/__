@@ -8,8 +8,8 @@ class Xsrv
   let! RDFD = NULL;
   let XAUTH_BIN = Sys.which ("xauth");
   let URXVTD_BIN = Sys.which ("urxvtd");
-  let X_TERM_BIN = NULL == URXVTD_BIN
-    ? Sys.which ("xterm") : Sys.which ("urxvtc");
+  let X_TERM_BIN = (NULL == URXVTD_BIN
+    ? Sys.which ("xterm") : Sys.which ("urxvtc"));
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
   let ERR = 0xc8;
 

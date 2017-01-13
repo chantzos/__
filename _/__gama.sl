@@ -1,5 +1,3 @@
-$0 = realpath (path_dirname (__FILE__) + "/../..");
-
 public variable Dir, File;
 eval ("static define OS_PATH ();", "Env");
 
