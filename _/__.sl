@@ -688,9 +688,11 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
     throw ClassError, "Class::__INIT__::" + tokens[0] + " statement needs an argument";
 
   variable
+    is_install = qualifier ("install", -2 == is_defined ("INSTALLATION")),
+    __PATHS    = qualifier ("__PATHS", {__CPATHS, __SRC_CPATHS}[is_install]),
     lcname     = tokens[1],
     lfrom      = lcname,
-    lclasspath = __CPATHS[0] + "/" + lfrom,
+    lclasspath = __PATHS[0] + "/" + lfrom,
     lfile      = lclasspath + "/__init__.__",
     cont       = 0;
 
@@ -704,7 +706,7 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
         {
         cont = 1;
         lfrom = tokens[3];
-        lclasspath = __CPATHS[0] + "/" + lfrom;
+        lclasspath = __PATHS[0] + "/" + lfrom;
         lfile = lclasspath + "/" + lcname + ".__";
         }
 
@@ -720,19 +722,19 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
   variable i, found = access (lfile, F_OK) + 1;
 
   ifnot (found)
-    _for i (1, length (__CPATHS) - 1)
-      ifnot (access ((lfile = __CPATHS[i] + "/" + lfrom + "/" + tokens[1] +
+    _for i (1, length (__PATHS) - 1)
+      ifnot (access ((lfile = __PATHS[i] + "/" + lfrom + "/" + tokens[1] +
           ".__", lfile), F_OK))
         {
         found = 1;
-        lclasspath = __CPATHS[i] + "/" + lfrom;
+        lclasspath = __PATHS[i] + "/" + lfrom;
         break;
         }
 
   ifnot (found)
     {
-    if (("include!" == tokens[0]) == 0 ==
-      (-2 == is_defined ("INSTALLATION")))
+    ifnot ("include!" == tokens[0])
+      if (is_install)
         throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
 
     _for i (0, length (__SRC_CPATHS) - 1)
@@ -750,6 +752,9 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
         ": cannot locate class " + lcname + ", from " + lfrom);
       return;
       }
+    else
+      IO.tostderr ("WARNING:", "Class::__INIT__::" + _function_name +
+        ": found class " + lcname + ", from " + lfrom + ", but on the sources path");
     }
 
   if (any (["include", "include!"] == tokens[0]))
@@ -1179,8 +1184,11 @@ private define parse_subclass (
     else
       {
       variable p, found = 0, lfrom = from;
-      _for p (0, length (__CPATHS) - 1)
-        ifnot (access ((from = __CPATHS[p] + "/" + lfrom + "/" + as +
+      variable is_install = qualifier ("install", -2 == is_defined ("INSTALLATION"));
+      variable __PATHS    = qualifier ("__PATHS", {__CPATHS, __SRC_CPATHS}[is_install]);
+
+      _for p (0, length (__PATHS) - 1)
+        ifnot (access ((from = __PATHS[p] + "/" + lfrom + "/" + as +
             ".__", from), F_OK))
           {
           found = 1;
@@ -1189,9 +1197,9 @@ private define parse_subclass (
 
       ifnot (found)
         {
-        ifnot (-2 == is_defined ("INSTALLATION"))
+        if (is_install)
           throw ClassError, "Class::__INIT__::subclass, cannot locate " +
-            "subclass " + as + ", from " + from;
+            "subclass " + as + ", from " + from + " during installation";
 
         _for p (0, length (__SRC_CPATHS) - 1)
           ifnot (access ((from = __SRC_CPATHS[p] + "/" + lfrom + "/" + as +
@@ -1433,8 +1441,11 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
 private define __Class_From_Init__ (classpath)
 {
+  variable is_install = qualifier ("install", -2 == is_defined ("INSTALLATION"));
+  variable __PATHS    = qualifier ("__PATHS", {__CPATHS, __SRC_CPATHS}[is_install]);
+
   ifnot (path_is_absolute (@classpath))
-    @classpath = __CPATHS[0] + "/" + @classpath;
+    @classpath = __PATHS[0] + "/" + @classpath;
 
   variable __init__ = __get_qualifier_as (String_Type, "__init__",
     qualifier ("__init__"), "__init__");
@@ -1442,7 +1453,7 @@ private define __Class_From_Init__ (classpath)
   variable i, __in__ = @classpath + "/" + __init__ + ".__";
 
   if (-1 == access (__in__, F_OK|R_OK))
-    ifnot (-2 == is_defined ("INSTALLATION"))
+    ifnot (is_install)
       throw ClassError, "Class::__INIT__::" + __in__ + "::" + errno_string (errno);
     else
       {
@@ -1598,59 +1609,59 @@ private define __Class_From_Init__ (classpath)
 
 private define __LoadClass__ (cname)
 {
-  variable classpath = __get_qualifier_as (String_Type,
-    "from", qualifier ("from"), __CPATHS[0] + "/" + cname);
-
-  variable as = __get_qualifier_as (String_Type, "as",
-    qualifier ("as"), cname);
+  variable is_install = qualifier ("install", -2 == is_defined ("INSTALLATION"));
+  variable __PATHS    = {__CPATHS, __SRC_CPATHS}[is_install];
+  variable classpath  = qualifier ("from", __PATHS[0] + "/" + cname);
+  variable as         = qualifier ("as", cname);
 
   if (NULL == classpath)
     {
     variable i, found_classpath = 0, found = 0;
-    _for i (0, length (__CPATHS) - 1)
-      ifnot (access ((classpath = __CPATHS[i] + "/" + cname, classpath) +
+    _for i (0, length (__PATHS) - 1)
+      ifnot (access ((classpath = __PATHS[i] + "/" + cname, classpath) +
           "/" + as + ".slc", F_OK))
         {
         found = 1;
         break;
         }
       else
-        if (0 == access (__CPATHS[i] + "/" + cname + "/" + as + ".__", F_OK) ||
-            0 == access (__CPATHS[i] + "/" + cname + "/__init__.__", F_OK))
+        if (0 == access (__PATHS[i] + "/" + cname + "/" + as + ".__", F_OK) ||
+            0 == access (__PATHS[i] + "/" + cname + "/__init__.__", F_OK))
           {
           found_classpath = 1;
-          classpath = __CPATHS[i] + "/" + cname;
+          classpath = __PATHS[i] + "/" + cname;
           break;
           }
 
     ifnot (found)
       ifnot (found_classpath)
-        {
-        _for i (0, length (__SRC_CPATHS) - 1)
-          if (0 == access (__SRC_CPATHS[i] + "/" + cname + "/" + as + ".__", F_OK) ||
-              0 == access (__SRC_CPATHS[i] + "/" + cname + "/__init__.__", F_OK))
-            {
-            found = 1;
-            break;
-            }
+        ifnot (is_install)
+          {
+          _for i (0, length (__SRC_CPATHS) - 1)
+            if (0 == access (__SRC_CPATHS[i] + "/" + cname + "/" + as + ".__", F_OK) ||
+                0 == access (__SRC_CPATHS[i] + "/" + cname + "/__init__.__", F_OK))
+              {
+              found = 1;
+              break;
+              }
 
-        ifnot (found)
-          throw ClassError, sprintf ("%s (), classname: %s, unable to locate it, even after looking in the sources paths",
-              _function_name, cname);
+          ifnot (found)
+            throw ClassError, sprintf ("%s (), classname: %s, unable to locate it, even after looking in the sources paths",
+                _function_name, cname);
 
-        ifnot (-2 == is_defined ("INSTALLATION"))
           IO.tostderr (sprintf ("WARNING: %s (), classname: %s, unable to locate it",
               _function_name, cname), "\nlooking (falling back) to",
               __SRC_CPATHS[i], "\nyou might want to re-install");
 
-        classpath = __SRC_CPATHS[i] + "/" + cname;
-        }
+          classpath = __SRC_CPATHS[i] + "/" + cname;
+          }
     }
 
   variable cpath = classpath + "/" + as + ".slc";
 
   if (-1 == access (cpath, F_OK|R_OK) || qualifier_exists ("force"))
-    __Class_From_Init__ (&classpath;;__qualifiers);
+    __Class_From_Init__ (&classpath;; struct {@__qualifiers,
+      install = is_install, __PATHS = __PATHS});
 
   ifnot (qualifier_exists ("dont_eval"))
     () = evalfile (classpath + "/" + as, cname);
