@@ -157,20 +157,23 @@ beg
     self.get_cur_wind ().rline;
   end
 
-  def setbuf (key)
+  def setbuf (bufname)
     variable w = self.get_cur_wind ();
 
-    ifnot (any (key == w.bufnames))
+    ifnot (any (bufname == w.bufnames))
+      {
+      IO.tostderr ("possible error: " + bufname + "\n", "no such bufname");
       return;
+      }
 
-    variable s = w.buffers[key];
+    variable s = w.buffers[bufname];
 
     variable frame = qualifier ("frame", w.cur_frame);
 
     if (frame > length (w.frame_names) - 1)
       return;
 
-    w.frame_names[frame] = key;
+    w.frame_names[frame] = bufname;
 
     if (s._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (s._dir);

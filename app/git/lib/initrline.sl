@@ -248,6 +248,8 @@ private define __commitall__ (argv)
       redir_to_file = DIFF, flags = ">>");
 
     __viewfile  (DIFF_VED, "diff", [1, 0], 0);
+                                     % workaround
+    Ved.setbuf (This.is.std.out.fn); % untill proper code will be written
 
     variable std = __write_std__;
 
@@ -325,6 +327,8 @@ private define __commit__ (argv)
       redir_to_file = DIFF, flags = ">>");
 
     __viewfile  (DIFF_VED, "diff", [1, 0], 0);
+                                     % workaround
+    Ved.setbuf (This.is.std.out.fn); % untill proper code will be written
 
     variable std = __write_std__;
 
