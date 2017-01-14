@@ -731,8 +731,6 @@ private define __builtins__ (a)
     a["__project_new"].func = f;
     a["__project_new"].args = ["--from-file= filename read from filename"];
     }
-
-  a;
 }
 
 static define __filtercommands (s, ar, chars)

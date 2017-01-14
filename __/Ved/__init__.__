@@ -493,7 +493,7 @@ class Ved
         if ('!' == Ved.get_cur_rline ().argv[0][0] &&
            (@__get_reference ("SCRATCH")) == s._abspath)
           {
-          (@__get_reference ("draw")) (s);
+          (@__get_reference ("__draw_buf")) (s);
           continue;
           }
 
