@@ -990,7 +990,7 @@ private define __main__ ()
 
   ifnot (string_match ("$PATH"$, BIN_PATH))
     warnings = [warnings, BIN_PATH, "is not a part of $PATH\n" +
-      BIN_PATH + "should be added to the $PATH environment variable\n"];
+      BIN_PATH + " should be added to the $PATH environment variable\n"];
 
   if (NULL == Sys.which ("xclip"))
     warnings = [warnings, "xclip is not installed, xclipboard won't work\n"];

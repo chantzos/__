@@ -730,10 +730,27 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
         }
 
   ifnot (found)
-    ifnot ("include!" == tokens[0])
-      throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
-    else
+    {
+    if (("include!" == tokens[0]) == 0 ==
+      (-2 == is_defined ("INSTALLATION")))
+        throw ClassError, "Class::__INIT__::cannot locate class " + lcname;
+
+    _for i (0, length (__SRC_CPATHS) - 1)
+      ifnot (access ((lfile = __SRC_CPATHS[i] + "/" + lfrom + "/" +
+          tokens[1] + ".__", lfile), F_OK))
+        {
+        found = 1;
+        lclasspath = __SRC_CPATHS[i] + "/" + lfrom;
+        break;
+        }
+
+    ifnot (found)
+      {
+      IO.tostderr ("WARNING:", "Class::__INIT__::" + _function_name +
+        ": cannot locate class " + lcname + ", from " + lfrom);
       return;
+      }
+    }
 
   if (any (["include", "include!"] == tokens[0]))
     {
@@ -1171,23 +1188,38 @@ private define parse_subclass (
           }
 
       ifnot (found)
-        throw ClassError, "Class::__INIT__::subclass, cannot locate " +
-          "subclass " + as + ", from " + from;
-       }
+        {
+        ifnot (-2 == is_defined ("INSTALLATION"))
+          throw ClassError, "Class::__INIT__::subclass, cannot locate " +
+            "subclass " + as + ", from " + from;
 
-      fp = fopen (from, "r");
-      if (NULL == fp)
-        throw ClassError, "Class::__INIT__::subclass " + as + ", from " +
-          cname + " error:," + errno_string (errno);
+        _for p (0, length (__SRC_CPATHS) - 1)
+          ifnot (access ((from = __SRC_CPATHS[p] + "/" + lfrom + "/" + as +
+            ".__", from), F_OK))
+            {
+            found = 1;
+            break;
+            }
 
-      if (-1 == fgets (&line, fp))
-        throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
-          " from " + from;
-
-      ifnot ("subclass " + as == strtrim_end (line))
-        throw ClassError, "Class::__INIT__::subclass, definitions doesn't match, expected: " +
-          "subclass " + as;
+        ifnot (found)
+          throw ClassError, "Class::__INIT__::subclass, cannot locate " +
+            "subclass " + as + ", from " + from;
+        }
       }
+
+    fp = fopen (from, "r");
+    if (NULL == fp)
+      throw ClassError, "Class::__INIT__::subclass " + as + ", from " +
+        cname + " error:," + errno_string (errno);
+
+    if (-1 == fgets (&line, fp))
+      throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
+        " from " + from;
+
+    ifnot ("subclass " + as == strtrim_end (line))
+      throw ClassError, "Class::__INIT__::subclass, definitions doesn't match, expected: " +
+        "subclass " + as;
+    }
 
   if (-1 == fgets (&line, fp))
     throw ClassError, "Class::__INIT__::subclass, awaiting block for " + as +
