@@ -19,7 +19,7 @@ static define __getclass__ (cname, init)
     if (init)
       __initclass__ (cname);
     else
-      throw ClassError, sprintf ("__getclass::%S class is not defined", cname);
+      throw ClassError, sprintf ("__getclass__::%S class is not defined", cname);
 
   __CLASS__[cname];
 }
@@ -1635,19 +1635,19 @@ __setfun__ ("Class", "vset", &__vset__, 3, 1);
 __setfun__ ("Class", "vget", &__vget__, 2, 1);
 __setfun__ ("Class", "setself", &__setself__, 2, 1);
 
-private define __load__ (self, cname)
+private define _load_ (self, cname)
 {
   __->__ (cname, "Class::LoadClass::__LoadClass__";;__qualifiers);
 }
 
-private define __subclass__ (self, sub, super)
+private define _subclass_ (self, sub, super)
 {
   __->__ (sub, "Class::LoadClass::__subclass";
     __init__ = sub, super = super,
     from = __get_qualifier_as  (String_Type, "from", qualifier ("from"), super));
 }
 
-private define __getclass (self, cname)
+private define _getclass_ (self, cname)
 {
   variable c = NULL;
 
@@ -1660,11 +1660,18 @@ private define __getclass (self, cname)
   c;
 }
 
-private define __get_funcref (self, cname, fun)
+private define _get_funcref_ (self, cname, fun)
 {
   try
     {
-    variable f = qualifier ("class", __getclass__ (cname, 0)) ["__FUN__"];
+    variable f = __get_qualifier_as (Assoc_Type, "class", qualifier ("class"),
+        __getclass__ (cname, 0));
+
+    ifnot (assoc_key_exists (f, "__FUN__"))
+      return NULL;
+
+    f = f["__FUN__"];
+
     assoc_key_exists (f, fun) ? f[fun].funcref : NULL;
     }
   catch ClassError:
@@ -1673,10 +1680,10 @@ private define __get_funcref (self, cname, fun)
 
 public variable Class = struct
   {
-  load = &__load__,
-  subclass = &__subclass__,
-  get = &__getclass,
-  __FUNCREF__ = &__get_funcref,
+  load = &_load_,
+  subclass = &_subclass_,
+  get = &_getclass_,
+  __FUNCREF__ = &_get_funcref_,
   let = &vlet,
   fun = &addFun
   };
