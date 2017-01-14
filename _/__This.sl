@@ -58,9 +58,10 @@ static define __INIT__ (role)
       },
     has = struct
       {
-      frames = 1,
-      max_frames = 2,
-      sigint = 1,
+      frames      = 1,
+      max_frames  = 2,
+      sigint      = 1,
+      new_windows = 1,
       screenactive,
       argv = qualifier ("setargv")
         ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)

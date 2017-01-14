@@ -848,7 +848,8 @@ class Ved
   end
 
   def next_wind (s) public proc
-    wind_change (".");
+    if (This.has.new_windows)
+      wind_change (".");
   end
 
   def on_wind_new (w) public proc
@@ -1817,7 +1818,8 @@ class Ved
   end
 
   beg
-    VED_PAGER[string (Input->F3)]      = &next_wind;
+    VED_PAGER[string (Input->rmap.windnext[0])] = &next_wind;
+    VED_PAGER[string (Input->F12)]              = &paste_xsel;
     VED_PAGER[string (',')]            = &handle_comma;
     VED_PAGER[string ('"')]            = &__register__;
     VED_PAGER[string (Input->CTRL_a)]  = &_incr_nr_;
@@ -1881,7 +1883,6 @@ class Ved
     VED_PAGER[string ('X')]            = &__del_chr__;
     VED_PAGER[string ('>')]            = &__indent_out__;
     VED_PAGER[string ('<')]            = &__indent_in__;
-    VED_PAGER[string (Input->F12)]     = &paste_xsel;
     VED_PAGER[string (Input->rmap.delete[0])]    = &__del_chr__;
     VED_PAGER[string (Input->rmap.backspace[0])] = &__del_trail_ws__;
     VED_PAGER[string (Input->rmap.backspace[1])] = &__del_trail_ws__;
