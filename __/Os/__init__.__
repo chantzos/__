@@ -94,4 +94,14 @@ class Os
   end
 
   fun login ()
+
+  subclass Pid
+    __init__
+      exists
+    end
+
+    def exists (pid)
+      0 == (kill (pid, 0)) || errno == EPERM;
+    end
+  end
 end
