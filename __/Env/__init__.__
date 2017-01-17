@@ -22,6 +22,7 @@ class Env
   let BIN_PATH         = ROOT_PATH + "/bin";
   let USER_PATH        = ROOT_PATH + "/usr";
   let LOCAL_PATH       = ROOT_PATH + "/local";
+  let PROC_FS          = TMP_PATH  + "/proc";
 
   let STD_APP_PATH     = STD_PATH + "/app";
   let STD_COM_PATH     = STD_PATH + "/com";
@@ -58,6 +59,7 @@ class Env
   let SRC_LOCAL_APP_PATH   = SRC_LOCAL_PATH + "/app";
   let SRC_LOCAL_CLASS_PATH = SRC_LOCAL_PATH + "/__";
   let SRC_LOCAL_LIB_PATH   = SRC_LOCAL_PATH + "/___";
+
 
   def defenv ()
     variable lenv = [

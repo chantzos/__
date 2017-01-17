@@ -290,8 +290,9 @@ subclass Srv
     ifnot (NULL == App->APPSINFO[app].set)
       {
       if (any (app == CONNECTED_APPS))
-        if (($1 = app, Anon->Fun (`
-            return any (0 == strncmp (App->APPSINFO[__tmp ($1)].set, "unique:1", 8));`)))
+        if (Anon->Fun (`
+            return any (0 == strncmp (App->APPSINFO[app].set,
+              "unique:1", 8));`;__args = {app}, __argnames = ["app"]))
           {
           APP_ERR = 1;
           return;
@@ -307,8 +308,16 @@ subclass Srv
       return;
       }
 
-    variable clpid = App.Run.as.client ([app], SRV_FIFO, clfifo;;
-      struct {@__qualifiers, bg});
+    variable argv = [app, NULL, NULL];
+
+    if (This.request.profile)
+      argv[1] = "--profile";
+
+    if (This.request.debug)
+      argv[2] = "--debug";
+
+    variable clpid = App.Run.as.client (argv[wherenot (_isnull (argv))],
+      SRV_FIFO, clfifo;;struct {@__qualifiers, bg});
 
     if (NULL == clpid)
       {
