@@ -265,6 +265,8 @@ private define __install_distribution (argv)
   variable p = Proc.init (0, 1, 1);
 
   p.stdout.file = SCRATCH;
+  % redirect to file, because fd can easily overflow with a large buffer
+  p.stderr.file = This.is.std.err.fn;
 
   variable status = p.execve (myargv, Env.defenv (), NULL);
 
@@ -272,16 +274,11 @@ private define __install_distribution (argv)
       status.exit_status, NULL, NULL);
 
   if (status.exit_status)
-    ifnot (NULL == p.stderr.out)
-      {
-      variable buf = "ERROR:\n" +  strjoin (strtok (p.stderr.out, "\n"),
-        "\n");
-      () = File.append (SCRATCH, buf);
-      }
+   () = File.append (SCRATCH, File.read (This.is.std.err.fn));
 
   signal (SIGINT, handler);
 
-  __scratch (NULL;_i = 1000);
+  __scratch (NULL;_i = 10000);
 }
 
 private define __myrepo (argv)
