@@ -162,14 +162,8 @@ private define ioproc ()
     {
     ioargs = ioargs[0];
 
-    try
-      {
-      () = array_map (Integer_Type, &fprintf, iofp, "%s%S%S%s", ioclr, ioargs,
-        qualifier_exists ("n") ? "" : "\n", ESCCOLOR);
-      }
-    catch AnyError:
-      This.exit (sprintf ("%sIO_WriteError:to%S, %s%s", ioclr, iofp,
-        errno_string (errno), ESCCOLOR), 1);
+    () = array_map (Integer_Type, &fprintf, iofp, "%s%S%S%s", ioclr, ioargs,
+      qualifier_exists ("n") ? "" : "\n", ESCCOLOR);
 
     return;
     }
@@ -180,9 +174,8 @@ private define ioproc ()
 
   fmt += ESCCOLOR + "%S";
 
-  if (-1 == fprintf (iofp, fmt, ioclr, __push_list (ioargs),
-       qualifier_exists ("n") ? "" : "\n"))
-    This.exit (sprintf ("IO_WriteError:to%S, %s", iofp, errno_string (errno)), 1);
+  () = fprintf (stdout, fmt, ioclr, __push_list (ioargs),
+       qualifier_exists ("n") ? "" : "\n");
 }
 
 private define __tostdout__ ()
@@ -423,6 +416,7 @@ private define __eval__ (__buf__)
   catch AnyError:
     {
     __buf__ = strchop (__buf__, '\n', 0);
+
     io.tostderr (strjoin (array_map (String_Type, &sprintf, "%d| %s",
       [1:length (__buf__)], __buf__), "\n"));
 
