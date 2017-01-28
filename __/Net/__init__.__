@@ -196,9 +196,10 @@ update_config=1
         return -1;
 
       if (SERVER_PID)
-%        ifnot (qualifier_exists ("force"))  # for sys check_pid ()
-%          return 0;
-        return 0;
+        if (Os.Pid.exists (SERVER_PID))
+          return 0;
+        else
+          SERVER_PID = NULL;
 
       if (NULL == SERVER_CONF)
         self.err ("you have to setup first a conf file";;__return__ (-1));
@@ -218,7 +219,7 @@ update_config=1
         ifnot (passwd[-1] == '\n')
           passwd += "\n";
 
-        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
         }
 
       variable isstdout = qualifier ("stdout");
@@ -235,6 +236,8 @@ update_config=1
         p.stdin.in = passwd;
 
       SERVER_PID = p.execv (argv, 1);
+      ifnot (Os.Pid.exists (SERVER_PID))
+        self.err ("error while starting wpa_supplicant";;__return__ (-1));
       SERVER_PID;
     end
 
@@ -361,7 +364,7 @@ update_config=1
         set_struct_fields (netw[tok[4]], Array.push (tok[[:-2]]));
         }
 
-       netw;
+      netw;
     end
 
     def parse_iw_scan (scan)
