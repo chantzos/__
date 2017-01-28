@@ -274,7 +274,7 @@ private define __install_distribution (argv)
       status.exit_status, NULL, NULL);
 
   if (status.exit_status)
-   () = File.append (SCRATCH, File.read (This.is.std.err.fn));
+    () = File.append (SCRATCH, File.read (This.is.std.err.fn));
 
   signal (SIGINT, handler);
 

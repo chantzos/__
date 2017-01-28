@@ -97,7 +97,14 @@ private define file_callback (file, st)
   ifnot (stat_is ("reg", st.st_mode))
     return 1;
 
-  if (access (file, R_OK))
+  if (-1 == access (file, R_OK))
+    return 1;
+
+  if (any ([".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar", ".tiff", ".png"]
+     == path_extname (file)))
+    return 1;
+
+  if (1 == File.is_elf (file))
     return 1;
 
   ifnot (HIDDENFILES)
@@ -129,6 +136,23 @@ private define grep (file, depth)
     IO.tostderr (sprintf ("%s: %s", file, errno_string (errno)));
     return 1;
     }
+
+  variable st = stat_file (file);
+  if (NULL == st)
+    return 1;
+
+  ifnot (stat_is ("reg", st.st_mode))
+    return 1;
+
+  if (-1 == access (file, R_OK))
+    return 1;
+
+  if (any ([".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar", ".tiff", ".png"]
+     == path_extname (file)))
+    return 1;
+
+  if (1 == File.is_elf (file))
+    return 1;
 
   exec (file);
 }

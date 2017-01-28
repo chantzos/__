@@ -288,16 +288,12 @@ subclass Srv
 
   def connect_to_app (app)
     ifnot (NULL == App->APPSINFO[app].set)
-      {
       if (any (app == CONNECTED_APPS))
-        if (Anon->Fun (`
-            return any (0 == strncmp (App->APPSINFO[app].set,
-              "unique:1", 8));`;__args = {app}, __argnames = ["app"]))
+        if (any (0 == strncmp (App->APPSINFO[app].set, "unique:1", 8)))
           {
           APP_ERR = 1;
           return;
           }
-      }
 
     variable clfifo = This.is.my.tmpdir + "/__" + app + "_client_" +
       string (_time)[[5:]] + ".fifo";
@@ -326,9 +322,6 @@ subclass Srv
       return;
       }
 
-    SRV_FIFO_FD = open (SRV_FIFO, O_RDONLY);
-    variable clfifo_fd = open (clfifo, O_WRONLY);
-
     CONNECTED_APPS = [CONNECTED_APPS, app];
     CONNECTED_PIDS = [CONNECTED_PIDS, clpid];
 
@@ -336,10 +329,12 @@ subclass Srv
 
     variable s = App->APPS[app][string (clpid)];
     s.fifo  = clfifo;
-    s.fd    = clfifo_fd;
     s.pid   = clpid;
     s.state = Api->CONNECTED;
     s.name  = app;
+
+    SRV_FIFO_FD = open (SRV_FIFO, O_RDONLY);
+    s.fd        = open (clfifo, O_WRONLY);
 
     PREV_APP = CUR_APP;
     CUR_APP = app + "::" + string (s.pid);

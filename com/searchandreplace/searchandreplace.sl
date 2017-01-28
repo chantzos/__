@@ -152,6 +152,15 @@ private define sanitycheck (file, st)
     return -1;
     }
 
+  if (any ([".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar", ".tiff",
+    ".png"] ==
+      path_extname (file)))
+    {
+    IO.tostderr (sprintf
+      ("cannot operate on this file `%s': Operation not permitted", file));
+     return -1;
+    }
+
   if (1 == File.is_elf (file))
     {
     IO.tostderr (sprintf
