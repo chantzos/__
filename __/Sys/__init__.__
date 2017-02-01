@@ -94,6 +94,109 @@ class Sys
     pw.pw_name;
   end
 
+  subclass Acpi
+    __init__
+      brightness
+      tomemory
+    end
+
+    var BRIGHT_INIT_DONE = 0;
+    var BACKLIGHT_DIR = NULL;
+    var MAX_BRIGHTNESS = NULL;
+
+    var POWER_DIR = NULL;
+    var MEM_INIT_DONE = 0;
+
+    def tomemory ()
+      ifnot ("Linux" == Sys->OS)
+        return;
+
+      ifnot (MEM_INIT_DONE)
+        {
+        ifnot (access ("/sys/power", F_OK))
+          POWER_DIR = "/sys/power";
+
+        MEM_INIT_DONE = 1;
+        }
+
+      if (NULL == POWER_DIR)
+        return;
+
+      variable passwd = NULL;
+
+      if (getuid ())
+        passwd = qualifier ("passwd");
+
+      variable com = (NULL == passwd ? "" : "printf \"" + passwd +
+         "\" | " + Sys->SUDO_BIN + " -S -E -p \"\" ") +
+         "sh -c \"printf \"mem\" >" + POWER_DIR + "/state\"";
+
+      () = system (com);
+    end
+
+    def backlight_dir_init () proc
+      BRIGHT_INIT_DONE = 1;
+
+      ifnot ("Linux" == Sys->OS)
+        return;
+
+      variable dir = "/sys/class/backlight";
+      variable ar  = listdir (dir);
+      if (NULL == ar || 0 == length (ar))
+        return;
+
+      if (1 == length (ar))
+        BACKLIGHT_DIR = dir + "/" + ar[0];
+
+      if (any ("acpi_video0" == ar))
+        BACKLIGHT_DIR = dir + "/acpi_video0";
+      else
+        BACKLIGHT_DIR = dir + "/" + ar[0];
+    end
+
+    def brightness (v)
+      ifnot (BRIGHT_INIT_DONE)
+        backlight_dir_init ();
+
+      if (NULL == BACKLIGHT_DIR)
+        return;
+
+      if (NULL == MAX_BRIGHTNESS)
+        {
+        variable max_br = File.read (BACKLIGHT_DIR + "/max_brightness";
+          unhandled, return_on_err = NULL);
+
+        if (NULL == max_br)
+          {
+          MAX_BRIGHTNESS = -1;
+          return;
+          }
+
+        MAX_BRIGHTNESS = atoi (max_br);
+        }
+
+      if (-1 == MAX_BRIGHTNESS)
+        return;
+
+      v = (MAX_BRIGHTNESS * v) / 100;
+
+      variable passwd = NULL;
+
+      if (getuid ())
+        if (NULL == (passwd = qualifier ("passwd"), passwd))
+          return;
+        else
+          passwd = strtrim_end (passwd) + "\n";
+
+      variable com = (NULL == passwd ? "" : "printf \"" + passwd +
+         "\" | " + Sys->SUDO_BIN + " -S -E -p \"\" ") +
+         "sh -c \"printf \"" + string (v) + "\" >" + BACKLIGHT_DIR +
+         "/brightness\"";
+
+      () = system (com);
+    end
+  end
+
   fun mode_conversion (mode)
   fun getpwuidgid (user)
 end
