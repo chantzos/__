@@ -1,5 +1,6 @@
-public variable Dir, File;
+public variable Dir, File, Proc;
 eval ("static define OS_PATH ();", "Env");
+eval ("static define SUDO_BIN ();", "Sys");
 
 Class.load ("Load");
 Class.load ("Exc");
