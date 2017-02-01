@@ -427,6 +427,15 @@ private define __classnew__ (cname, super, classpath, isself, methods)
 
 static define err_handler (e, s)
 {
+  if (qualifier_exists ("unhandled"))
+    {
+    variable retval = qualifier_exists ("return_on_err");
+    ifnot (retval)
+      return;
+
+    return qualifier ("return_on_err");
+    }
+
   ifnot (qualifier_exists ("dont_print_err"))
     {
     IO.tostderr (Struct.to_string (s), "\nArgs: ",
