@@ -918,7 +918,7 @@ private define parse_preproc (
 
   try
     {
-    cond = Anon->Fun (cond + ";";;__qualifiers);
+    cond = __Fexpr (cond + ";").__ (;;__qualifiers);
     }
   catch AnyError:
     throw ClassError, "parse_preproc::error while evaluating condition",

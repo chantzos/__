@@ -30,13 +30,13 @@ This.is.at.session = getenv ("SESSION");
 if (NULL == This.is.child)
   This.is.also = [This.is.also, "PARENT"];
 
-This.is.me = Anon->Fun (`
+This.is.me = __Fexpr (`
   if (NULL == This.is.child)
     NULL == This.is.at.session ? "MASTER" : "PARENT";
   else
-    "CHILD";`);
+    "CHILD";`).__ ();
 
-This.request.X = Anon->Fun (`
+This.request.X = __Fexpr (`
   variable i = where ("--no-x" == This.has.argv);
   if (length (i))
     {
@@ -47,7 +47,7 @@ This.request.X = Anon->Fun (`
     ifnot (access (Env->STD_C_PATH + "/xsrv-module.so", F_OK))
       1;
     else
-      0;`);
+      0;`).__ ();
 
 Load.module ("socket");
 
@@ -93,7 +93,7 @@ This.is.my.histfile  = Env->USER_DATA_PATH + "/.__" + Env->USER +
 This.is.my.genconf = Env->USER_DATA_PATH + "/Generic/conf";
 This.is.my.conf    = This.is.my.datadir  + "/config/conf";
 
-Anon->Fun (`
+__Fexpr (`
   variable ar = String_Type[0];
   if (0 == access (This.is.my.genconf, F_OK|R_OK) &&
       0 == Sys.checkperm (stat_file (This.is.my.genconf).st_mode,
@@ -112,7 +112,7 @@ Anon->Fun (`
     ifnot (2 == length (tok))
       continue;
     This.is.my.settings[tok[0]] = tok[1];
-    }`);
+    }`).__ ();
 
 This.is.std.out.type = "ashell";
 

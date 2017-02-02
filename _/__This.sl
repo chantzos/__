@@ -64,7 +64,7 @@ static define __INIT__ (role)
       new_windows = 1,
       screenactive,
       argv = qualifier ("setargv")
-        ? Anon->Fun (`__argv;__set_argc_argv (String_Type[0]);`)
+        ? __Fexpr (`__argv;__set_argc_argv (String_Type[0]);`).__ ()
         : __argv,
       },
     on = struct
