@@ -23,7 +23,7 @@ public define unless (cond)
   cond == 0;
 }
 
-public define __get_qualifier_as (dtype, nameq, q, value)
+public define __get_qualifier_as (dtype, q, value)
 {
   q = NULL == q
     ? value
@@ -42,8 +42,8 @@ public define __get_qualifier_as (dtype, nameq, q, value)
         : NULL;
 
   if (NULL == q && NULL != value)
-    throw ClassError, _function_name + "::" + nameq +
-       " qualifier should be of " + string (dtype);
+    throw ClassError, _function_name + ":: qualifier should be of " +
+      string (dtype);
   q;
 }
 

@@ -21,7 +21,7 @@ private define __copy__ (self, source, dest, st_source, st_dest, opts)
     link,
     mode,
     retval,
-    verbose = __get_qualifier_as (Integer_Type, "verbose", qualifier ("verbose"), 0),
+    verbose = __get_qualifier_as (Integer_Type, qualifier ("verbose"), 0),
     force = NULL,
     backuptext = "",
     backup = NULL;

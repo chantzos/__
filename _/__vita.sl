@@ -191,8 +191,7 @@ private define Assoc_to_string (self, a)
   variable sorted = qualifier_exists ("sort");
   if (sorted)
     {
-    variable sort_fun = __get_qualifier_as (Ref_Type,
-      "sort_fun", qualifier ("sort_fun"), NULL);
+    variable sort_fun = __get_qualifier_as (Ref_Type, qualifier ("sort_fun"), NULL);
     ifnot (NULL == sort_fun)
       sorted = array_sort (keys, sort_fun;;__qualifiers);
     else
@@ -220,7 +219,7 @@ private define List_to_string (self, l)
   variable
     str = "",
     n = (qualifier_exists ("n") ? "" : "\n"),
-    pad = __get_qualifier_as (Integer_Type, "pad", qualifier ("pad"), 2),
+    pad = __get_qualifier_as (Integer_Type, qualifier ("pad"), 2),
     sp = repeat (" ", pad),
     t, i;
 

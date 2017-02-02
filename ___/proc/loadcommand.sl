@@ -260,7 +260,7 @@ public define editfile (file)
   close_smg ();
   variable status;
   variable p = Proc.init (0, 0, 0);
-  variable ft = __get_qualifier_as (String_Type, "ftype", qualifier ("ftype"), NULL);
+  variable ft = __get_qualifier_as (String_Type, qualifier ("ftype"), NULL);
   ifnot (NULL == ft)
     status = p.execv ([Env->BIN_PATH + "/__ved", "--ftype=" + ft, file], NULL);
   else

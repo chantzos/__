@@ -122,20 +122,17 @@ class Curl
     variable s =
       struct
         {
-        write_callback = __get_qualifier_as (Ref_Type, "write_callback",
+        write_callback = __get_qualifier_as (Ref_Type,
           qualifier ("write_callback"), &write_callback),
-        progress_callback = __get_qualifier_as (Ref_Type, "progress_callback",
+        progress_callback = __get_qualifier_as (Ref_Type,
           qualifier ("progress_callback"), NULL),
-        followlocation = __get_qualifier_as (Integer_Type, "follow",
-          qualifier ("follow"), 1),
-        useragent = __get_qualifier_as (String_Type, "agent",
+        followlocation = __get_qualifier_as (Integer_Type, qualifier ("follow"), 1),
+        useragent = __get_qualifier_as (String_Type,
           qualifier ("agent"), "User-Agent: S-Lang cURL Module"),
-        cacert = __get_qualifier_as (String_Type, "cacert",
+        cacert = __get_qualifier_as (String_Type,
           qualifier ("cacert"), "/etc/ssl/certs/ca-certificates.crt"),
-        connectiontimeout = __get_qualifier_as (Integer_Type, "timeout",
-          qualifier ("timeout"), 0),
-        tovar = __get_qualifier_as (Integer_Type, "tovar",
-          qualifier ("tovar"), 0),
+        connectiontimeout = __get_qualifier_as (Integer_Type, qualifier ("timeout"), 0),
+        tovar = __get_qualifier_as (Integer_Type, qualifier ("tovar"), 0),
         output,
         };
 

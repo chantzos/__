@@ -20,8 +20,7 @@ subclass Arg
 
     if (NULL == ind)
       {
-      err_msg = __get_qualifier_as (String_Type, "exists_err", qualifier ("exists_err"),
-          NULL);
+      err_msg = __get_qualifier_as (String_Type, qualifier ("exists_err"), NULL);
       return defval;
       }
 

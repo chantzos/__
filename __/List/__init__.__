@@ -3,7 +3,7 @@ class List
     variable
       str = "",
       n = (qualifier_exists ("n") ? "" : "\n"),
-      pad = __get_qualifier_as (Integer_Type, "pad", qualifier ("pad"), 2),
+      pad = __get_qualifier_as (Integer_Type, qualifier ("pad"), 2),
       sp = repeat (" ", pad),
       t, i;
 

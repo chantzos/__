@@ -74,8 +74,7 @@ class Assoc
     variable sorted = qualifier_exists ("sort");
     if (sorted)
       {
-      variable sort_fun = __get_qualifier_as (Ref_Type,
-        "sort_fun", qualifier ("sort_fun"), NULL);
+      variable sort_fun = __get_qualifier_as (Ref_Type, qualifier ("sort_fun"), NULL);
       ifnot (NULL == sort_fun)
         sorted = array_sort (keys, sort_fun;;__qualifiers);
       else

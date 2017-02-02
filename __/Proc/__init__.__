@@ -244,10 +244,10 @@ class Proc
     p.connect = &connect_to_socket;
     p.execve = &__execve__;
     p.execv = &__execv__;
-    p.setid = __get_qualifier_as (Integer_Type, "setid", qualifier ("setid"), NULL);
-    p.uid   = __get_qualifier_as (Integer_Type, "uid",   qualifier ("uid"), NULL);
-    p.gid   = __get_qualifier_as (Integer_Type, "gid",   qualifier ("gid"), NULL);
-    p.user  = __get_qualifier_as (String_Type, "user",   qualifier ("user"), NULL);
+    p.setid = __get_qualifier_as (Integer_Type, qualifier ("setid"), NULL);
+    p.uid   = __get_qualifier_as (Integer_Type, qualifier ("uid"), NULL);
+    p.gid   = __get_qualifier_as (Integer_Type, qualifier ("gid"), NULL);
+    p.user  = __get_qualifier_as (String_Type,  qualifier ("user"), NULL);
     p;
   end
 end

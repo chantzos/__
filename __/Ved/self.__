@@ -353,8 +353,8 @@ beg
     w.frame_names = w.frame_names[wherenot (_isnull (w.frame_names))];
     w.frames--;
 
-    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
-      qualifier ("framesize_fun"), This.framesize);
+    variable setframesize = __get_qualifier_as (Ref_Type, qualifier ("framesize_fun"),
+      This.framesize);
 
     if (NULL == setframesize)
       setframesize = &framesize;
@@ -403,8 +403,8 @@ beg
 
     w.frames++;
 
-    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
-      qualifier ("framesize_fun"), This.framesize);
+    variable setframesize = __get_qualifier_as (Ref_Type, qualifier ("framesize_fun"),
+        This.framesize);
 
     if (NULL == setframesize)
       setframesize = &framesize;

@@ -1,8 +1,7 @@
 private define move (self, source, dest, opts)
 {
   variable
-    verbose = __get_qualifier_as (Integer_Type, "verbose",
-       qualifier ("verbose"), 0),
+    verbose = __get_qualifier_as (Integer_Type, qualifier ("verbose"), 0),
     backup,
     retval,
     backuptext = "",

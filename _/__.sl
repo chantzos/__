@@ -128,8 +128,7 @@ private define __getfun__ (from, fun)
 
 private define __setfun__ (cname, funname, funcref, nargs, const)
 {
-  variable submethod = __get_qualifier_as (Integer_Type, "submethod",
-    qualifier ("submethod"), 0);
+  variable submethod = __get_qualifier_as (Integer_Type, qualifier ("submethod"), 0);
 
   ifnot (Ref_Type == typeof (funcref))
     ifnot (submethod)
@@ -359,7 +358,7 @@ private define __setself__ (c, methods)
       c = __getclass__ (c, 0);
     else
       {
-      c = __get_qualifier_as (String_Type, "cname", qualifier ("cname"), NULL);
+      c = __get_qualifier_as (String_Type, qualifier ("cname"), NULL);
 
       if (NULL == c)
         throw ClassError, "__setself__:: cannot get class";
@@ -1456,8 +1455,7 @@ private define __Class_From_Init__ (classpath)
   ifnot (path_is_absolute (@classpath))
     @classpath = __PATHS[0] + "/" + @classpath;
 
-  variable __init__ = __get_qualifier_as (String_Type, "__init__",
-    qualifier ("__init__"), "__init__");
+  variable __init__ = __get_qualifier_as (String_Type, qualifier ("__init__"), "__init__");
 
   variable i, __in__ = @classpath + "/" + __init__ + ".__";
 
@@ -1512,7 +1510,7 @@ private define __Class_From_Init__ (classpath)
     }
   else
     {
-    super = __get_qualifier_as (String_Type, "super", qualifier ("super"), NULL);
+    super = __get_qualifier_as (String_Type, qualifier ("super"), NULL);
     if (NULL == super)
       throw ClassError, "Class::__INIT__::awaiting super qualifier";
 
@@ -1586,8 +1584,7 @@ private define __Class_From_Init__ (classpath)
   if (qualifier_exists ("return_buf"))
     return eval_buf;
 
-  variable as = __get_qualifier_as (String_Type, "as", qualifier ("as"),
-    cname);
+  variable as = __get_qualifier_as (String_Type, qualifier ("as"), cname);
 
   __in__ = @classpath + "/" + as + ".sl";
 
@@ -1696,7 +1693,7 @@ private define _subclass_ (self, sub, super)
 {
   __->__ (sub, "Class::LoadClass::__subclass";
     __init__ = sub, super = super,
-    from = __get_qualifier_as  (String_Type, "from", qualifier ("from"), super));
+    from = __get_qualifier_as  (String_Type, qualifier ("from"), super));
 }
 
 private define _getclass_ (self, cname)
@@ -1716,7 +1713,7 @@ private define _get_funcref_ (self, cname, fun)
 {
   try
     {
-    variable f = __get_qualifier_as (Assoc_Type, "class", qualifier ("class"),
+    variable f = __get_qualifier_as (Assoc_Type, qualifier ("class"),
         __getclass__ (cname, 0));
 
     ifnot (assoc_key_exists (f, "__FUN__"))

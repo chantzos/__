@@ -340,8 +340,7 @@ class Ved
   def __vwritetofile (file, lines, indent, bts) public proc
     variable i, retval,
       append = qualifier_exists ("append")
-        ? __get_qualifier_as (Integer_Type, "append", qualifier ("append"),
-          0)
+        ? __get_qualifier_as (Integer_Type, qualifier ("append"), 0)
         : 0,
       fp = fopen (file, ["w", "a+"][append > 0]);
 
@@ -539,8 +538,8 @@ class Ved
   def __init_fun_norm__ () proc
     struct {
       on_carriage_return =
-        __get_qualifier_as (Ref_Type, "on_carriage_return",
-          qualifier ("on_carriage_return"), &__on_carriage_return__)
+        __get_qualifier_as (Ref_Type, qualifier ("on_carriage_return"),
+           &__on_carriage_return__)
         };
   end
 
@@ -860,8 +859,8 @@ class Ved
     if (any (name == assoc_get_keys (VED_WIND)) && 0 == qualifier_exists ("force"))
       return;
 
-    variable setframesize = __get_qualifier_as (Ref_Type, "framesize_fun",
-      qualifier ("framesize_fun"), This.framesize);
+    variable setframesize = __get_qualifier_as (Ref_Type, qualifier ("framesize_fun"),
+        This.framesize);
 
     if (NULL == setframesize)
       setframesize = &framesize;
@@ -889,8 +888,7 @@ class Ved
 
     variable i;
     variable winds = assoc_get_keys (VED_WIND);
-    variable frames = __get_qualifier_as (Integer_Type, "frames",
-      qualifier ("frames"), This.has.frames);
+    variable frames = __get_qualifier_as (Integer_Type, qualifier ("frames"), This.has.frames);
 
     if (NULL == frames)
       frames = 1;

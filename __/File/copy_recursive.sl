@@ -62,7 +62,7 @@ private define cpr_file_callback (file, st_source, source, dest, opts, exit_code
 
 private define copy_recursive (self, source, dest)
 {
-  variable verbose = __get_qualifier_as (Integer_Type, "verbose", qualifier ("verbose"), 0);
+  variable verbose = __get_qualifier_as (Integer_Type, qualifier ("verbose"), 0);
   variable opts = qualifier ("copy_opts");
 
   ifnot (typeof (opts) == Struct_Type)

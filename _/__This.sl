@@ -45,11 +45,11 @@ static define __INIT__ (role)
     {
     framesize,
     err_handler = __get_qualifier_as (
-      Ref_Type, "err_handler", qualifier ("err_handler"), &__def_err_handler__),
+      Ref_Type, qualifier ("err_handler"), &__def_err_handler__),
     at_exit     = __get_qualifier_as (
-      Ref_Type, "at_exit", qualifier ("at_exit"), &__def_at_exit__),
+      Ref_Type, qualifier ("at_exit"), &__def_at_exit__),
     exit        = __get_qualifier_as (
-      Ref_Type, "exit", qualifier ("exit"), &__def_exit__),
+      Ref_Type, qualifier ("exit"), &__def_exit__),
     request = struct
       {
       X,
@@ -76,9 +76,9 @@ static define __INIT__ (role)
       {
       me,
       also = String_Type[0],
-      shell = __get_qualifier_as (Integer_Type, "shell", qualifier ("shell"), 1),
-      ved   = __get_qualifier_as (Integer_Type, "ved", qualifier ("ved"), 1),
-      os    = __get_qualifier_as (Integer_Type, "os", qualifier ("os"), 0),
+      shell = __get_qualifier_as (Integer_Type, qualifier ("shell"), 1),
+      ved   = __get_qualifier_as (Integer_Type, qualifier ("ved"), 1),
+      os    = __get_qualifier_as (Integer_Type, qualifier ("os"), 0),
       tty   = &__is_tty,
       smg   = &__is_smg,
       master,
@@ -109,13 +109,13 @@ static define __INIT__ (role)
           type,
           fd,
           fn = __get_qualifier_as (
-            String_Type, "stdoutFn", qualifier ("stdoutFn"), NULL),
+            String_Type, qualifier ("stdoutFn"), NULL),
           },
         err = struct
           {
           fd,
           fn = __get_qualifier_as (
-            String_Type, "stderrFn", qualifier ("stderrFn"), NULL),
+            String_Type, qualifier ("stderrFn"), NULL),
           }
         },
       },

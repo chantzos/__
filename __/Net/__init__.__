@@ -149,8 +149,7 @@ update_config=1
 
       variable argv = [Net->IP_BIN, "link", "set", IFACE, what];
 
-      variable passwd = __get_qualifier_as (String_Type, "passwd",
-        qualifier ("passwd"), NULL);
+      variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
 
       ifnot (NULL == passwd)
         {
@@ -211,8 +210,7 @@ update_config=1
       variable argv = [Net->WP_SERV_BIN, "-D" + DEV, "-i" + IFACE,
          "-c" + SERVER_CONF];
 
-      variable passwd = __get_qualifier_as (String_Type, "passwd",
-        qualifier ("passwd"), NULL);
+      variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
 
       ifnot (NULL == passwd)
         {
@@ -263,8 +261,7 @@ update_config=1
 
       variable argv = [Net->DH_BIN, IFACE];
 
-      variable passwd = __get_qualifier_as (String_Type, "passwd",
-        qualifier ("passwd"), NULL);
+      variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
 
       ifnot (NULL == passwd)
         {

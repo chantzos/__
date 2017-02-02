@@ -1,6 +1,6 @@
 private define remove (self, file, interactive, isdir)
 {
-  variable verbose = __get_qualifier_as (Integer_Type, "verbose", qualifier ("verbose"), 0);
+  variable verbose = __get_qualifier_as (Integer_Type, qualifier ("verbose"), 0);
   variable f = [&remove, &rmdir][isdir];
   variable type = ["file", "directory"][isdir];
 

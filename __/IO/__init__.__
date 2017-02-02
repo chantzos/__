@@ -3,8 +3,7 @@ class IO
   let PIP_CAP = 65535;
 
   def print (str)
-    variable std = __get_qualifier_as (File_Type, "std",
-      qualifier ("std"), stdout);
+    variable std = __get_qualifier_as (File_Type, qualifier ("std"), stdout);
 
     variable ufd = _fileno (std);
 
@@ -12,7 +11,7 @@ class IO
       throw ClassError, sprintf ("IO::print: unacceptable stream");
 
     variable tofp = NULL == (tofp = __get_qualifier_as (
-        File_Type, "fp", qualifier ("fp"), NULL), tofp)
+        File_Type, qualifier ("fp"), NULL), tofp)
       ? This.is.tty ()
         ? std
         : NULL
@@ -26,7 +25,7 @@ class IO
       }
     else
       {
-      variable fd = __get_qualifier_as (FD_Type, "fd", qualifier ("fd"),
+      variable fd = __get_qualifier_as (FD_Type, qualifier ("fd"),
         [This.is.std.out.fd, This.is.std.err.fd][ufd - 1]);
 
       if (-1 == lseek (fd, 0, SEEK_END))

@@ -153,8 +153,7 @@ define getpage (page)
 
   p.stdin.file = outfn;
 
-  variable rm_head_ws = __get_qualifier_as (Integer_Type,
-    "rm_head_ws", qualifier ("rm_head_ws"), NULL);
+  variable rm_head_ws = __get_qualifier_as (Integer_Type, qualifier ("rm_head_ws"), NULL);
 
   ifnot (NULL == rm_head_ws)
     rm_head_ws__ (outfn, rm_head_ws);

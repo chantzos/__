@@ -302,8 +302,7 @@ class Rline
     rl.childrec = qualifier ("childrec");
     rl.wind_mang = qualifier ("wind_mang");
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
-    rl.funclist = __get_qualifier_as (Assoc_Type, "funclist",
-      qualifier ("funclist"), NULL);
+    rl.funclist = __get_qualifier_as (Assoc_Type, qualifier ("funclist"), NULL);
 
     if (0 == length (rl.history) && NULL != rl.histfile)
       rl.history = readhistory (Rline, rl.histfile);
