@@ -471,6 +471,7 @@ private define __read___ (this)
 
   __buf__ += readfile (SRC_PROTO_PATH + "/__alfa.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__slang.sl");
+  __buf__ += readfile (SRC_PROTO_PATH + "/__F.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__This.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__vita.sl");
   __buf__ += this + "\n\n";
