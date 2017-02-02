@@ -407,6 +407,51 @@ private define __cd__ (argv)
   Com.post_builtin ();
 }
 
+private variable __CHDIR__ = __Function (`
+__(
+  __CWD__    = "";
+  __DIR__    = "";
+  __PDIR__   = NULL;
+  __RETVAL__ = 0;
+)__
+
+  (argv)
+    __CWD__ = getcwd ();
+
+  if (1 == length (argv))
+    __DIR__ = "$HOME/"$;
+  else
+    if ("-" == argv[1])
+      ifnot (NULL == __PDIR__)
+        __DIR__ = __PDIR__;
+      else
+        return 0;
+    else
+      __DIR__ = Dir.eval (argv[1]);
+
+  if (File.are_same (__CWD__, __DIR__))
+    return 0;
+
+   __RETVAL__ = chdir (__tmp (&__DIR__));
+
+   ifnot (__RETVAL__)
+     __PDIR__ = __tmp (&__CWD__);
+
+   __tmp (&__RETVAL__);
+`;__ns__ = "__CHDIR__");
+
+private define __chdir__ (argv)
+{
+  variable retval = __CHDIR__.__ (argv);
+  if (-1 == retval)
+    {
+    IO.tostderr (errno_string (errno));
+    EXITSTATUS = 1;
+    }
+
+  Com.post_builtin ();
+}
+
 private define __search__ (argv)
 {
   Com.pre_com ();
@@ -711,7 +756,7 @@ private define __builtins__ (a)
   if (COM_OPTS.chdir)
     {
     a["cd"] = @Argvlist_Type;
-    a["cd"].func = &__cd__;
+    a["cd"].func = &__chdir__;
     }
 
   a["__which"] = @Argvlist_Type;
