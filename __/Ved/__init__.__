@@ -339,9 +339,9 @@ class Ved
 
   def __vwritetofile (file, lines, indent, bts) public proc
     variable i, retval,
-      append = qualifier_exists ("append")
-        ? __get_qualifier_as (Integer_Type, qualifier ("append"), 0)
-        : 0,
+      append = (NULL == (append = qualifier ("append", 0), append)
+       ? 0
+       : append),
       fp = fopen (file, ["w", "a+"][append > 0]);
 
     if (NULL == fp) % fopen sets errno
@@ -1466,7 +1466,17 @@ class Ved
       {
       lnr = lnrs[ind];
       line = buf.lines[lnr];
-      if (pcre_exec (pat, line, 0))
+      if (__Fexpr (`(pat, line)
+        try
+          {
+          pcre_exec (pat, line, 0);
+          }
+        catch AnyError:
+          {
+          Exc.print (NULL);
+          0;
+          }
+        `).__ (pat, line))
         ifnot (whenmatch)
           continue;
         else

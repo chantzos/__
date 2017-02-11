@@ -30,24 +30,10 @@ This.is.at.session = getenv ("SESSION");
 if (NULL == This.is.child)
   This.is.also = [This.is.also, "PARENT"];
 
-This.is.me = __Fexpr (`
-  if (NULL == This.is.child)
-    NULL == This.is.at.session ? "MASTER" : "PARENT";
-  else
-    "CHILD";`).__ ();
-
-This.request.X = __Fexpr (`
-  variable i = where ("--no-x" == This.has.argv);
-  if (length (i))
-    {
-    Array.delete_at (&This.has.argv, i[0]);
-    0;
-    }
-  else
-    ifnot (access (Env->STD_C_PATH + "/xsrv-module.so", F_OK))
-      1;
-    else
-      0;`).__ ();
+This.is.me = __Fexpr (`(ischild)
+  [(NULL == This.is.at.session ? "MASTER" : "PARENT"),
+   "CHILD"][ischild];
+`).__ (NULL != This.is.child);
 
 Load.module ("socket");
 
@@ -71,6 +57,10 @@ This.at_exit = &__exit;
 
 Class.load ("I";force);
 
+This.request.X = __Fexpr (`(nox)
+  [0 == access (Env->STD_C_PATH + "/xsrv-module.so", F_OK), 0][nox];
+`).__ (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg));
+
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 
@@ -84,17 +74,15 @@ This.is.my.name = "____" == path_basename_sans_extname (This.has.argv[0])
    ? "__"
    : strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
 
-This.is.my.basedir   = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
-This.is.my.tmpdir    = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
-This.is.my.datadir   = Env->USER_DATA_PATH + "/" + This.is.my.name;
-This.is.my.histfile  = Env->USER_DATA_PATH + "/.__" + Env->USER +
-    "_" + This.is.my.name + "history";
-
+This.is.my.basedir = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
+This.is.my.tmpdir  = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
+This.is.my.datadir = Env->USER_DATA_PATH + "/" + This.is.my.name;
 This.is.my.genconf = Env->USER_DATA_PATH + "/Generic/conf";
 This.is.my.conf    = This.is.my.datadir  + "/config/conf";
+This.is.my.histfile= Env->USER_DATA_PATH + "/.__" + Env->USER +
+  "_" + This.is.my.name + "history";
 
-__Fexpr (`
-  variable ar = String_Type[0];
+__Fexpr (`(ar, tok, i)
   if (0 == access (This.is.my.genconf, F_OK|R_OK) &&
       0 == Sys.checkperm (stat_file (This.is.my.genconf).st_mode,
         File->PERM["_PRIVATE"]))
@@ -105,14 +93,14 @@ __Fexpr (`
         File->PERM["_PRIVATE"]))
     ar = [ar, File.readlines (This.is.my.conf)];
 
-  variable tok, i;
   _for i (0, length (ar) - 1)
     {
     tok = strtok (ar[i], "::");
     ifnot (2 == length (tok))
       continue;
     This.is.my.settings[tok[0]] = tok[1];
-    }`).__ ();
+    }
+`).__ (String_Type[0], NULL, NULL);
 
 This.is.std.out.type = "ashell";
 
@@ -137,8 +125,8 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-private define __profile_set (self)
-{
+public variable Profile = struct {set = __Function (`
+  (self)
   if (NULL == This.request.profile)
     ifnot (qualifier_exists ("set"))
       return;
@@ -150,9 +138,7 @@ private define __profile_set (self)
   else
     ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
       Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
-}
-
-public variable Profile = struct {set = &__profile_set};
+`).__funcref};
 
 Profile.set ();
 
@@ -162,26 +148,25 @@ Load.file (This.is.my.basedir + "/" + This.is.my.name);
 
 VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
-This.is.std.err.fn   = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
-This.is.std.out.fn   = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
+This.is.std.err.fn = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
+This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
+This.is.std.out.fd = IO.open_fn (This.is.std.out.fn);
+This.is.std.err.fd = IO.open_fn (This.is.std.err.fn);
 
-This.is.std.out.fd   = IO.open_fn (This.is.std.out.fn);
-This.is.std.err.fd   = IO.open_fn (This.is.std.err.fn);
+SCRATCH  = This.is.my.tmpdir + "/__SCRATCH__.txt";
+STDOUTBG = This.is.my.tmpdir + "/__STDOUTBG__.txt";
+GREPFILE = This.is.my.tmpdir + "/__GREP__.list";
+BGDIR    = This.is.my.tmpdir + "/__PROCS__";
+RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
+WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
 
-SCRATCH         = This.is.my.tmpdir + "/__SCRATCH__.txt";
-STDOUTBG        = This.is.my.tmpdir + "/__STDOUTBG__.txt";
-GREPFILE        = This.is.my.tmpdir + "/__GREP__.list";
-BGDIR           = This.is.my.tmpdir + "/__PROCS__";
-RDFIFO          = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
-WRFIFO          = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
+SCRATCHFD  = IO.open_fn (SCRATCH);
+STDOUTFDBG = IO.open_fn (STDOUTBG);
 
-SCRATCHFD       = IO.open_fn (SCRATCH);
-STDOUTFDBG      = IO.open_fn (STDOUTBG);
-
-ERR_VED         = Ved.init_ftype (NULL);
-OUT_VED         = Ved.init_ftype (This.is.std.out.type);
-OUTBG_VED       = Ved.init_ftype (This.is.std.out.type);
-SCRATCH_VED     = Ved.init_ftype (NULL);
+ERR_VED     = Ved.init_ftype (NULL);
+OUT_VED     = Ved.init_ftype (This.is.std.out.type);
+OUTBG_VED   = Ved.init_ftype (This.is.std.out.type);
+SCRATCH_VED = Ved.init_ftype (NULL);
 
 SCRATCH_VED._fd = SCRATCHFD;
 OUTBG_VED._fd   = STDOUTFDBG;
@@ -212,52 +197,9 @@ if (-1 == mkfifo (RDFIFO, 0644))
 if (-1 == mkfifo (WRFIFO, 0644))
   This.err_handler (WRFIFO + ": cannot create, " + errno_string (errno));
 
-private define com_execute (argv)
-{
-  Com.execute (argv;;__qualifiers);
-}
-
-private define _build_comlist_ (a)
-{
-  variable
-    i,
-    c,
-    ii,
-    ex = qualifier_exists ("ex"),
-    d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
-
- ifnot (ex)
-   ex = "shell" != This.is.my.name;
-
-  _for i (0, length (d) - 1)
-    {
-    c = listdir (d[i]);
-
-    ifnot (NULL == c)
-      _for ii (0, length (c) - 1)
-        if (Dir.isdirectory (d[i] + "/" + c[ii]))
-          {
-          a[(ex ? "!" : "") + c[ii]]      = @Argvlist_Type;
-          a[(ex ? "!" : "") + c[ii]].dir  = d[i] + "/" + c[ii];
-          a[(ex ? "!" : "") + c[ii]].func = &com_execute;
-          }
-    }
-
-  array_map (Void_Type, &assoc_delete_key, a, ["xstart", "!xstart"]);
-
-  c = listdir (Env->LOCAL_COM_PATH);
-  _for i (0, length (c) - 1)
-    if (Dir.isdirectory (Env->LOCAL_COM_PATH + "/" + c[i]))
-      {
-      a["~" + c[i]]      = @Argvlist_Type;
-      a["~" + c[i]].dir  = Env->LOCAL_COM_PATH + "/" + c[i];
-      a["~" + c[i]].func = &com_execute;
-      }
-}
-
 private define __rehash__ ();
 
-private define draw_buf (argv)
+private define draw_frame (argv)
 {
   __draw_buf (Ved.get_cur_buf ());
 }
@@ -265,12 +207,6 @@ private define draw_buf (argv)
 private define draw_wind (argv)
 {
   Ved.draw_wind ();
-}
-
-private define scratch_to_stdout (argv)
-{
-  () = File.copy (SCRATCH, This.is.std.out.fn;flags = "ab", verbose = 1);
-  __draw_buf (Ved.get_cur_buf ()); % might not be the right buffer, but there is no generic solution 
 }
 
 private define __clear__ (argv)
@@ -386,37 +322,18 @@ private define __echo__ (argv)
     __scratch (NULL);
 }
 
-private define __cd__ (argv)
-{
-  if (1 == length (argv))
-    {
-    ifnot (getcwd () == "$HOME/"$)
-      () = chdir ("$HOME"$);
-    }
-  else
-    {
-    variable dir = Dir.eval (argv[1]);
-    ifnot (File.are_same (getcwd (), dir))
-      if (-1 == chdir (dir))
-        {
-        IO.tostderr (errno_string (errno));
-        EXITSTATUS = 1;
-        }
-    }
-
-  Com.post_builtin ();
-}
-
 private variable __CHDIR__ = __Function (`
 __(
   __CWD__    = "";
   __DIR__    = "";
   __PDIR__   = NULL;
-  __RETVAL__ = 0;
 )__
 
   (argv)
-    __CWD__ = getcwd ();
+  EXITSTATUS = 0;
+  Com.pre_com ();
+
+  __CWD__ = getcwd ();
 
   if (1 == length (argv))
     __DIR__ = "$HOME/"$;
@@ -425,32 +342,26 @@ __(
       ifnot (NULL == __PDIR__)
         __DIR__ = __PDIR__;
       else
-        return 0;
+        return;
     else
       __DIR__ = Dir.eval (argv[1]);
 
   if (File.are_same (__CWD__, __DIR__))
-    return 0;
-
-   __RETVAL__ = chdir (__tmp (&__DIR__));
-
-   ifnot (__RETVAL__)
-     __PDIR__ = __tmp (&__CWD__);
-
-   __tmp (&__RETVAL__);
-`;__ns__ = "__CHDIR__");
-
-private define __chdir__ (argv)
-{
-  variable retval = __CHDIR__.__ (argv);
-  if (-1 == retval)
     {
-    IO.tostderr (errno_string (errno));
-    EXITSTATUS = 1;
+    array_map (&__uninitialize, [&__CWD__, &__DIR__]);
+    return;
     }
 
+   ifnot (chdir (__tmp (&__DIR__)))
+     __PDIR__ = __tmp (&__CWD__);
+   else
+     {
+     IO.tostderr (errno_string (errno));
+     EXITSTATUS = 1;
+     }
+
   Com.post_builtin ();
-}
+`;__ns__ = "__CHDIR__");
 
 private define __search__ (argv)
 {
@@ -480,8 +391,9 @@ private define __search__ (argv)
   __draw_buf (Ved.get_cur_buf ());
 }
 
-private define __which__ (argv)
-{
+private variable __WHICH__ = __Function (`
+__(__PATH__ = NULL, __MSG__ = NULL;)__
+  (argv)
   Com.pre_builtin (argv);
 
   if (1 == length (argv))
@@ -491,21 +403,18 @@ private define __which__ (argv)
     return;
     }
 
-  variable com = argv[1];
-
-  variable path = Sys.which (com);
-
-  variable msg = NULL != path ? path : com + " hasn't been found in PATH";
+  __PATH__ = Sys.which (argv[1]);
+  __MSG__ = NULL != __PATH__ ? __PATH__ : argv[1] + " hasn't been found in PATH";
 
   if (This.is.my.name == "shell")
-    IO.tostdout (msg;n);
+    IO.tostdout (__tmp (__MSG__);n);
   else
-    __toscratch  (msg);
+    __toscratch  (__tmp (__MSG__));
 
-  EXITSTATUS = NULL == path;
+  EXITSTATUS = NULL == __tmp (__PATH__);
 
   Com.post_builtin ();
-}
+`;__ns__ = "__WHICH__");
 
 private define __write__ (argv)
 {
@@ -536,12 +445,7 @@ private define __write__ (argv)
     if (NULL == (lnrs = Ved.parse_arg_range (s, range_arg, lnrs), lnrs))
       return;
 
-  ind = wherefirst (">>" == argv);
-  ifnot (NULL == ind)
-    {
-    append = 1;
-    Array.delete_at (&argv, ind);
-    }
+  append = NULL != Opt.Arg.exists (">>", &argv;del_arg);
 
   command = argv[0];
   file = length (argv) - 1 ? argv[1] : NULL;
@@ -663,14 +567,11 @@ public define init_functions ()
   a["@lock"] = @Argvlist_Type;
   a["@lock"].func = &__lock__;
 
-  a["@draw_buf"] = @Argvlist_Type;
-  a["@draw_buf"].func = &draw_buf;
+  a["@draw_frame"] = @Argvlist_Type;
+  a["@draw_frame"].func = &draw_frame;
 
   a["@draw_wind"] = @Argvlist_Type;
   a["@draw_wind"].func = &draw_wind;
-
-  a["@scratch_to_stdout"] = @Argvlist_Type;
-  a["@scratch_to_stdout"].func = &scratch_to_stdout;
 
   a["@clear"] = @Argvlist_Type;
   a["@clear"].func = &__clear__;
@@ -756,11 +657,11 @@ private define __builtins__ (a)
   if (COM_OPTS.chdir)
     {
     a["cd"] = @Argvlist_Type;
-    a["cd"].func = &__chdir__;
+    a["cd"].func = __CHDIR__.__funcref;
     }
 
   a["__which"] = @Argvlist_Type;
-  a["__which"].func = &__which__;
+  a["__which"].func = __WHICH__.__funcref;
 
   if (COM_OPTS.search)
     {
@@ -838,9 +739,39 @@ private define filterexargs (s, args, type, desc)
 
 public define init_commands ()
 {
-  variable a = Assoc_Type[Argvlist_Type, @Argvlist_Type];
+  variable i, c, ii,
+    a = Assoc_Type[Argvlist_Type, @Argvlist_Type],
+    ref = __Function (`(argv) Com.execute (argv;;__qualifiers);`).__funcref,
+    ex = qualifier_exists ("ex"),
+    d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
-  _build_comlist_ (a;;__qualifiers ());
+  ifnot (ex)
+    ex = "shell" != This.is.my.name;
+
+  _for i (0, length (d) - 1)
+    {
+    c = listdir (d[i]);
+
+    ifnot (NULL == c)
+      _for ii (0, length (c) - 1)
+        if (Dir.isdirectory (d[i] + "/" + c[ii]))
+          {
+          a[(ex ? "!" : "") + c[ii]]      = @Argvlist_Type;
+          a[(ex ? "!" : "") + c[ii]].dir  = d[i] + "/" + c[ii];
+          a[(ex ? "!" : "") + c[ii]].func = ref;
+          }
+    }
+
+  array_map (Void_Type, &assoc_delete_key, a, ["xstart", "!xstart"]);
+
+  c = listdir (Env->LOCAL_COM_PATH);
+  _for i (0, length (c) - 1)
+    if (Dir.isdirectory (Env->LOCAL_COM_PATH + "/" + c[i]))
+      {
+      a["~" + c[i]]      = @Argvlist_Type;
+      a["~" + c[i]].dir  = Env->LOCAL_COM_PATH + "/" + c[i];
+      a["~" + c[i]].func = ref;
+      }
 
   X.comlist (a);
 
@@ -913,7 +844,7 @@ __initrline ();
 
 Smg.init ();
 
-Input.init (); % an error_handler expected there
+Input.init ();
 
 public define sigint_handler ();
 public define sigint_handler (sig)

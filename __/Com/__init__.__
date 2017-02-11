@@ -231,13 +231,14 @@ class Com
   end
 
   def post_builtin ()
-    variable err = File.read (This.is.std.err.fd;offset = ERR_VED.st_.st_size);
+    variable err = File.read (This.is.std.err.fd;
+      offset = ERR_VED.st_.st_size);
 
     ifnot (NULL == err)
       if (This.is.shell)
-        IO.tostdout (err);
+        IO.tostdout (strtrim_end (err));
       else
-        __toscratch  (err + "\n");
+        __toscratch  (strtrim_end (err) + "\n");
 
     self.post_header ();
 
