@@ -72,7 +72,7 @@ subclass Search
 
     try
       {
-      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP);
+      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP|PCRE_NO_UTF8_CHECK);
       }
     catch ParseError:
       {
@@ -82,10 +82,21 @@ subclass Search
 
     i = s_lnr;
 
+    variable __pcre_exec = __Fexpr (`(pat, line)
+        try
+          {
+          pcre_exec (pat, line);
+          }
+        catch AnyError:
+          {
+          Exc.print (NULL);
+          0;
+          }`);
+
     while (i > -1 || (i > s_lnr && wrapped))
       {
       line = __vgetlinestr (s, s.lines[i], 1);
-      if (pcre_exec (pat, line))
+      if (__pcre_exec.__ (pat, line))
         {
         match = pcre_nth_match (pat, 0);
         ar = [
@@ -143,7 +154,7 @@ subclass Search
 
     try
       {
-      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP);
+      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP|PCRE_NO_UTF8_CHECK);
       }
     catch ParseError:
       {
@@ -153,10 +164,22 @@ subclass Search
 
     i = s_lnr;
 
+    variable __pcre_exec = __Fexpr (`(pat, line)
+      try
+        {
+        pcre_exec (pat, line);
+        }
+      catch AnyError:
+        {
+        Exc.print (NULL);
+        0;
+        }
+      `);
+
     while (i <= s._len || (i < s_lnr && wrapped))
       {
       line = __vgetlinestr (s, s.lines[i], 1);
-      if (pcre_exec (pat, line))
+      if (__pcre_exec.__ (pat, line))
         {
         match = pcre_nth_match (pat, 0);
         ar = [

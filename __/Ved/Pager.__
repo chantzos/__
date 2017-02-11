@@ -247,10 +247,10 @@ subclass Pager
     loop (end - col)
       {
       retval = __right (s, len);
+      if (1 == retval)
+        needsdraw = 1;
       if (-1 == retval)
         break;
-      if (retval)
-        needsdraw = 1;
       }
 
     if (needsdraw)

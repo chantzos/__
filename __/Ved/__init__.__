@@ -1461,22 +1461,23 @@ class Ved
       }
 
     variable lnr, line, len;
+    variable __pcre_exec = __Fexpr (`(pat, line)
+      try
+        {
+        pcre_exec (pat, line, 0);
+        }
+      catch AnyError:
+        {
+        Exc.print (NULL);
+        0;
+        }
+        `);
 
     _for ind (0, length (lnrs) -1)
       {
       lnr = lnrs[ind];
       line = buf.lines[lnr];
-      if (__Fexpr (`(pat, line)
-        try
-          {
-          pcre_exec (pat, line, 0);
-          }
-        catch AnyError:
-          {
-          Exc.print (NULL);
-          0;
-          }
-        `).__ (pat, line))
+      if (__pcre_exec.__ (pat, line))
         ifnot (whenmatch)
           continue;
         else
