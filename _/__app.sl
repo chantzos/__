@@ -708,7 +708,7 @@ public define __parse_argtype (s, arg, type, baselen)
     return 0;
 
   ifnot ("--bufname=" == arg)
-    return;
+    return 0;
 
   variable bufnames = Ved.get_cur_wind ().bufnames;
 
