@@ -9,10 +9,6 @@
 
 SLANG_MODULE(getkey);
 
-#define I SLANG_INT_TYPE
-#define B SLANG_BSTRING_TYPE
-#define V SLANG_VOID_TYPE
-
 static int TTY_Inited = 0;
 static int Key_Error = -1;
 
@@ -81,12 +77,12 @@ static void unget_key_intrin (void)
 
 static SLang_Intrin_Fun_Type Getkey_Intrinsics [] =
 {
-  MAKE_INTRINSIC_0("reset_tty", reset_tty_intrin, V),
-  MAKE_INTRINSIC_3("init_tty", init_tty_intrin, V, I, I, I),
-  MAKE_INTRINSIC_1("input_pending", input_pending_intrin, I, I),
-  MAKE_INTRINSIC_0("flush_input", flush_input_intrin, V),
-  MAKE_INTRINSIC_0("getkey", getkey_intrin, I),
-  MAKE_INTRINSIC_0("ungetkey", unget_key_intrin, V),
+  MAKE_INTRINSIC_0("reset_tty", reset_tty_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_III("init_tty", init_tty_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_I("input_pending", input_pending_intrin, SLANG_INT_TYPE),
+  MAKE_INTRINSIC_0("flush_input", flush_input_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("getkey", getkey_intrin, SLANG_INT_TYPE),
+  MAKE_INTRINSIC_0("ungetkey", unget_key_intrin, SLANG_VOID_TYPE),
 
   SLANG_END_INTRIN_FUN_TABLE
 };
@@ -96,10 +92,6 @@ static SLang_Intrin_Var_Type Getkey_Variables [] =
   MAKE_VARIABLE("TTY_Inited", &TTY_Inited, SLANG_INT_TYPE, 1),
   SLANG_END_INTRIN_VAR_TABLE
 };
-
-#undef I
-#undef S
-#undef V
 
 int init_getkey_module_ns (char *ns_name)
 {

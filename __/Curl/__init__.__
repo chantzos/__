@@ -153,7 +153,7 @@ class Curl
 
   def isconnected ()
     variable s = self.new (;tovar = 1);
-    any ([39:43] ==
-      self.fetch (s, "http://www.google.com";tovar = 1, dont_print)) ? 0 :1;
+    any ([39:44] ==
+      self.fetch (s, "http://www.google.com";tovar = 1, dont_print)) ? 0 : 1;
   end
 end

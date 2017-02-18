@@ -76,14 +76,14 @@ private define getitem (s)
 public define __list_on_carriage_return (s)
 {
   ifnot (path_basename (path_dirname (__FILE__)) == s._type)
-    return;
+    return -1;
 
   variable l = getitem (s);
   if (NULL == l)
-    return;
+    return -1;
 
   if ("." + s._type == path_extname (l.fname))
-    return;
+    return -1;
 
   variable w = Ved.get_cur_wind ();
 
@@ -122,6 +122,7 @@ public define __list_on_carriage_return (s)
   __vdraw_tail (s);
 
   s.vedloop ();
+  -1;
 }
 
 public define list_set (s, mys)

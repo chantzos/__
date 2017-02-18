@@ -3,7 +3,12 @@ variable MED_FD;
 variable MED_STDOUT;
 variable MED_STDOUT_FD;
 variable MED_FIFO   = This.is.my.tmpdir + "/__MED_FIFO.fifo";
-variable MED_LIST   = This.is.my.tmpdir + "/__MED_playlist";
+variable MED_LIST_FN= This.is.my.tmpdir + "/__MED_playlist.txt";
+variable MED_LIST_BUF;
+variable MED_CUR_PLAYLIST = NULL;
+variable MED_CUR_PLAYING = struct {fname, time_len, time_left};
+variable MED_CUR_SONG_CHANGED = 0;
+variable MED_VIS_ROWS = NULL;
 variable MED_STDOUT = This.is.my.tmpdir + "/__MED_STDOUT";
 variable MED_LYRICS = This.is.my.datadir + "/lyrics";
 variable MED_CONF   = This.is.my.datadir + "/__MED_CONF";
@@ -48,3 +53,6 @@ if (length (MED_AUD_DIR))
   MED_AUD_DIR = [MED_AUD_DIR[0]];
 else
   MED_AUD_DIR = [""];
+
+public define __med_cur_playing ();
+public define __med_step ();

@@ -113,7 +113,7 @@ class Input
 
     if (chr == esc_key)
       if (0 == input_pending (esc_pend))
-  	    return esc_key;
+  	     return esc_key;
       else
         chr = getkey () + 65535;
 
@@ -159,7 +159,7 @@ class Input
 
     if (chr == esc_key)
       if (0 == input_pending (esc_pend))
-  	    return esc_key;
+  	     return esc_key;
       else
         chr = getkey () + 65535;
 

@@ -1,16 +1,19 @@
-private variable CUR_PLAYING = struct {fname, time_len, time_left};
 private variable CUR_LYRIC = NULL;
-private variable CUR_PLAYLIST = NULL;
 private variable CUR_STR = "get_file_name\nget_time_length\nget_time_pos\n";
 
-private define _cur_playing_ ()
+public define __med_step (step)
+{
+  () = write (MED_FD, "pt_step " + string (step) + "\n");
+}
+
+public define __med_cur_playing ()
 {
   if (qualifier_exists ("usecur"))
     return;
 
-  CUR_PLAYING.fname = NULL;
-  CUR_PLAYING.time_len = NULL;
-  CUR_PLAYING.time_left = NULL;
+  MED_CUR_PLAYING.fname = NULL;
+  MED_CUR_PLAYING.time_len = NULL;
+  MED_CUR_PLAYING.time_left = NULL;
 
   if (-1 == lseek (MED_STDOUT_FD, 0, SEEK_END))
     return;
@@ -39,23 +42,23 @@ private define _cur_playing_ ()
   ifnot (3 == length (buf))
     return;
 
-  CUR_PLAYING.fname = strtok (buf[0], "=");
-  ifnot (2 == length (CUR_PLAYING.fname))
-    CUR_PLAYING.fname = "";
+  MED_CUR_PLAYING.fname = strtok (buf[0], "=");
+  ifnot (2 == length (MED_CUR_PLAYING.fname))
+    MED_CUR_PLAYING.fname = "";
   else
-    CUR_PLAYING.fname = substr (CUR_PLAYING.fname[1], 2, strlen (
-      CUR_PLAYING.fname[1]) - 2);
+    MED_CUR_PLAYING.fname = substr (MED_CUR_PLAYING.fname[1], 2, strlen (
+      MED_CUR_PLAYING.fname[1]) - 2);
 
-  CUR_PLAYING.time_len = strtok (buf[1], "=");
-  ifnot (2 == length (CUR_PLAYING.time_len))
-    CUR_PLAYING.time_len = "";
+  MED_CUR_PLAYING.time_len = strtok (buf[1], "=");
+  ifnot (2 == length (MED_CUR_PLAYING.time_len))
+    MED_CUR_PLAYING.time_len = "";
   else
-    CUR_PLAYING.time_len = CUR_PLAYING.time_len[1];
+    MED_CUR_PLAYING.time_len = MED_CUR_PLAYING.time_len[1];
 
-  variable len = atoi (CUR_PLAYING.time_len);
+  variable len = atoi (MED_CUR_PLAYING.time_len);
   ifnot (len)
     {
-    CUR_PLAYING.time_left = "";
+    MED_CUR_PLAYING.time_left = "";
     return;
     }
 
@@ -65,39 +68,39 @@ private define _cur_playing_ ()
   else
     tl = atoi (tl)[1];
 
-  CUR_PLAYING.time_left = string (len - tl);
+  MED_CUR_PLAYING.time_left = string (len - tl);
 }
 
 private define __write_info__ ()
 {
-  variable cur = NULL == CUR_PLAYING.fname ? NULL : @CUR_PLAYING;
+  variable cur = NULL == MED_CUR_PLAYING.fname ? NULL : @MED_CUR_PLAYING;
   variable buf;
 
-   _cur_playing_ (;;__qualifiers);
+  __med_cur_playing (;;__qualifiers);
 
-  if (NULL == CUR_PLAYING.fname)
+  if (NULL == MED_CUR_PLAYING.fname)
     buf = "\n";
   else
     buf =
-    "\nFilename: " + path_basename_sans_extname (CUR_PLAYING.fname) +
-    "\nTime len: " + CUR_PLAYING.time_len + " Time left: " + CUR_PLAYING.time_left + "\n";
+    "\nFilename: " + path_basename_sans_extname (MED_CUR_PLAYING.fname) +
+    "\nTime len: " + MED_CUR_PLAYING.time_len + " Time left: " + MED_CUR_PLAYING.time_left + "\n";
 
   ifnot (NULL == cur)
-    ifnot (NULL == CUR_PLAYING.fname)
-      if (CUR_PLAYING.fname == cur.fname && CUR_PLAYING.time_left ==
+    ifnot (NULL == MED_CUR_PLAYING.fname)
+      if (MED_CUR_PLAYING.fname == cur.fname && MED_CUR_PLAYING.time_left ==
           cur.time_left)
         return;
 
   variable tag = NULL, tmp = 1, i, ar, fname = NULL;
   loop (1)
     {
-    if (NULL == CUR_PLAYING.fname)
+    if (NULL == MED_CUR_PLAYING.fname)
       break;
 
-    ar = File.readlines (MED_LIST);
+    ar = File.readlines (MED_LIST_FN);
     _for i (0, length (ar) - 1)
       if (path_basename_sans_extname (ar[i]) ==
-          path_basename_sans_extname (CUR_PLAYING.fname))
+          path_basename_sans_extname (MED_CUR_PLAYING.fname))
         {
         fname = ar[i];
         break;
@@ -162,11 +165,11 @@ private define __write_info__ ()
 
 private define __write_lyric__ ()
 {
-  _cur_playing_ (;;__qualifiers);
-  if (NULL == CUR_PLAYING.fname)
+  __med_cur_playing (;;__qualifiers);
+  if (NULL == MED_CUR_PLAYING.fname)
     return;
 
-  variable cur_song = path_basename_sans_extname (CUR_PLAYING.fname);
+  variable cur_song = path_basename_sans_extname (MED_CUR_PLAYING.fname);
 
   ifnot (NULL == CUR_LYRIC)
     if (cur_song == CUR_LYRIC)
@@ -246,10 +249,10 @@ private define play_audio (argv)
   else
     list = list[array_sort (list)];
 
-  CUR_PLAYLIST = list;
+  MED_CUR_PLAYLIST = list;
 
-  () = File.write (MED_LIST, list);
-  () = write (MED_FD, "loadlist " + MED_LIST + "\n");
+  () = File.write (MED_LIST_FN, list);
+  () = write (MED_FD, "loadlist " + MED_LIST_FN + "\n");
   sleep (0.3);
   __write_info__;
   __write_lyric__ (;usecur);
@@ -292,34 +295,39 @@ private define play_video (argv)
   else
     list = list[array_sort (list)];
 
-  CUR_PLAYLIST = list;
+  MED_CUR_PLAYLIST = list;
 
-  () = File.write (MED_LIST, list);
-  () = write (MED_FD, "loadlist " + MED_LIST + "\n");
+  () = File.write (MED_LIST_FN, list);
+  () = write (MED_FD, "loadlist " + MED_LIST_FN + "\n");
   __write_info__;
 }
 
 private define __show_list (argv)
 {
-  variable ar = File.readlines (MED_LIST);
-  if (NULL == ar || 0 == length (ar))
-    return;
+  MED_CUR_SONG_CHANGED = 0;
+  variable cb = Ved.get_cur_buf ();
+  __viewfile (MED_LIST_BUF, "playlist", [1, 0], 0);
 
-  ar = array_map (String_Type, &path_basename_sans_extname, ar);
-  () = File.write (SCRATCH, ar);
-  __scratch (NULL);
+  Ved.setbuf (cb._abspath);
+  if (MED_CUR_SONG_CHANGED)
+    {
+    __write_info__;
+    __write_lyric__ (;usecur);
+    }
+  else
+    Ved.draw_wind ();
 }
 
 private define __prev (argv)
 {
-  () = write (MED_FD, "pt_step -1\n");
+  __med_step (-1);
   __write_info__;
   __write_lyric__ (;usecur);
 }
 
 private define __next (argv)
 {
-  () = write (MED_FD, "pt_step 1\n");
+  __med_step (1);
   __write_info__;
   __write_lyric__ (;usecur);
 }
