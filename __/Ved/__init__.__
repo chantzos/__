@@ -440,7 +440,14 @@ class Ved
   end
 
   def _vedloopcallback_ (s) proc
-    (@VED_PAGER[string (s._chr)]) (s);
+    variable retval = (@s.__NOR__["beg"][string (s._chr)]) (s);
+    if (-1 == retval)
+      return;
+
+    ifnot (retval)
+      (@VED_PAGER[string (s._chr)]) (s);
+
+    () = (@s.__NOR__["end"][string (s._chr)]) (s);
   end
 
   def _loop_ (s) proc
@@ -532,15 +539,14 @@ class Ved
     Smg.setrcdr (ptr[0], ptr[1]);
   end
 
-  def __on_carriage_return__ (s) proc
+  def __on_keypress__ (s) proc
+    0;
   end
 
   def __init_fun_norm__ () proc
-    struct {
-      on_carriage_return =
-        __get_qualifier_as (Ref_Type, qualifier ("on_carriage_return"),
-           &__on_carriage_return__)
-        };
+    Assoc.new (Assoc_Type, ["beg", "end"],
+      [Assoc.new (Ref_Type, NULL, NULL;default = &__on_keypress__),
+       Assoc.new (Ref_Type, NULL, NULL;default = &__on_keypress__)]);
   end
 
   def __init_fun_all__ (s) proc
@@ -1219,7 +1225,6 @@ class Ved
   end
 
   def __pg_on_carriage_return (s) public proc
-      (@s.__NOR__.on_carriage_return) (s); % assuming sanity
   end
 
   def __write_on_esc__ (s) proc
@@ -1762,6 +1767,10 @@ class Ved
       seltoX (Ved.get_cur_buf ()._abspath);
   end
 
+  def __space__ (s) proc
+    Ved.Pager.page_down (s);
+  end
+
   def __up__ (s) proc
     Ved.Pager.up (s);
   end
@@ -1862,7 +1871,7 @@ class Ved
     VED_PAGER[string ('k')]            = &__up__;
     VED_PAGER[string ('G')]            = &__eof__;
     VED_PAGER[string ('g')]            = &__g__;
-    VED_PAGER[string (' ')]            = &__page_down__;
+    VED_PAGER[string (' ')]            = &__space__;
     VED_PAGER[string ('e')]            = &__end_word__;
     VED_PAGER[string ('l')]            = &__right__;
     VED_PAGER[string ('h')]            = &__left__;
