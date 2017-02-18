@@ -12,7 +12,7 @@ public define seltoX (sel)
   ifnot (isnotlentoobigforfd)
     {
     file = sprintf ("%s/%d_%d_clipboard", Ved->VED_DIR, Env->PID, Env->UID);
-    if (-1 == String.write (file, sel))
+    if (-1 == File.write (file, sel))
       return;
     com = [com, "-i", file];
     }
