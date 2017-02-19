@@ -8,6 +8,15 @@ private define mainloop ()
     }
 }
 
+private define med_draw_box (buf, hl, draw)
+{
+  MED_VIS_ROWS = Smg.pop_up (buf, 1, COLUMNS - max (strlen (buf)) - 1,
+    (hl == NULL ? 0 : hl);fgclr = [5, 11][hl == NULL]);
+
+  ifnot (NULL == draw)
+    Smg.setrcdr (draw.ptr[0], draw.ptr[1]);
+}
+
 private define med_restore_vis_rows (s)
 {
   if (NULL == MED_VIS_ROWS)
@@ -66,10 +75,7 @@ private define med_on_up (s)
     return 0;
 
   if (length (buf))
-    {
-    MED_VIS_ROWS = Smg.pop_up (buf, 1, COLUMNS - max (strlen (buf)) - 1, 1;fgclr = 11);
-    Smg.setrcdr (s.ptr[0], s.ptr[1]);
-    }
+    med_draw_box (buf, NULL, s);
 
   0;
 }
@@ -84,10 +90,7 @@ private define med_on_down (s)
     return 0;
 
   if (length (buf))
-    {
-    MED_VIS_ROWS = Smg.pop_up (buf, 1, COLUMNS - max (strlen (buf)) - 1, 1;fgclr = 11);
-    Smg.setrcdr (s.ptr[0], s.ptr[1]);
-    }
+    med_draw_box (buf, NULL, s);
 
   0;
 }
@@ -106,8 +109,8 @@ private define med_on_right (s)
     "Time len: " + MED_CUR_PLAYING.time_len,
     "Time left: " + MED_CUR_PLAYING.time_left];
 
-  MED_VIS_ROWS = Smg.pop_up (buf, 1, COLUMNS - max (strlen (buf)) - 1, 0);
-  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  med_draw_box (buf, 1, s);
+
   -1;
 }
 
@@ -145,8 +148,7 @@ private define med_on_carriage_return (s)
     "Time len: " + MED_CUR_PLAYING.time_len,
     "Time left: " + MED_CUR_PLAYING.time_left];
 
-  MED_VIS_ROWS = Smg.pop_up (buf, 1, COLUMNS - max (strlen (buf)) - 1, 0);
-  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+  med_draw_box (buf, 1, s);
   MED_CUR_SONG_CHANGED = 1;
   0;
 }
