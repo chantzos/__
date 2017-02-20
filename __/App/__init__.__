@@ -183,7 +183,9 @@ class App
         }
 
     s.st_ = st;
-    s.lines = Ved.getlines (s._abspath, s._indent, st);
+
+    ifnot (qualifier_exists ("dont_read"))
+      s.lines = Ved.getlines (s._abspath, s._indent, st);
 
     s._len = length (s.lines) - 1;
 
@@ -219,7 +221,7 @@ class App
 
     topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
 
-    __draw_buf (s;pos = pos, _i = _i);
+    __draw_buf (s;;struct {@__qualifiers, pos = pos, _i = _i});
 
     forever
       {
