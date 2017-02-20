@@ -2,11 +2,11 @@ static variable CC = "gcc";
 
 static variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre",
-  "rand", "iconv", "json", "xsrv", "xclient", "taglib"];
+  "rand", "iconv", "json", "xsrv", "xclient", "taglib", "fd"];
 
 static variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
-  "-lX11", "-lX11 -lXtst", "-ltag_c"];
+  "-lX11", "-lX11 -lXtst", "-ltag_c", ""];
 
 static variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";

@@ -66,10 +66,10 @@ public  variable DEBUG = any ("--debug" == __argv);
 private variable X = any ("--no-x" == __argv) ? 0 : 1;
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
-  "iconv", "json", "taglib"];
+  "iconv", "json", "taglib", "fd"];
 private variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
-  "-ltag_c"];
+  "-ltag_c", ""];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable DEB_FLAGS =
