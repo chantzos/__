@@ -125,7 +125,10 @@ class Sys
       variable passwd = NULL;
 
       if (getuid ())
-        passwd = qualifier ("passwd");
+        if (NULL == (passwd = qualifier ("passwd"), passwd))
+          return;
+        else
+          passwd = strtrim_end (passwd) + "\n";
 
       variable com = (NULL == passwd ? "" : "printf \"" + passwd +
          "\" | " + Sys->SUDO_BIN + " -S -E -p \"\" ") +

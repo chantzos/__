@@ -306,9 +306,14 @@ private define __show_list (argv)
 {
   MED_CUR_SONG_CHANGED = 0;
   variable cb = Ved.get_cur_buf ();
-  __viewfile (MED_LIST_BUF, "playlist", [1, 0], 0);
+
+  MED_LIST_BUF.lines = array_map (String_Type, &sprintf, "  %s",
+    array_map (String_Type, &path_basename_sans_extname, MED_CUR_PLAYLIST));
+
+  __viewfile (MED_LIST_BUF, "playlist", [1, 0], 0;dont_read);
 
   Ved.setbuf (cb._abspath);
+
   if (MED_CUR_SONG_CHANGED)
     {
     __write_info__;
