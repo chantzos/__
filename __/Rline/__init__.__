@@ -1651,6 +1651,7 @@ class Rline
     rl._lin = rl.argv[0];
 
     variable prow = s._prow - (strlen (s._lin) / s._columns) - 1;
+    Smg.atrcaddnstr (" ", 0, prow, 0, s._columns);
     Smg.setrcdr (prow, strlen (rl.argv[0]));
 
     forever

@@ -508,15 +508,18 @@ private define my_commands ()
 
   a["bytecompile"] = @Argvlist_Type;
   a["bytecompile"].func = &__bytecompile__;
+  a["bytecompile"].args = [
+    "--dont-move void do not try to put bytecompiled file on the application hierarchy"];
 
   a["classcompile"] = @Argvlist_Type;
   a["classcompile"].func = &__classcompile__;
   a["classcompile"].args = [
-    "--dont-move void do not try to put bytecompiled class on application hierarchy",
+    "--dont-move void do not try to put bytecompiled class on the application hierarchy",
     "--dont-remove void do not remove parsed class from filesystem"];
 
   a["loadlib"] = @Argvlist_Type;
   a["loadlib"].func = &__loadlib__;
+  a["loadlib"].args = ["--ns= string load file into the defined namespace"];
 
   a["install_distribution"] = @Argvlist_Type;
   a["install_distribution"].func = &__install_distribution;

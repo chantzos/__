@@ -89,6 +89,67 @@ private define med_on_left (s)
   0;
 }
 
+private define med_on_t (s)
+{
+  ifnot (HAS_TAGLIB)
+    return -1;
+
+  variable fname = MED_CUR_PLAYLIST[__vlnr (s, '.')];
+  variable argv = String_Type[9];
+  argv[0] = "tagwrite";
+  variable tag = tagread (fname);
+  ifnot (NULL == tag)
+    {
+    if (strlen (tag.title))
+      argv[1] = "--title=" + tag.title;
+
+    if (strlen (tag.artist))
+      argv[2] = "--artist=" + tag.artist;
+
+    if (strlen (tag.album))
+      argv[3] = "--album=" + tag.album;
+
+    if (strlen (tag.genre))
+      argv[4] = "--genre=" + tag.genre;
+
+    if (strlen (tag.comment))
+      argv[5] = "--comment=" + tag.comment;
+
+    if (tag.year)
+      argv[6] = "--year=" + string (tag.year);
+
+    if (tag.track)
+      argv[7] = "--track=" + string (tag.track);
+   }
+
+  argv[8] = fname;
+
+  argv = argv[wherenot (_isnull (argv))];
+
+  variable rl = Ved.get_cur_rline ();
+
+  Rline.set (rl;line = strjoin (argv, " "), argv = argv,
+     col = int (sum (strlen (argv))) + length (argv),
+     ind = length (argv) - 1);
+
+  MED_ABORT_READ_TAG = 1;
+  Rline.readline (rl);
+  MED_ABORT_READ_TAG = 0;
+
+  Rline.restore (rl.cmp_lnrs, NULL, NULL, rl._columns);
+  Smg.send_msg ("", 0);
+  Ved.write_prompt (" ", 0);
+
+  variable buf = med_get_tag (fname);
+  if (NULL == buf)
+    return -1;
+
+  if (length (buf))
+    med_draw_box (s, buf, NULL, 1;first_row = -1, first_col = -2);
+
+  -1;
+}
+
 private define med_on_up (s)
 {
   med_restore_vis_rows (s);
@@ -186,6 +247,7 @@ public define init_media ()
   MED_LIST_BUF.__NOR__["end"][string (Input->DOWN)] = &med_on_down;
   MED_LIST_BUF.__NOR__["end"][string (Input->UP)] = &med_on_up;
   MED_LIST_BUF.__NOR__["beg"][string (Input->RIGHT)] = &med_on_right;
+  MED_LIST_BUF.__NOR__["beg"][string ('t')] = &med_on_t;
 
   wind_init ("a", 2;force, on_wind_new);
   mainloop ();

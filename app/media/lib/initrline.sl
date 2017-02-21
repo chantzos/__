@@ -446,7 +446,8 @@ private define __tagwrite (argv)
     return;
     }
 
-  __tagread ([NULL, fname]);
+  ifnot (MED_ABORT_READ_TAG)
+    __tagread ([NULL, fname]);
 }
 
 private define my_commands ()

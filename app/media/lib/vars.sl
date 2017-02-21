@@ -8,6 +8,7 @@ variable MED_LIST_BUF;
 variable MED_CUR_PLAYLIST = NULL;
 variable MED_CUR_PLAYING = struct {fname, time_len, time_left};
 variable MED_CUR_SONG_CHANGED = 0;
+variable MED_ABORT_READ_TAG = 0;
 variable MED_VIS_ROWS = NULL;
 variable MED_STDOUT = This.is.my.tmpdir + "/__MED_STDOUT";
 variable MED_LYRICS = This.is.my.datadir + "/lyrics";
