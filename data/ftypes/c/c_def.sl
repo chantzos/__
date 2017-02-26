@@ -15,7 +15,7 @@ define c_autoindent (s, line)
   if (any (lc == [';', ',']) || '%' == line[indent] || "{" == txtline)
     {
     if (lc == ';' && string_match (line, "\\s*return.*;"))
-      return indent - s._shiftwidth;
+      return indent - (indent < s._shiftwidth  ? 0  : s._shiftwidth);
 
     return indent;
     }
