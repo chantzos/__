@@ -86,7 +86,7 @@ private define med_get_tag (fname)
 private define med_on_left (s)
 {
   med_restore_vis_rows (s);
-  0;
+  -1;
 }
 
 private define med_on_t (s)
