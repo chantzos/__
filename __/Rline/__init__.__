@@ -2309,7 +2309,8 @@ class Rline
 
       if (033 == s._chr)
         {
-        restore (NULL, s.cmp_lnrs, s.ptr, 1, s._columns);
+        restore (NULL, [s.cmp_lnrs, s.lnrs[[:-2]]][Array.unique ([s.cmp_lnrs, s.lnrs[[:-2]]])],
+          s.ptr, 1, s._columns);
         break;
         }
 
