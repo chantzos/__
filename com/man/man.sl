@@ -94,10 +94,6 @@ define getpage (page)
 
   ar = File.readlines (errfn);
 
-  () = remove (errfn);
-
-  errfn = Env->TMP_PATH + "/" + string (getpid) + substr (string (_time), 7, -1)  + "manerrs";
-
   if (length (ar))
     {
     _for i (0, length (ar) - 1)
@@ -136,8 +132,9 @@ define getpage (page)
         () = File.copy (page, sprintf ("%s/%s", MYMANDIR, match));
       }
 
-    p = initproc (0, 1, 0);
+    p = initproc (0, 1, 1);
     p.stdout.file = outfn;
+    p.stdout.file = errfn;
 
     status = p.execv ([groff, "-Tutf8", "-m", "man", "-I", MYMANDIR, fname], NULL);
 

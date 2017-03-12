@@ -162,7 +162,7 @@ beg
 
     ifnot (any (bufname == w.bufnames))
       {
-      IO.tostderr ("possible error: " + bufname + "\n", "no such bufname");
+      % IO.tostderr ("possible error: " + bufname + "\n", "no such bufname");
       return;
       }
 

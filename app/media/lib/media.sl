@@ -242,12 +242,14 @@ public define init_media ()
   MED_LIST_BUF = Ved.init_ftype ("txt");
   Ved.initbuf (MED_LIST_BUF, MED_LIST_FN, VED_ROWS, [""], Ved.deftype ();indent = 2);
 
-  MED_LIST_BUF.__NOR__["beg"][string ('\r')] = &med_on_carriage_return;
-  MED_LIST_BUF.__NOR__["beg"][string (Input->LEFT)] = &med_on_left;
-  MED_LIST_BUF.__NOR__["end"][string (Input->DOWN)] = &med_on_down;
-  MED_LIST_BUF.__NOR__["end"][string (Input->UP)] = &med_on_up;
+  MED_LIST_BUF.__NOR__["beg"][string ('\r')]         = &med_on_carriage_return;
+  MED_LIST_BUF.__NOR__["beg"][string (Input->LEFT)]  = &med_on_left;
+  MED_LIST_BUF.__NOR__["beg"][string ('h')]          = &med_on_left;
+  MED_LIST_BUF.__NOR__["end"][string (Input->DOWN)]  = &med_on_down;
+  MED_LIST_BUF.__NOR__["end"][string (Input->UP)]    = &med_on_up;
   MED_LIST_BUF.__NOR__["beg"][string (Input->RIGHT)] = &med_on_right;
-  MED_LIST_BUF.__NOR__["beg"][string ('t')] = &med_on_t;
+  MED_LIST_BUF.__NOR__["beg"][string ('l')]          = &med_on_right;
+  MED_LIST_BUF.__NOR__["beg"][string ('t')]          = &med_on_t;
 
   wind_init ("a", 2;force, on_wind_new);
   mainloop ();
