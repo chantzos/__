@@ -134,7 +134,7 @@ define getpage (page)
 
     p = initproc (0, 1, 1);
     p.stdout.file = outfn;
-    p.stdout.file = errfn;
+    p.stdout.file = "/dev/null";
 
     status = p.execv ([groff, "-Tutf8", "-m", "man", "-I", MYMANDIR, fname], NULL);
 
