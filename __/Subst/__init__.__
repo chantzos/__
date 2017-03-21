@@ -134,7 +134,7 @@ class Subst
               {
               case Integer_Type :
                 if (found - 1 < chr)
-                  return "Captured substrings are less than the requested", NULL;
+                  return "Captured substrings are less than the requested", -1;
                 else
                   replace += pcre_nth_substr (s.pat, str, chr);
               }
@@ -184,13 +184,15 @@ class Subst
 
                {
                case 'c':
-                 return -1;
+                 return "Operation was canselled", -1;
                }
             }
 
           finished += sprintf ("%s%s", fpart, replace);
-          str = lpart;
           s.numchanges++;
+          str = lpart;
+          ifnot (strlen (str))
+            break;
           }
         while (found = pcre_exec (s.pat, str, 0), found && s.global);
 
