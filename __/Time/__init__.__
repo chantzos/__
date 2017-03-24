@@ -77,7 +77,7 @@ class Time
     variable a = (14 - tim.tm_mon) / 12;
 
     lyear = tim.tm_year - a + (0 > tim.tm_year);
-    lmonth = (tim.tm_mon + 1) + (12 * a ) - 2;
+    lmonth = (tim.tm_mon + 1) + (12 * a) - 2;
 
     if (jdn > 2299160)
       lday = (tim.tm_mday + lyear + (lyear / 4) - (lyear / 100) +  (lyear / 400)
@@ -127,10 +127,11 @@ class Time
     else
       lyear = c - 4716;
 
-    variable weekday = self.week_day (tim;jdn = jdn);
-
+    % there is bug on the called fun, when on March? 2017
+    % returns +2 days
+    % variable weekday = self.week_day (tim;jdn = jdn);
     sprintf ("%d %s, %d, %s", lday, months[lmonth - 1], lyear,
-        week_days[weekday]);
+        week_days[tim.tm_wday]);
   end
 
   def normalize (v) proc

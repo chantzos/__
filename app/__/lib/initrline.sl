@@ -393,6 +393,8 @@ private define __sync_from (argv)
 
 private define __module_compile__ (argv)
 {
+  % gdb: man gcc 
+  % -v -wrapper gdb,--args
   variable debug = Opt.Arg.exists ("--debug", &argv;del_arg);
   variable dont_inst = Opt.Arg.exists ("--dont-install", &argv;del_arg);
   variable cflags = Opt.Arg.getlong ("cflags", NULL, &argv;del_arg);
@@ -460,8 +462,11 @@ private define __module_compile__ (argv)
     IO.tostderr ("compiling " + mdl);
     mdlout = pabs ? path_basename_sans_extname (mdl) + ".so" : mdl + "-module.so";
 
-    largv = [Sys.which (Me->CC), strtok (flags), pabs ? mdl : Env->SRC_C_PATH + "/" +
-      mdl + "-module.c", "-o", This.is.my.tmpdir + "/" + mdlout];
+    largv = [Sys.which (Me->CC),
+      pabs ? mdl : Env->SRC_C_PATH + "/" +  mdl + "-module.c",
+      strtok (flags),
+      "-o", This.is.my.tmpdir + "/" + mdlout
+      ];
 
     status = p.execv (largv, NULL);
 

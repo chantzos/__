@@ -1,9 +1,9 @@
 class Hw
   let AMIXER = Sys.which ("amixer");
-  var AMIXER_ARGV = NULL;
-  var SOUNDCARDS = NULL;
-  var SOUNDCHANNELS = Assoc_Type[Array_Type];
-  var CUR_SOUNDCARD = NULL;
+  var public AMIXER_ARGV = NULL;
+  var public SOUNDCARDS = NULL;
+  var public SOUNDCHANNELS = Assoc_Type[Array_Type];
+  var public CUR_SOUNDCARD = NULL;
 
   % if Linux then look at /proc/asound
   def set_soundcard () proc
@@ -38,9 +38,12 @@ class Hw
           if (1 == length (buf))
             continue;
 
+%          buf = strjoin (strtok (buf[1]), " ");
+%         ()= printf ("%s\n", buf);
+          %[0];
+%          ifnot (any (["Master", "PCM", "Speakers"] == buf))
           buf = strtok (buf[1])[0];
-          ifnot (any (["Master", "PCM", "Speakers"] == buf))
-            continue;
+%            continue;
 
           channels[buf] = 1;
           }

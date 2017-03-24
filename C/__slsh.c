@@ -565,35 +565,36 @@ static void stat_mode_to_string (void)
 
 static int try_to_load_file (SLFUTURE_CONST char *path, char *file, char *ns)
 {
-   int status;
+  int status;
 
-   if (file != NULL)
-     {
-	int free_path = 0;
-	if (path == NULL)
-	  {
+  if (file != NULL)
+    {
+    int free_path = 0;
+	   if (path == NULL)
+	     {
 	     free_path = 1;
 	     path = SLpath_getcwd ();
-	     if (path == NULL)
-	       {
-		  path = ".";
-		  free_path = 0;
-	       }
-	  }
 
-	file = SLpath_find_file_in_path (path, file);
-	if (free_path) SLfree (path);
+      if (path == NULL)
+        {
+	       path = ".";
+     	  free_path = 0;
+        }
+   	  }
 
-	if (file == NULL)
-	  return 0;
-     }
-   /* otherwise use stdin */
+	   file = SLpath_find_file_in_path (path, file);
+	   if (free_path)
+      SLfree (path);
 
-   status = SLns_load_file (file, ns);
-   SLfree (file);
-   if (status == 0)
-     return 1;
-   return -1;
+	   if (file == NULL)
+	   return 0;
+    }
+
+  status = SLns_load_file (file, ns);
+  SLfree (file);
+  if (status == 0)
+    return 1;
+  return -1;
 }
 
 static SLang_Intrin_Var_Type Variables [] =
@@ -602,7 +603,7 @@ static SLang_Intrin_Var_Type Variables [] =
   MAKE_VARIABLE("COLUMNS", &Columns, SLANG_INT_TYPE, 1),
   SLANG_END_TABLE
 };
- 
+
 /* Create the Table that S-Lang requires */
 static SLang_Intrin_Fun_Type Intrinsics [] =
 {

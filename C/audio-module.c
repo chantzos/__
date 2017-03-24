@@ -456,7 +456,7 @@ private define __play__ (self, fname)
   return 0;
 }
 
-private define __info__ ()
+private define __info__ (self)
 {
   ifnot (__AO_IS_INITIALIZED)
     __ao_init ();

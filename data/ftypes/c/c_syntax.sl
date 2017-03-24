@@ -15,7 +15,9 @@ private variable regexps = [
 %conditional
   pcre_compile ("\
 (^\s*(if(?=\s))\
+|(^\w*:)\
 |^\s*(else if(?=\s))\
+|^\s*(ifnot(?=\s))\
 |^(#(if|else|endif).*)\
 |^\s*(while(?=\s))\
 |^\s*(else)(?=$|\s{2,}%)\
@@ -25,6 +27,7 @@ private variable regexps = [
 |((?<!\{)(?<!\w)\}(?=;))\
 |((?<!\w)\}$)\
 |((?<!\w)switch(?=\s))\
+|((?<!\w)goto(?=\s))\
 |((?<!\w)case(?=\s))\
 |((?<=\w|\])--(?=;|\)|,))\
 |((?<=\w|\])\+\+(?=;|\)|,))\
@@ -53,18 +56,21 @@ private variable regexps = [
   pcre_compile ("\
 ((^\{$)\
 |(^\}$)\
-|(^static(?=\s))\
-|(^typedef struct)\
+|(?<=\s)(sizeof(?=\s))\
+|(?<=\s)(malloc(?=\s))\
+|(VOID_STAR)\
+|(^typedef)\
 |((?<!\w)struct(?=[\s]*))\
 |^\s*(return(?=[\s;]))\
 |^\s*(break(?=;))\
+|^\s*(continue(?=;))\
 |^\s*(exit(?=\s))\
 |^(#include(?=\s))\
 |^(#\s?define(?=\s))\
 |^(enum(?=\s))\
-|(\s?(void|static|const))\
-|((?<=\s|^|\()(unsigned|int|char))\
-|^\s*(continue(?=;))\
+|(\s?(const))\
+|(^static)\
+|((?<=\s|^|\()(unsigned|int|char|void))\
 |((?<=[\(|\s])errno(?=[;|\)]))\
 |(__arg[vc])\
 |(SEEK_...)\

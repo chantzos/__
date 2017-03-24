@@ -304,8 +304,8 @@ private define writefile (__fn__, __buf__)
 private define __compile_module__ (__dir__, __module__)
 {
   variable
-    CC_COM = CC + " " + DEF_FLAGS + " " + (DEBUG ? DEB_FLAGS : "") + " " +
-      __dir__ + "/" + __module__ +  " -o " +
+    CC_COM = CC + " " + __dir__ + "/" + __module__  + " " +
+      DEF_FLAGS + " " + (DEBUG ? DEB_FLAGS : "") + " " + " -o " +
       SRC_TMP_PATH + "/" + path_basename_sans_extname (__module__) + ".so";
 
   if (VERBOSE)
@@ -318,8 +318,9 @@ private define __compile_module__ (__dir__, __module__)
 private define __build_module__ (i)
 {
   variable
-    CC_COM = CC + " " + DEF_FLAGS + " " + (DEBUG ? DEB_FLAGS : "") + " " +
-      SRC_C_PATH + "/" + MODULES[i] + "-module.c -o " +
+    CC_COM = CC + " " +
+      SRC_C_PATH + "/" + MODULES[i] + "-module.c " +
+      DEF_FLAGS + " " + (DEBUG ? DEB_FLAGS : "") + " -o " +
       SRC_TMP_PATH + "/" + MODULES[i] + "-module.so " + FLAGS[i];
 
   if (VERBOSE)

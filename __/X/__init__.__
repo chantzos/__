@@ -41,7 +41,7 @@ class X
       argv = [XINIT_BIN, Env->BIN_PATH + "/__xstart", "-nolisten", "tcp"];
     else
       argv = [XINIT_BIN, Env->BIN_PATH + "/__xstart", "--", dis,
-        "-nolisten", "tcp"];
+        "-nolisten", "tcp", "-keeptty"];
 
     variable status = p.execv (argv, NULL);
 
