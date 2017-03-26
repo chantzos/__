@@ -67,6 +67,7 @@ private variable regexps = [
 |^\s*(exit(?=\s))\
 |^(#include(?=\s))\
 |^(#\s?define(?=\s))\
+|^(#\s?undef(?=\s))\
 |^(enum(?=\s))\
 |(\s?(const))\
 |(^static)\
