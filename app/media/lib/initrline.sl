@@ -518,7 +518,7 @@ private define my_commands ()
   a;
 }
 
-private define populate_audiodir ()
+static define populate_audiodir ()
 {
   MED_AUD_DIR = MED_AUD_ORIG_DIR[wherenot (array_map (Integer_Type, &access,
     MED_AUD_ORIG_DIR, F_OK|R_OK))];

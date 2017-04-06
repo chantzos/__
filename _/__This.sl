@@ -92,6 +92,7 @@ static define __INIT__ (role)
       my = struct
         {
         role = role,
+        namespace,
         name,
         tmpdir,
         basedir,

@@ -77,6 +77,8 @@ public define shell ();
 
 public define init_shell ()
 {
-  Load.file (This.is.my.basedir + "/lib/shell", NULL);
+  Load.file (This.is.my.basedir + "/lib/shell",
+    This.is.my.namespace);
+
   shell ();
 }

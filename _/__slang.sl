@@ -52,7 +52,7 @@ public define __eval (buf, ns)
   try
     eval (buf, ns);
   catch AnyError:
-   {
+    {
     variable err_buf;
     variable fun = (fun = qualifier ("fun"),
       NULL == fun

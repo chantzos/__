@@ -278,21 +278,25 @@ class Ved
 
   def get_ftype (fn)
     variable ftype = qualifier ("ftype");
+    variable ext;
+
     if (NULL == ftype)
       if (NULL == fn)
         ftype = "txt";
       else
         {
-        variable ext = path_extname (fn);
-        if (strlen (ext) < 2)
+        ext = strtrim_beg (path_extname (fn), ".");
+        ifnot (strlen (ext))
           ftype = "txt";
         else
-          ftype = substr (ext, 2, -1);
+          ftype = ext;
         }
 
     ifnot (any (assoc_get_keys (FTYPES) == ftype))
       if ("mutt-" == substr (path_basename (fn), 1, 5))
         ftype = "mail";
+      else if ("h" == ftype)
+        ftype = "c";
       else
         ftype = "txt";
 

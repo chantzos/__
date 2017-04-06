@@ -54,4 +54,5 @@ private define _myframesize_ ()
 
 This.framesize = &_myframesize_;
 
-Load.file (This.is.my.basedir + "/lib/" + This.is.my.name, NULL);
+Load.file (This.is.my.basedir + "/lib/" + This.is.my.name,
+  This.is.my.namespace);

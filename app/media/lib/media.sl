@@ -252,6 +252,22 @@ public define init_media ()
   MED_LIST_BUF.__NOR__["beg"][string ('t')]          = &med_on_t;
 
   wind_init ("a", 2;force, on_wind_new);
+
+  loop (1)
+  ifnot (NULL == Opt.Arg.exists ("--play", &This.has.argv;del_arg))
+    {
+    variable s = Ved.get_cur_rline ();
+    Rline.set (s);
+
+    __eval ("populate_audiodir;", This.is.my.namespace);
+
+    ifnot (strlen (MED_AUD_DIR[0]))
+       break;
+
+    s.argv = ["audioplay", MED_AUD_DIR[0]];
+    s.execline ();
+    }
+
   mainloop ();
 }
 

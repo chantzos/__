@@ -74,6 +74,7 @@ This.is.my.name = "____" == path_basename_sans_extname (This.has.argv[0])
    ? "__"
    : strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
 
+This.is.my.namespace = "__" + strup (This.is.my.name) + "__";
 This.is.my.basedir = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
 This.is.my.tmpdir  = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
 This.is.my.datadir = Env->USER_DATA_PATH + "/" + This.is.my.name;
@@ -780,14 +781,19 @@ public define init_commands ()
   a;
 }
 
+__use_namespace (This.is.my.namespace);
+
 ifnot (access (This.is.my.basedir + "/lib/vars.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/vars", NULL);
+  Load.file (This.is.my.basedir + "/lib/vars",
+    This.is.my.namespace);
 
 ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/Init", NULL);
+  Load.file (This.is.my.basedir + "/lib/Init",
+    This.is.my.namespace);
 
 ifnot (access (This.is.my.basedir + "/lib/initrline.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/initrline", NULL);
+  Load.file (This.is.my.basedir + "/lib/initrline",
+    This.is.my.namespace);
 
 ifnot (access (Env->USER_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
   Load.file (Env->USER_LIB_PATH + "/wind/" + This.is.my.name);
