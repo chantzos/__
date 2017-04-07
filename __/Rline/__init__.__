@@ -303,6 +303,8 @@ class Rline
     rl.wind_mang = qualifier ("wind_mang");
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
     rl.funclist = __get_qualifier_as (Assoc_Type, qualifier ("funclist"), NULL);
+    rl.lnrs = Integer_Type[0];
+    rl.cmp_lnrs = Integer_Type[0];
 
     if (0 == length (rl.history) && NULL != rl.histfile)
       rl.history = readhistory (Rline, rl.histfile);
