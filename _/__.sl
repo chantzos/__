@@ -404,10 +404,12 @@ private define __classnew__ (cname, super, classpath, isself, methods)
     r = c["__R__"];
 
   ifnot (NULL == r.name)
-    ifnot (r.super == r.name)
-      throw ClassError, "Class::__classnew::" + r.name +
-          " is super class and cannot be redefined";
-    else
+    % __NEVER_USED__
+
+    %ifnot (r.super == r.name)
+    %  throw ClassError, "Class::__classnew::" + r.name +
+    %    " is super class and cannot be redefined";
+    % else
       return c;
 
   r.name = cname;
