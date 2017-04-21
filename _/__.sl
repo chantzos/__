@@ -404,7 +404,7 @@ private define __classnew__ (cname, super, classpath, isself, methods)
     r = c["__R__"];
 
   ifnot (NULL == r.name)
-    % __NEVER_USED__
+    % __NEVER_USED__ (see commit: 1095be9)
 
     %ifnot (r.super == r.name)
     %  throw ClassError, "Class::__classnew::" + r.name +

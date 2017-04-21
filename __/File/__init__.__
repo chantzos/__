@@ -116,8 +116,14 @@ class File
         ifnot (any ([BString_Type, String_Type] == _typeof (@str)))
           @str = NULL;
         else
-          ifnot (qualifier_exists ("n"))
-            @str += "\n";
+          ifnot (length (@str))
+            ifnot (qualifier_exists ("abort_on_no_length"))
+              @str = [""];
+            else
+              @str = NULL;
+          else
+            ifnot (qualifier_exists ("n"))
+              @str += "\n";
   end
 
   def write (file, str)
