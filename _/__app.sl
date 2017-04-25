@@ -84,10 +84,12 @@ This.is.my.histfile= Env->USER_DATA_PATH + "/.__" + Env->USER +
   "_" + This.is.my.name + "history";
 
 __Fexpr (`(ar, tok, i)
+  ar = File.readlines (Env->STD_DATA_PATH + "/genconf/conf");
+
   if (0 == access (This.is.my.genconf, F_OK|R_OK) &&
       0 == Sys.checkperm (stat_file (This.is.my.genconf).st_mode,
         File->PERM["_PRIVATE"]))
-    ar = File.readlines (This.is.my.genconf);
+    ar = [ar, File.readlines (This.is.my.genconf)];
 
   if (0 == access (This.is.my.conf, F_OK|R_OK) &&
       0 == Sys.checkperm (stat_file (This.is.my.conf).st_mode,
@@ -98,8 +100,9 @@ __Fexpr (`(ar, tok, i)
     {
     tok = strtok (ar[i], "::");
     ifnot (2 == length (tok))
-      continue;
-    This.is.my.settings[tok[0]] = tok[1];
+      This.is.my.settings[tok[0]] = "";
+    else
+      This.is.my.settings[tok[0]] = tok[1];
     }
 `).__ (String_Type[0], NULL, NULL);
 

@@ -51,7 +51,10 @@ class Env
   let SRC_USER_PATH    = SRC_PATH + "/usr";
 
   let SRC_STD_DATA_PATH    = SRC_PATH + "/data";
+  let SRC_STD_LIB_PATH     = SRC_PATH + "/___";
+
   let SRC_USER_DATA_PATH   = SRC_USER_PATH + "/data";
+  let SRC_USER_COM_PATH    = SRC_USER_PATH + "/com";
   let SRC_USER_CLASS_PATH  = SRC_USER_PATH + "__";
 
   let SRC_LOCAL_PATH       = SRC_PATH + "/local";
