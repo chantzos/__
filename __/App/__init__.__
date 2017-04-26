@@ -168,6 +168,26 @@ class App
       Rline.writehistory (list_to_array (searchhist), (@__get_reference ("SEARCH_HISTFILE")));
   end
 
+  def __draw_wind () public proc
+    variable cur = Ved.get_wind_name ();
+    variable wind = _NARGS ? () : cur;
+
+    ifnot (String_Type == typeof (wind))
+      return;
+
+    if (wind == ".")
+      wind = cur;
+
+    variable winds = Ved.get_wind_names ();
+    ifnot (any (wind == winds))
+      return;
+
+    if (wind == cur)
+      Ved.draw_wind ();
+    else
+      Ved.wind_change (wind);
+  end
+
   def __draw_buf (s) public proc
     variable st = NULL == s._fd
       ? lstat_file (s._abspath)
