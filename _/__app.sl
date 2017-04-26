@@ -367,6 +367,24 @@ __(
   Com.post_builtin ();
 `;__ns__ = "__CHDIR__");
 
+private variable __TRACK__ = __Function (`
+__(
+  __TRACK_FILE__ = This.is.my.datadir + "/" + This.is.my.name +
+    "_DevDo.md";
+  __SRC_TRACK_FILE__ = "";
+)__
+
+  (argv)
+  App.Run.as.child (["__ved", __TRACK_FILE__]);
+
+  __SRC_TRACK_FILE__ = Me.get_src_path (__TRACK_FILE__);
+
+  if (File.exists (__TRACK_FILE__))
+    () = File.copy (__TRACK_FILE__, __SRC_TRACK_FILE__);
+
+  __draw_wind ();
+`;__ns__ = "__TRACK__");
+
 private define __search__ (argv)
 {
   Com.pre_com ();
@@ -392,7 +410,7 @@ private define __search__ (argv)
     App.Run.as.child (["__ved", GREPFILE]);
 
   Com.post_header ();
-  __draw_buf (Ved.get_cur_buf ());
+  __draw_wind ();
 }
 
 private variable __WHICH__ = __Function (`
@@ -520,7 +538,7 @@ private define __help (argv)
     {
     variable f = Me.get_src_path (k.dir) + "/help.txt";
     App.Run.as.child (["__ved", f]);
-    __draw_buf (Ved.get_cur_buf ());
+    __draw_wind ();
     return;
     }
 
@@ -538,7 +556,7 @@ private define __info (argv)
     {
     variable f = I.get_src_path (k.dir) + "/desc.txt";
     App.Run.as.child (["__ved", f]);
-    __draw_buf (Ved.get_cur_buf ());
+    __draw_wind ();
     return;
     }
 
@@ -559,7 +577,7 @@ private define __edit_history (argv)
     Rline.writehistory (rl.history, rl.histfile);
 
   App.Run.as.child (["__ved", rl.histfile]);
-  __draw_buf (Ved.get_cur_buf ());
+  __draw_wind ();
 
   rl.history = Rline.readhistory (rl.histfile);
 }
@@ -663,6 +681,9 @@ private define __builtins__ (a)
     a["cd"] = @Argvlist_Type;
     a["cd"].func = __CHDIR__.__funcref;
     }
+
+  a["__track"] = @Argvlist_Type;
+  a["__track"].func = __TRACK__.__funcref;
 
   a["__which"] = @Argvlist_Type;
   a["__which"].func = __WHICH__.__funcref;
