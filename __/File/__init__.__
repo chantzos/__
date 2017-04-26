@@ -49,6 +49,10 @@ class File
     NULL == mode ? 0 : stat_is (type, mode);
   end
 
+  def exists (file)
+    access (file, F_OK) ? 0 : 1;
+  end
+
   def read (file)
     variable fd;
 
