@@ -2,16 +2,18 @@ public define intro (rl, vd)
 {
   variable notice = ` Intro
 
-This is the output of an introduction function, that is running at the shell
-application initialization.
+This is the output of an introduction function, that is running at the
+shell application initialization.
+
 Normally, it runs once a day, but that depends if ` + Env->TMP_PATH + `
-is mounted in a tmpfs filesystem (which (kinda) is a prequisite for current code
-as it doesn't any cleanup at exit),
+is mounted under a tmpfs filesystem (which (kinda) is a prerequisite
+for the current code, as it doesn't any cleanup at exit)
 
     EXAMPLE
 The underneath function searchs first for a file intro.slc, located at
   ` + Env->LOCAL_LIB_PATH + `/intro/
-which (the source file (and the one that has to be edited)) is located at
+which the relative source file (and the one that has to be edited)) is
+located at
   ` + Env->SRC_LOCAL_LIB_PATH + `/intro/
 
 and expects a public defined intro function (like the following)
@@ -19,18 +21,18 @@ and expects a public defined intro function (like the following)
 public define intro (rline, ved)
 {
   % redirect  output of ``battery`` to the scratch buffer 
-  % (using ">|" for redirection and without writting the header (which normally
-  % is a shell prompt)) --
+  % (using ">|" for redirection and without writting the header (which
+  % normally is a shell prompt)) --
   %   focus the pointer on (sample_battery_command) and press *,
-  % for a battery command located at this pager view
+  %   for a battery command located at this pager view
   %   (this will open a search dialog (enter to accept the match) 
-  %                                   (```` to come back)
+  %                                   (```` to come back))
 
   __runcom  (["battery", ">|" + SCRATCH], NULL;no_header);
 
-  % appends a (divider) line (by default COLUMNS length)
+  % appends a (divider) horizontal line
   % by using the (__HLINE__) method from the Smg class
-  %     (by default COLUMNS length), which actually is the expression
+  % which actually is the expression
   %   repeat (char (8212), COLUMNS);
   %  (repeat is a intrinsic function defined by the interpreter)
 
@@ -38,15 +40,33 @@ public define intro (rline, ved)
   %   (File.append) is a method defined at
   %  ` + Env->SRC_CLASS_PATH + `/File/__init__.__
 
-  % probably another command (but now using >> (for appending to the buffer))
+  % probably another command (but now using >> (for appending to the
+  % buffer))
 
-  __runcom  (["battery",  ">>" + SCRATCH], NULL;no_header);;
- %__runcom is a public defined function that runs a command
- %__scratchis a public defined function that runs a pager for the scratch buffer
+  __runcom  (["command",  ">>" + SCRATCH], NULL;no_header);;
+ %__runcom is a public defined function that runs a command.
+
+ % functions that start with two underscores are defined on
+ % the public namespace and serve as the application interface
+ % (most of them defined at)
+ % ` + Env->SRC_CLASS_PATH + `/App/__init__.__
+ %  (it is possible to open the file, by placing the cursor
+ %   over the filename and press "gf")
+
+ % note that this intro file can be reopened
+ % by issuing: intro (to the command line)
+
+ %__scratch is a public defined function that runs a pager for the
+ % scratch buffer
   __scratch (ved);
- % the ved argunent is a ved (buffer) structure (see `
- +  Env->SRC_CLASS_PATH  + `/Ved/__init__.__)
- %  which also serves as an editor 
+
+ % the ved argunent is a ved (buffer) structure, see
+ % ` +  Env->SRC_CLASS_PATH  + `/Ved/__init__.__
+
+ %  which (with some aditions to the code) also serves as an editor
+ %  it can be started by issuing: ved [filename]
+ %    without filename ved opens the scratch buffer (which
+ %    in this case is this buffer)
 }
 
 Press q to exit from the pager, for the shell command line
@@ -64,9 +84,14 @@ either at:
 See examples at:
   ` + Env->SRC_COM_PATH + `
 
+% a main () function is required for any command
 define main ()
 {
+  % this sets verbose mode on
   verboseon ();
+  % see the definitions at
+  ` + Env->SRC_PATH + `/tmp/__com.sl
+
   variable
     dir,
     bat,
@@ -90,6 +115,8 @@ define main ()
 
     if (NULL == bat)
       {
+      % IO structure located at
+      ` + Env->SRC_CLASS_PATH + `/IO/__init__.__
       IO.tostderr ("I didn't found any battery");
       exit_me (1);
       }

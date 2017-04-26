@@ -63,7 +63,6 @@ class Env
   let SRC_LOCAL_CLASS_PATH = SRC_LOCAL_PATH + "/__";
   let SRC_LOCAL_LIB_PATH   = SRC_LOCAL_PATH + "/___";
 
-
   def defenv ()
     variable lenv = [
       "TERM=" + TERM,

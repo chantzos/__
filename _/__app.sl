@@ -374,8 +374,8 @@ __(
 )__
 
   (argv)
-  __SRC_TRACK_DIR__  =  Me.get_src_path (This.is.my.basedir);
-  __SRC_TRACK_FILE__ =  This.is.my.name + "_DevDo.md";
+  __SRC_TRACK_DIR__  = Me.get_src_path (This.is.my.basedir);
+  __SRC_TRACK_FILE__ = This.is.my.name + "_DevDo.md";
 
   variable tracked = File.exists (__SRC_TRACK_DIR__ + "/" +
     __SRC_TRACK_FILE__);
@@ -440,7 +440,7 @@ private define __search__ (argv)
     App.Run.as.child (["__ved", GREPFILE]);
 
   Com.post_header ();
-  __draw_wind ();
+  __draw_buf (Ved.get_cur_buf ());
 }
 
 private variable __WHICH__ = __Function (`
@@ -542,7 +542,7 @@ private define __lock__ (argv)
 
   while (NULL == Os.__getpasswd (;uncached));
 
-  Ved.draw_wind ();
+  __draw_wind ();
 }
 
 private define list_bg_jobs (argv)
@@ -568,7 +568,6 @@ private define __help (argv)
     {
     variable f = Me.get_src_path (k.dir) + "/help.txt";
     App.Run.as.child (["__ved", f]);
-    __draw_wind ();
     return;
     }
 
@@ -586,7 +585,6 @@ private define __info (argv)
     {
     variable f = I.get_src_path (k.dir) + "/desc.txt";
     App.Run.as.child (["__ved", f]);
-    __draw_wind ();
     return;
     }
 
@@ -607,7 +605,6 @@ private define __edit_history (argv)
     Rline.writehistory (rl.history, rl.histfile);
 
   App.Run.as.child (["__ved", rl.histfile]);
-  __draw_wind ();
 
   rl.history = Rline.readhistory (rl.histfile);
 }
@@ -895,6 +892,9 @@ private define __rehash__ ()
 }
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
+
+Com.let ("COMMANDS_FOR_PAGER",__Fexpr (`()
+    strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`).__ ());
 
 App.build_table ();
 

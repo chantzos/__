@@ -10,6 +10,8 @@ class Com
   ved     = 1,
   };
 
+  let COMMANDS_FOR_PAGER = NULL;
+
   subclass Fork from Com
 
   def pre_com ()
@@ -418,7 +420,7 @@ class Com
 
     if (NULL == isscratch &&
     %%% CARE FOR CHANGES argv-index
-      (any (argv[2] == ["man"]) &&
+      (any (COMMANDS_FOR_PAGER == argv[2]) &&
         NULL == Opt.Arg.exists ("--buildcache", &argv)))
       {
       isbg = 0;
