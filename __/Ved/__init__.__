@@ -818,9 +818,17 @@ class Ved
   def on_wind_change (w) public proc
   end
 
-  def wind_change (to) proc
+  def get_wind_name ()
+    VED_CUR_WIND;
+  end
+
+  def get_wind_names ()
     variable winds = assoc_get_keys (VED_WIND);
-    winds = winds[array_sort (winds)];
+    winds[array_sort (winds)];
+  end
+
+  def wind_change (to)
+    variable winds = get_wind_names (NULL);
 
     variable w;
     variable i;
@@ -858,7 +866,7 @@ class Ved
 
   def next_wind (s) public proc
     if (This.has.new_windows)
-      wind_change (".");
+      wind_change (NULL, ".");
   end
 
   def on_wind_new (w) public proc
@@ -1175,7 +1183,7 @@ class Ved
     else
       chr = char (chr);
 
-    wind_change (chr);
+    wind_change (NULL, chr);
     s = Ved.get_cur_buf ();
   end
 
