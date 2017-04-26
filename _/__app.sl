@@ -369,20 +369,50 @@ __(
 
 private variable __TRACK__ = __Function (`
 __(
-  __TRACK_FILE__ = This.is.my.datadir + "/" + This.is.my.name +
-    "_DevDo.md";
+  __SRC_TRACK_DIR__  = "";
   __SRC_TRACK_FILE__ = "";
 )__
 
   (argv)
-  App.Run.as.child (["__ved", __TRACK_FILE__]);
+  __SRC_TRACK_DIR__  =  Me.get_src_path (This.is.my.basedir);
+  __SRC_TRACK_FILE__ =  This.is.my.name + "_DevDo.md";
 
-  __SRC_TRACK_FILE__ = Me.get_src_path (__TRACK_FILE__);
+  variable tracked = File.exists (__SRC_TRACK_DIR__ + "/" +
+    __SRC_TRACK_FILE__);
 
-  if (File.exists (__TRACK_FILE__))
-    () = File.copy (__TRACK_FILE__, __SRC_TRACK_FILE__);
+  App.Run.as.child (["__ved", __SRC_TRACK_DIR__ + "/" +
+    __SRC_TRACK_FILE__]);
 
-  __draw_wind ();
+  loop (1)
+  ifnot (tracked)
+    {
+    variable git_bin = Sys.which ("git");
+    if (NULL == git_bin) % by default exists (but make the test anyway)
+      break;
+
+    variable cur_dir = getcwd ();
+    if (-1 == chdir (Env->SRC_PATH))
+      break;
+
+    variable path = strreplace (__SRC_TRACK_DIR__ + "/" +
+      __SRC_TRACK_FILE__, Env->SRC_PATH + "/", "");
+
+    variable p = Proc.init (0, 1, 1);
+
+    variable status = p.execv ([git_bin, "add", path], NULL);
+    if (status.exit_status)
+      {
+      () = chdir (cur_dir);
+      break;
+      }
+
+    variable pa = Proc.init (0, 1, 1);
+    variable msg = This.is.my.name + ": added a development (track) file";
+    status = pa.execv ([git_bin, "commit", path, "-m", msg], NULL);
+
+    () = chdir (cur_dir);
+    }
+
 `;__ns__ = "__TRACK__");
 
 private define __search__ (argv)
