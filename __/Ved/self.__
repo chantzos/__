@@ -85,12 +85,65 @@ beg
     ifnot (2 == length (arg))
       return NULL;
 
-    variable i, ia;
+    variable i, ia, expr, len;
     variable range = ["", ""];
+
     _for i (0, 1)
-      _for ia (0, strlen (arg[i]) - 1)
+      % after years of `_for', this is the first need for `for'
+      for (ia = 0; len = strlen (arg[i]), ia < len; ia++)
         ifnot ('0' <= arg[i][ia] <= '9')
-          return NULL;
+          ifnot (any (['$', '.'] == arg[i][ia]))
+            return NULL;
+          else if ('$' == arg[i][ia])
+            {
+            if (ia == len - 1)
+              range[i] += string (length (lnrs) - 1);
+            else
+              {
+              ia++;
+
+              if ('-' != arg[i][ia] || ia + 1 == len)
+                return NULL;
+
+              ia++;
+              expr = string (length (lnrs) - 1) + " - ";
+
+              % this is because the outer loop dont get the increments 
+              for (ia = ia; ia < len; ia++)
+                ifnot ('0' <= arg[i][ia] <= '9')
+                  return NULL;
+                else
+                  expr += char (arg[i][ia]);
+
+              range[i] = string (eval (expr));
+              }
+            }
+          else if ('.' == arg[i][ia])
+            {
+            expr = string (__vlnr (s, '.'));
+            if (ia == len - 1)
+              range[i] = expr;
+            else
+              {
+              ia++;
+
+              ifnot (any (['-', '+'] == arg[i][ia]))
+                return NULL;
+
+              expr += char (arg[i][ia]);
+
+              if (ia + 1 == len)
+                return NULL;
+
+              for (ia = ia + 1; ia < len; ia++)
+                ifnot ('0' <= arg[i][ia] <= '9')
+                  return NULL;
+                else
+                  expr += char (arg[i][ia]);
+
+              range[i] = string (eval (expr));
+              }
+            }
         else
           range[i] += char (arg[i][ia]);
 

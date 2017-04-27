@@ -591,9 +591,10 @@ class Ved
   end
 
   def _draw_ (s) proc
-    if (0 > s._len) % this shouldn't never occur
-      {             % something went wrong and needs fixing
-      Smg.send_msg ("_draw_ (), caught unacceptable s._len condition, " + s._fname, 1);
+    if (0 > s._len) % this shouldn't never occur (simple means that
+      {             % something went wrong and needs fixing at the cause)
+      __vdebug ("_draw_ (), caught unacceptable s._len condition, " +
+         s._fname;hold);
       s.lins = [__get_null_str (s._indent)];
       s.lnrs = [0];
       s._ii = 0;
@@ -1420,6 +1421,61 @@ class Ved
     Smg.askprintstr (ar, char_ar, &cmp_lnrs;hl_region = hl_reg);
   end
 
+  def __delete__ (buf, pat, lnrs, whenmatch) proc
+    variable lnr, line, len, i;
+    variable __pcre_exec = __Fexpr (`(pat, line)
+      try
+        {
+        pcre_exec (pat, line, 0);
+        }
+      catch AnyError:
+        {
+        Exc.print (NULL);
+        0;
+        }
+        `);
+
+    _for i (0, length (lnrs) -1)
+      {
+      lnr = lnrs[i];
+      line = buf.lines[lnr];
+      if (__pcre_exec.__ (pat, line))
+        ifnot (whenmatch)
+          continue;
+        else
+          buf.lines[lnr] = NULL;
+      else
+        ifnot (whenmatch)
+          buf.lines[lnr] = NULL;
+      }
+
+    variable nulllines = _isnull (buf.lines);
+    len = buf._len - length (nulllines);
+
+    buf.lines = buf.lines[wherenot (nulllines)];
+    buf._len = length (buf.lines) - 1;
+
+    buf._i = buf._ii - len;
+    if (0 > buf._i)
+      buf._i = 0;
+
+    buf._index = buf._indent;
+    buf._findex = buf._indent;
+    buf.ptr[0] = buf.rows[0];
+    buf.ptr[1] = buf._indent;
+
+    if (-1 == buf._len)
+      {
+      buf.lines = [__get_null_str (buf._indent)];
+      buf._len = 0;
+      buf._i = 0;
+      }
+
+    buf.st_.st_size = Array.String.__len (buf.lines, buf._len + 1);
+    set_modified (buf);
+    buf.draw ();
+  end
+
   def __global () public proc
     variable global = 0, whenmatch = 1, ask = 1, pat = NULL, action = NULL, ind, range = NULL;
     variable args = __pop_list (_NARGS);
@@ -1477,57 +1533,7 @@ class Ved
       return;
       }
 
-    variable lnr, line, len;
-    variable __pcre_exec = __Fexpr (`(pat, line)
-      try
-        {
-        pcre_exec (pat, line, 0);
-        }
-      catch AnyError:
-        {
-        Exc.print (NULL);
-        0;
-        }
-        `);
-
-    _for ind (0, length (lnrs) -1)
-      {
-      lnr = lnrs[ind];
-      line = buf.lines[lnr];
-      if (__pcre_exec.__ (pat, line))
-        ifnot (whenmatch)
-          continue;
-        else
-          buf.lines[lnr] = NULL;
-      else
-        ifnot (whenmatch)
-          buf.lines[lnr] = NULL;
-      }
-
-    variable nulllines = _isnull (buf.lines);
-    len = buf._len - length (nulllines);
-
-    buf.lines = buf.lines[wherenot (nulllines)];
-    buf._len = length (buf.lines) - 1;
-
-    buf._i = buf._ii - len;
-    if (0 > buf._i)
-      buf._i = 0;
-
-    buf.ptr[0] = buf.rows[0];
-    buf.ptr[1] = buf._indent;
-    buf._index = buf._indent;
-    buf._findex = buf._indent;
-
-    if (-1 == buf._len)
-      {
-      buf.lines = [__get_null_str (buf._indent)];
-      buf._len = 0;
-      }
-
-    buf.st_.st_size = Array.String.__len (buf.lines, buf._len + 1);
-    set_modified (buf);
-    buf.draw ();
+     __delete__ (buf, pat, lnrs, whenmatch);
   end
 
   def __substitute () public proc
