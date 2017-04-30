@@ -27,6 +27,9 @@ private define __err_get (nsname)
 
 private define __err_set (nsname, err)
 {
+  if (NULL == err)
+    err = "";
+
   ifnot (assoc_key_exists (__ERR__, nsname))
     __ERR__[nsname] = {err};
   else
@@ -41,9 +44,22 @@ static define ERR ()
   variable nss, ref = &__err_get, args = {NULL}, err = NULL;
 
   switch (_NARGS)
-    {case 1: nss = ();}
-    {case 2: ref = &__err_set; err = (); nss = ();}
-    {return "";}
+    {
+    case 1:
+       nss = ();
+    }
+
+    {
+    case 2:
+      err = ();
+      nss = ();
+      list_append (args, err);
+      ref = &__err_set;
+    }
+
+    {
+    return "";
+    }
 
   variable t = typeof (nss);
 
@@ -57,9 +73,6 @@ static define ERR ()
       args[0] = nss.__name;
   else
     args[0] = nss;
-
-  ifnot (NULL == err)
-    list_append (args, err);
 
   (@ref) (__push_list (args);;__qualifiers);
 }
