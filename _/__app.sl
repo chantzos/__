@@ -491,11 +491,10 @@ private define __write__ (argv)
   variable file;
   variable command;
 
-  (range_arg, ) = Opt.Arg.compare ("--range=", &argv;ret_arg, del_arg);
-
-  ifnot (NULL == range_arg)
-    if (NULL == (lnrs = Ved.parse_arg_range (s, range_arg, lnrs), lnrs))
-      return;
+  % the getlong method should parse range
+  if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &argv;fun_args =
+       {s, lnrs}, del_arg, defval = lnrs), lnrs))
+    return;
 
   append = NULL != Opt.Arg.exists (">>", &argv;del_arg);
 

@@ -73,8 +73,7 @@ beg
       qualifier ("row", PROMPTROW), col, COLUMNS);
   end
 
-  def parse_arg_range (s, arg, lnrs)
-    arg = substr (arg, strlen ("--range=") + 1, -1);
+  def parse_range (s, lnrs, arg)
     ifnot (strlen (arg))
       return NULL;
 
@@ -144,6 +143,7 @@ beg
               range[i] = string (eval (expr));
               }
             }
+          else {}
         else
           range[i] += char (arg[i][ia]);
 
@@ -156,6 +156,9 @@ beg
 
   def writefile (s, overwrite, ptr, file, append)
     variable bts = 0;
+
+    ifnot (append)
+      append = NULL;
 
     if (NULL == file)
       {

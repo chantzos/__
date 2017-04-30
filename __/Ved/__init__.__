@@ -1524,13 +1524,9 @@ class Ved
       return;
       }
 
-    ind = Opt.Arg.compare ("--range=", &args);
-    ifnot (NULL == ind)
-      {
-      lnrs = Ved.parse_arg_range (buf, args[ind], lnrs);
-      if (NULL == lnrs)
-        return;
-      }
+    if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &args;fun_args =
+        {buf, lnrs}, del_arg, defval = lnrs), lnrs))
+      return;
 
     ifnot (NULL == pat)
     try
@@ -1551,48 +1547,31 @@ class Ved
   end
 
   def __substitute () public proc
-    variable global = 0, ask = 1, pat = NULL, sub = NULL, ind, range = NULL;
+    variable global = 0, ask = 1, pat = NULL, sub = NULL, range = NULL;
     variable args = __pop_list (_NARGS);
     variable buf = Ved.get_cur_buf ();
     variable lnrs = [0:buf._len];
 
     args = list_to_array (args, String_Type);
 
-    ind = Opt.Arg.compare ("--pat=", &args);
-    ifnot (NULL == ind)
-      pat = substr (args[ind], strlen ("--pat=") + 1, -1);
+    pat = Opt.Arg.getlong ("pat", NULL, &args;del_arg, ret_arg);
+    sub = Opt.Arg.getlong ("sub", NULL, &args;del_arg, ret_arg);
 
-    ind = Opt.Arg.compare ("--sub=", &args);
-    ifnot (NULL == ind)
-      sub = substr (args[ind], strlen ("--sub=") + 1, -1);
-
-    if (NULL == pat || NULL == sub)
+    if (NULL == pat || NULL == sub || any (0 == strlen ([pat, sub])))
       {
       Smg.send_msg_dr ("--pat= and --sub= are required", 1, buf.ptr[0], buf.ptr[1]);
       return;
       }
 
-    if (0 == strlen (pat) || 0 == strlen (sub))
+    global = (NULL != Opt.Arg.exists ("--global", &args;del_arg));
+    ask = (NULL == Opt.Arg.exists ("--dont-ask-when-subst", &args;del_arg));
+
+    if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &args;fun_args =
+       {buf, lnrs}, del_arg, defval = lnrs), lnrs))
       {
-      Smg.send_msg_dr ("--pat= and --sub= are required", 1, buf.ptr[0], buf.ptr[1]);
-      return;
-      }
-
-    ind = Opt.Arg.exists ("--global", &args);
-    ifnot (NULL == ind)
-      global = 1;
-
-    ind = Opt.Arg.exists ("--dont-ask-when-subst", &args);
-    ifnot (NULL == ind)
-      ask = 0;
-
-    ind = Opt.Arg.compare ("--range=", &args);
-    ifnot (NULL == ind)
-      {
-      lnrs = Ved.parse_arg_range (buf, args[ind], lnrs);
-      if (NULL == lnrs)
-        return;
-      }
+       Smg.send_msg_dr (Opt.err ());
+       return;
+       }
 
     variable s = Subst.new (pat, sub;
       fname = buf._abspath, global = global, askwhensubst = ask,

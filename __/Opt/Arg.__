@@ -4,23 +4,16 @@ subclass Arg
     compare
     exists
     getlong
-    geterr
-  end
-
-  var err = NULL;
-
-  def geterr ()
-    err;
-    err = NULL;
   end
 
   def getlong (arg, type, argv)
-    variable opt, ind, err_msg, defval = qualifier ("defval");
+    variable opt, ind, defval = qualifier ("defval");
     (opt, ind) = self.compare ("--" + arg + "=", argv;;struct {@__qualifiers, ret_arg});
 
     if (NULL == ind)
       {
-      err_msg = __get_qualifier_as (String_Type, qualifier ("exists_err"), NULL);
+      Opt.err (__get_qualifier_as (String_Type, qualifier ("exists_err"),
+         "argument --" + arg + " doesn't match any of the arguments"));
       return defval;
       }
 
@@ -28,7 +21,7 @@ subclass Arg
 
     if (2 > length (opt))
       {
-      err = "No value specified";
+      Opt.err ("No value specified");
       return defval;
       }
 
@@ -55,7 +48,7 @@ subclass Arg
       case "dir" || case "directory":
         ifnot (Dir.isdirectory (opt))
           {
-          err = "--" + arg + "=" + opt + ", doesn't specify a directory";
+          Opt.err ("--" + arg + "=" + opt + ", doesn't specify a directory");
           return defval;
           }
 
@@ -68,6 +61,21 @@ subclass Arg
           return defval;
 
         return opt;
+      }
+
+      {
+      case "range":
+        variable ved = Class.get ("Ved")["__SELF__"];
+        variable fargs = __get_qualifier_as (List_Type, qualifier ("fun_args"),
+          {ved.get_cur_buf (), [0:ved.get_cur_buf ()._len]});
+
+        list_append (fargs, opt);
+
+        variable lnrs = ved.parse_range (__push_list (fargs));
+        if (NULL == lnrs)
+          Opt.err ("unacceptable range: " + opt);
+
+        return lnrs;
       }
 
       {
