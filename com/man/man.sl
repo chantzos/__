@@ -6,7 +6,11 @@ private variable
   LOCALMANDIR = "/usr/local/share/man/",
   DATA_DIR = sprintf ("%s/man", Env->USER_DATA_PATH),
   MYMANDIR = sprintf ("%s/manhier", DATA_DIR),
-  MAN_HIER = array_map (String_Type, &sprintf, "%s/man%d",  MYMANDIR, [0:8]);
+  MAN_HIER = [
+    array_map (String_Type, &sprintf, "%s/man%d",  MYMANDIR, [0:8]),
+    MYMANDIR + "/man0p",
+    MYMANDIR + "/man1p",
+    MYMANDIR + "/man3p"];
 
 private variable
   gzip = Sys.which ("gzip"),
@@ -373,7 +377,8 @@ define main ()
       }
 
     cache = File.readlines (cachefile);
-    pat = pcre_compile (sprintf ("/%s\\056[0-9]", page), options);
+    pat = pcre_compile (sprintf (
+      "/%s\\056(h\\056)?[0-9]", page), options);
     if (path_is_absolute (page))
       pos = 0;
     else

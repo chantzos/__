@@ -847,8 +847,8 @@ class Rline
                 ? (length (strtok (strjoin (car, " "))) mod items) - 1
                 : items - 1,
             length (car) >= lines
-              ? ((page) * (lines * items)) + ((lines - 1) * items) + items - 1 -
-                (length (ar) mod items)
+              ? ((page) * (lines * items)) + ((lines - 1) * items) +
+                items - 1 - (length (ar) mod items)
               : length (ar) - 1;
           }
         else

@@ -324,7 +324,7 @@ private define __sync_gen__ (argv, type)
 
   if (NULL == toorfrom)
     {
-    IO.tostderr (Opt.Arg.geterr ());
+    IO.tostderr (Opt.err ());
     return -1;
     }
 

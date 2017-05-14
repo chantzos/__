@@ -1,11 +1,11 @@
 VED_RLINE = 1;
 VED_ISONLYPAGER = 0;
 
-public define _new_frame_ (s)
-{
-  Ved.new_frame (Ved->VED_DIR + "/" + string (_time) + ".noname");
-  s = Ved.get_cur_buf ();
-}
+%public define _new_frame_ (s)
+%{
+%  Ved.new_frame (Ved->VED_DIR + "/" + string (_time) + ".noname");
+%  s = Ved.get_cur_buf ();
+%}
 
 variable VED_CLINE = Assoc_Type[Ref_Type];
 

@@ -393,7 +393,8 @@ class Ved
 
     w.bufnames = [w.bufnames,  s._abspath];
     w.buffers[s._abspath] = s;
-    w.buffers[s._abspath]._dir = realpath (path_dirname (s._abspath));
+    w.buffers[s._abspath]._dir = qualifier ("_dir",
+      realpath (path_dirname (s._abspath)));
 
     w.buffers[s._abspath];
   end
@@ -1128,7 +1129,8 @@ class Ved
     ifnot (VED_OPTS.new_frame)
       return;
 
-    Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname";_autochdir = 0);
+    Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname";
+      _autochdir = 0, _dir = Ved.get_cur_buf ()._dir);
     s = Ved.get_cur_buf ();
   end
 

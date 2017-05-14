@@ -23,8 +23,8 @@ class Time
 
     if (tim.tm_year > 1582 ||
         (tim.tm_year == 1582 && (lmonth > 10 || (lmonth == 10 && tim.tm_mday > 4))))
-      jdn = tim.tm_mday + ((153 * newmonth + 2) / 5) + (newyear * 365) + (newyear / 4)
-          - (newyear / 100) + (newyear / 400) - 32045;
+      jdn = tim.tm_mday + ((153 * newmonth + 2) / 5) + (newyear * 365) +
+          (newyear / 4) - (newyear / 100) + (newyear / 400) - 32045;
     else
       jdn = tim.tm_mday + (153 * newmonth + 2) / 5 + newyear * 365 + newyear / 4 - 32083;
 

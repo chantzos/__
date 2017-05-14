@@ -258,7 +258,7 @@ beg
 
     s._linlen = s._maxlen - s._indent;
 
-    s = __vaddbuf__ (s);
+    s = __vaddbuf__ (s;;__qualifiers);
 
     s.st_ = stat_file (s._abspath);
 
