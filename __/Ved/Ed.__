@@ -96,9 +96,11 @@ subclass Ed
       }
 
     if ('C' == s._chr) % add to register? not really usefull
-      Ved.Insert.mode (s, &line, lnr, prev_l, next_l;modified);
+      Ved.Insert.mode (s, &line, lnr, prev_l, next_l;;
+        struct {@__qualifiers, modified});
     else
-      Ved.Insert.mode (s, &line, lnr, prev_l, next_l);
+      Ved.Insert.mode (s, &line, lnr, prev_l, next_l;;
+        struct {@__qualifiers, modified});
   end
 
   def newline (s)

@@ -962,7 +962,22 @@ subclass Insert
     @line = Ved.Ed.Put (s;reg = "*", return_line);
   end
 
+  def exec_func (is, s, line, chr) proc
+    is.chr = chr;
+    if ('\r' == is.chr)
+      {
+      ins_cr (is, s, line);
+      return -1;
+      }
+
+    return 0;
+  end
+
   def ins_getline (is, s, line) proc
+    if (qualifier_exists ("exec_func"))
+      if (-1 == exec_func (is, s, line, qualifier ("exec_func")))
+        return;
+
     forever
       {
       is.chr = Input.getch (;on_lang = &_on_lang_change_, on_lang_args = {"insert", s.ptr});
@@ -1127,7 +1142,7 @@ subclass Insert
     ifnot (qualifier_exists ("dont_draw_tail"))
       __vdraw_tail (s);
 
-    ins_getline (sa, s, line);
+    ins_getline (sa, s, line;;__qualifiers);
 
     lang = Input.getmapname ();
 

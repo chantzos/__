@@ -1240,6 +1240,7 @@ class Ved
   end
 
   def __pg_on_carriage_return (s) public proc
+    Ved.Ed.editline (s;exec_func = '\r');
   end
 
   def __write_on_esc__ (s) proc
