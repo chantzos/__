@@ -82,7 +82,6 @@ class Smg
     SMGINITED = 0;
   end
 
-
   def suspend ()
     if (SUSPENDSTATE)
       return;
@@ -112,7 +111,6 @@ class Smg
     slsmg_gotorc (row, col);
     slsmg_refresh ();
   end
-
 
   def getrc (row, col)
       [slsmg_get_row (), slsmg_get_column ()];

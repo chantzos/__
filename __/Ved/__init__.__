@@ -1781,7 +1781,18 @@ class Ved
   end
 
   def __space__ (s) proc
-    Ved.Pager.page_down (s);
+    ifnot (s.st_.st_size)
+      return;
+
+    variable lnr = __vlnr (s, '.');
+    s.lines[lnr] = substr (s.lines[lnr], 1, s._index) + " " +
+        substr (s.lines[lnr], s._index + 1, -1);
+
+    s.st_.st_size ++;
+
+    set_modified (s);
+
+    s.draw ();
   end
 
   def __up__ (s) proc
