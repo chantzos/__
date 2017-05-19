@@ -681,7 +681,7 @@ subclass Insert
           variable lldws = llen - strlen (strtrim_beg (item));
 
           if (llen - len < col)
-            item = substr (item, col - len + 1, -1);
+            item = substr (item, col - len + 1 + (col < len), -1);
 
           if (llen - len > col)
             item = repeat (" ", ldws) + substr (item, lldws + 1, -1);
@@ -829,8 +829,16 @@ subclass Insert
 
     set_modified (s);
 
-    waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
-    __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
+    if (qualifier_exists ("draw_buf"))
+      {
+      s._i = s._ii;
+      s.draw ();
+      }
+    else
+      {
+      waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
+      __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
+      }
   end
 
   def blockcompletion (lnr, s, line) proc
@@ -885,6 +893,31 @@ subclass Insert
       case 'b':
         line = __vline (s, '.');
         blockcompletion (__vlnr (s, '.'), s, &line);
+      }
+
+      {
+      case 'f':
+        line = __vline (s, '.');
+        ins_fnamecompletion (__vlnr (s, '.'), s, &line;draw_buf);
+      }
+
+      {
+      case 'l':
+        line = __vline (s, '.');
+        variable _line = line;
+        variable lnr = __vlnr (s, '.');
+        variable len = strlen (_line);
+        % decrease to avoid an algotithm weakness 
+        s._index++;
+        ins_linecompletion (s, &line);
+        s._index--;
+        if (line == _line || strlen (line) < len)
+          return;
+        s.lines[lnr] = line;
+        s.st_.st_size += strlen (line) - len;
+        set_modified (s);
+        s._i = s._ii;
+        s.draw ();
       }
 
       {

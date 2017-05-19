@@ -1887,7 +1887,7 @@ class Ved
     VED_PAGER[string ('*')]            = &__search_word__;
     VED_PAGER[string ('n')]            = &__search_last__;
     VED_PAGER[string ('N')]            = &__search_last__;
-    VED_PAGER[string (033)]            = &pag_completion;
+    VED_PAGER[string ('\t')]           = &pag_completion;
     VED_PAGER[string ('\r')]           = &__pg_on_carriage_return;
     VED_PAGER[string ('`')]            = &__gotomark__;
     VED_PAGER[string ('Y')]            = &__Yank__;
