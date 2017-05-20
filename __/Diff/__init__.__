@@ -16,6 +16,7 @@ class Diff
     list_to_array (l, String_Type);
   end
 
+  % produces the second
   def files (fnamea, fnameb)
     if (-1 == access (fnamea, F_OK|R_OK))
       {
@@ -29,13 +30,13 @@ class Diff
       return NULL;
       }
 
-    ifnot (File.isreg (fnamea))
+    ifnot (File.is_reg (fnamea))
       {
       IO.tostderr (fnamea, " : is not a regular file");
       return NULL;
       }
 
-    ifnot (File.isreg (fnameb))
+    ifnot (File.is_reg (fnameb))
       {
       IO.tostderr (fnameb, " : is not a regular file");
       return NULL;
@@ -68,16 +69,27 @@ class Diff
         return array_map (String_Type, &sprintf, " %s", x);
 
     _for pi (0, xl - 1)
-      if (x[pi] == y[pi])
-        list_append (prefix, sprintf (" %s", x[pi]));
+      if (pi < yl)
+        if (x[pi] == y[pi])
+          list_append (prefix, sprintf (" %s", x[pi]));
+        else
+          break;
       else
         break;
 
-    _for si (1, xl - 1)
-      if (x[xl-si] == y[yl-si])
-        list_insert (suffix, sprintf (" %s", x[xl-si]));
-      else
-        break;
+    % but what if ["a", "b"] ["b"]
+    % understand the heuristics, but just broad a bit the distance
+    if (yl > 8)
+      _for si (1, xl - 1)
+        if (yl - si > -1)
+          if (x[xl-si] == y[yl-si])
+            list_insert (suffix, sprintf (" %s", x[xl-si]));
+          else
+            break;
+         else
+           break;
+     else
+       si = 1;
 
     x = x[[pi:xl-si]];
     y = y[[pi:yl-si]];
