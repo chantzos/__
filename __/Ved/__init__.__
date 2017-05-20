@@ -502,7 +502,7 @@ class Ved
           draw = (@__get_reference ("SCRATCH")) != s._abspath);
 
         if ('!' == Ved.get_cur_rline ().argv[0][0] &&
-           (@__get_reference ("SCRATCH")) == s._abspath)
+            (@__get_reference ("SCRATCH")) == s._abspath)
           {
           (@__get_reference ("__draw_buf")) (s);
           continue;
@@ -521,8 +521,7 @@ class Ved
   end
 
   def _vedloop_ (s) proc
-    if (_loop_ (s))
-      return;
+    () = _loop_ (s);
   end
 
   def autoindent (s, indent, line) proc
@@ -1265,19 +1264,24 @@ class Ved
     variable isbin = 0;
 
     nr = __vfind_nr (s._indent, line, col, &start, &end, &ishex, &isoct, &isbin);
-    ifnot (strlen (nr))
+
+        ifnot (strlen (nr))
+    if (qualifier_exists ("abort"))
+      return -1;
+    else
       {
       nr = String.decode (line)[col];
 
       if ("+" == incrordecr)
         nr += count;
-      else
+      else if ("-" == incrordecr)
         nr -= count;
 
       if (any (nr ==  [[0:31], ['~' + 1:160]]))
-        return;
+        return -1;
 
-      line = sprintf ("%s%c%s", substr (line, 1, col), nr, substr (line, col + 2, -1));
+      line = sprintf ("%s%c%s", substr (line, 1, col), nr,
+        substr (line, col + 2, -1));
 
       s.lins[s.ptr[0] - s.rows[0]] = line;
       s.lines[i] = line;
@@ -1288,7 +1292,7 @@ class Ved
       waddline (s, line, 0, s.ptr[0]);
 
       __vdraw_tail (s);
-      return;
+      return 0;
       }
 
     variable isdbl = _slang_guess_type (nr) == Double_Type;
@@ -1297,8 +1301,12 @@ class Ved
 
     if ("+" == incrordecr)
       nr = (@convf) (nr) + count;
-    else
+    else if ("-" == incrordecr)
       nr = (@convf) (nr) - count;
+    else if ("*" == incrordecr)
+      nr = (@convf) (nr) * count;
+    else if ("//" == incrordecr)
+      nr = (@convf) (nr) / count;
 
     variable format = sprintf ("%s%%%s",
       ishex ? "0x0" : isoct ? "0" : "",
@@ -1324,14 +1332,15 @@ class Ved
     waddline (s, line, 0, s.ptr[0]);
 
     __vdraw_tail (s);
+    0;
   end
 
   def _incr_nr_ (s) proc
-    _set_nr_ (s, "+";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
+    () = _set_nr_ (s, "+";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
   end
 
   def _decr_nr_ (s) proc
-    _set_nr_ (s, "-";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
+    () = _set_nr_ (s, "-";count = VEDCOUNT == -1 ? 1 : VEDCOUNT);
   end
 
   def __undo__ (s) proc
@@ -1756,10 +1765,18 @@ class Ved
   end
 
   def __search__ (s) proc
+    if (Input->BSLASH == s._chr && VEDCOUNT > 0)
+      ifnot (_set_nr_ (s, "//"; abort, count = VEDCOUNT))
+        return;
+
     Ved.Search.run (s);
   end
 
   def __search_word__ (s) proc
+    if ('*' == s._chr && VEDCOUNT > 0)
+      ifnot (_set_nr_ (s, "*"; abort, count = VEDCOUNT))
+        return;
+
     Ved.Search.word (s);
   end
 

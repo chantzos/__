@@ -281,7 +281,8 @@ subclass Visual
   def v_l_loop (vs, s) proc
     variable chr, i, size = s.st_.st_size, reg = "\"", reginit = 0;
 
-    while (chr = Input.getch (), any ([vs.l_keys, ['0':'9'], '"'] == chr))
+    while (chr = Input.getch (), any ([vs.l_keys, 't', ['0':'9'], '"']
+        == chr))
       {
       VEDCOUNT = 1;
 
@@ -356,7 +357,7 @@ subclass Visual
         continue;
         }
 
-      if ('y' == chr)
+      if (any (['y', 't'] == chr)) % quite often I miss the y
         {
         Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n");
         seltoX (strjoin (vs.lines, "\n") + "\n");
