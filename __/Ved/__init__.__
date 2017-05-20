@@ -1591,8 +1591,7 @@ class Ved
 
     if (NULL == s)
       {
-      variable err = ();
-      IO.tostderr (err);
+      IO.tostderr (Subst.err ());
       return;
       }
 

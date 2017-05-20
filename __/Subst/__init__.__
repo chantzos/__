@@ -257,6 +257,9 @@ class Subst
         };
       }
     catch ParseError:
-      return __get_exception_info ().message, NULL;
+      {
+      self.err (__get_exception_info ().message);
+      return NULL;
+      }
   end
 end

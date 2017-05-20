@@ -253,8 +253,7 @@ define main ()
 
   if (NULL == type)
     {
-    err = ();
-    IO.tostderr (err);
+    IO.tostderr (Subst.err ());
     exit_me (1);
     }
 
