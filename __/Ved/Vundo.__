@@ -5,14 +5,15 @@ subclass Vundo
     set
   end
 
+  var CAPACITY = 8192;
   var Rec = Struct_Type[3];
-  var Redo = NULL;
+  var static Redo = NULL;
   var Level = 0;
 
   beg
-    Rec[0] = struct {pos = @Pos_Type, data, inds, deleted, blwise};
-    Rec[1] = struct {pos = @Pos_Type, data, inds, deleted, blwise};
-    Rec[2] = struct {pos = @Pos_Type, data, inds, deleted, blwise};
+    Rec[0] = struct {pos = @Pos_Type, data, inds, deleted, blwise, inserted};
+    Rec[1] = struct {pos = @Pos_Type, data, inds, deleted, blwise, inserted};
+    Rec[2] = struct {pos = @Pos_Type, data, inds, deleted, blwise, inserted};
   end
 
   def redo (v)
@@ -24,6 +25,19 @@ subclass Vundo
       v.lines[Redo.inds] = Redo.data;
       v.lines = v.lines[wherenot (_isnull (v.lines))];
       v._len = length (v.lines) - 1;
+      }
+    else if (Redo.inserted)
+      {
+      v.lines =
+        [
+        Redo.inds[0]
+          ? v.lines[[:Redo.inds[0] - 1]]
+          : String_Type[0],
+        Redo.data,
+        v.lines[[Redo.inds[0]:]]
+        ];
+
+      v._len += length (Redo.inds);
       }
     else
       v.lines[Redo.inds] = Redo.data;
@@ -42,7 +56,7 @@ subclass Vundo
   end
 
   def set (v, data, inds)
-    if (sum (array_map (Integer_Type, &strbytelen, data)) > 2048)
+    if (sum (array_map (Integer_Type, &strbytelen, data)) > CAPACITY)
       return;
 
     Level += Level < length (Rec) - 1;
@@ -60,6 +74,7 @@ subclass Vundo
     Rec[Level].inds = inds;
     Rec[Level].deleted = qualifier_exists ("deleted");
     Rec[Level].blwise = qualifier_exists ("blwise");
+    Rec[Level].inserted = qualifier_exists ("inserted");
   end
 
   def undo (v)
@@ -70,13 +85,20 @@ subclass Vundo
 
     if (0 == Rec[Level].blwise && Rec[Level].deleted)
       {
-      v.lines = [
+      v.lines =
+        [
         Rec[Level].inds[0]
           ? v.lines[[:Rec[Level].inds[0] - 1]]
           : String_Type[0],
-        Rec[Level].data, v.lines[[Rec[Level].inds[0]:]]];
+        Rec[Level].data, v.lines[[Rec[Level].inds[0]:]]
+        ];
 
       Redo.data = Null_Type[length (Rec[Level].inds)];
+      }
+    else if (Rec[Level].inserted)
+      {
+      v.lines[Rec[Level].inds] = NULL;
+      v.lines = v.lines[wherenot (_isnull (v.lines))];
       }
     else
       {

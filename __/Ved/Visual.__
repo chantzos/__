@@ -299,7 +299,7 @@ subclass Visual
         VEDCOUNT = integer (VEDCOUNT);
         }
 
-      ifnot (any (chr == [vs.l_keys, '"']))
+      ifnot (any (chr == [vs.l_keys, 't', '"']))
         break;
 
       if ('"' == chr)

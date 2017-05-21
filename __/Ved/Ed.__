@@ -13,7 +13,6 @@ subclass Ed
     change_chr
     change_word
     toggle_case
-    put
     Put
     newline
     editline
@@ -162,6 +161,7 @@ subclass Ed
   def Put (s)
     variable reg = Ved.Reg.get (qualifier ("reg", "\""));
     variable lnr = __vlnr (s, '.');
+    variable isP = 'P' == qualifier ("_chr", s._chr);
 
     if (NULL == reg)
       if (qualifier_exists ("return_line"))
@@ -170,56 +170,40 @@ subclass Ed
         return;
 
     variable lines = strchop (reg, '\n', 0);
+    variable len = length (lines);
 
-    if (length (lines) > 1)
+    if (len > 1)
       {
       variable ind = '\n' == reg[-1] ? -2 : -1;
+      len += ind;
       lines = lines[[:ind]];
-      ifnot (lnr)
-        s.lines = [lines, s.lines];
-      else
-        s.lines = [s.lines[[:lnr - 1]], lines, s.lines[[lnr:]]];
 
-      s._len += length (lines);
+      ifnot (isP)
+        s.lines = [s.lines[[:lnr]], lines, s.lines[[lnr + 1:]]];
+      else
+        ifnot (lnr)
+          s.lines = [lines, s.lines];
+        else
+          s.lines = [s.lines[[:lnr - 1]], lines, s.lines[[lnr:]]];
+
+      s._len += len;
+
+      ifnot (isP)
+        Ved.Vundo.set (s, lines, [lnr + 1:lnr+len+1];inserted);
+      else
+        Ved.Vundo.set (s, lines, [lnr:lnr+len];inserted);
       }
     else
-      s.lines[lnr] = substr (s.lines[lnr], 1, s._index) + strjoin (lines) +
-        substr (s.lines[lnr], s._index + 1, -1);
-
-    s._i = lnr == 0 ? 0 : s._ii;
-
-    s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
-
-    set_modified (s);
-
-    s.draw ();
-
-    if (qualifier_exists ("return_line"))
-      return s.lines[lnr];
-  end
-
-  def put (s)
-    variable reg = Ved.Reg.get (qualifier ("reg", "\""));
-    variable lnr = __vlnr (s, '.');
-
-    if (NULL == reg)
-      if (qualifier_exists ("return_line"))
-        return s.lines[lnr];
-      else
-        return;
-
-    variable lines = strchop (reg, '\n', 0);
-
-    if (length (lines) > 1)
       {
-      variable ind = '\n' == reg[-1] ? -2 : -1;
-      lines = lines[[:ind]];
-      s.lines = [s.lines[[:lnr]], lines, s.lines[[lnr + 1:]]];
-      s._len += length (lines);
+      ifnot (isP)
+        s.lines[lnr] = substr (s.lines[lnr], 1, s._index) + strjoin (lines) +
+          substr (s.lines[lnr], s._index + 1, -1);
+      else
+        s.lines[lnr] = substr (s.lines[lnr], 1, s._index + 1) + strjoin (lines) +
+          substr (s.lines[lnr], s._index + 2, -1);
+
+      Ved.Vundo.set (s, [s.lines[lnr]], [lnr]);
       }
-    else
-      s.lines[lnr] = substr (s.lines[lnr], 1, s._index + 1) + strjoin (lines) +
-        substr (s.lines[lnr], s._index + 2, -1);
 
     s._i = lnr == 0 ? 0 : s._ii;
 
@@ -698,4 +682,3 @@ subclass Ed
 
     s.draw ();
   end
-end

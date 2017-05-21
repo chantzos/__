@@ -1083,7 +1083,7 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
     }
 
   ifnot (@found)
-    throw ClassError, "Class::__INIT__::def end identifier is missing";
+    throw ClassError, "Class::__INIT__::parse_def: end identifier is missing";
 
   ifnot (isproc)
     @eval_buf += "}\n\n" +

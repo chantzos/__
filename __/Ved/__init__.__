@@ -1406,9 +1406,9 @@ class Ved
     else if ('D' == chr)
       Ved.Ed.del_to_end (s;reg = reg);
     else if ('P' == chr)
-      Ved.Ed.Put (s;reg = reg);
+      Ved.Ed.Put (s;reg = reg, _chr = 'P');
     else
-      Ved.Ed.Put (s;reg = reg);
+      Ved.Ed.Put (s;reg = reg, _chr = 'p');
   end
 
   def __askonsubst__ (s, fn, lnr, fpart, context, lpart, replace) proc
@@ -1748,7 +1748,7 @@ class Ved
   end
 
   def __put__ (s) proc
-    Ved.Ed.put (s);
+    Ved.Ed.Put (s);
   end
 
   def __Put__ (s) proc
