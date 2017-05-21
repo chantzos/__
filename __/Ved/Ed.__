@@ -282,7 +282,6 @@ subclass Ed
           return;
 
         Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n");
-        seltoX (strjoin (s.lines[[lnr:]], "\n") + "\n");
         Ved.Vundo.set (s, s.lines[[lnr:]], s.lnrs[[lnr:]];deleted);
         s.lines = s.lines[[:lnr -1]];
         s._len = length (s.lines) - 1;
