@@ -682,6 +682,15 @@ private define __builtins__ (a)
   a["__&"] = @Argvlist_Type;
   a["__&"].func = &__detach;
 
+  a["global"] = @Argvlist_Type;
+  a["global"].func = &__global;
+  a["global"].type = "Func_Type";
+  a["global"].args =
+    ["--action= string supported actions [delete|write] (required)",
+     "--pat= pattern pcre pattern",
+     "--whenNotMatch void perform action on lines that dont match pattern (negate)",
+     "--range= int first linenr, last linenr, or % (for whole buffer) or . (for current line)"];
+
   a["w"] = @Argvlist_Type;
   a["w"].func = &__write__;
   a["w"].args = [
@@ -744,7 +753,7 @@ static define __filtercommands (s, ar, chars)
 private define filtercommands (s, ar)
 {
   ar = ar[where (1 < strlen (ar))];
-  ar = ar[wherenot (ar == "w!")];
+  ar = ar[wherenot (ar == ["w!", "global"])];
 
   variable chars = [0, '~', '_'];
   ifnot ("shell" == This.is.my.name)
@@ -770,11 +779,11 @@ public define __parse_argtype (s, arg, type, baselen)
   () = Rline.commandcmp (rl, bufnames;already_filtered);
   if (strlen (rl.argv[0]))
     {
-     s.argv[s._ind] += rl.argv[0];
-     s._col = baselen + strlen (s.argv[s._ind]) + 1;
-     Rline.parse_args (s);
-     return 1;
-     }
+    s.argv[s._ind] += rl.argv[0];
+    s._col = baselen + strlen (s.argv[s._ind]) + 1;
+    Rline.parse_args (s);
+    return 1;
+    }
 
   0;
 }
@@ -926,4 +935,3 @@ if (This.has.sigint)
 
 (@__get_reference ("init_" + This.is.my.name));
 
-This.exit (0);

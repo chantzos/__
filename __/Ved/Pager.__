@@ -451,6 +451,20 @@ subclass Pager
       __open_fname (s);
       return;
       }
+
+    if (':' == chr)
+      {
+      variable rl = Ved.get_cur_rline ();
+      variable argv = ["global", "--action="];
+
+      Rline.set (rl;line = strjoin (argv, " "), argv = argv,
+        col = int (sum (strlen (argv))) + length (argv),
+        ind = length (argv) - 1);
+
+      Rline.readline (rl);
+      Smg.setrcdr (s.ptr[0], s.ptr[1]);
+      return;
+      }
   end
 
   def buffer_other (s) proc
