@@ -252,7 +252,7 @@ subclass Ed
   def del (s)
     variable chr = Input.getch ();
 
-    if (any (['d', 'w', 'W', 'G'] == chr))
+    if (any (['d', 'w', 'W', 'G', 'g'] == chr))
       {
       if ('d' == chr)
         {
@@ -282,8 +282,31 @@ subclass Ed
           return;
 
         Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n");
-        Ved.Vundo.set (s, s.lines[[lnr:]], s.lnrs[[lnr:]];deleted);
-        s.lines = s.lines[[:lnr -1]];
+        Ved.Vundo.set (s, s.lines[[lnr:]], [lnr:s._len];deleted);
+        s.lines = s.lines[[:lnr-1]];
+        s._len = length (s.lines) - 1;
+
+        s._i = s._ii;
+
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+        set_modified (s);
+        s.draw ();
+        return;
+        }
+
+      if ('g'== chr)
+        {
+        chr = Input.getch ();
+        ifnot ('g' == chr)
+          return;
+
+        lnr = __vlnr (s, '.');
+        ifnot (lnr)
+          return;
+
+        Ved.Reg.set ("\"", strjoin (s.lines[[:lnr]], "\n") + "\n");
+        Ved.Vundo.set (s, s.lines[[:lnr]], [0:lnr];deleted);
+        s.lines = s.lines[[lnr+1:]];
         s._len = length (s.lines) - 1;
 
         s._i = s._ii;
