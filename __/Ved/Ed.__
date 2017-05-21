@@ -175,8 +175,8 @@ subclass Ed
     if (len > 1)
       {
       variable ind = '\n' == reg[-1] ? -2 : -1;
-      len += ind;
       lines = lines[[:ind]];
+      len = length (lines);
 
       ifnot (isP)
         s.lines = [s.lines[[:lnr]], lines, s.lines[[lnr + 1:]]];
@@ -196,11 +196,11 @@ subclass Ed
     else
       {
       ifnot (isP)
-        s.lines[lnr] = substr (s.lines[lnr], 1, s._index) + strjoin (lines) +
-          substr (s.lines[lnr], s._index + 1, -1);
-      else
         s.lines[lnr] = substr (s.lines[lnr], 1, s._index + 1) + strjoin (lines) +
           substr (s.lines[lnr], s._index + 2, -1);
+      else
+        s.lines[lnr] = substr (s.lines[lnr], 1, s._index) + strjoin (lines) +
+          substr (s.lines[lnr], s._index + 1, -1);
 
       Ved.Vundo.set (s, [s.lines[lnr]], [lnr]);
       }
@@ -252,7 +252,7 @@ subclass Ed
   def del (s)
     variable chr = Input.getch ();
 
-    if (any (['d', 'w', 'W'] == chr))
+    if (any (['d', 'w', 'W', 'G'] == chr))
       {
       if ('d' == chr)
         {
@@ -272,6 +272,26 @@ subclass Ed
       if ('W' == chr)
         {
         self.del_word (s, 'W';;__qualifiers ());
+        return;
+        }
+
+      if ('G'== chr)
+        {
+        variable lnr = __vlnr (s, '.');
+        if (lnr == s._len)
+          return;
+
+        Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n");
+        seltoX (strjoin (s.lines[[lnr:]], "\n") + "\n");
+        Ved.Vundo.set (s, s.lines[[lnr:]], s.lnrs[[lnr:]];deleted);
+        s.lines = s.lines[[:lnr -1]];
+        s._len = length (s.lines) - 1;
+
+        s._i = s._ii;
+
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+        set_modified (s);
+        s.draw ();
         return;
         }
       }
@@ -682,3 +702,4 @@ subclass Ed
 
     s.draw ();
   end
+end

@@ -1756,7 +1756,7 @@ class Ved
   end
 
   def __newline__ (s) proc
-    Ved.Ed.newline (s);
+    Ved.Ed.newline (s;;__qualifiers);
   end
 
   def __editline__ (s) proc
