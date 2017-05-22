@@ -95,7 +95,7 @@ subclass Insert
         ifnot (is.lnr)
           return;
 
-        if (s.ptr[0] != s.rows[0])
+        ifnot (s.ptr[0] == s.rows[0])
           s.ptr[0]--;
         else
           s._ii--;
@@ -105,10 +105,7 @@ subclass Insert
         s._index = strlen (s.lines[is.lnr]);
         s.ptr[1] = s._index > s._maxlen ? s._maxlen : s._index;
 
-        if (is.lnr == s._len)
-          @line = s.lines[is.lnr];
-        else
-          @line = s.lines[is.lnr] + @line;
+        @line = s.lines[is.lnr] + @line;
 
         s.lines[is.lnr] = @line;
         s.lines[is.lnr + 1] = NULL;

@@ -16,7 +16,7 @@ private define my_commands ()
 private define filtercommands (s, ar)
 {
   ar = ar[where (1 < strlen (ar))];
-  ar = ar[wherenot (ar == "w!")];
+  ar = ar[Array.__wherenot (ar, ["w!", "global"])];
   __APP__->__filtercommands (s, ar, ['~', '_']);
 }
 

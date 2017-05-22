@@ -444,6 +444,26 @@ class Ved
     ff;
   end
 
+  def __cline__ (s) proc
+    topline (" -- command --");
+    variable rl = Ved.get_cur_rline ();
+    Rline.set (rl);
+    Rline.readline (rl;ved = s,
+      draw = (@__get_reference ("SCRATCH")) != s._abspath);
+
+    if ('!' == Ved.get_cur_rline ().argv[0][0] &&
+        (@__get_reference ("SCRATCH")) == s._abspath)
+      {
+      (@__get_reference ("__draw_buf")) (s);
+      return -1;
+      }
+
+    topline (" -- pager --");
+    s = Ved.get_cur_buf ();
+    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+    0;
+  end
+
   def _vedloopcallback_ (s) proc
     variable retval = (@s.__NOR__["beg"][string (s._chr)]) (s);
     if (-1 == retval)
@@ -456,7 +476,7 @@ class Ved
   end
 
   def _loop_ (s) proc
-    variable rl, ismsg = 0;
+    variable ismsg = 0;
 
     forever
       {
@@ -494,24 +514,8 @@ class Ved
         }
 
       if (':' == s._chr && (VED_RLINE || 0 == VED_ISONLYPAGER))
-        {
-        topline (" -- command --");
-        rl = Ved.get_cur_rline ();
-        Rline.set (rl);
-        Rline.readline (rl;ved = s,
-          draw = (@__get_reference ("SCRATCH")) != s._abspath);
-
-        if ('!' == Ved.get_cur_rline ().argv[0][0] &&
-            (@__get_reference ("SCRATCH")) == s._abspath)
-          {
-          (@__get_reference ("__draw_buf")) (s);
+        if (__cline__ (s))
           continue;
-          }
-
-        topline (" -- pager --");
-        s = Ved.get_cur_buf ();
-        Smg.setrcdr (s.ptr[0], s.ptr[1]);
-        }
 
       if ('q' == s._chr && VED_ISONLYPAGER)
         return 1;
@@ -1249,6 +1253,26 @@ class Ved
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
   end
 
+  def __on_escape__ (s) proc
+    variable keys = [033, 'w'];
+    variable key = Input.getch ();
+    ifnot (any (key == keys))
+      return;
+
+    switch (key)
+      {
+      case 'w':
+        __write_on_esc__ (s);
+      }
+
+      {
+      case 033:
+        () = __cline__ (s);
+      }
+
+    return;
+  end
+
   def _set_nr_ (s, incrordecr) proc
     variable
       count = qualifier ("count", 1),
@@ -1886,7 +1910,7 @@ class Ved
     VED_PAGER[string (Input->CTRL_l)]  = &__vreread;
     VED_PAGER[string (Input->UP)]      = &__up__;
     VED_PAGER[string (Input->DOWN)]    = &__down__;
-    VED_PAGER[string (Input->ESC_esc)] = &__write_on_esc__;
+    VED_PAGER[string (033)]            = &__on_escape__;
     VED_PAGER[string (Input->HOME)]    = &__bof__;
     VED_PAGER[string (Input->NPAGE)]   = &__page_down__;
     VED_PAGER[string (Input->CTRL_f)]  = &__page_down__;
