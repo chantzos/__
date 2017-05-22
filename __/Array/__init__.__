@@ -32,7 +32,7 @@ class Array
   def unique (a)
     variable
       i,
-      j,
+      ar,
       len = length (a);
 
     if (len <= 1)
@@ -45,8 +45,33 @@ class Array
     if (a[0] == a[-1])
      return [0];
 
-    j = where (shift (NULL, a, -1) != a);
-    i[j];
+    a[where (shift (NULL, a, -1) != a)];
+  end
+
+  def __where (ara, arb)
+    variable inds = Integer_Type[0];
+    variable i;
+    _for i (0, length (arb) -1) % all elements
+      inds = [inds, where (ara == arb[i])];
+
+    inds = inds[array_sort (inds)];
+    unique (NULL, inds);
+  end
+
+  def Not (ara, inds)
+    variable len = Integer_Type == typeof (ara) ? ara : length (ara);
+    variable leni = length (inds);
+    variable new  = Integer_Type[len - leni];
+    variable cur = 0, i;
+    _for i (0, len - 1)
+      ifnot (any (i == inds))
+        new[(cur, cur++)] = i;
+
+    new;
+  end
+
+  def __wherenot (ara, arb)
+    Not (NULL, ara, __where (NULL, ara, arb));
   end
 
   subclass String
