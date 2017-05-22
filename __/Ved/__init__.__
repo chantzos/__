@@ -1639,7 +1639,10 @@ class Ved
 
     ifnot (retval)
       {
-      variable ar= ();
+      Ved.Vundo.set (buf, buf.lines[s.indices], s.indices);
+
+      variable ar = ();
+
       ifnot (length (ar) == length (lnrs))
         {
         ifnot (lnrs[0])

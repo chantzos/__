@@ -198,6 +198,8 @@ class Subst
 
         tok = strtok (sprintf ("%s%s", finished, str), "\n");
 
+        s.indices = [s.indices, [s.lnronfile:s.lnronfile + newlines]];
+
         if (i)
           ar = [ar[[:i-1]], tok, ar[[i+1+newlines:]]];
         else
@@ -247,6 +249,7 @@ class Subst
         {
         patstr = pat,
         numchanges = 0,
+        indices = Integer_Type[0],
         fname = qualifier ("fname", " "),
         lnronfile = qualifier ("lnronfile", 0),
         global = qualifier ("global"),

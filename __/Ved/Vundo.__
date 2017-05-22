@@ -107,7 +107,6 @@ subclass Vundo
       }
 
     Ved.restorePos (v, Rec[Level].pos);
-
     v._len = length (v.lines) - 1;
     v.st_.st_size = Array.String.__len (v.lines, v._len + 1);
 
