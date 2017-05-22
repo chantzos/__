@@ -977,6 +977,8 @@ subclass Insert
 
     forever
       {
+      __check_msg__ (s);
+
       is.chr = Input.getch (;on_lang = &_on_lang_change_, on_lang_args = {"insert", s.ptr});
 
       if (033 == is.chr)
@@ -990,11 +992,8 @@ subclass Insert
         s.lins[s.ptr[0] - s.rows[0]] = @line;
         s.lines[is.lnr] = @line;
         s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
-        Ved.writefile (s, NULL, s.ptr, NULL, NULL);
+        Ved.writefile (s, NULL, s.ptr, NULL, NULL;send_msg);
         s._flags &= ~VED_MODIFIED;
-        Smg.send_msg_dr (s._abspath + " written", 0, s.ptr[0], s.ptr[1]);
-        sleep (0.02);
-        Smg.send_msg_dr ("", 0, s.ptr[0], s.ptr[1]);
         continue;
         }
 

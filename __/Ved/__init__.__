@@ -475,8 +475,19 @@ class Ved
     () = (@s.__NOR__["end"][string (s._chr)]) (s);
   end
 
+  def __check_msg__ (s) proc
+    if (Smg->MSG_SEND)
+      if (1 == Smg->MSG_SEND)
+         Smg->MSG_SEND++;
+      else
+        {
+        Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
+        Smg->MSG_SEND = 0;
+        }
+  end
+
   def _loop_ (s) proc
-    variable ismsg = 0;
+    __check_msg__ (s);
 
     forever
       {
@@ -498,7 +509,6 @@ class Ved
           VEDCOUNT = integer (VEDCOUNT);
         catch SyntaxError:
           {
-          ismsg = 1;
           Smg.send_msg_dr ("count: too many digits >= " +
             string (256 * 256 * 256 * 128), 1, s.ptr[0], s.ptr[1]);
           continue;
@@ -507,11 +517,7 @@ class Ved
 
       s.vedloopcallback ();
 
-      if (ismsg)
-        {
-        Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
-        ismsg = 0;
-        }
+      __check_msg__ (s);
 
       if (':' == s._chr && (VED_RLINE || 0 == VED_ISONLYPAGER))
         if (__cline__ (s))
@@ -1247,14 +1253,11 @@ class Ved
   end
 
   def __write_on_esc__ (s) proc
-    Ved.writefile (s, NULL, s.ptr, NULL, NULL);
-    Smg.send_msg_dr ("", 14, NULL, NULL);
-    sleep (0.001);
-    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+    Ved.writefile (s, NULL, s.ptr, NULL, NULL;send_msg);
   end
 
   def __on_escape__ (s) proc
-    variable keys = [033, 'w'];
+    variable keys = [033, 'w', 's'];
     variable key = Input.getch ();
     ifnot (any (key == keys))
       return;
@@ -1268,6 +1271,19 @@ class Ved
       {
       case 033:
         () = __cline__ (s);
+      }
+
+      {
+      case 's':
+        variable rl = Ved.get_cur_rline ();
+        variable argv = ["substitute", "--dont-ask-when-subst",
+          "--global", "--range=.", "--pat="];
+
+        Rline.set (rl;line = strjoin (argv, " "), argv = argv,
+          col = int (sum (strlen (argv))) + length (argv),
+          ind = length (argv) - 1);
+
+        Rline.readline (rl);
       }
 
     return;

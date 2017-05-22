@@ -30,6 +30,7 @@ class Smg
   };
 
   var static IMG = List_Type[LINES - 2];
+  var static MSG_SEND = 0;
   var SMGINITED = 0;
   var SUSPENDSTATE = 0;
 
@@ -233,10 +234,12 @@ class Smg
       lrow = NULL == row ? MSGROW : row;
 
     atrcaddnstrdr (self, str, clr, MSGROW, 0, lrow, lcol, COLUMNS);
+    MSG_SEND++;
   end
 
   def send_msg (str, clr)
     atrcaddnstr (self, str, clr, MSGROW, 0, COLUMNS);
+    MSG_SEND++;
   end
 
   var defclr = 11;

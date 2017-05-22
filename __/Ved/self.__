@@ -198,7 +198,12 @@ beg
       return;
       }
 
-    IO.tostderr (s._abspath + ": " + string (bts) + " bytes written\n");
+    variable msg = s._abspath + ": " + string (bts) + " bytes written";
+
+    if (qualifier_exists ("send_msg"))
+      Smg.send_msg_dr (msg, 0, s.ptr[0], s.ptr[1]);
+
+    IO.tostderr (msg + "\n");
 
     if (file == s._abspath)
       s._flags &= ~VED_MODIFIED;
