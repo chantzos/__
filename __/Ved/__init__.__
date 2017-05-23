@@ -125,6 +125,12 @@ class Ved
   def __console () public proc
   end
 
+  def __vline () public proc
+  end
+
+  def __vfind_word () public proc
+  end
+
   subclass Reg from Ved
 
   def toogle_infoclrbg ()
@@ -476,14 +482,13 @@ class Ved
   end
 
   def __check_msg__ (s) proc
-    if (Smg->MSG_SEND)
-      if (1 == Smg->MSG_SEND)
-         Smg->MSG_SEND++;
-      else
-        {
-        Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
-        Smg->MSG_SEND = 0;
-        }
+    if (1 == Smg->MSG_SEND)
+       Smg->MSG_SEND++;
+    else
+      {
+      Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
+      Smg->MSG_SEND = 0;
+      }
   end
 
   def _loop_ (s) proc
@@ -1418,9 +1423,8 @@ class Ved
       reg = qualifier ("reg", "\""),
       line = __vline (s, '.');
 
-    Ved.Reg.set (reg, line + "\n");
+    Ved.Reg.set (reg, line + "\n";msg = "yanked line and ");
     seltoX (line + "\n");
-    Smg.send_msg_dr ("yanked", 1, s.ptr[0], s.ptr[1]);
   end
 
   def __register__ (s) proc
@@ -1994,9 +1998,7 @@ class Ved
       ifnot (NULL == Env->XAUTHORITY)
         ifnot (NULL == Sys->XCLIP_BIN)
           Load.file (Env->STD_LIB_PATH + "/X/seltoX", NULL);
-  end
 
-  beg
     new_wind ();
   end
 end

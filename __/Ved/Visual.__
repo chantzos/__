@@ -359,9 +359,9 @@ subclass Visual
 
       if (any (['y', 't'] == chr)) % quite often I miss the y
         {
-        Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n");
+        Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n";
+          msg = "visual lines yanked and ");
         seltoX (strjoin (vs.lines, "\n") + "\n");
-        Smg.send_msg ("visual lines yanked", 1);
         break;
         }
 
@@ -406,7 +406,7 @@ subclass Visual
 
       if ('d' == chr)
         {
-        Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n");
+        Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n";dont_print);
         s.lines[vs.lnrs] = NULL;
         s.lines = s.lines[wherenot (_isnull (s.lines))];
         s._len = length (s.lines) - 1;
@@ -425,9 +425,9 @@ subclass Visual
 
         s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
         set_modified (s);
-        Ved.Vundo.set (s, vs.lines, vs.lnrs;deleted);
+        Ved.Vundo.set (s, vs.lines, vs.lnrs;
+          msg = "visual lines deleted and ");
         s.draw ();
-        Smg.send_msg ("visual lines deleted", 1);
         return;
         }
 
@@ -628,9 +628,9 @@ subclass Visual
       if ('y' == chr)
         {
         sel = strjoin (vs.sel, "\n");
-        Ved.Reg.set (reg, sel);
+        Ved.Reg.set (reg, sel;
+          msg = "visual lines yanked and ");
         seltoX (sel);
-        Smg.send_msg ("visual lines yanked", 1);
         break;
         }
 
@@ -641,7 +641,7 @@ subclass Visual
           return;
 
         sel = strjoin (vs.sel, "\n");
-        Ved.Reg.set (reg, sel);
+        Ved.Reg.set (reg, sel;dont_print);
 
         variable line = s.lines[vs.startlnr];
         line = strreplace (line, sel, "");
@@ -671,9 +671,9 @@ subclass Visual
         set_modified (s);
 
         waddline (s, __vgetlinestr (s, s.lines[vs.startlnr], 1), 0, s.ptr[0]);
-        Ved.Vundo.set (s, [s.lines[vs.startlnr]], [vs.startlnr]);
+        Ved.Vundo.set (s, [s.lines[vs.startlnr]], [vs.startlnr];
+          msg = "visual lines deleted and ");
         __vdraw_tail (s);
-        Smg.send_msg ("visual lines deleted", 1);
         return;
         }
       }
@@ -893,7 +893,7 @@ subclass Visual
       if (any (['d', 'x'] == chr))
         {
         sel = strjoin (vs.sel, "\n");
-        Ved.Reg.set ("\"", sel);
+        Ved.Reg.set ("\"", sel;dont_print);
         Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
 
         _for i (0, length (vs.lnrs) - 1)
@@ -921,7 +921,6 @@ subclass Visual
       if (any (['r', 'c'] == chr))
         {
         sel = strjoin (vs.sel, "\n");
-        Ved.Reg.set ("\"", sel);
         Ved.Vundo.set (s, vs.lines, vs.lnrs;blwise);
         variable txt = Rline.__gettxt ("", vs.vlins[0] - 1, vs.startcol)._lin;
 
@@ -954,7 +953,7 @@ subclass Visual
       if ('y' == chr)
         {
         sel = strjoin (vs.sel, "\n");
-        Ved.Reg.set ("\"", sel);
+        Ved.Reg.set ("\"", sel;msg = "yanked and ");
         break;
         }
 

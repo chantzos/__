@@ -4,12 +4,12 @@ subclass Reg
     set
   end
 
-  let RDREGS = ['*',  '/', '%', '='];
-  let REGS   = [['A':'Z'], ['a':'z'], '*', '"', '/', '%'];
+  let RDREGS = ['*',  '/', '%', '=', 0x17];
+  let REGS   = [['A':'Z'], ['a':'z'], '*', '"', '/', '%', 0x17];
 
   def get (reg)
     ifnot (any ([REGS, '='] == reg[0]))
-      return NULL;
+      return "";
 
     if ("*" == reg)
       return getXsel ();
@@ -17,23 +17,49 @@ subclass Reg
     if ("%" == reg)
       return Ved.get_cur_buf ()._abspath;
 
+    if (char (0x17) == reg) % CTRL-w
+      {
+      variable buf = Ved.get_cur_buf (),
+               line = __vline (buf, '.'),
+               col = buf._index,
+               start, end;
+
+      return __vfind_word (buf, line, col, &start, &end);
+      }
+
     if ("=" == reg)
-      return __console (;return_str);
+      ifnot (qualifier_exists ("disable_expr"))
+        return __console (;return_str);
 
-    variable k = assoc_get_keys (REG);
-
-    ifnot (any (k == reg))
-      return NULL;
+    if (any (reg[0] == ['A':'Z']))
+      reg = char (reg[0] + 32);
 
     REG[reg];
   end
 
   def set (reg, sel)
-    variable k = assoc_get_keys (REG);
+    variable is_append = any (reg[0] == ['A':'Z']);
 
-    if (any (REGS == reg[0]) || 0 == any (k == reg))
-      REG[reg] = sel;
+    if (is_append)
+      {
+      reg = char (reg[0] + 32);
+      REG[reg] += sel;
+      }
     else
-      REG[reg] = REG[reg] + sel;
+      REG[reg] = sel;
+
+    if (This.request.debug || 0 == qualifier_exists ("dont_print"))
+      {
+      variable ptr = Ved.get_cur_buf ().ptr;
+      variable msg = qualifier ("msg", "");
+      msg += (is_append ? "appended " : "set ") + "to register [" +
+         reg + "]";
+      Smg.send_msg_dr (msg, 0, ptr[0], ptr[1]);
+      }
+  end
+
+  beg
+    Array.map (Void_Type, &Reg_set, NULL, array_map
+      (String_Type, &char, ['"', ['a':'z'], RDREGS]), "";dont_print);
   end
 end

@@ -22,7 +22,7 @@ subclass Search
       if (NULL == SEARCH_HISTINDEX)
         SEARCH_HISTINDEX = 0;
 
-      Ved.Reg.set ("/", pat);
+      Ved.Reg.set ("/", pat;dont_print);
       }
 
     if (draw)
