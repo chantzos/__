@@ -234,12 +234,12 @@ class Smg
       lrow = NULL == row ? MSGROW : row;
 
     atrcaddnstrdr (self, str, clr, MSGROW, 0, lrow, lcol, COLUMNS);
-    MSG_SEND++;
+    MSG_SEND = 1;
   end
 
   def send_msg (str, clr)
     atrcaddnstr (self, str, clr, MSGROW, 0, COLUMNS);
-    MSG_SEND++;
+    MSG_SEND = 1;
   end
 
   var defclr = 11;

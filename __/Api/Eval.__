@@ -31,7 +31,7 @@ subclass Eval
       try
         {
         res = eval (substr (rl.argv[0], 1, strlen (rl.argv[0]) - 1));
-        if (any (typeof (res) == [Struct_Type, Ftype_Type]))
+        if (_is_struct_type (res))
           ar = get_struct_field_names (res);
         }
       catch AnyError:
@@ -161,33 +161,9 @@ subclass Eval
 
       if (Input->CTRL_r == rl._chr)
         {
-        variable chr = Input.getch ();
-
-        if ('%' == chr)
-          {
-          variable absfn = Ved.get_cur_buf ()._abspath;
-          rl.argv[0] = substr (rl.argv[0], 1, rl._col - 1) + absfn +
-                       substr (rl.argv[0], rl._col, -1);
-          }
-
-        if (Input->CTRL_w == chr)
-          {
-          variable buf = Ved.get_cur_buf ();
-          variable line = __vline (buf, '.');
-          variable col = buf._index;
-          variable start, end;
-          variable word = __vfind_word (buf, line, col, &start, &end);
-          rl.argv[0] = substr (rl.argv[0], 1, rl._col - 1) + word +
-                       substr (rl.argv[0], rl._col, -1);
-          }
-
-        if ('/' == chr)
-          {
-          if (assoc_key_exists (REG, "/"))
-            if (1 == length (strtok (REG["/"])))
-              rl.argv[0] = substr (rl.argv[0], 1, rl._col - 1) + REG["/"] +
-                           substr (rl.argv[0], rl._col, -1);
-          }
+        rl.argv[0] = substr (rl.argv[0], 1, rl._col - 1) +
+            Ved.Reg.get (char (Input.getch ());disable_expr) +
+            substr (rl.argv[0], rl._col, -1);
 
         continue;
         }
