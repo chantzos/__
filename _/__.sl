@@ -988,10 +988,35 @@ private define parse_fun (cname, funs, eval_buf, tokens)
   funs[funname].const = const;
 }
 
+private define parse_declare (eval_buf, tokens)
+{
+  if (2 > length (tokens))
+    throw ClassError, "Class::__INIT__::function declaration needs at least 1 argument";
+
+  variable
+    d = "define ",
+    i = 2;
+
+  if (any (["private", "static", "public"] == tokens[1]))
+    {
+    d = tokens[1] + " " + d;
+
+    if (3 > length (tokens))
+      throw ClassError, "Class::__INIT__::function declaration, missing function name";
+
+    d += tokens[2] + " ();\n\n";
+    i = 3;
+    }
+  else
+    d = "private " + d + tokens[1] + " ();\n\n";
+
+  @eval_buf += d;
+}
+
 private define parse_variable (eval_buf, tokens, line, fp, found)
 {
   if (2 > length (tokens))
-    throw ClassError, "Class::__INIT__::var declaration needs at least 1 args";
+    throw ClassError, "Class::__INIT__::var declaration needs at least 1 argument";
 
   variable
     v = "variable ",
@@ -1438,6 +1463,12 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
     if ("fun" == tokens[0])
       {
       parse_fun (cname, funs, eval_buf, tokens;;__qualifiers);
+      continue;
+      }
+
+    if ("decl" == tokens[0])
+      {
+      parse_declare (eval_buf, tokens);
       continue;
       }
     }

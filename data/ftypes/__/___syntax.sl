@@ -27,6 +27,7 @@ private variable regexps = [
 |(?<=^|\s)(beg(?=$))\
 |(?<=\s)(let!?(?=\s))\
 |(?<=\s)(def!?(?=\s))\
+|(?<=\s)(decl(?=\s))\
 |(?<=\s)(typedef(?=\s))\
 |(?<=\s)(muttable(?=\s|$))\
 |(?<=\s)(fun(?=\s))\
@@ -35,7 +36,7 @@ private variable regexps = [
 |(?<=\s)(import(?=\s))\
 |(?<=\s)(proc(?=$))\
 |(?<=^|\s)(end(?=\s|$))\
-|(?<=\)|r)( public| static(?=\s))\
+|(?<=\)|r|l)( public| static| private(?=\s))\
 |(?<=&|\s|\[|\()(unless(?=\s|,))\
 |(?<=&|\s|\[|\()(raise(?=\s|,))\
 )"R, 0),

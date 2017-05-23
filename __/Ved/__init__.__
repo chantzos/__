@@ -116,20 +116,11 @@ class Ved
   def seltoX (sel) public proc
   end
 
-  def topline () public proc
-  end
-
-  def toplinedr () public proc
-  end
-
-  def __console () public proc
-  end
-
-  def __vline () public proc
-  end
-
-  def __vfind_word () public proc
-  end
+  decl public topline
+  decl public toplinedr
+  decl public __console
+  decl public __vline
+  decl public __vfind_word
 
   subclass Reg from Ved
 
