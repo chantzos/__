@@ -4,7 +4,7 @@ beg
     variable linlen = qualifier ("linlen", __vlinlen (s, '.'));
 
     sprintf (
-     "[%s] (row:%d col:%d lnr:%d/%d %.0f%% strlen:%d chr:%d) undo %d/%d",
+     "[%s] (row:%d col:%d lnr:%d/%d %.0f%% strlen:%d chr:%d)",
         path_basename (s._fname),
         s.ptr[0],
         s.ptr[1] - s._indent + 1,
@@ -13,9 +13,7 @@ beg
         (100.0 / s._len) * (lnr - 1),
         linlen,
         qualifier ("chr", String.decode (substr (__vline (s, '.'),
-          s._index + 1, 1))[0]),
-        s._undolevel,
-        length (s.undo)
+          s._index + 1, 1))[0])
       );
   end
 
@@ -296,10 +294,6 @@ beg
 
     s._findex = s._indent;
     s._index  = s._indent;
-
-    s.undo = String_Type[0];
-    s._undolevel = 0;
-    s.undoset = {};
 
     s._i = qualifier ("_i", 0);
 
