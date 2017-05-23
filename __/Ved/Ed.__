@@ -281,7 +281,8 @@ subclass Ed
         if (lnr == s._len)
           return;
 
-        Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n");
+        Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n";
+          msg = "deleted lines till eof and ");
         Ved.Vundo.set (s, s.lines[[lnr:]], [lnr:s._len];deleted);
         s.lines = s.lines[[:lnr-1]];
         s._len = length (s.lines) - 1;
@@ -304,7 +305,8 @@ subclass Ed
         ifnot (lnr)
           return;
 
-        Ved.Reg.set ("\"", strjoin (s.lines[[:lnr]], "\n") + "\n");
+        Ved.Reg.set ("\"", strjoin (s.lines[[:lnr]], "\n") + "\n";
+          msg = "deleted lines till bof and ");
         Ved.Vundo.set (s, s.lines[[:lnr]], [0:lnr];deleted);
         s.lines = s.lines[[lnr+1:]];
         s._len = length (s.lines) - 1;
@@ -404,7 +406,7 @@ subclass Ed
 
     if (any (['x', Input->rmap.delete] == chr))
       {
-      Ved.Reg.set (reg, substr (line, col + 1, 1));
+      Ved.Reg.set (reg, substr (line, col + 1, 1);dont_print);
       line = substr (line, 1, col) + substr (line, col + 2, - 1);
       if (s._index == strlen (line))
         {
@@ -415,7 +417,7 @@ subclass Ed
     else
       if (0 < s.ptr[1] - s._indent)
         {
-        Ved.Reg.set (reg, substr (line, col, 1));
+        Ved.Reg.set (reg, substr (line, col, 1);dont_print);
         line = substr (line, 1, col - 1) + substr (line, col + 1, - 1);
         s.ptr[1]--;
         s._index--;
@@ -521,7 +523,7 @@ subclass Ed
     ifnot (s.ptr[1] - s._indent)
       {
       if (strlen (line))
-       Ved.Reg.set (reg, line);
+       Ved.Reg.set (reg, line;dont_print);
 
       line = __get_null_str (s._indent);
 
@@ -544,7 +546,7 @@ subclass Ed
       }
 
     if (strlen (line))
-      Ved.Reg.set (reg, substr (line, col, -1));
+      Ved.Reg.set (reg, substr (line, col, -1);dont_print);
 
     line = substr (line, 1, col);
 
@@ -581,7 +583,7 @@ subclass Ed
 
     word = (@func) (s, line, col, &start, &end);
 
-    Ved.Reg.set (reg, word);
+    Ved.Reg.set (reg, word;dont_print);
 
     Ved.Vundo.set (s, line, i);
 
@@ -623,7 +625,7 @@ subclass Ed
         return 0;
         }
 
-    Ved.Reg.set (reg, s.lines[i] + "\n");
+    Ved.Reg.set (reg, s.lines[i] + "\n";dont_print);
 
     s.lines[i] = NULL;
     s.lines = s.lines[wherenot (_isnull (s.lines))];

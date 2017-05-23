@@ -50,20 +50,7 @@ subclass Insert
   def ins_reg (s, line) proc
     variable reg = Input.getch ();
 
-    if (any (VedReg->RDREGS == reg))
-    ifnot (reg == '=')
-      {
-      if ('%' == reg)
-        Ved.Reg.set ("\"", s._abspath);
-      else
-        return;
-
-      @line = Ved.Ed.Put (s;return_line, _chr = 'p');
-      return;
-      }
-
-
-    ifnot (any ([VedReg->REGS == reg, '=']))
+    ifnot (any ([VedReg->REGS, '='] == reg))
       return;
 
     @line = Ved.Ed.Put (s;reg = char (reg), return_line, _chr = 'p');

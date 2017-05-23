@@ -212,15 +212,15 @@ beg
   end
 
   def get_cur_frame ()
-    self.get_cur_wind ().cur_frame;
+    get_cur_wind (self).cur_frame;
   end
 
   def get_cur_rline ()
-    self.get_cur_wind ().rline;
+    get_cur_wind (self).rline;
   end
 
   def setbuf (bufname)
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
 
     ifnot (any (bufname == w.bufnames))
       {
@@ -306,7 +306,7 @@ beg
   end
 
   def draw_wind ()
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
     variable i;
     variable s;
     variable cur;
@@ -339,7 +339,7 @@ beg
   def get_buf (bufname)
     ifnot (qualifier_exists ("on_all_windows"))
       {
-      variable w = self.get_cur_wind ();
+      variable w = get_cur_wind (self);
 
       ifnot (any (bufname == w.bufnames))
         return NULL;
@@ -356,16 +356,25 @@ beg
   end
 
   def get_cur_buf ()
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
     w.buffers[w.frame_names[w.cur_frame]];
   end
 
   def get_cur_bufname ()
-    self.get_cur_buf ()._abspath;
+    get_cur_buf (self)._abspath;
+  end
+
+  def get_cur_word ()
+    variable buf = get_cur_buf (self),
+             line = __vline (buf, '.'),
+             col = buf._index,
+             start, end;
+
+    __vfind_word (buf, line, col, &start, &end);
   end
 
   def get_frame_buf (frame)
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
     if (frame >= w.frames)
       return NULL;
 
@@ -373,7 +382,7 @@ beg
   end
 
   def change_frame ()
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
     variable s = w.buffers[w.frame_names[w.cur_frame]];
     variable dir = qualifier ("dir", "next");
 
@@ -384,11 +393,11 @@ beg
     else
       w.cur_frame = 0 == w.cur_frame ? w.frames - 1 : w.cur_frame - 1;
 
-    s = self.get_cur_buf ();
+    s = get_cur_buf (self);
 
     __vset_clr_fg (s, 1);
 
-    self.setbuf (s._abspath);
+    setbuf (self, s._abspath);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
   end
@@ -397,9 +406,9 @@ beg
     variable frame = _NARGS > 1 ? () : NULL;
     variable self = ();
     if (NULL == frame)
-      frame = self.get_cur_frame ();
+      frame = get_cur_frame (self);
 
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
 
     if (frame >= w.frames)
       return;
@@ -419,13 +428,12 @@ beg
 
     w.frame_rows = (@setframesize) (w.frames);
 
-    variable cur_fr = self.get_cur_frame ();
+    variable cur_fr = get_cur_frame (self);
 
     if (frame == w.frames || cur_fr > frame)
       w.cur_frame--;
 
-    variable i;
-    variable s;
+    variable i, s;
 
     _for i (0, w.frames - 1)
       {
@@ -447,17 +455,15 @@ beg
       s._index = s._indent;
       }
 
-    self.draw_wind ();
+    draw_wind (self);
   end
 
   def new_frame (fn)
-    variable w = self.get_cur_wind ();
+    variable w = get_cur_wind (self);
     if (w.frames == This.has.max_frames)
       return;
 
-    variable i;
-    variable s;
-    variable b;
+    variable i, s, b;
 
     w.frames++;
 
@@ -471,10 +477,10 @@ beg
 
     w.cur_frame = w.frames - 1;
 
-    variable ft = self.get_ftype (fn);
-    s = self.init_ftype (ft);
+    variable ft = get_ftype (self, fn);
+    s = init_ftype (self, ft);
     s.set (fn, w.frame_rows[-1], NULL;;__qualifiers);
-    self.setbuf (s._abspath;;__qualifiers);
+    setbuf (self, s._abspath;;__qualifiers);
 
     w.frame_names = [w.frame_names, fn];
 
@@ -493,7 +499,7 @@ beg
       s._index = s._indent;
       }
 
-    self.draw_wind ();
+    draw_wind (self);
   end
 
   def del_wind (name)
@@ -514,7 +520,7 @@ beg
     if (name == VED_CUR_WIND)
       {
       VED_CUR_WIND = i ? winds[i-1] : winds[-1];
-      self.draw_wind ();
+      draw_wind (self);
       }
   end
 
