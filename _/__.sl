@@ -619,24 +619,51 @@ private define __get_fun_head__ (
 
 private define __Class_From_Init__ ();
 
+private define line_is_no_length_or_is_comment (tokens, line, fp)
+{
+  if (0 == length (tokens) || '%' == tokens[0][0])
+    return 1;
+
+  if (strncmp (tokens[0], "/*", 2))
+    return 0;
+
+  if (tokens[-1] == "*/")
+    return 1;
+
+  while (-1 != fgets (&line, fp))
+    if ((tokens = strtok (line), length (tokens)))
+      if (tokens[-1] ==  "*/")
+        return 1;
+
+  throw ClassError, "Class::__INIT__::parse_block, unended multiline comment";
+}
+
 private define parse_class ();
 
 private define parse_block (eval_buf, tokens, line, fp)
 {
   variable open_block = 1, block_buf = "";
-  variable keywords = ["raise", "when", "it", "do"];
 
   while (-1 != fgets (&line, fp))
     {
-    if ("end" == strtrim (line))
+    tokens = strtok (line);
+
+    if (line_is_no_length_or_is_comment (tokens, line, fp))
+      continue;
+
+    if (1 == length (tokens) && "end" == tokens[0])
       {
       open_block = 0;
       break;
       }
+
+    block_buf += strjoin (tokens, " ");
     }
 
   if (open_block)
     throw ClassError, "Class::__INIT__::unended block statement";
+
+  @eval_buf += block_buf;
 }
 
 private define parse_require (cname, classpath, funs, eval_buf, tokens)
@@ -1098,7 +1125,7 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
       break;
       }
 
-    if ("block" == strtrim (line))
+    if (any (["block", "__"] == strtrim (line)))
       {
       parse_block (eval_buf, tokens, line, fp;scope = "fun_in");
       continue;
@@ -1380,7 +1407,7 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
     {
     tokens = strtok (line);
 
-    if (0 == length (tokens) || '%' == tokens[0][0])
+    if (line_is_no_length_or_is_comment (tokens, line, fp))
       continue;
 
     if (NULL != end && end == tokens[0])
