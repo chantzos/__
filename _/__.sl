@@ -1018,26 +1018,49 @@ private define parse_fun (cname, funs, eval_buf, tokens)
 private define parse_declare (eval_buf, tokens)
 {
   if (2 > length (tokens))
-    throw ClassError, "Class::__INIT__::function declaration needs at least 1 argument";
+    throw ClassError, "Class::__INIT__::parse_declare: declaration needs at least 1 argument";
 
-  variable
-    d = "define ",
-    i = 2;
+  variable scope = qualifier ("scope", "toplevel"),
+           decl_buf = "",
+           is_var = 0,
+           idx = 1;
 
-  if (any (["private", "static", "public"] == tokens[1]))
+  if (scope == "function")
+    decl_buf = "variable " + strjoin (strtok (strjoin (tokens[[idx:]]), ","),
+        ", ") + ";\n";
+  else
     {
-    d = tokens[1] + " " + d;
+    scope = "private";
 
-    if (3 > length (tokens))
+    if ("var" == tokens[1])
+      {
+      is_var = 1;
+      idx++;
+      }
+
+    if (any (["private", "static", "public"] == tokens[idx]))
+      {
+      scope = tokens[idx];
+      idx++;
+      }
+
+    if (idx + 1 > length (tokens))
       throw ClassError, "Class::__INIT__::function declaration, missing function name";
 
-    d += tokens[2] + " ();\n\n";
-    i = 3;
-    }
-  else
-    d = "private " + d + tokens[1] + " ();\n\n";
 
-  @eval_buf += d;
+    if (is_var)
+      decl_buf = scope + " variable " + strjoin (strtok (
+        strjoin (tokens[[idx:]]), ","), ", ") + ";\n";
+    else
+      {
+      variable funs = strtok (strjoin (tokens[[idx:]]), ",");
+
+      _for idx (0, length (funs) - 1)
+         decl_buf += scope + " define " + funs[idx] + " ();\n";
+      }
+    }
+
+  @eval_buf += decl_buf;
 }
 
 private define parse_variable (eval_buf, tokens, line, fp, found)
@@ -1119,16 +1142,33 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
 
   while (-1 != fgets (&line, fp))
     {
-    if ("end" == strtrim (line))
+    tokens = strtok (line);
+
+    if (line_is_no_length_or_is_comment (tokens, line, fp))
+      continue;
+
+    if (1 == length (tokens) && "end" == tokens[0])
       {
       @found = 1;
       break;
       }
 
-    if (any (["block", "__"] == strtrim (line)))
+    if ("decl" == tokens[0])
       {
-      parse_block (eval_buf, tokens, line, fp;scope = "fun_in");
+      parse_declare (eval_buf, tokens;scope = "function");
       continue;
+      }
+
+    if (any (["block", "__"] == tokens[0]))
+      {
+      parse_block (eval_buf, tokens, line, fp;scope = "function");
+      continue;
+      }
+
+    if ("var" == tokens[0])
+      {
+      tokens[0] += "iable";
+      line = strjoin (tokens, " ");
       }
 
     @eval_buf += line;
@@ -1495,7 +1535,7 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
     if ("decl" == tokens[0])
       {
-      parse_declare (eval_buf, tokens);
+      parse_declare (eval_buf, tokens;scope = "toplevel");
       continue;
       }
     }
