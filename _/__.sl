@@ -549,11 +549,12 @@ private define vlet (self, varname, varval)
 }
 
 private define __get_fun_head__ (
-  tokens, funname, nargs, args, const, isproc, issubproc, scope)
+  tokens, funname, nargs, args, const, isproc, ismethod, scope)
 {
   @funname = tokens[1];
   @const = '!' != tokens[0][-1];
-  @isproc = 0;
+  @isproc = qualifier ("isproc", 0);
+  @ismethod = qualifier ("ismethod", 0);
   @scope = "private";
 
   variable i, ind, tmp;
@@ -599,15 +600,16 @@ private define __get_fun_head__ (
   if (ind == length (tokens))
     {
     if (qualifier_exists ("add_meth_decl"))
-      @funname = qualifier ("cname", "") + @funname;
+      ifnot (@isproc)
+        @funname = qualifier ("cname", "") + @funname;
     return;
     }
 
   _for i (ind, length (tokens) - 1)
     switch (tokens[i])
       { case "proc"     : @isproc = 1;}
-      { case "subproc"  : @issubproc = 1;}
       { case "public"   : @scope  = "public";}
+      { case "method"   : @ismethod = 1;}
       { case "muttable" : @const  = 0;}
       { case "static"   : @scope = "static";}
       { throw ClassError, "Class::__INIT__::" + tokens[i] + ", unexpected keyword";}
@@ -998,13 +1000,14 @@ private define parse_beg_block (eval_buf, tokens, line, fp, found)
 
 private define parse_fun (cname, funs, eval_buf, tokens)
 {
-  variable funname, nargs, args, const, isproc, scope, issubproc;
+  variable funname, nargs, args, const, isproc, ismethod, scope;
 
   if (3 > length (tokens))
     throw ClassError, "Class::__INIT__::fun declaration needs at least 3 args";
 
   __get_fun_head__ (tokens,
-    &funname, &nargs, &args, &const, &isproc, &issubproc, &scope;;__qualifiers);
+    &funname, &nargs, &args, &const, &isproc, &ismethod, &scope
+      ;;__qualifiers);
 
   @eval_buf += "$9 = __->__ (\"" + cname + "\", \"" + funname +
     "\", \"Class::getfun::__INIT__\");\n\n$9.nargs = " + string (nargs) +
@@ -1124,10 +1127,11 @@ private define parse_def (cname, eval_buf, funs, tokens, line, fp, found)
   if (3 > length (tokens))
     throw ClassError, "Class::__INIT__::def declaration needs at least 3 args";
 
-  variable funname, nargs, args, const, isproc, scope, issubproc;
+  variable funname, nargs, args, const, isproc, scope, ismethod;
 
   __get_fun_head__ (tokens,
-    &funname, &nargs, &args, &const, &isproc, &issubproc, &scope;;__qualifiers);
+    &funname, &nargs, &args, &const, &isproc, &ismethod, &scope;;
+      __qualifiers);
 
   args = strtrim (args, "()");
   args = strtok (args, ",");
@@ -1464,7 +1468,8 @@ private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
 
     if (any (["def", "def!"] == tokens[0]))
       {
-      parse_def (cname, eval_buf, funs, tokens, line, fp, &found;;__qualifiers);
+      parse_def (cname, eval_buf, funs, tokens, line, fp, &found;;
+        __qualifiers);
       continue;
       }
 

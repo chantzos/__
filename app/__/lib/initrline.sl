@@ -498,8 +498,16 @@ private define __search_project__ (argv)
   if (NULL == pat)
     return;
 
+  variable excludedirs = String_Type[0];
+
+  ifnot (access (This.is.my.datadir + "/search_excludes.txt", F_OK))
+     excludedirs = File.readlines (This.is.my.datadir + "/search_excludes.txt");
+
+  excludedirs = array_map (String_Type, &sprintf, "--excludedir=%s",
+    excludedirs);
+
   variable _argv = ["!search", "--pat=" + pat, "--recursive",
-    "--excludedir=tmp", "--excludedir=C", Env->SRC_PATH];
+    excludedirs, "--excludedir=tmp", "--excludedir=C", Env->SRC_PATH];
 
   ifnot (NULL == Opt.Arg.exists ("--include_c", &argv;del_arg))
     Array.delete_at (&_argv, -2);

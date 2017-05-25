@@ -25,6 +25,7 @@ subclass Eval
 
     variable res;
     variable ar;
+
     forever
       {
       ar = String_Type[0];
@@ -39,6 +40,8 @@ subclass Eval
 
       ifnot (length (ar))
         return 0;
+
+      ar = ar[array_sort (ar)];
 
       variable tmp = "";
       variable chr = Rline.hlitem (rl, ar, rl.argv[0], rl._col, &tmp);
@@ -59,8 +62,9 @@ subclass Eval
         {
         if (033 == chr)
           return 0;
+
         s.argv = rl.argv;
-        return;
+        return 1;
         }
 
       rl._lin = rl.argv[0];

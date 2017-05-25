@@ -740,6 +740,9 @@ class Rline
       fmt = sprintf ("%%-%ds", max_len),
       lines;
 
+    ifnot (length (ar))
+      return Input.getch (;disable_langchange);
+
     ifnot (qualifier_exists ("dont_format"))
       {
       if (max_len < s._columns)
