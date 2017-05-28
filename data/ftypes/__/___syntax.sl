@@ -103,6 +103,7 @@ private variable regexps = [
 |(?<=&|\s|\[|\()(strn?cmp(?=\s|,))\
 |(?<=&|\s|\[|\()(f?printf(?=\s|,))\
 |(?<=&|\s|\[|\()(realpath(?=\s|,))\
+|(?<=&|\s|\[|\()(list_pop(?=\s|,))\
 |(?<=&|\s|\[|\()(_stk_roll(?=\s|,))\
 |(?<=^|\s|\[|\()(array_map(?=\s|,))\
 |(?<=&|\s|\[|\()(qualifier(?=\s|,))\

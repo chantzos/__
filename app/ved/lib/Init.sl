@@ -52,7 +52,15 @@ private define _edit_other ()
 
   ifnot (_NARGS)
     {
+    variable key;
+    Smg.send_msg_dr ("reload current buffer [y/n]", 1, NULL, NULL);
+    while (key = Input.getch (), 0 == any (['n', 'y'] == key));
+
+    if ('n' == key)
+      return;
+
     __vreread (cb);
+    Smg.send_msg_dr ("realoaded", 0, cb.ptr[0], cb.ptr[1]);
     return;
     }
 
