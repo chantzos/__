@@ -85,7 +85,6 @@ private variable regexps = [
 |(?<=&|\s|\[|\()(listen(?=\s|,))\
 |(?<=&|\s|\[|\()(getenv(?=\s|,))\
 |(?<=&|\s|\[|\()(getuid(?=\s|,))\
-|(?<=^|&|\s|\[|\()(eval(?=\s|,))\
 |(?<=&|\s|\[|\()(mkfifo(?=\s|,))\
 |(?<=&|\s|\[|\()(_isnull(?=\s|,))\
 |(?<=&|\s|\[|\()(listdir(?=\s|,))\
@@ -113,6 +112,7 @@ private variable regexps = [
 |(?<=&|\s|\[|\()(array_sort(?=\s|,))\
 |(?<=&|\s|\[|\()(strbytelen(?=\s|,))\
 |(?<=&|\s|\[|\()(is_defined(?=\s|,))\
+|(?<=^|&|\s|\[|\()((__)?eval(?=\s|,))\
 |(?<=&|\s|\[|\()((f|_)?close(?=\s|,))\
 |(?<=&|\s|\[|\()(__p\w*_list(?=\s|,))\
 |(?<=&|\s|\[|\()(substrbytes(?=\s|,))\
@@ -123,7 +123,7 @@ private variable regexps = [
 |(?<=&|\s|\[|\(|^)(sigprocmask(?=\s|,))\
 |(?<=&|\s|\[|\()(list_to_array(?=\s|,))\
 |(?<=&|\s|\[|\()(strtrim(_\w*)?(?=\s|,))\
-|(?<=&|\s|\[|\(|^)(new_exception)(?=\s|,)\
+|(?<=&|\s|\[|\(|^)((__)?new_exception)(?=\s|,)\
 |(?<=&|\s|\[|\(|^)(__set_argc_argv(?=\s))\
 |(?<=&|\s|\[|\()(l?stat_\w*[e|s](?=\s|,))\
 |(?<=&|\s|\[|\()(qualifier_exists(?=\s|,))\
@@ -134,7 +134,7 @@ private variable regexps = [
 |(?<=&|\s|\[|\()(f(get|put)s[lines]*(?=\s|,))\
 |(?<=&|\s|\[|\()(__get_exception_info(?=\s|,|\.))\
 |(?<=&|\s|\[|\()(__(is_|un)initialize(d)?(?=\s|,|\.))\
-|(?<=^|&|\s|\[|\()((use|current)+_namespace(?=\s|,|\.))\
+|(?<=^|&|\s|\[|\()((__)?(use|current)+_namespace(?=\s|,|\.))\
 |(?<=&|\s|\[|\()((g|s)et_struct_field(s|_names)?(?=\s|,))\
 |(?<=&|\s|\[|\()(list_(insert|delete|append|to_array)(?=\s|,))\
 |(?<=&|\s|\[|\()(where(first|last|not)?(max|min)?(_[engl][qet])?(?=\s|,))\

@@ -116,11 +116,7 @@ class Ved
   def seltoX (sel) public proc
   end
 
-  decl public topline
-  decl public toplinedr
-  decl public __console
-  decl public __vline
-  decl public __vfind_word
+  decl public topline, toplinedr, __console, __vline, __vfind_word
 
   subclass Reg from Ved
 
