@@ -16,8 +16,8 @@ private variable __fid__ = -1;
 private variable __FUNCALLS__    = 0;
 private variable __INSTANCES__   = {};
 private variable __ENV_END_OFFSETS__ = {};
-private variable __ENV_BEG_TOKEN__ = "__(";
-private variable __ENV_END_TOKEN__ = ")__";
+private variable __ENV_BEG_TOKEN__ = "envbeg";
+private variable __ENV_END_TOKEN__ = "envend";
 private variable __ENV_BEG_TOKEN_LEN__ = strlen (__ENV_BEG_TOKEN__);
 private variable __ENV_END_TOKEN_LEN__ = strlen (__ENV_END_TOKEN__);
 

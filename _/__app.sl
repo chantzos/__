@@ -327,11 +327,11 @@ private define __echo__ (argv)
 }
 
 private variable __CHDIR__ = __Function (`
-__(
-  __CWD__    = "";
-  __DIR__    = "";
-  __PDIR__   = NULL;
-)__
+  envbeg
+    __CWD__    = "";
+    __DIR__    = "";
+    __PDIR__   = NULL;
+  envend
 
   (argv)
   EXITSTATUS = 0;
@@ -368,10 +368,10 @@ __(
 `;__ns__ = "__CHDIR__");
 
 private variable __TRACK__ = __Function (`
-__(
-  __SRC_TRACK_DIR__  = "";
-  __SRC_TRACK_FILE__ = "";
-)__
+  envbeg
+    __SRC_TRACK_DIR__  = "";
+    __SRC_TRACK_FILE__ = "";
+  envend
 
   (argv)
   __SRC_TRACK_DIR__  = Me.get_src_path (This.is.my.basedir);
@@ -444,8 +444,10 @@ private define __search__ (argv)
 }
 
 private variable __WHICH__ = __Function (`
-__(__PATH__ = NULL, __MSG__ = NULL;)__
-  (argv)
+  envbeg
+    __PATH__ = NULL, __MSG__ = NULL;
+  envend
+      (argv)
   Com.pre_builtin (argv);
 
   if (1 == length (argv))
