@@ -47,6 +47,20 @@ public define __get_qualifier_as (dtype, q, value)
   q;
 }
 
+public define __is_substrbytes (src, byteseq, offset)
+{
+  variable occur = {};
+  if (NULL == offset || 1 > offset)
+    offset = 1;
+
+  offset--;
+
+  while (offset = is_substrbytes (src, byteseq, offset + 1), offset)
+    list_append (occur, offset);
+
+  occur;
+}
+
 public define __eval (buf, ns)
 {
   try
