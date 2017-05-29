@@ -1,4 +1,3 @@
-
 % This is an evaluation "on the fly", that means that the private scope
 % cannot access (or the oposite) nothing from the private environment,
 % that is declared on the compilation unit (file)
@@ -14,6 +13,13 @@ private variable __len__;
 private variable __name__;
 private variable __scope__;
 private variable __fid__ = -1;
+private variable __FUNCALLS__    = 0;
+private variable __INSTANCES__   = {};
+private variable __ENV_END_OFFSETS__ = {};
+private variable __ENV_BEG_TOKEN__ = "__(";
+private variable __ENV_END_TOKEN__ = ")__";
+private variable __ENV_BEG_TOKEN_LEN__ = strlen (__ENV_BEG_TOKEN__);
+private variable __ENV_END_TOKEN_LEN__ = strlen (__ENV_END_TOKEN__);
 
 private define __my_err_handler__ (err, msg)
 {
@@ -25,6 +31,10 @@ private define __ferror__ (msg)
   loop (_stkdepth) pop;
 
   array_map (&__uninitialize, [&__i__, &__len__, &__fun__, &__name__, &__scope__]);
+
+  __FUNCALLS__ = 0;
+  __INSTANCES__ = {};
+  __ENV_END_OFFSETS__ = {};
 
   if (qualifier_exists ("unhandled"))
     {
@@ -130,29 +140,114 @@ public define __Fexpr ()
   __tmp (&__f__);
 }
 
+private define __save_instance__ ()
+{
+  list_insert (__INSTANCES__, struct
+    {
+    __fun__   =  __fun__,
+    __f__     =  @__f__,
+    __name__  =  __name__,
+    __scope__ =  __scope__
+    });
+}
+
+private define __restore_instance__ ()
+{
+  variable i = list_pop (__INSTANCES__);
+  __fun__   =  i.__fun__;
+  __f__     =  @i.__f__;
+  __name__  =  i.__name__;
+  __scope__ =  i.__scope__;
+}
+
+private define __env_matches__ ();
+private define __env_matches__ (start, end, index, orig_len, orig_start)
+{
+  ifnot (orig_len)
+    return;
+
+  variable start_len = length (start);
+  variable i = -1;
+  variable idx;
+
+  if (index + 1 == orig_len)
+    {
+    idx = wherefirst_eq (orig_start, start[0]);
+
+    __ENV_END_OFFSETS__[idx] = end[index] - list_pop (start) +
+        __ENV_END_TOKEN_LEN__ + 1;
+
+    return;
+    }
+
+  while (i++, i < start_len)
+    {
+    if (end[index] < start[i])
+      {
+      idx = wherefirst_eq (orig_start, start[i - 1]);
+
+      __ENV_END_OFFSETS__[idx] = end[index] - list_pop (start, i - 1) +
+          __ENV_END_TOKEN_LEN__ + 1;
+
+      __env_matches__ (start, end, index + 1, orig_len, orig_start);
+
+      return;
+      }
+    }
+}
+
 public define __Function ()
 {
+  if (__FUNCALLS__)
+    __save_instance__;
+
   __fun__ = strtrim (());
+
+  ifnot (__FUNCALLS__)
+    {
+    variable
+      env_beg = __is_substrbytes (__fun__, __ENV_BEG_TOKEN__, 1),
+      env_end = __is_substrbytes (__fun__, __ENV_END_TOKEN__, 1);
+
+    ifnot (length (env_beg) == length (env_end))
+      __ferror__ (sprintf ("%d %d unended env expression",
+         length (env_beg), length (env_end)));
+
+    loop (length (env_beg))
+      list_append (__ENV_END_OFFSETS__, 0);
+
+    __env_matches__ (env_beg, env_end, 0, length (env_beg),
+        list_to_array (env_beg, Integer_Type));
+    }
+
+  __FUNCALLS__++;
 
   variable env = "_auto_declare = 1;\n", index;
 
-  if (strlen (__fun__) > 2)
-    if (__fun__[[:2]] == "__(")
-      if ((index = is_substrbytes (__fun__, ")__"), index))
-        {
-        env += substr (__fun__, 4, index - 4) + "\n";
-        __fun__  = strtrim_beg (substr (__fun__, index + 3, -1));
-        }
-      else
-        __ferror__ ("unended env expression");
+  if (strlen (__fun__) > __ENV_BEG_TOKEN_LEN__)
+    if (__fun__[[:__ENV_BEG_TOKEN_LEN__ - 1]] == __ENV_BEG_TOKEN__)
+      {
+      index = list_pop (__ENV_END_OFFSETS__);
+      env += substr (__fun__, __ENV_BEG_TOKEN_LEN__ + 1,
+        index - (__ENV_BEG_TOKEN_LEN__ + 1) - __ENV_END_TOKEN_LEN__)
+         + "\n";
+      __fun__  = strtrim_beg (substr (__fun__, index, -1));
+      }
 
   __f__    = @__F_Type;
   __name__ = qualifier ("__name__", sprintf ("fun_%d", (__fid__++, __fid__)));
   __f__.__ns__  = qualifier ("__ns__", __name__);
   __scope__     = qualifier ("__scope__", "private");
+
+
   __compile__;
   __fun__ = env + __fun__;
   __eval__;
   __tmp (&__f__);
+
+   __FUNCALLS__--;
+
+   if (__FUNCALLS__)
+     __restore_instance__;
 }
 `, "__F");
