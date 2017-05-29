@@ -93,7 +93,7 @@ private define sed (file, s)
   s.fname = file;
 
   s.askwhensubst = NULL == WHENSUBST;
-  retval = Subst.exec (s, File.readlines (file));
+  retval = Subst.exec (s, File.readlines (file);lnronfile = 0);
 
   if (NULL == retval)
     {

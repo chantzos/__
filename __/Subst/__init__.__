@@ -90,7 +90,7 @@ class Subst
       replace,
       finished,
       newlines,
-      lnronfile = s.lnronfile,
+      lnronfile = qualifier ("lnronfile", s.lnronfile),
       i = 0,
       found = 0,
       fname = "file: " + s.fname,
