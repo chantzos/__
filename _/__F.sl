@@ -74,6 +74,11 @@ private define declare__ ()
   ifnot ('(' == __fun__[0])
     return buf + " ()\n{\n";
 
+  if (__len__ > 4)
+    if (any (0 == array_map (Integer_Type, &strncmp, __fun__,
+       ["() =", "()="], [4, 3])))
+        return buf + " ()\n{\n";
+
   buf += " (";
 
   _for __i__ (1, __len__ - 1)
