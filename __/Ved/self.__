@@ -322,7 +322,7 @@ beg
         }
 
       s._i = s._ii;
-      __vset_clr_bg (s, NULL);
+      __vset_status_line_bg_clr (s, NULL);
       s.draw (;dont_draw, no_statusline_clr);
       }
 
@@ -386,7 +386,10 @@ beg
     variable s = w.buffers[w.frame_names[w.cur_frame]];
     variable dir = qualifier ("dir", "next");
 
-    __vset_clr_bg (s, 1);
+    ifnot (s.opt_show_status_line)
+      __vunset_status_line_clr (s, 1);
+    else
+      __vset_status_line_bg_clr (s, 1);
 
     if ("next" == dir)
       w.cur_frame = w.cur_frame == w.frames - 1 ? 0 : w.cur_frame + 1;
@@ -395,7 +398,10 @@ beg
 
     s = get_cur_buf (self);
 
-    __vset_clr_fg (s, 1);
+    ifnot (s.opt_show_status_line)
+      __vunset_status_line_clr (s, 1);
+    else
+      __vset_status_line_fg_clr (s, 1);
 
     setbuf (self, s._abspath);
 
@@ -446,9 +452,9 @@ beg
       s._i = s._ii;
 
       if (i == w.cur_frame)
-        __vset_clr_fg (s, NULL);
+        __vset_status_line_fg_clr (s, NULL);
       else
-        __vset_clr_bg (s, NULL);
+        __vset_status_line_bg_clr (s, NULL);
 
       s.ptr[0] = s.rows[0];
       s.ptr[1] = s._indent;
@@ -492,9 +498,8 @@ beg
       {
       sa = w.buffers[w.frame_names[i]];
       sa.rows = w.frame_rows[i];
-      __vinitrowsbuffvars__ (sa);
+      __vinitrowsbuffvars__ (sa;info_color = VED_INFOCLRBG);
       sa._i = sa._ii;
-      sa.clrs[-1] = VED_INFOCLRBG;
       sa.ptr[0] = sa.rows[0];
       sa.ptr[1] = sa._indent;
 

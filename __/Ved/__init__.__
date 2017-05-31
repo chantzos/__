@@ -403,19 +403,25 @@ class Ved
     s.lexicalhl ([line], [row]);
   end
 
-  def __set_clr__ (s, clr, set) proc
+  def __set_status_line_clr__ (s, clr, set) proc
     s.clrs[-1] = clr;
     Smg->IMG[s.rows[-1]][1] = clr;
     if (set)
-      Smg.hlregion (clr, s.rows[-1], 0, 1, COLUMNS);
+      (@[Smg.hlregion, Smg.hlregiondr]
+        [qualifier_exists ("draw_status_line")])
+          (Smg, clr, s.rows[-1], 0, 1, COLUMNS);
   end
 
-  def __vset_clr_fg (s, set) public proc
-    __set_clr__ (s, VED_INFOCLRFG, set);
+  def __vset_status_line_fg_clr (s, set) public proc
+    __set_status_line_clr__ (s, VED_INFOCLRFG, set);
   end
 
-  def __vset_clr_bg (s, set) public proc
-    __set_clr__ (s, VED_INFOCLRBG, set);
+  def __vset_status_line_bg_clr (s, set) public proc
+    __set_status_line_clr__ (s, VED_INFOCLRBG, set);
+  end
+
+  def __vunset_status_line_clr (s, set) public proc
+    __set_status_line_clr__ (s, Smg->NOCOLOR, set);
   end
 
   def framesize (frames) proc
@@ -525,6 +531,8 @@ class Ved
 
   def _vedloop_ (s) proc
     () = _loop_ (s);
+    ifnot (s.opt_show_status_line)
+      __vunset_status_line_clr (s, 1);
   end
 
   def autoindent (s, indent, line) proc
@@ -646,7 +654,7 @@ class Ved
     if (arlen < rowslen - 1)
       {
       ifnot (s._type == "ashell")
-        clrs[[arlen:length (clrs) -2]] = 5;
+        clrs[[arlen:length (clrs) - 2]] = 5;
 
       variable t = String_Type[rowslen - arlen - 1];
       t[*] = s.opt_show_tilda ? "~" : " ";
@@ -655,8 +663,8 @@ class Ved
 
     ar = [ar, Ved.tail (s;;__qualifiers ())];
 
-    ifnot (qualifier_exists ("no_statusline_clr"))
-    clrs[-1] = [Smg->NOCOLOR, VED_INFOCLRFG][s.opt_show_status_line > 0];
+    ifnot (s.opt_show_status_line)
+      clrs[-1] = Smg->NOCOLOR;
 
     Smg.set_img (s.rows, ar, clrs, s.cols);
 

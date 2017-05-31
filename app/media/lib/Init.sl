@@ -94,7 +94,7 @@ public define on_wind_new (w)
   Ved.setbuf (b;frame = 1);
   Ved.setbuf (This.is.std.out.fn);
 
-  __vset_clr_bg (bved, NULL);
+  __vset_status_line_bg_clr (bved, NULL);
 
   This.is.std.out.fd = aved._fd;
 

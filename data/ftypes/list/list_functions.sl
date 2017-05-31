@@ -99,12 +99,12 @@ public define __list_on_carriage_return (s)
     s.ptr[1] = l.col - 1 + s._indent;
     s._findex = s._indent;
     s._index = s.ptr[1];
-    __vset_clr_fg (s, 1);
+    __vset_status_line_fg_clr (s, 1);
     }
   else
     s = Ved.get_cur_buf ();
 
-  __vset_clr_bg (w.buffers[w.frame_names[1]], 1);
+  __vset_status_line_bg_clr (w.buffers[w.frame_names[1]], 1);
 
   s.draw ();
 
