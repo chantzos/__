@@ -323,7 +323,7 @@ beg
 
       s._i = s._ii;
       __vset_clr_bg (s, NULL);
-      s.draw (;dont_draw);
+      s.draw (;dont_draw, no_statusline_clr);
       }
 
     cur.draw ();
@@ -356,7 +356,7 @@ beg
   end
 
   def get_cur_buf ()
-    variable w = get_cur_wind (self);
+    variable w = VED_WIND[VED_CUR_WIND];
     w.buffers[w.frame_names[w.cur_frame]];
   end
 
@@ -400,6 +400,8 @@ beg
     setbuf (self, s._abspath);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
+
+    return s;
   end
 
   def del_frame (?)
@@ -461,7 +463,7 @@ beg
   def new_frame (fn)
     variable w = get_cur_wind (self);
     if (w.frames == This.has.max_frames)
-      return;
+      return get_cur_buf (NULL);
 
     variable i, s, b;
 
@@ -484,29 +486,31 @@ beg
 
     w.frame_names = [w.frame_names, fn];
 
+    variable sa;
     % fine tuning maybe is needed
     _for i (0, w.cur_frame - 1)
       {
-      s = w.buffers[w.frame_names[i]];
-      s.rows = w.frame_rows[i];
-      __vinitrowsbuffvars__ (s);
-      s._i = s._ii;
-      s.clrs[-1] = VED_INFOCLRBG;
-      s.ptr[0] = s.rows[0];
-      s.ptr[1] = s._indent;
+      sa = w.buffers[w.frame_names[i]];
+      sa.rows = w.frame_rows[i];
+      __vinitrowsbuffvars__ (sa);
+      sa._i = sa._ii;
+      sa.clrs[-1] = VED_INFOCLRBG;
+      sa.ptr[0] = sa.rows[0];
+      sa.ptr[1] = sa._indent;
 
-      s._findex = s._indent;
-      s._index = s._indent;
+      sa._findex = sa._indent;
+      sa._index = sa._indent;
       }
 
     draw_wind (self);
+    s;
   end
 
   def del_wind (name)
     if (1 == length (VED_WIND))
       return;
 
-    variable winds = assoc_get_keys (VED_WIND);
+   variable winds = assoc_get_keys (VED_WIND);
 
     ifnot (any (name == winds))
       return;

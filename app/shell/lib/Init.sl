@@ -36,8 +36,7 @@ public define on_wind_new (w)
 
 public define _change_frame_ (s)
 {
-  Ved.change_frame (;;__qualifiers);
-  s = Ved.get_cur_buf ();
+  s = Ved.change_frame (;;__qualifiers);
   This.is.std.out.fd = s._fd;
 }
 
@@ -50,10 +49,9 @@ public define _del_frame_ (s)
 
 public define _new_frame_ (s)
 {
-  Ved.new_frame (This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
+  s = Ved.new_frame (This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
     "." + This.is.std.out.type);
 
-  s = Ved.get_cur_buf ();
   s._fd = IO.open_fn (s._abspath);
   s.opt_show_tilda = 0;
   s.opt_show_status_line = 0;

@@ -50,7 +50,7 @@ public define intro (rline, ved)
  % the public namespace and serve as the application interface
  % (most of them defined at)
  % ` + Env->SRC_CLASS_PATH + `/App/__init__.__
- %  (it is possible to open the file, by placing the cursor
+ %  (it is possible to open that file, by placing the cursor
  %   over the filename and press "gf")
 
  % note that this intro file can be reopened

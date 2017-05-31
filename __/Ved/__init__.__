@@ -117,6 +117,7 @@ class Ved
   end
 
   decl public topline, toplinedr, __console, __vline, __vfind_word
+  decl get_cur_buf
 
   subclass Reg from Ved
 
@@ -452,7 +453,7 @@ class Ved
       }
 
     topline (" -- pager --");
-    s = Ved.get_cur_buf ();
+    s = get_cur_buf (NULL);
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
     0;
   end
@@ -471,7 +472,7 @@ class Ved
   def __check_msg__ (s) proc
     if (1 == Smg->MSG_SEND)
        Smg->MSG_SEND++;
-    else
+    else if (2 == Smg->MSG_SEND)
       {
       Smg.send_msg_dr (" ", 0, s.ptr[0], s.ptr[1]);
       Smg->MSG_SEND = 0;
@@ -483,7 +484,7 @@ class Ved
 
     forever
       {
-      s = Ved.get_cur_buf ();
+      s = get_cur_buf (NULL);
       VEDCOUNT = -1;
       s._chr = Input.getch (;disable_langchange);
 
@@ -509,7 +510,7 @@ class Ved
 
       s.vedloopcallback ();
 
-      __check_msg__ (s);
+      __check_msg__ (get_cur_buf (NULL));
 
       if (':' == s._chr && (VED_RLINE || 0 == VED_ISONLYPAGER))
         if (__cline__ (s))
@@ -654,6 +655,7 @@ class Ved
 
     ar = [ar, Ved.tail (s;;__qualifiers ())];
 
+    ifnot (qualifier_exists ("no_statusline_clr"))
     clrs[-1] = [Smg->NOCOLOR, VED_INFOCLRFG][s.opt_show_status_line > 0];
 
     Smg.set_img (s.rows, ar, clrs, s.cols);
@@ -981,7 +983,7 @@ class Ved
         winds = assoc_get_keys (VED_WIND);
         VED_CUR_WIND = winds[0];
         w = Ved.get_cur_wind ();
-        s = Ved.get_cur_buf ();
+        s = get_cur_buf (NULL);
         Ved.setbuf (s._abspath);
         Ved.draw_wind ();
         return;
@@ -1016,7 +1018,7 @@ class Ved
 
       Ved.setbuf (w.bufnames[i]);
 
-      s = Ved.get_cur_buf ();
+      s = get_cur_buf (NULL);
       s.draw ();
       }
   end
@@ -1122,17 +1124,15 @@ class Ved
   end
 
   def _change_frame_ (s) public proc
-    Ved.change_frame (;;__qualifiers);
-    s = Ved.get_cur_buf ();
+    s = Ved.change_frame (;;__qualifiers);
   end
 
   def _new_frame_ (s) public proc
     ifnot (VED_OPTS.new_frame)
       return;
 
-    Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname";
-      _autochdir = 0, _dir = Ved.get_cur_buf ()._dir);
-    s = Ved.get_cur_buf ();
+    s = Ved.new_frame (VED_DIR + "/" + string (_time) + ".noname";
+      _autochdir = 0, _dir = get_cur_buf (NULL)._dir);
   end
 
   def _del_frame_ (s) proc
@@ -1148,7 +1148,7 @@ class Ved
       return;
 
     Ved.del_wind (VED_CUR_WIND);
-    s = Ved.get_cur_buf ();
+    s = get_cur_buf (NULL);
   end
 
   def on_wind_change (w) proc
@@ -1188,7 +1188,7 @@ class Ved
       chr = char (chr);
 
     wind_change (NULL, chr);
-    s = Ved.get_cur_buf ();
+    s = get_cur_buf (NULL);
   end
 
   def handle_w (s) public proc
@@ -1546,7 +1546,7 @@ class Ved
              action = NULL,
              ind, range = NULL;
     variable args = __pop_list (_NARGS);
-    variable buf = Ved.get_cur_buf ();
+    variable buf = get_cur_buf (NULL);
     variable lnrs = [0:buf._len];
 
     args = list_to_array (args, String_Type);
@@ -1592,7 +1592,7 @@ class Ved
   def __substitute () public proc
     variable global = 0, ask = 1, pat = NULL, sub = NULL, range = NULL;
     variable args = __pop_list (_NARGS);
-    variable buf = Ved.get_cur_buf ();
+    variable buf = get_cur_buf (NULL);
     variable lnrs = [0:buf._len];
 
     args = list_to_array (args, String_Type);
@@ -1828,7 +1828,7 @@ class Ved
       return;
 
     if ('p' == chr)
-      seltoX (Ved.get_cur_buf ()._abspath);
+      seltoX (get_cur_buf (NULL)._abspath);
   end
 
   def __space__ (s) proc
