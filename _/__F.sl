@@ -194,6 +194,13 @@ private define __env_matches__ (start, end, index, orig_len, orig_start)
       return;
       }
     }
+
+  idx = wherefirst_eq (orig_start, start[i - 1]);
+
+  __ENV_END_OFFSETS__[idx] = end[index] - list_pop (start, i - 1) +
+      __ENV_END_TOKEN_LEN__ + 1;
+
+  __env_matches__ (start, end, index + 1, orig_len, orig_start);
 }
 
 public define __Function ()

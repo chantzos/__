@@ -21,24 +21,25 @@ private variable regexps = [
 % api public functions and vars
   pcre_compile ("(\
 (?<=\s|\[|\()([tT]his(?=\.))\
-|(?<=^|\s)(sub)?(class(?=\s))\
-|(?<=\s)(__init__(?=$))\
 |(?<=\s)(var(?=\s))\
-|(?<=^|\s)(beg(?=$))\
+|(?<=\s)(fun(?=\s))\
+|(?<=\s)(proc(?=$))\
+|(?<=\s)(from(?=\s))\
+|(?<=\s)(decl(?=\s))\
 |(?<=\s)(let!?(?=\s))\
 |(?<=\s)(def!?(?=\s))\
-|(?<=\s)(decl(?=\s))\
-|(?<=\s)(typedef(?=\s))\
-|(?<=\s)(muttable(?=\s|$))\
-|(?<=\s)(fun(?=\s))\
-|(?<=\s)(load|require|include!? (?=[a-z]*))\
-|(?<=\s)(from(?=\s))\
 |(?<=\s)(import(?=\s))\
-|(?<=\s)(proc(?=$))\
-|(?<=^|\s)(end(?=\s|$))\
-|(?<=\)|r|l)( public| static| private(?=\s))\
-|(?<=&|\s|\[|\()(unless(?=\s|,))\
+|(?<=\s)(__init__(?=$))\
+|(?<=\s)(typedef(?=\s))\
+|(?<=\s)(function(?=\s))\
+|(?<=\s)(muttable(?=\s|$))\
+|(?<=^|\s)(sub)?(class(?=\s))\
+|(?<=^|\s)((env)?beg(?=\s|$))\
+|(?<=^|\s)((env)?end(?=\s|$))\
 |(?<=&|\s|\[|\()(raise(?=\s|,))\
+|(?<=&|\s|\[|\()(unless(?=\s|,))\
+|(?<=\s)(load|require|include!? (?=[a-z]*))\
+|(?<=\)|r|l)( public| static| private(?=\s))\
 )"R, 0),
 % identifiers
   pcre_compile ("\
