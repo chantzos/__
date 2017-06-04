@@ -249,8 +249,61 @@ subclass Ed
       (@VED_PAGER[string ('l')]) (s);
   end
 
+
+  def __del_lines__ (s, chr) proc
+    variable lnr = __vlnr (s, '.');
+
+    if (lnr == s._len)
+      if ('G' == chr)
+        return;
+
+    ifnot (lnr)
+      if ('g' == chr)
+        return;
+
+    if ('G' == chr)
+      {
+      Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n";
+          msg = "deleted lines till eof and ");
+      Ved.Vundo.set (s, s.lines[[lnr:]], [lnr:s._len];deleted);
+      if (lnr)
+        s.lines = s.lines[[:lnr-1]];
+      else
+        s.lines = String_Type[0];
+      }
+    else
+      {
+      s._ii = 0;
+      Ved.Reg.set ("\"", strjoin (s.lines[[:lnr]], "\n") + "\n";
+          msg = "deleted lines till bof and ");
+      Ved.Vundo.set (s, s.lines[[:lnr]], [0:lnr];deleted);
+      s.lines = s.lines[[lnr+1:]];
+      s.ptr[0] = 1;
+      }
+
+    s._len = length (s.lines) - 1;
+
+    if (-1 == s._len)
+      {
+      s._len = 0;
+      s.lines = [__get_null_str (s._indent)];
+      s.st_.st_size = 0;
+      }
+    else
+      s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+
+    s.ptr[1] = s._indent;
+    s._index = s._indent;
+    s._findex = s._indent;
+
+    s._i = s._ii;
+
+    set_modified (s);
+    s.draw ();
+  end
+
   def del (s)
-    variable chr = Input.getch ();
+    variable chr = qualifier ("chr", Input.getch ());
 
     if (any (['d', 'w', 'W', 'G', 'g'] == chr))
       {
@@ -275,47 +328,17 @@ subclass Ed
         return;
         }
 
-      if ('G'== chr)
+      if ('G' == chr)
         {
-        variable lnr = __vlnr (s, '.');
-        if (lnr == s._len)
-          return;
-
-        Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n";
-          msg = "deleted lines till eof and ");
-        Ved.Vundo.set (s, s.lines[[lnr:]], [lnr:s._len];deleted);
-        s.lines = s.lines[[:lnr-1]];
-        s._len = length (s.lines) - 1;
-
-        s._i = s._ii;
-
-        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
-        set_modified (s);
-        s.draw ();
+        __del_lines__ (s, 'G');
         return;
         }
 
-      if ('g'== chr)
+      if ('g' == chr)
         {
-        chr = Input.getch ();
-        ifnot ('g' == chr)
-          return;
+        if ('g' == Input.getch ())
+          __del_lines__ (s, 'g');
 
-        lnr = __vlnr (s, '.');
-        ifnot (lnr)
-          return;
-
-        Ved.Reg.set ("\"", strjoin (s.lines[[:lnr]], "\n") + "\n";
-          msg = "deleted lines till bof and ");
-        Ved.Vundo.set (s, s.lines[[:lnr]], [0:lnr];deleted);
-        s.lines = s.lines[[lnr+1:]];
-        s._len = length (s.lines) - 1;
-
-        s._i = s._ii;
-
-        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
-        set_modified (s);
-        s.draw ();
         return;
         }
       }

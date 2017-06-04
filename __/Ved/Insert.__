@@ -1143,6 +1143,9 @@ subclass Insert
     lang = Input.getmapname ();
 
     Input.setlang ("en");
+
     s.opt_show_status_line = save_st_line;
+    ifnot (s.opt_show_status_line)
+      __vunset_status_line_clr (s, 1;;__qualifiers);
   end
 end

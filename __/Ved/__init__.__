@@ -604,7 +604,7 @@ class Ved
   def _draw_ (s) proc
     if (0 > s._len) % this shouldn't never occur (simple means that
       {             % something went wrong and needs fixing at the cause)
-      __vdebug ("_draw_ (), caught unacceptable s._len condition, " +
+      __vdebug (s, "_draw_ (), caught unacceptable s._len condition, " +
          s._fname;hold);
       s.lins = [__get_null_str (s._indent)];
       s.lnrs = [0];

@@ -14,6 +14,8 @@ private define addfname (fname)
   variable absfname;
   variable s;
 
+  fname = Dir.eval (fname;dont_change);
+
   ifnot (path_is_absolute (fname))
     absfname = getcwd + fname;
   else

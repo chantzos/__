@@ -190,9 +190,7 @@ private variable regexps = [
 |(^\{$)\
 |(^\}$)\
 |((?<!\w)variable(?=[\s]*))\
-|(^private(?=\s))\
-|(^public(?=\s))\
-|(^static(?=\s))\
+|((?<=^|\s)(private|public|static)(?=\s))\
 |(^typedef struct$)\
 |((?<!\w)struct(?=[\s]*))\
 |^\s*(try(?=[\s]*))\
