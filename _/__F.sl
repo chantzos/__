@@ -8,33 +8,36 @@ __use_namespace ("__F");
 static variable __FUNCREF__;
 private variable __f__;
 private variable __fun__;
+private variable __env__;
 private variable __i__;
 private variable __len__;
-private variable __name__;
+private variable __as__;
 private variable __scope__;
 private variable __fid__ = -1;
-private variable __FUNCALLS__    = 0;
+private variable __FUNCDEPTH__    = 0;
 private variable __INSTANCES__   = {};
-private variable __ENV_END_OFFSETS__ = {};
 private variable __ENV_BEG_TOKEN__ = "envbeg";
 private variable __ENV_END_TOKEN__ = "envend";
 private variable __ENV_BEG_TOKEN_LEN__ = strlen (__ENV_BEG_TOKEN__);
 private variable __ENV_END_TOKEN_LEN__ = strlen (__ENV_END_TOKEN__);
 
-private define __my_err_handler__ (err, msg)
+private define __my_err_handler__ (e)
 {
-  throw err, msg;
+  if (String_Type == typeof (e))
+    throw qualifier ("error", AnyError), e;
+  else
+    throw qualifier ("error", AnyError), e.message, e;
 }
 
-private define __ferror__ (msg)
+private define __ferror__ (e)
 {
   loop (_stkdepth) pop;
 
-  array_map (&__uninitialize, [&__i__, &__len__, &__fun__, &__name__, &__scope__]);
+  array_map (&__uninitialize,
+    [&__i__, &__len__, &__fun__, &__env__, &__as__, &__scope__]);
 
-  __FUNCALLS__ = 0;
+  __FUNCDEPTH__ = 0;
   __INSTANCES__ = {};
-  __ENV_END_OFFSETS__ = {};
 
   if (qualifier_exists ("unhandled"))
     {
@@ -51,11 +54,9 @@ private define __ferror__ (msg)
     if (NULL == (handler = __get_reference ("__FError_Handler"), handler))
       handler = &__my_err_handler__;
 
-  variable err = qualifier ("__error", ClassError);
-
   if (Ref_Type == typeof (handler))
     if (__is_callable (handler))
-      (@handler) (err, msg;;__qualifiers);
+      (@handler) (e;;__qualifiers);
 }
 
 private define declare__ ()
@@ -63,13 +64,10 @@ private define declare__ ()
   __i__   = 0;
   __len__ = strlen (__fun__);
 
-  variable buf = __scope__ + " define " + __name__;
+  variable buf = __scope__ + " define " + __as__;
 
   ifnot (__len__)
-    if (__scope__ == "private")
-      __ferror__ ("cannot declare empty function in a private scope");
-    else
-      return buf + " ();";
+    return buf + " ();";
 
   ifnot ('(' == __fun__[0])
     return buf + " ()\n{\n";
@@ -91,7 +89,7 @@ private define declare__ ()
       }
 
   __ferror__ ("function declaration failed, syntax error, " +
-     "expected \")\"");
+     "expected \")\""; error = SyntaxError);
 }
 
 private define __compile__ ()
@@ -105,11 +103,11 @@ private define __eval__ ()
 {
   try
     {
-    __eval (__tmp (__fun__) + "__F->__FUNCREF__ = &" + __tmp (__name__) + ";",
-      __f__.__ns__);
+    __eval (__tmp (__fun__) + "__F->__FUNCREF__ = &" + __tmp (__as__) + ";",
+      __f__.__ns);
     }
   catch ClassError:
-    __ferror__ (__get_exception_info.message);
+    __ferror__ (__get_exception_info);
 
   __f__.__funcref = __tmp (__FUNCREF__);
 }
@@ -124,13 +122,13 @@ private define __call ()
     (@f.__funcref) (__push_list (args);;__qualifiers);
     }
   catch AnyError:
-    __ferror__ (__get_exception_info.message;;__qualifiers);
+    __ferror__ (__get_exception_info;;__qualifiers);
 }
 
 private variable __F_Type = struct
   {
-  __ns__     = "__F",
-  __         = &__call,
+  __ns  = "__F",
+  __    = &__call,
   __funcref,
   };
 
@@ -138,7 +136,7 @@ public define __Fexpr ()
 {
   __fun__   = strtrim (());
   __f__     = @__F_Type;
-  __name__  = "__FUNCTION__";
+  __as__    = "__FUNCTION__";
   __scope__ = "private";
   __compile__;
   __eval__;
@@ -149,117 +147,107 @@ private define __save_instance__ ()
 {
   list_insert (__INSTANCES__, struct
     {
-    __fun__   =  __fun__,
-    __f__     =  @__f__,
-    __name__  =  __name__,
-    __scope__ =  __scope__
+    __fun   =  __fun__,
+    __env   =  __env__,
+    __f     =  @__f__,
+    __as    =  __as__,
+    __scope =  __scope__
     });
 }
 
 private define __restore_instance__ ()
 {
   variable i = list_pop (__INSTANCES__);
-  __fun__   =  i.__fun__;
-  __f__     =  @i.__f__;
-  __name__  =  i.__name__;
-  __scope__ =  i.__scope__;
+  __fun__   =  i.__fun;
+  __env__   =  i.__env;
+  __f__     =  @i.__f;
+  __as__    =  i.__as;
+  __scope__ =  i.__scope;
 }
 
-private define __env_matches__ ();
-private define __env_matches__ (start, end, index, orig_len, orig_start)
+private define __find_env__ ()
 {
-  ifnot (orig_len)
-    return;
+  variable
+    env_beg = __is_substrbytes (__fun__, __ENV_BEG_TOKEN__, 1),
+    env_end = __is_substrbytes (__fun__, __ENV_END_TOKEN__, 1);
 
-  variable start_len = length (start);
-  variable i = -1;
-  variable idx;
+  variable i, idx, env;
+  variable len = length (env_beg);
+  ifnot (len == length (env_end))
+    __ferror__ (sprintf ("%d %d  %s\nunmatched %s %s delimiters",
+        len, length (env_end), __fun__, __ENV_BEG_TOKEN__, __ENV_END_TOKEN__)
+      ;error = SyntaxError);
 
-  if (index + 1 == orig_len)
+  if (1 == len)
     {
-    idx = wherefirst_eq (orig_start, start[0]);
+    __env__ += substr (__fun__, __ENV_BEG_TOKEN_LEN__ + 1,
+        env_end[0] -  (__ENV_BEG_TOKEN_LEN__ + 1)) + "\n";
 
-    __ENV_END_OFFSETS__[idx] = end[index] - list_pop (start) +
-        __ENV_END_TOKEN_LEN__ + 1;
+    __fun__ = strtrim_beg (substr (__fun__,
+        env_end[0] + __ENV_END_TOKEN_LEN__, - 1));
 
     return;
     }
 
-  while (i++, i < start_len)
+  idx = 0;
+  while (idx++, idx < len)
     {
-    if (end[index] < start[i])
+    i = 0;
+
+    while (i++, i < len)
       {
-      idx = wherefirst_eq (orig_start, start[i - 1]);
+      if (env_end[idx] < env_beg[i])
+        {
+        __env__ += substr (__fun__, __ENV_BEG_TOKEN_LEN__ + 1,
+            env_end[idx] -  (__ENV_BEG_TOKEN_LEN__ + 1)) + "\n";
 
-      __ENV_END_OFFSETS__[idx] = end[index] - list_pop (start, i - 1) +
-          __ENV_END_TOKEN_LEN__ + 1;
+        __fun__ = strtrim_beg (substr (__fun__,
+            env_end[idx] + __ENV_END_TOKEN_LEN__, -1));
 
-      __env_matches__ (start, end, index + 1, orig_len, orig_start);
-
-      return;
+        return;
+        }
       }
     }
 
-  idx = wherefirst_eq (orig_start, start[i - 1]);
+  __env__ += substr (__fun__, __ENV_BEG_TOKEN_LEN__ + 1,
+      env_end[-1] -  (__ENV_BEG_TOKEN_LEN__ + 1)) + "\n";
 
-  __ENV_END_OFFSETS__[idx] = end[index] - list_pop (start, i - 1) +
-      __ENV_END_TOKEN_LEN__ + 1;
-
-  __env_matches__ (start, end, index + 1, orig_len, orig_start);
+  __fun__ = strtrim_beg (substr (__fun__,
+      env_end[-1] + __ENV_END_TOKEN_LEN__, -1));
 }
 
 public define __Function ()
 {
-  if (__FUNCALLS__)
+  if (__FUNCDEPTH__)
     __save_instance__;
 
   __fun__ = strtrim (());
 
-  ifnot (__FUNCALLS__)
-    {
-    variable
-      env_beg = __is_substrbytes (__fun__, __ENV_BEG_TOKEN__, 1),
-      env_end = __is_substrbytes (__fun__, __ENV_END_TOKEN__, 1);
+  __FUNCDEPTH__++;
 
-    ifnot (length (env_beg) == length (env_end))
-      __ferror__ (sprintf ("%d %d unended env expression",
-         length (env_beg), length (env_end)));
-
-    loop (length (env_beg))
-      list_append (__ENV_END_OFFSETS__, 0);
-
-    __env_matches__ (env_beg, env_end, 0, length (env_beg),
-        list_to_array (env_beg, Integer_Type));
-    }
-
-  __FUNCALLS__++;
-
-  variable env = "_auto_declare = 1;\n", index;
+  __env__ = "_auto_declare = 1;\n";
 
   if (strlen (__fun__) > __ENV_BEG_TOKEN_LEN__)
     if (__fun__[[:__ENV_BEG_TOKEN_LEN__ - 1]] == __ENV_BEG_TOKEN__)
-      {
-      index = list_pop (__ENV_END_OFFSETS__);
-      env += substr (__fun__, __ENV_BEG_TOKEN_LEN__ + 1,
-        index - (__ENV_BEG_TOKEN_LEN__ + 1) - __ENV_END_TOKEN_LEN__)
-         + "\n";
-      __fun__  = strtrim_beg (substr (__fun__, index, -1));
-      }
+       __find_env__;
 
+  __as__   = qualifier ("name", sprintf ("fun_%d", (__fid__++, __fid__)));
   __f__    = @__F_Type;
-  __name__ = qualifier ("__name__", sprintf ("fun_%d", (__fid__++, __fid__)));
-  __f__.__ns__  = qualifier ("__ns__", __name__);
-  __scope__     = qualifier ("__scope__", "private");
-
+  __f__.__ns  = qualifier ("ns", __as__);
+  __scope__   = qualifier ("scope", "private");
 
   __compile__;
-  __fun__ = env + __fun__;
+  __fun__ = __env__ + __fun__;
   __eval__;
-  __tmp (&__f__);
 
-   __FUNCALLS__--;
+  ifnot (qualifier_exists ("discard"))
+    __tmp (&__f__);
+  else
+    __uninitialize (&__f__);
 
-   if (__FUNCALLS__)
+   __FUNCDEPTH__--;
+
+   if (__FUNCDEPTH__)
      __restore_instance__;
 }
 `, "__F");
