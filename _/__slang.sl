@@ -63,7 +63,8 @@ public define __is_substrbytes (src, byteseq, offset)
 
 public define __eval (buf, ns)
 {
-  try
+  variable e;
+  try (e)
     eval (buf, ns);
   catch AnyError:
     {
@@ -75,16 +76,19 @@ public define __eval (buf, ns)
           ? fun
           : _function_name);
 
-    % assuming sanity
-    variable err = qualifier ("__error", ClassError);
+    err_buf = (err_buf = strchop (buf, '\n', 0),
+         strjoin (array_map (String_Type, &sprintf, "%d| %s",
+         [1:length (err_buf)], err_buf), "\n"));
 
-    throw err, sprintf (
-      "%s: Evaluation Error\n%S\nmessage: %S\nline: %d\n",
-      fun, (err_buf = strchop (buf, '\n', 0),
-        strjoin (array_map (String_Type, &sprintf, "%d| %s",
-        [1:length (err_buf)], err_buf), "\n")),
-        __get_exception_info.message, __get_exception_info.line),
-        __get_exception_info;
+    if (qualifier_exists ("print_err"))
+      () = fprintf (stderr, "%s\n%s\n%d\n%s\n", err_buf,
+          e.message, e.line, e.function);
+
+    throw qualifier ("error", AnyError), sprintf (
+      "%s: Evaluation Error\n%S\nmessage: %S\nline: %d\n %s\n",
+         fun, [err_buf, ""][qualifier_exists ("print_err")],
+         e.message, e.line, e.function),
+      e;
     }
 }
 
