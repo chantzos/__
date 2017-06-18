@@ -31,13 +31,13 @@ private variable regexps = [
 |(?<=\s)(import(?=\s))\
 |(?<=\s)(__init__(?=$))\
 |(?<=\s)(typedef(?=\s))\
-|(?<=\s)(function(?=\s))\
 |(?<=\s)(muttable(?=\s|$))\
 |(?<=^|\s)(sub)?(class(?=\s))\
 |(?<=^|\s)((env)?beg(?=\s|$))\
 |(?<=^|\s)((env)?end(?=\s|$))\
 |(?<=&|\s|\[|\()(raise(?=\s|,))\
 |(?<=&|\s|\[|\()(unless(?=\s|,))\
+|(?<=^|\s)((function|method)(?=\s))\
 |(?<=\s)(load|require|include!? (?=[a-z]*))\
 |(?<=\)|r|l)( public| static| private(?=\s))\
 )"R, 0),

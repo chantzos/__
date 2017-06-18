@@ -1,4 +1,5 @@
 --mountpoint= mountpoint MountPoint
+--all void print all file systems in listing mode
 --device= device Device
 --verbose void Be verbose
 --info void Show information

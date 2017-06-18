@@ -11,6 +11,7 @@
 	
   --mountpoint=  MountPoint
   --device=      Device
+  --all          Print all file systems in listing mode
   -v,--verbose   Be verbose
   --info         Show info
   --help         Show help

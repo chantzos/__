@@ -234,7 +234,7 @@ private define med_on_carriage_return (s)
 
   med_draw_box (s, buf, 1, 1);
   MED_CUR_SONG_CHANGED = 1;
-  0;
+  1;
 }
 
 public define init_media ()

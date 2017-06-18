@@ -13,6 +13,7 @@ define main ()
     p,
     file,
     argv,
+    all = NULL,
     index,
     retval,
     status,
@@ -20,27 +21,39 @@ define main ()
     mountpoint = NULL,
     device = NULL,
     mount = Sys.which ("mount"),
+    findmnt = Sys.which ("findmnt"),
     c = Opt.Parse.new (&_usage);
-
-  if (NULL == mount)
-    {
-    IO.tostderr ("mount couldn't be found in PATH");
-    exit_me (1);
-    }
 
   c.add ("mountpoint", &mountpoint;type = "string");
   c.add ("device", &device;type = "string");
+  c.add ("all", &all);
   c.add ("v|verbose", &verbose);
   c.add ("help", &_usage);
   c.add ("info", &info);
 
   i = c.process (__argv, 1);
 
+  if (NULL == mount &&
+      ((mountpoint == NULL == device) == 0 ||
+      ((mountpoint == NULL == device) && NULL == findmnt)))
+    {
+    IO.tostderr ("mount couldn't be found in PATH");
+    exit_me (1);
+    }
+
   if (mountpoint == NULL == device)
     {
     p = initproc (0, openstdout, openstderr);
+    if (Sys->OS == "Linux" && NULL != findmnt)
+      {
+      argv = [findmnt, "-l"];
+      if (NULL == all)
+        argv = [argv, "-t", "nocgroup,nodevpts,noproc,nosysfs,nodevtmp"];
 
-    status = p.execv ([mount], NULL);
+      status = p.execv (argv, NULL);
+      }
+    else
+      status = p.execv ([mount], NULL);
 
     exit_me (status.exit_status);
     }

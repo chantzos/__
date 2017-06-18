@@ -21,14 +21,8 @@ private variable regexps = [
 ((?<=\s|\[\()(keys(?=(->)))\
 |(?<=\s|\[|\()([tT]his(?=\.))\
 |(?<=^|\s)(class(?=\s))\
-|(?<=\s)(var(?=\s))\
-|(?<=\s)(let(?=\s))\
-|(?<=\s)(def(?=\s))\
-|(?<=\s)(fun(?=\s))\
 |(?<=\s)(import(?=\s))\
-|(?<=^|\s)(end(?=\s|$))\
 |(?<=&|\s|\[|\()(unless(?=\s|,))\
-|(?<=&|\s|\[|\()(raise(?=\s|,))\
 |(?<=&|\s|\[|\()(which(?=\s|,))\
 |(?<=&|\s|\[|\()(getch(?=\s|,))\
 |(?<=&|\s|\[|\()(fstat(?=\s|,))\
@@ -190,9 +184,7 @@ private variable regexps = [
 |(^\{$)\
 |(^\}$)\
 |((?<!\w)variable(?=[\s]*))\
-|(^private(?=\s))\
-|(^public(?=\s))\
-|(^static(?=\s))\
+|((?<=^|\s)(private|public|static)(?=\s))\
 |(^typedef struct)\
 |((?<!\w)struct(?=[\s]*))\
 |^\s*(try(?=[\s]*))\
