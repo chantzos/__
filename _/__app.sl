@@ -30,10 +30,10 @@ This.is.at.session = getenv ("SESSION");
 if (NULL == This.is.child)
   This.is.also = [This.is.also, "PARENT"];
 
-This.is.me = __Fexpr (`(ischild)
+This.is.me = fexpr (`(ischild)
   [(NULL == This.is.at.session ? "MASTER" : "PARENT"),
    "CHILD"][ischild];
-`).__ (NULL != This.is.child);
+`).call (NULL != This.is.child);
 
 Load.module ("socket");
 
@@ -57,9 +57,9 @@ This.at_exit = &__exit;
 
 Class.load ("I";force);
 
-This.request.X = __Fexpr (`(nox)
+This.request.X = fexpr (`(nox)
   [0 == access (Env->STD_C_PATH + "/xsrv-module.so", F_OK), 0][nox];
-`).__ (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg));
+`).call (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg));
 
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
@@ -83,7 +83,7 @@ This.is.my.conf    = This.is.my.datadir  + "/config/conf";
 This.is.my.histfile= Env->USER_DATA_PATH + "/.__" + Env->USER +
   "_" + This.is.my.name + "history";
 
-__Fexpr (`(ar, tok, i)
+fexpr (`(ar, tok, i)
   ar = File.readlines (Env->STD_DATA_PATH + "/genconf/conf");
 
   if (0 == access (This.is.my.genconf, F_OK|R_OK) &&
@@ -104,7 +104,7 @@ __Fexpr (`(ar, tok, i)
     else
       This.is.my.settings[tok[0]] = tok[1];
     }
-`).__ (String_Type[0], NULL, NULL);
+`).call (String_Type[0], NULL, NULL);
 
 This.is.std.out.type = "ashell";
 
@@ -129,7 +129,7 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-public variable Profile = struct {set = __Function (`
+public variable Profile = struct {set = function (`
   (self)
   if (NULL == This.request.profile)
     ifnot (qualifier_exists ("set"))
@@ -326,7 +326,7 @@ private define __echo__ (argv)
     __scratch (NULL);
 }
 
-private variable __CHDIR__ = __Function (`
+private variable __CHDIR__ = function (`
   envbeg
     __CWD__    = "";
     __DIR__    = "";
@@ -367,7 +367,7 @@ private variable __CHDIR__ = __Function (`
   Com.post_builtin ();
 `;__ns__ = "__CHDIR__");
 
-private variable __TRACK__ = __Function (`
+private variable __TRACK__ = function (`
   envbeg
     __SRC_TRACK_DIR__  = "";
     __SRC_TRACK_FILE__ = "";
@@ -443,7 +443,7 @@ private define __search__ (argv)
   __draw_buf (Ved.get_cur_buf ());
 }
 
-private variable __WHICH__ = __Function (`
+private variable __WHICH__ = function (`
   envbeg
     __PATH__ = NULL, __MSG__ = NULL;
   envend
@@ -740,6 +740,10 @@ private define __builtins__ (a)
     a["__project_new"].func = f;
     a["__project_new"].args = ["--from-file= filename read from filename"];
     }
+
+  variable lbuiltin = Env->LOCAL_LIB_PATH + "/__builtin__/__funs.__"; 
+  ifnot (access (lbuiltin, F_OK|R_OK))
+    fexpr (File.read (lbuiltin)).call (a);
 }
 
 static define __filtercommands (s, ar, chars)
@@ -803,7 +807,7 @@ public define init_commands ()
 {
   variable i, c, ii,
     a = Assoc_Type[Argvlist_Type, @Argvlist_Type],
-    ref = __Function (`(argv) Com.execute (argv;;__qualifiers);`).__funcref,
+    ref = function (`(argv) Com.execute (argv;;__qualifiers);`).__funcref,
     ex = qualifier_exists ("ex"),
     d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
@@ -903,8 +907,8 @@ private define __rehash__ ()
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
-Com.let ("COMMANDS_FOR_PAGER",__Fexpr (`()
-    strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`).__ ());
+Com.let ("COMMANDS_FOR_PAGER", fexpr (`()
+    strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`).call ());
 
 App.build_table ();
 

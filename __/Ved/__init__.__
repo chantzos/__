@@ -1476,7 +1476,7 @@ class Ved
     variable lnr, line, len, i;
     ifnot (NULL == pat)
       { % code style violation (clever)
-      variable __pcre_exec = __Fexpr (`(pat, line)
+      variable __pcre_exec = fexpr (`(pat, line)
       try
         {
         pcre_exec (pat, line, 0);
@@ -1492,7 +1492,7 @@ class Ved
       {
       lnr = lnrs[i];
       line = buf.lines[lnr];
-      if (__pcre_exec.__ (pat, line))
+      if (__pcre_exec.call (pat, line))
         ifnot (whenmatch)
           continue;
         else

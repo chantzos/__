@@ -82,7 +82,7 @@ subclass Search
 
     i = s_lnr;
 
-    variable __pcre_exec = __Fexpr (`(pat, line)
+    variable __pcre_exec = fexpr (`(pat, line)
         try
           {
           pcre_exec (pat, line);
@@ -96,7 +96,7 @@ subclass Search
     while (i > -1 || (i > s_lnr && wrapped))
       {
       line = __vgetlinestr (s, s.lines[i], 1);
-      if (__pcre_exec.__ (pat, line))
+      if (__pcre_exec.call (pat, line))
         {
         match = pcre_nth_match (pat, 0);
         ar = [
@@ -164,7 +164,7 @@ subclass Search
 
     i = s_lnr;
 
-    variable __pcre_exec = __Fexpr (`(pat, line)
+    variable __pcre_exec = fexpr (`(pat, line)
       try
         {
         pcre_exec (pat, line);
@@ -179,7 +179,7 @@ subclass Search
     while (i <= s._len || (i < s_lnr && wrapped))
       {
       line = __vgetlinestr (s, s.lines[i], 1);
-      if (__pcre_exec.__ (pat, line))
+      if (__pcre_exec.call (pat, line))
         {
         match = pcre_nth_match (pat, 0);
         ar = [

@@ -128,11 +128,11 @@ private define __call ()
 private variable __F_Type = struct
   {
   __ns  = "__F",
-  __    = &__call,
+  call  = &__call,
   __funcref,
   };
 
-public define __Fexpr ()
+public define fexpr ()
 {
   __fun__   = strtrim (());
   __f__     = @__F_Type;
@@ -216,7 +216,7 @@ private define __find_env__ ()
       env_end[-1] + __ENV_END_TOKEN_LEN__, -1));
 }
 
-public define __Function ()
+public define function ()
 {
   if (__FUNCDEPTH__)
     __save_instance__;
