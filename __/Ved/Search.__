@@ -266,7 +266,7 @@ subclass Search
 
       if ((' ' <= chr < 64505) &&
           0 == any (chr == [Input->rmap.backspace, Input->rmap.delete,
-          [Input->UP:Input->RIGHT], [Input->F1:Input->F12]]))
+          [Input->UP:Input->END], [Input->F1:Input->F12]]))
         {
         if (s_col == strlen (pat) + 1)
           pat += char (chr);
@@ -344,7 +344,7 @@ subclass Search
           continue;
           }
 
-      if (chr == Input->CTRL_n)
+      if (any (chr == [Input->NPAGE, Input->CTRL_n]))
         {
         if (type == "forward")
           if (s_lnr == s._len)
@@ -360,7 +360,7 @@ subclass Search
         (@typesearch) (s, pat);
         }
 
-      if (chr == Input->CTRL_p)
+      if (any (chr == [Input->PPAGE, Input->CTRL_p]))
         {
         typesearch = type == "forward" ? &s_backward : &s_forward;
         if (type == "backward")
