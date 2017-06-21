@@ -1,4 +1,6 @@
 class Env
+  let ROOT_PATH      = __tmp ($0);
+
   let PID            = getpid ();
   let UID            = getuid ();
   let GID            = getgid ();
@@ -7,6 +9,7 @@ class Env
   let HOSTNAME       = Sys.gethostname ();
   let TERM           = getenv ("TERM");
   let LANG           = getenv ("LANG");
+  let LD_LIBRARY_PATH = getenv ("LD_LIBRARY_PATH");
   let! DISPLAY       = getenv ("DISPLAY");
   let! XAUTHORITY    = getenv ("XAUTHORITY");
   let IS_SU_PROC     = getuid == 0;
@@ -15,7 +18,6 @@ class Env
 
   let OS_PATH          = getenv ("PATH");
   let HOME_PATH        = getenv ("HOME");
-  let ROOT_PATH        = __tmp (&$0);
   let SRC_PATH         = ROOT_PATH + "/__";
   let STD_PATH         = ROOT_PATH + "/std";
   let TMP_PATH         = ROOT_PATH + "/tmp";
@@ -73,6 +75,7 @@ class Env
       "SLSH_LIB_DIR=" + SLSH_LIB_DIR,
       "COLUMNS=" + string (COLUMNS),
       "LINES=" + string (LINES),
+      "LD_LIBRARY_PATH=" + LD_LIBRARY_PATH,
       ];
 
     ifnot (NULL == DISPLAY)

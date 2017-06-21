@@ -24,6 +24,9 @@ Sys.let ("SUDO_BIN", Sys.which ("sudo"));
 
 eval ("static define COLOR ();", "Smg");
 
+if (NULL == Env->LD_LIBRARY_PATH)
+  Env.let ("LD_LIBRARY_PATH", "/usr/local/lib:/lib:/usr/lib");
+
 if (NULL == Env->TERM)
   {
   IO.tostderr ("TERM environment variable isn't set");
@@ -50,7 +53,7 @@ if (NULL == Env->HOME_PATH)
   }
 
 $5 = stat_file (Env->HOME_PATH);
-if (Env->UID)
+if (Env->UID && This.request.debug)
 if (NULL == $5 || -1 == Sys.checkperm (
      $5.st_mode, File->PERM["PRIVATE"]) ||
      $5.st_uid != Env->UID ||
