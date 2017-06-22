@@ -922,10 +922,18 @@ subclass Insert
       }
   end
 
+  def ins_wordcompletion (s, line) proc
+    ctrl_completion_rout (s, line, _function_name ());
+  end
+
   def ins_ctrl_x_completion (is, s, line) proc
     variable chr = Input.getch ();
 
     switch (chr)
+      {
+      case Input->CTRL_n || case 'n':
+      ins_wordcompletion (s, line);
+      }
 
       {
       case Input->CTRL_l || case 'l':
@@ -945,10 +953,6 @@ subclass Insert
       {
       return;
       }
-  end
-
-  def ins_wordcompletion (s, line) proc
-    ctrl_completion_rout (s, line, _function_name ());
   end
 
   def paste_xsel (s) proc
