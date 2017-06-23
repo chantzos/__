@@ -2321,20 +2321,29 @@ class Rline
         }
 
       if (s._ind == 0 == strlen (s.argv[0]))
-        if (any (['~', '!', '_'] == s._chr))
-          {
-          commands = assoc_get_keys (s.argvlist);
-          commands = commands[wherenot (strncmp (commands,
-            ["~", "!", "_"][wherefirst (['~', '!', '_'] == s._chr)], 1))];
-
-          if (commandcmp (NULL, s, commands;already_filtered) == 1)
+        if (any (['~', '!', '_', '`'] == s._chr))
+          if ('`' == s._chr)
             {
-            s.execline (;;__qualifiers ());
-            return;
+            ifnot (NULL == s.wind_mang)
+              {
+              s.wind_mang ();
+              continue;
+              }
             }
+          else
+            {
+            commands = assoc_get_keys (s.argvlist);
+            commands = commands[wherenot (strncmp (commands,
+              ["~", "!", "_"][wherefirst (['~', '!', '_'] == s._chr)], 1))];
 
-          continue;
-          }
+            if (commandcmp (NULL, s, commands;already_filtered) == 1)
+              {
+              s.execline (;;__qualifiers ());
+              return;
+              }
+
+            continue;
+            }
 
       if ('\r' == s._chr)
         {
