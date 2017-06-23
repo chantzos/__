@@ -50,12 +50,13 @@ public define _del_frame_ (s)
 public define _new_frame_ (s)
 {
   s = Ved.new_frame (This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
-    "." + This.is.std.out.type);
+    "." + This.is.std.out.type;show_tilda = 0, show_status_line = 0);
 
   s._fd = IO.open_fn (s._abspath);
-  s.opt_show_tilda = 0;
-  s.opt_show_status_line = 0;
   This.is.std.out.fd = s._fd;
+  Com.post_header ();
+
+  __draw_buf (s);
 }
 
 public define intro ()

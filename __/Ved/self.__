@@ -223,10 +223,7 @@ beg
     variable w = get_cur_wind (self);
 
     ifnot (any (bufname == w.bufnames))
-      {
-      % IO.tostderr ("possible error: " + bufname + "\n", "no such bufname");
       return;
-      }
 
     variable s = w.buffers[bufname];
 
@@ -327,6 +324,7 @@ beg
       }
 
     cur.draw ();
+    topline (" -- " + This.is.my.name + " --");
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (cur._dir);

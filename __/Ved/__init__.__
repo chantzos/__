@@ -1172,7 +1172,7 @@ class Ved
     SPECIAL = [SPECIAL, fn];
 
     (@__get_reference ("__initrline"));
-    topline (" -- ved --");
+    topline (" -- " + This.is.my.name + " --");
     Ved.draw_wind ();
   end
 
