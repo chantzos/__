@@ -829,6 +829,8 @@ class Ved
   end
 
   def on_wind_change (w) public proc
+    topline (" -- " + This.is.my.name + " --");
+    Ved.setbuf (w.frame_names[w.cur_frame]);
   end
 
   def get_wind_name ()
@@ -845,9 +847,10 @@ class Ved
 
     variable w;
     variable i;
+    variable windlen = length (winds);
 
     if (Integer_Type == typeof (to))
-      if (length (winds) - 1 < to)
+      if (windlen - 1 < to)
         return;
       else
         w = winds[to];
@@ -860,7 +863,7 @@ class Ved
         else
           {
           i = wherefirst (winds == VED_CUR_WIND);
-          i = i == length (winds) - 1 ? 0 : i + 1;
+          i = i == windlen - 1 ? 0 : i + 1;
           w = winds[i];
           }
 
@@ -1159,11 +1162,6 @@ class Ved
     s = get_cur_buf (NULL);
   end
 
-  def on_wind_change (w) proc
-    topline (" -- ved --");
-    Ved.setbuf (w.frame_names[w.cur_frame]);
-  end
-
   def on_wind_new (w) public proc
     variable fn = VED_DIR + "/" + string (_time) + ".noname";
     variable s = Ved.init_ftype (NULL;;__qualifiers);
@@ -1200,51 +1198,54 @@ class Ved
   end
 
   def handle_w (s) public proc
-    variable chr = Input.getch ();
+    variable chr = qualifier ("input_char", Input.getch ());
+    variable keys = [
+      'w', 's', 'd', 'k', 'n', ',', '.',
+      Input->UP, Input->CTRL_w, Input->DOWN, ['0':'9']];
 
-    if (any (['w', 's', Input->UP, Input->CTRL_w, Input->DOWN, 'd', 'k', 'n', ',', '.', ['0':'9']] == chr))
+    ifnot (any (chr == keys))
+      return;
+
+    if (any (['w', Input->CTRL_w, Input->DOWN] == chr))
       {
-      if (any (['w', Input->CTRL_w, Input->DOWN] == chr))
-        {
-        _change_frame_ (s;dir = "next");
-        return;
-        }
+      _change_frame_ (s;dir = "next");
+      return;
+      }
 
-      if (any ([Input->UP] == chr))
-        {
-        _change_frame_ (s;dir = "prev");
-        return;
-        }
+    if (any ([Input->UP] == chr))
+      {
+      _change_frame_ (s;dir = "prev");
+      return;
+      }
 
-      if ('s' == chr)
-        {
-        _new_frame_ (s);
-        return;
-        }
+    if ('s' == chr)
+      {
+      _new_frame_ (s);
+      return;
+      }
 
-      if ('d' == chr)
-        {
-        _del_frame_ (s);
-        return;
-        }
+    if ('d' == chr)
+      {
+      _del_frame_ (s);
+      return;
+      }
 
-      if ('k' == chr)
-        {
-        _del_wind_ (s);
-        return;
-        }
+    if ('k' == chr)
+      {
+      _del_wind_ (s);
+      return;
+      }
 
-      if ('n' == chr)
-        {
-        _new_wind_ (s);
-        return;
-        }
+    if ('n' == chr)
+      {
+      _new_wind_ (s);
+      return;
+      }
 
-      if (any ([['0':'9'], ',', '.'] == chr))
-        {
-        _goto_wind_ (s, chr);
-        return;
-        }
+    if (any ([['0':'9'], ',', '.'] == chr))
+      {
+      _goto_wind_ (s, chr);
+      return;
       }
   end
 
@@ -1257,7 +1258,7 @@ class Ved
   end
 
   def __on_escape__ (s) proc
-    variable keys = [033, 'w', 's'];
+    variable keys = [033, 'w', 's', '`'];
     variable key = Input.getch ();
     ifnot (any (key == keys))
       return;
@@ -1271,6 +1272,11 @@ class Ved
       {
       case 033:
         () = __cline__ (s);
+      }
+
+      {
+      case '`':
+        handle_w (s);
       }
 
       {
