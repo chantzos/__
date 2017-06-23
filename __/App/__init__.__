@@ -283,7 +283,41 @@ class App
   end
 
   def wind_mang (s) public proc
-    (@__get_reference ("handle_w")) (Ved.get_cur_buf ());
+    variable ref = __get_reference ("handle_w");
+
+    ifnot ('`' == s._chr)
+      {
+      loop (1) {
+      variable rl = Rline.init (NULL);
+      Rline.set (rl);
+      Rline.prompt (rl, rl._lin, rl._col);
+
+      variable commands = [
+        "frame_new", "frame_next", "frame_prev", "frame_del",
+        "wind_new",  "wind_del", "wind_next", "wind_prev",
+        "wind_goto"];
+
+      () = Rline.commandcmp (rl, commands; accept_space_as_return, already_filtered);
+
+      ifnot (strlen (rl.argv[0]))
+        break;
+
+      variable idx = where (commands == rl.argv[0]);
+
+      ifnot (length (idx))
+        break;
+
+      variable buf = Ved.get_cur_buf ();
+
+      if (rl.argv[0] == "wind_goto")
+        (@ref) (buf);
+      else
+        (@ref) (buf;input_char =
+          ['s', 'w', Input->UP, 'd', 'n', 'k', '.', ','][idx[0]]); }
+      }
+    else
+      (@ref) (Ved.get_cur_buf ());
+
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
   end
@@ -316,7 +350,7 @@ class App
   end
 
   def scratch (ved)
-    if (qualifier_exists ("draw") && qualifier ("draw") == 0)
+    ifnot (qualifier ("draw", 1))
       return;
 
     variable __i = __get_qualifier_as (Integer_Type, qualifier ("_i"), 0);
