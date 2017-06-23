@@ -156,7 +156,7 @@ define main ()
   filelist = [length (files) ? files : "", length (filelist) ?
     list_to_array (filelist) : ""];
   filelist = filelist[where (strlen (filelist))];
-  filelist = filelist[Array.unique (filelist)];
+  filelist = Array.unique (filelist);
   filelist = filelist[array_sort (filelist;dir=-1)];
 
   ifnot (length (filelist))
