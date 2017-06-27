@@ -54,6 +54,9 @@ private define _edit_other ()
 
   ifnot (_NARGS)
     {
+    ifnot ("e" == string (qualifier ("argv0")))
+      return;
+
     variable key;
     Smg.send_msg_dr ("reload current buffer [y/n]", 1, NULL, NULL);
     while (key = Input.getch (), 0 == any (['n', 'y'] == key));

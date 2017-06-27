@@ -928,6 +928,7 @@ subclass Insert
 
   def ins_ctrl_x_completion (is, s, line) proc
     variable chr = Input.getch ();
+    Smg.send_msg_dr ("CTRL-x completion", 0, s.ptr[0], s.ptr[1]);
 
     switch (chr)
       {
