@@ -8,7 +8,7 @@ subclass Ed
     del_line
     del_word
     del_to_end
-    del_trail_ws
+    del_trail_c
     change
     change_chr
     change_word
@@ -478,16 +478,18 @@ subclass Ed
     __vdraw_tail (s);
   end
 
-  def del_trail_ws (s)
+  def del_trail_c (s, c)
     variable
       col = s._index,
       i = __vlnr (s, '.');
 
     variable
       line = __vline (s, '.'),
-      line_ = strtrim_end (line),
-      len_  = strlen (line_),
-      len   = strlen (line);
+      len   = strlen (line),
+      line_ = (c == NULL)
+        ? substr (line, 1, len - 1)
+        : strtrim_end (line, c),
+      len_  = strlen (line_);
 
      ifnot (len_)
        (len = 0, line = __get_null_str (s._indent));
