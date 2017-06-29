@@ -289,7 +289,7 @@ subclass Srv
   def connect_to_app (app)
     ifnot (NULL == App->APPSINFO[app].set)
       if (any (app == CONNECTED_APPS))
-        if (any (0 == strncmp (App->APPSINFO[app].set, "unique:1", 8)))
+        if (anynot (strncmp (App->APPSINFO[app].set, "unique:1", 8)))
           {
           APP_ERR = 1;
           return;

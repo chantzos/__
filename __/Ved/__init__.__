@@ -1063,7 +1063,7 @@ class Ved
       if (0 == strlen (line) || "\000" == line)
         continue;
 
-      iscomment = any (0 == array_map (Integer_Type, &strncmp,
+      iscomment = anynot (array_map (Integer_Type, &strncmp,
         strtrim_beg (line), s.comment_str, strlen (s.comment_str)));
 
       _for ii (0, length (regexps) - 1)
@@ -1614,7 +1614,7 @@ class Ved
     pat = Opt.Arg.getlong ("pat", NULL, &args;del_arg, ret_arg);
     sub = Opt.Arg.getlong ("sub", NULL, &args;del_arg, ret_arg);
 
-    if (NULL == pat || NULL == sub || any (0 == strlen ([pat, sub])))
+    if (NULL == pat || NULL == sub || anynot (strlen ([pat, sub])))
       {
       Smg.send_msg_dr ("--pat= and --sub= are required", 1, buf.ptr[0], buf.ptr[1]);
       return;

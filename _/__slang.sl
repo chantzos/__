@@ -23,6 +23,11 @@ public define unless (cond)
   cond == 0;
 }
 
+public define anynot (exp)
+{
+  any (0 == exp);
+}
+
 public define __get_qualifier_as (dtype, q, value)
 {
   q = NULL == q

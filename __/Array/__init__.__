@@ -330,7 +330,7 @@ class Array
   end
 
   def join (ar, bar)
-    if (any (0 == [self.istype (@ar, NULL), self.istype (bar, NULL)]))
+    if (anynot ([self.istype (@ar, NULL), self.istype (bar, NULL)]))
       return;
 
     ifnot (_typeof (@ar) == _typeof (bar))

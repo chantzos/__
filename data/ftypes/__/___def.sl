@@ -42,7 +42,7 @@ define ___autoindent (s, line)
       variable ar = ["private", "variable"];
       variable ln = strlen (ar);
 
-      if (any (0 == array_map (Integer_Type, &strncmp, line, ar, ln)))
+      if (anynot (array_map (Integer_Type, &strncmp, line, ar, ln)))
         indent += s._shiftwidth;
       }
 
