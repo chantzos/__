@@ -700,6 +700,7 @@ private define __builtins__ (a)
     "--bufname= null bufname"];
 
   a["w!"] = a["w"];
+  a["W"] = a["w"];
 
   if (COM_OPTS.bg_jobs)
     {

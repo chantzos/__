@@ -9,7 +9,7 @@ subclass Search
   var s_fcol;
   var s_lnr;
   var s_found;
-  var s_ltype;
+  var s_ltype = NULL;
 
   def s_exit_rout (s, pat, draw, cur_lang) proc
     ifnot (NULL == cur_lang)
@@ -404,6 +404,9 @@ subclass Search
   end
 
   def last (s)
+    if (NULL == s_ltype)
+      return;
+
     variable reg = Ved.Reg.get ("/");
     if (NULL == reg)
       return;
