@@ -140,7 +140,7 @@ public define fexpr ()
   __scope__ = "private";
   __compile__;
   __eval__;
-  __tmp (&__f__);
+  __tmp (__f__);
 }
 
 private define __save_instance__ ()
@@ -241,7 +241,7 @@ public define function ()
   __eval__;
 
   ifnot (qualifier_exists ("discard"))
-    __tmp (&__f__);
+    __tmp (__f__);
   else
     __uninitialize (&__f__);
 

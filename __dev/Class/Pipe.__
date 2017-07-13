@@ -1,0 +1,103 @@
+  members (`wr_fd, rd_fd, len`);
+
+  method (`
+    envbeg
+      private variable
+        __fd__,
+        __len__,
+        __bts__,
+        __retval__,
+        __idx__;
+    envend
+
+    (buf)
+    __fd__  = qualifier ("fd", this.wr_fd);
+    __len__ = strlen (buf);
+    __bts__ = 0;
+    __retval__ = 0;
+
+    forever
+      {
+      __idx__ = write (__fd__, buf);
+      ifnot (-1 == __idx__)
+        if (__len__ == (__bts__ += __idx__, __bts__))
+          break;
+        else
+          {
+          buf = buf[[__idx__:]];
+          continue;
+          }
+      else
+        if (EINTR == errno)
+          continue;
+        else
+          {
+          __retval__ = -1;
+          break;
+          }
+      }
+
+    this.len += __bts__;
+    __retval__;
+  `;as = "write");
+
+  method (`
+    envbeg
+      private variable
+        __fd__,
+        __len__,
+        __buf__,
+        __tmp__,
+        __bts__,
+        __orig_bts__,
+        __read__;
+    envend
+
+    __fd__  = qualifier ("fd", this.rd_fd);
+    __bts__ = qualifier ("bytes", this.len);
+    __len__ = 0;
+    __buf__ = "";
+
+    if (__bts__ > this.len)
+      __bts__ = this.len;
+
+    ifnot (__bts__)
+      return "";
+
+    __orig_bts__ = __bts__;
+
+    forever
+      {
+      __read__ = read (__fd__, &__tmp__, __bts__);
+      if (-1 ==  __read__)
+        if (EINTR == errno)
+          continue;
+        else
+          break;
+
+      ifnot (__read__)
+        continue;
+
+      __buf__ += __tmp__;
+      __len__ += __read__;
+      __bts__ -= __len__;
+
+      if (__len__ == __orig_bts__)
+        break;
+      }
+
+    this.len -= __len__;
+    __tmp (__buf__);
+  `;as = "read");
+
+  method (`
+    if (this.is_initialized)
+      ifnot (qualifier_exists ("reinit"))
+        return 0;
+
+    (this.rd_fd, this.wr_fd) = pipe ();
+    this.len = 0;
+    this.is_initialized = 1;
+    0;
+  `;as = "init");
+

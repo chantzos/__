@@ -356,8 +356,8 @@ private variable __CHDIR__ = function (`
     return;
     }
 
-   ifnot (chdir (__tmp (&__DIR__)))
-     __PDIR__ = __tmp (&__CWD__);
+   ifnot (chdir (__tmp (__DIR__)))
+     __PDIR__ = __tmp (__CWD__);
    else
      {
      IO.tostderr (errno_string (errno));
