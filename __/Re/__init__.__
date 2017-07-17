@@ -1,5 +1,53 @@
 class Re
   import pcre
+  let DEF_OPTS = PCRE_UTF8|PCRE_UCP|PCRE_NO_UTF8_CHECK;
+
+  subclass Array
+    __init__
+      match
+    end
+
+    def match (a, pat)
+      variable i, p, matches = 0,
+        len = length (a),
+        opts = qualifier ("opts"),
+        stop = qualifier ("stop", len),
+        start = qualifier ("start", 0),
+        lines = {},
+        indices = {};
+
+      ifnot (NULL == opts)
+        opts |= Re->DEF_OPTS;
+      else
+        opts = Re->DEF_OPTS;
+
+      try
+        {
+        p = pcre_compile (pat, opts);
+        }
+      catch ParseError:
+        {
+        IO.tostderr ("PCRE PARSE ERROR", __get_exception_info.message);
+        return struct {indices = Integer_Type[0], lines = String_Type[0]};
+        }
+
+     _for i (start, len - 1)
+       if (pcre_exec (p, a[i]))
+         {
+         matches++;
+         list_append (indices, i);
+         list_append (lines, a[i]);
+         if (stop == matches)
+           break;
+         }
+
+    struct
+      {
+      indices = list_to_array (indices, Integer_Type),
+      lines   = list_to_array (lines, String_Type)
+      };
+    end
+  end
 
   def escape_str  (str, quote)
     variable q = NULL == quote
