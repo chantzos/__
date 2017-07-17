@@ -1,3 +1,7 @@
+% extended defined SLang functions, prefixed with __ %
+
+% like use_namespace, but define the namespace if is not
+% defined and then switch
 public define __use_namespace (ns)
 {
   try
@@ -23,6 +27,9 @@ public define unless (cond)
   cond == 0;
 }
 
+% like any (), but instead
+% returns 1 when [expression or any array element] is zero,
+% or zero otherwise
 public define anynot (exp)
 {
   any (0 == exp);
@@ -52,6 +59,9 @@ public define __get_qualifier_as (dtype, q, value)
   q;
 }
 
+% like is_substrbytes but return all the occurences of the 
+% byte sequence after offset, in a form of a list,
+% if offset is NULL or < 1 then offset assumed the first byte
 public define __is_substrbytes (src, byteseq, offset)
 {
   variable occur = {};
@@ -66,6 +76,9 @@ public define __is_substrbytes (src, byteseq, offset)
   occur;
 }
 
+% like eval, but evaluate under a try/catch, format buffer in case
+% of error and rethrow error
+% ns (namespace) is a required argument 
 public define __eval (buf, ns)
 {
   variable e;

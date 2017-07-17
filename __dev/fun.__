@@ -1,3 +1,6 @@
+% the general idea is described briefly at: 6e45f00 git commit
+% on 13 of July
+
 variable Thispath = path_dirname (__FILE__);
 
 % extended defined SLang functions, prefixed with __ %
@@ -16,7 +19,7 @@ public define __new_exception (exc, super, desc)
   __new_exception ("EvalError", SuperClassError, "EVALUATION ERROR");
   __new_exception ("PrintError", SuperClassError, "PRINTING ERROR");
 
-% define the namespace if is not defines,
+% define the namespace if is not defined,
 % and then switch
 public define __use_namespace (ns)
 {

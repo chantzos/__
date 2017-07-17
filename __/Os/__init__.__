@@ -5,6 +5,13 @@ class Os
   var timeout = 30 * 60;
   var cached_passwd = NULL;
 
+  def set_passwd_timeout (tim)
+    ifnot (Integer_Type == typeof (tim))
+      return;
+
+    timeout = tim;
+  end
+
   def getpasswd ()
     variable passwd = "";
     variable prompt = "password:";
