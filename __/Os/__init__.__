@@ -102,9 +102,53 @@ class Os
 
   fun login ()
 
+  subclass Signal
+    __init__
+      send
+    end
+
+    def send (pid, sig)
+    ifnot (Os.Pid.exists (pid))
+      return 0;
+
+    variable uid = Env->UID;
+
+    variable match = Re.Array.match (Os.Pid.status (pid), "Uid:").lines;
+    ifnot (length (match))
+      return -1;
+
+    match = strtok (match[0], ":")[1];
+
+    if (atoi (strtok (match)[0]) == uid)
+      return kill (pid, sig);
+
+    variable passwd = qualifier ("passwd", Os.__getpasswd ());
+    if (NULL == passwd)
+      return -1;
+
+    variable p = Proc.init (1, 0, 0);
+    p.stdin.in = passwd;
+
+    return p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
+      Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", string (sig),
+      string (pid)], NULL).exit_status;
+    end
+  end
+
   subclass Pid
     __init__
+      status
       exists
+    end
+
+    def status (pid)
+      ifnot (self.exists (pid))
+        return String_Type[0];
+
+      ifnot (Sys->OS == "Linux")
+        return String_Type[0];
+
+      File.readlines ("/proc/" + string (pid) + "/status");
     end
 
     def exists (pid)
