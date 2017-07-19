@@ -31,7 +31,7 @@ private define tabhook (s)
   ifnot (s._ind)
     return -1;
 
-  ifnot (any (s.argv[0] == ["killbgjob", "man"]))
+  ifnot (any (s.argv[0] == ["__killbgjob", "man"]))
     return -1;
 
   if (strlen (s.argv[s._ind]) && '-' == s.argv[s._ind][0])

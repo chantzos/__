@@ -1,8 +1,6 @@
 VED_RLINE = 1;
 VED_ISONLYPAGER = 0;
 
-private variable clr = getuid () ? 16 : 1;
-
 private define _line_ (str)
 {
   variable b = Ved.get_cur_buf ();
@@ -16,7 +14,7 @@ public define topline (str)
   () = _line_ (&str);
 
   __topline (&str, COLUMNS);
-  Smg.atrcaddnstr (str, [2, 1][getuid () == 0], 0, 0, COLUMNS);
+  Smg.atrcaddnstr (str, [16, 1][getuid () == 0], 0, 0, COLUMNS);
 }
 
 public define toplinedr (str)
@@ -24,7 +22,7 @@ public define toplinedr (str)
   variable b = _line_ (&str);
 
   __topline (&str, COLUMNS);
-  Smg.atrcaddnstrdr (str, [2, 1][getuid () == 0],  0, 0,
+  Smg.atrcaddnstrdr (str, [16, 1][getuid () == 0],  0, 0,
     b.ptr[0], b.ptr[1], COLUMNS);
 }
 

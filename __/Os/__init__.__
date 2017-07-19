@@ -111,7 +111,7 @@ class Os
     ifnot (Os.Pid.exists (pid))
       return 0;
 
-    variable uid = Env->UID;
+    variable uid = qualifier ("uid", Env->UID);
 
     variable match = Re.Array.match (Os.Pid.status (pid), "Uid:").lines;
     ifnot (length (match))
@@ -129,9 +129,10 @@ class Os
     variable p = Proc.init (1, 0, 0);
     p.stdin.in = passwd;
 
-    return p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
+    return [-1, 0][0 == p.execv (
+      [Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
       Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", string (sig),
-      string (pid)], NULL).exit_status;
+      string (pid)], NULL).exit_status];
     end
   end
 

@@ -108,20 +108,18 @@ class Com
       else
         pidfile = BGDIR + "/" + pid + ".RUNNING";
 
+    variable sig = SIGALRM;
     if (0 == isnotsu && Env->UID)
-      {
-      variable passwd = Os.__getpasswd ();
-      if (NULL == passwd)
-        return;
+      sig = SIGKILL;
 
-      self.sig_send (string (SIGKILL), pid, passwd);
+%    if (0 == isnotsu && Env->UID)
+%      Os.Signal.send (atoi (pid), SIGKILL);
+%    else if (-1 == kill (atoi (pid), SIGALRM))
+    if (-1 == Os.Signal.send (atoi (pid), sig))
+      {
+      IO.tostderr (pid + ": " + errno_string (errno));
+      return;
       }
-    else
-      if (-1 == kill (atoi (pid), SIGALRM))
-        {
-        IO.tostderr (pid + ": " + errno_string (errno));
-        return;
-        }
 
     if (isnotsu || (isnotsu == 0 == Env->UID))
       {
