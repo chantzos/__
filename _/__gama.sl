@@ -25,7 +25,8 @@ Sys.let ("SUDO_BIN", Sys.which ("sudo"));
 eval ("static define COLOR ();", "Smg");
 
 if (NULL == Env->LD_LIBRARY_PATH)
-  Env.let ("LD_LIBRARY_PATH", "/usr/local/lib:/lib:/usr/lib");
+  Env.let ("LD_LIBRARY_PATH",
+  Env->STD_C_PATH + ":/usr/local/lib:/lib:/usr/lib");
 
 if (NULL == Env->TERM)
   {
@@ -60,6 +61,8 @@ if (NULL == $5 || -1 == Sys.checkperm (
      ($5.st_gid, __uninitialize (&$5)) != Env->GID)
   IO.tostderr (sprintf ("Warning: %s: permissions are not 0%o",
     Env->HOME_PATH, File->PERM["PRIVATE"]));
+else
+  __uninitialize (&$5);
 
 if (NULL == Env->OS_PATH)
   {

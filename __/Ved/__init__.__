@@ -116,8 +116,31 @@ class Ved
   def seltoX (sel) public proc
   end
 
-  decl public topline, toplinedr, __console, __vline, __vfind_word
+  decl public  __console, __vline, __vfind_word
   decl get_cur_buf
+
+  def __topline (str, columns) public proc
+    variable d = NULL == This.request.debug
+      ? ""
+      : "depth [" + string (_stkdepth) + "] ";
+
+    variable t = sprintf ("%sPID[%d] [%s] (W %s) [%s]",
+      d, getpid, This.is.me, VED_CUR_WIND,
+        strftime ("%a %d %I:%M:%S"));
+
+    @str += repeat (" ", columns - strlen (@str) - strlen (t)) + t;
+  end
+
+  def topline (str) public proc
+    __topline (&str, COLUMNS);
+    Smg.atrcaddnstr (str, [2, 1][getuid () == 0], 0, 0, COLUMNS);
+  end
+
+  def toplinedr (str) public proc
+    __topline (&str, COLUMNS);
+    Smg.atrcaddnstrdr (str, [2, 1][getuid () == 0], 0, 0, qualifier ("row", PROMPTROW),
+      qualifier ("col", Ved.get_cur_rline ()._col), COLUMNS);
+  end
 
   subclass Reg from Ved
 
@@ -675,10 +698,7 @@ class Ved
     (@[Smg.setrcdr, Smg.setrc][qualifier_exists ("dont_draw")]) (Smg, s.ptr[0], s.ptr[1]);
   end
 
-
   include self from Ved as Ved
-
-  require topline from wind
 
   def __vfpart_of_word (s, line, col, start) proc
     ifnot (strlen (line))

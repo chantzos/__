@@ -144,7 +144,7 @@ private variable regexps = [
   pcre_compile ("\
 (^\s*(if(?=\s))\
 |(^#(end)?if(not)?(?=\s|$))\
-|^\s*(else if(?=\s))\
+|^\s*(else if(not)?(?=\s|$))\
 |^\s*(while(?=\s))\
 |^\s*(else)(?=$|\s{2,}%)\
 |^\s*(do$)\

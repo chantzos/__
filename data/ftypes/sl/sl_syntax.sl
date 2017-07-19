@@ -138,7 +138,7 @@ private variable regexps = [
 %conditional
   pcre_compile ("\
 (^\s*(if(?=\s))\
-|^\s*(else if(?=\s))\
+|^\s*(else if(not)?(?=\s|$))\
 |^\s*(while(?=\s))\
 |^\s*(else)(?=$|\s{2,}%)\
 |^\s*(do$)\

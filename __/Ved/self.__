@@ -226,7 +226,6 @@ beg
       return;
 
     variable s = w.buffers[bufname];
-
     variable frame = qualifier ("frame", w.cur_frame);
 
     if (frame > length (w.frame_names) - 1)

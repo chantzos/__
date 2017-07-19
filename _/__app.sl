@@ -63,6 +63,10 @@ This.request.X = fexpr (`(nox)
 
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
+This.is.my.basedir = Opt.Arg.getlong ("basedir", NULL, &This.has.argv;del_arg);
+This.is.my.datadir = Opt.Arg.getlong ("datadir", NULL, &This.has.argv;del_arg);
+This.is.my.tmpdir  = Opt.Arg.getlong ("tmpdir",  NULL, &This.has.argv;del_arg);
+This.is.my.histfile= Opt.Arg.getlong ("histfile",NULL, &This.has.argv;del_arg);
 
 ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
   Load.file (Env->USER_CLASS_PATH + "/__app.slc");
@@ -75,13 +79,23 @@ This.is.my.name = "____" == path_basename_sans_extname (This.has.argv[0])
    : strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
 
 This.is.my.namespace = "__" + strup (This.is.my.name) + "__";
-This.is.my.basedir = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
-This.is.my.tmpdir  = Env->TMP_PATH + "/" + This.is.my.name + "/" + string (Env->PID);
-This.is.my.datadir = Env->USER_DATA_PATH + "/" + This.is.my.name;
+
+if (NULL == This.is.my.basedir)
+  This.is.my.basedir = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
+
+if (NULL == This.is.my.tmpdir)
+  This.is.my.tmpdir  = Env->TMP_PATH + "/" + This.is.my.name + "/" +
+    string (Env->PID);
+
+if (NULL == This.is.my.datadir)
+  This.is.my.datadir = Env->USER_DATA_PATH + "/" + This.is.my.name;
+
 This.is.my.genconf = Env->USER_DATA_PATH + "/Generic/conf";
 This.is.my.conf    = This.is.my.datadir  + "/config/conf";
-This.is.my.histfile= Env->USER_DATA_PATH + "/.__" + Env->USER +
-  "_" + This.is.my.name + "history";
+
+if (NULL == This.is.my.histfile)
+  This.is.my.histfile = Env->USER_DATA_PATH + "/.__" + Env->USER +
+    "_" + This.is.my.name + "history";
 
 fexpr (`(ar, tok, i)
   ar = File.readlines (Env->STD_DATA_PATH + "/genconf/conf");
@@ -117,7 +131,8 @@ if (-1 == access (This.is.my.basedir, F_OK))
 
 if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".slc", F_OK|R_OK))
   if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".sl", F_OK|R_OK))
-    This.err_handler ("Couldn't find application " + This.is.my.name);
+    if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".__", F_OK|R_OK))
+      This.err_handler ("Couldn't find application " + This.is.my.name);
 
 if (-1 == Dir.make_parents (This.is.my.tmpdir, File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.tmpdir);
@@ -850,22 +865,25 @@ public define init_commands ()
 __use_namespace (This.is.my.namespace);
 
 ifnot (access (This.is.my.basedir + "/lib/vars.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/vars",
-    This.is.my.namespace);
+  Load.file (This.is.my.basedir + "/lib/vars.slc", This.is.my.namespace);
+else ifnot (access (This.is.my.basedir + "/lib/vars.sl", F_OK))
+  Load.file (This.is.my.basedir + "/lib/vars.sl", This.is.my.namespace);
+else ifnot (access (This.is.my.basedir + "/lib/vars.__", F_OK))
+  Load.file (This.is.my.basedir + "/lib/vars.__", This.is.my.namespace);
 
 ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/Init",
-    This.is.my.namespace);
+  Load.file (This.is.my.basedir + "/lib/Init.slc", This.is.my.namespace);
+else ifnot (access (This.is.my.basedir + "/lib/Init.sl", F_OK))
+  Load.file (This.is.my.basedir + "/lib/Init.sl", This.is.my.namespace);
+else ifnot (access (This.is.my.basedir + "/lib/Init.__", F_OK))
+  Load.file (This.is.my.basedir + "/lib/Init.__", This.is.my.namespace);
 
 ifnot (access (This.is.my.basedir + "/lib/initrline.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/initrline",
-    This.is.my.namespace);
-
-ifnot (access (Env->USER_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
-  Load.file (Env->USER_LIB_PATH + "/wind/" + This.is.my.name);
-else
-  ifnot (access (Env->STD_LIB_PATH + "/wind/" + This.is.my.name + ".slc", F_OK))
-    Load.file (Env->STD_LIB_PATH + "/wind/" + This.is.my.name);
+  Load.file (This.is.my.basedir + "/lib/initrline.slc", This.is.my.namespace);
+else ifnot (access (This.is.my.basedir + "/lib/initrline.sl", F_OK))
+  Load.file (This.is.my.basedir + "/lib/initrline.sl", This.is.my.namespace);
+else ifnot (access (This.is.my.basedir + "/lib/initrline.__", F_OK))
+  Load.file (This.is.my.basedir + "/lib/initrline.__", This.is.my.namespace);
 
 if (This.request.X)
   Class.load ("Xclnt");

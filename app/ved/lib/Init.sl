@@ -1,6 +1,33 @@
 VED_RLINE = 1;
 VED_ISONLYPAGER = 0;
 
+private variable clr = getuid () ? 16 : 1;
+
+private define _line_ (str)
+{
+  variable b = Ved.get_cur_buf ();
+
+  @str += sprintf (" ftype (%s) LANG (%s) ", b._type, Input.getmapname ());
+  b;
+}
+
+public define topline (str)
+{
+  () = _line_ (&str);
+
+  __topline (&str, COLUMNS);
+  Smg.atrcaddnstr (str, [2, 1][getuid () == 0], 0, 0, COLUMNS);
+}
+
+public define toplinedr (str)
+{
+  variable b = _line_ (&str);
+
+  __topline (&str, COLUMNS);
+  Smg.atrcaddnstrdr (str, [2, 1][getuid () == 0],  0, 0,
+    b.ptr[0], b.ptr[1], COLUMNS);
+}
+
 %public define _new_frame_ (s)
 %{
 %  Ved.new_frame (Ved->VED_DIR + "/" + string (_time) + ".noname");

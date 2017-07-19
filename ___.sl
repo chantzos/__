@@ -451,7 +451,8 @@ private define __bytecompile__ (__sl__)
 private define __read___ (this)
 {
   variable __buf__ =
-`$0 = realpath ((($0 = path_concat (getcwd (), path_dirname (__FILE__)),
+`ifnot (__is_initialized (&$0))
+$0 = realpath ((($0 = path_concat (getcwd (), path_dirname (__FILE__)),
     $0[[-2:]] == "/."
       ? substr ($0, 1, strlen ($0) - 2)
       : $0)) + "/../..");` + "\n\n" +

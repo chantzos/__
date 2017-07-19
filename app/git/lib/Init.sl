@@ -2,6 +2,27 @@ Class.load ("Scm";loadGit,force);
 
 COM_NO_SETREPO = Opt.Arg.compare ("--no-setrepo", &This.has.argv;del_arg);
 
+private variable clr = getuid () ? 2 : 1;
+
+public define toplinedr (str)
+{
+  str += " REPO [" + CUR_REPO + "] ";
+
+  __topline (&str, COLUMNS);
+
+  Smg.atrcaddnstrdr (str, clr, 0, 0, qualifier ("row", PROMPTROW),
+     qualifier ("col", Ved.get_cur_rline ()._col), COLUMNS);
+}
+
+public define topline (str)
+{
+  str += " REPO [" + CUR_REPO + "] ";
+
+  __topline (&str, COLUMNS);
+
+  Smg.atrcaddnstr (str, clr, 0, 0, COLUMNS);
+}
+
 public define setrepo ();
 
 private variable i_colors = [Smg->COLOR.infobg];
