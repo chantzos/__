@@ -1,6 +1,7 @@
 class Proc
   import fork
   import socket
+  import fd
 
   typedef Proc
     pid,
@@ -29,6 +30,46 @@ class Proc
     write,
     wr_flags,
     append_flags,
+  end
+
+  var private MAX_PIPE_CAPACITY = NULL;
+  let MIN_PIPE_CAPACITY = 1 << 12;
+  let DEF_PIPE_CAPACITY = 1 << 16;
+
+  def get_max_pipe_capacity (fd)
+    ifnot (NULL == MAX_PIPE_CAPACITY)
+      return MAX_PIPE_CAPACITY;
+
+    variable cur_cap = __fd_get_pipe_size (fd);
+    if (-1 == cur_cap)
+      return -1;
+
+    variable mx = 1 << 30;
+    variable c = 0, cap;
+    while (-1 == (cap = __fd_set_pipe_size (fd, mx), cap))
+      {
+      c++;
+      mx = mx >> c;
+      }
+
+    () = __fd_set_pipe_size (fd, cur_cap);
+
+    MAX_PIPE_CAPACITY = cap;
+    MAX_PIPE_CAPACITY;
+  end
+
+  def get_pipe_capacity (fd)
+    __fd_get_pipe_size (fd);
+  end
+
+  def set_pipe_capacity (fd, cap)
+    if (cap > MAX_PIPE_CAPACITY)
+      cap = MAX_PIPE_CAPACITY;
+
+    if (cap < MIN_PIPE_CAPACITY)
+      cap = MIN_PIPE_CAPACITY;
+
+    __fd_set_pipe_size (fd, cap);
   end
 
   def parse_flags (fd) proc
@@ -75,6 +116,10 @@ class Proc
     fd.keep = dup_fd (fileno (fp));
 
     (fd.read, fd.write) = pipe ();
+
+    Array.map (Integer_Type, &set_pipe_capacity, NULL,
+      [fd.read, fd.write], qualifier ("fd_size", DEF_PIPE_CAPACITY);discard);
+
     variable retval = dup2_fd (fd.write, _fileno (fp));
     % do something
   end
@@ -91,6 +136,9 @@ class Proc
 
     (fd.read, fd.write) = pipe ();
 
+    Array.map (Integer_Type, &set_pipe_capacity, NULL,
+      [fd.read, fd.write], qualifier ("fd_size", DEF_PIPE_CAPACITY);discard);
+
     () = write (fd.write, fd.in);
 
     () = close (fd.write);
@@ -100,9 +148,9 @@ class Proc
 
   def _open (fd, fp) proc
     ifnot (NULL == fd.file)
-      open_file (fd, fp);
+      open_file (fd, fp;;__qualifiers);
     else
-      open_fd (fd, fp);
+      open_fd (fd, fp;;__qualifiers);
   end
 
   def atexit (s) proc
@@ -153,13 +201,13 @@ class Proc
 
   def dopid (s) proc
     ifnot (NULL == s.stdin)
-      _openforread (s.stdin, stdin);
+      _openforread (s.stdin, stdin;;__qualifiers);
 
     ifnot (NULL == s.stdout)
-      _open (s.stdout, stdout);
+      _open (s.stdout, stdout;;__qualifiers);
 
     ifnot (NULL == s.stderr)
-      _open (s.stderr, stderr);
+      _open (s.stderr, stderr;;__qualifiers);
 
     fork ();
   end
@@ -167,7 +215,7 @@ class Proc
   def __exec_proc__ (s, argv, bg, env) proc
     variable status = 0;
 
-    s.pid = dopid (s);
+    s.pid = dopid (s;;__qualifiers);
 
     ifnot (s.pid) % allow for a function callback, call a default else
       {
@@ -220,11 +268,11 @@ class Proc
   end
 
   def __execve__ (s, argv, env, bg) proc
-    __exec_proc__ (s, argv, bg, env);
+    __exec_proc__ (s, argv, bg, env;;__qualifiers);
   end
 
   def __execv__ (s, argv, bg) proc
-    __exec_proc__ (s, argv, bg, NULL);
+    __exec_proc__ (s, argv, bg, NULL;;__qualifiers);
   end
 
   def init (in, out, err)
@@ -250,4 +298,16 @@ class Proc
     p.user  = __get_qualifier_as (String_Type,  qualifier ("user"), NULL);
     p;
   end
+
+  beg
+    fexpr (`
+      (fun)
+      variable fda, fdb;
+      (fda, fdb) = pipe ();
+      () = (@fun) (NULL, fda);
+      () = close (fda);
+      () = close (fdb);
+      `).call (&get_max_pipe_capacity);
+  end
+
 end
