@@ -3,6 +3,7 @@
 --hidden-files        void hidden files also (off by default)
 --hidden-dirs         void hidden directories also (off by default)
 --excludedir=         directory exclude directory
+--excludeextension=   string exclude file with extension
 --maxdepth=           int  descend at most `levels' of directories
 --rmspacesfromtheend  void remove spaces from the end of a string (predefined)
 --pat=                pcrepattern  pcre pattern (required)

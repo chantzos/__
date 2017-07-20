@@ -18,6 +18,8 @@
   --hidden-dirs         Hidden directories also (off by default)
   --pat                 Pattern (required)
   --sub                 Substitution (required)
+  --excludedir=dir      Exclude directory
+  --excludeextension=ext Exclude file with ext
   --global              Do global substitutions
   --backup              Make backups
   --suffix              Change the default backup suffix

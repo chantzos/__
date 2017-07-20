@@ -20,7 +20,9 @@ variable
   CANSEL = NULL,
   DIFFEXEC = Sys.which ("diff"),
   RECURSIVE = NULL,
-  EXIT_CODE = 0;
+  EXIT_CODE = 0,
+  EXCLUDE_FILE_EXT = {".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar", ".tiff",
+    ".png", ".slc"};
 
 define assign_func (func)
 {
@@ -152,9 +154,7 @@ private define sanitycheck (file, st)
     return -1;
     }
 
-  if (any ([".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar", ".tiff",
-    ".png"] ==
-      path_extname (file)))
+  if (any (EXCLUDE_FILE_EXT == path_extname (file)))
     {
     IO.tostderr (sprintf
       ("cannot operate on this file `%s': Operation not permitted", file));
@@ -223,6 +223,7 @@ define main ()
   c.add ("maxdepth", &maxdepth;type = "int");
   c.add ("rmspacesfromtheend", &assign_func, "rmspacesfromtheend");
   c.add ("excludedir", &EXCLUDEDIRS;type = "string", append);
+  c.add ("excludeextension", &EXCLUDE_FILE_EXT;type = "string", append);
   c.add ("pat", &PAT;type = "string");
   c.add ("sub", &SUBSTITUTE;type = "string");
   c.add ("in-place", &INPLACE);
@@ -257,6 +258,7 @@ define main ()
     exit_me (1);
     }
 
+  EXCLUDE_FILE_EXT = list_to_array (EXCLUDE_FILE_EXT);
   EXCLUDEDIRS = list_to_array (EXCLUDEDIRS, String_Type);
 
   if (NULL == DIFFEXEC)
