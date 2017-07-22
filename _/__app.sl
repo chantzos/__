@@ -874,14 +874,6 @@ public define init_commands ()
 
 __use_namespace (This.is.my.namespace);
 
-
-ifnot (access (This.is.my.basedir + "/lib/vars.slc", F_OK))
-  Load.file (This.is.my.basedir + "/lib/vars.slc", This.is.my.namespace);
-else ifnot (access (This.is.my.basedir + "/lib/vars.sl", F_OK))
-  Load.file (This.is.my.basedir + "/lib/vars.sl", This.is.my.namespace);
-else ifnot (access (This.is.my.basedir + "/lib/vars.__", F_OK))
-  Load.file (This.is.my.basedir + "/lib/vars.__", This.is.my.namespace);
-
 ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
   Load.file (This.is.my.basedir + "/lib/Init.slc", This.is.my.namespace);
 else ifnot (access (This.is.my.basedir + "/lib/Init.sl", F_OK))
