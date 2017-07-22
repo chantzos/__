@@ -42,8 +42,12 @@ subclass Srv
 
   def init ()
     SRV_FIFO = This.is.my.tmpdir + "/Session.fifo";
+    ifnot (access (SRV_FIFO, F_OK|R_OK))
+      if (File.istype (stat_file (SRV_FIFO).st_mode, "fifo"))
+        () = remove (SRV_FIFO);
+
     if (-1 == mkfifo (SRV_FIFO, 0755))
-      throw ClassError, "Srv::init::" + SRV_FIFO + " cannot crate fifo, " +
+      throw ClassError, "Srv::init::" + SRV_FIFO + " cannot create fifo, " +
         errno_string (errno);
   end
 
@@ -63,7 +67,11 @@ subclass Srv
   end
 
   def appnew (s)
+    ifnot (This.has.other_apps)
+      return;
+
     variable apps = assoc_get_keys (App->APPS);
+
     variable retval, issu;
 
     Rline.set (s);
@@ -122,6 +130,9 @@ subclass Srv
   end
 
   def appreconnect (s)
+    ifnot (This.has.other_apps)
+      return;
+
     variable apps = get_connected_apps ()[[1:]];
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);

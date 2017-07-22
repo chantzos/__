@@ -62,6 +62,7 @@ static define __INIT__ (role)
       max_frames  = 2,
       sigint      = 1,
       new_windows = 1,
+      other_apps  = 1,
       screenactive,
       argv = qualifier ("setargv")
         ? fexpr (`__argv;__set_argc_argv (String_Type[0]);`).call ()

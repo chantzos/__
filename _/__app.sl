@@ -163,44 +163,54 @@ Profile.set ();
 
 Class.load ("Com");
 
-Load.file (This.is.my.basedir + "/" + This.is.my.name);
-
 VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
-This.is.std.err.fn = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
-This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
-This.is.std.out.fd = IO.open_fn (This.is.std.out.fn);
-This.is.std.err.fd = IO.open_fn (This.is.std.err.fn);
 
-SCRATCH  = This.is.my.tmpdir + "/__SCRATCH__.txt";
-STDOUTBG = This.is.my.tmpdir + "/__STDOUTBG__.txt";
-GREPFILE = This.is.my.tmpdir + "/__GREP__.list";
-BGDIR    = This.is.my.tmpdir + "/__PROCS__";
+Load.file (This.is.my.basedir + "/" + This.is.my.name);
+
+if (NULL == This.is.std.err.fn)
+  This.is.std.err.fn = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
+
+if (NULL == This.is.std.out.fn)
+  This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
+
+ifnot (__is_initialized (&SCRATCH))
+  SCRATCH  = This.is.my.tmpdir + "/__SCRATCH__.txt";
+
 RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
 WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
 
-SCRATCHFD  = IO.open_fn (SCRATCH);
-STDOUTFDBG = IO.open_fn (STDOUTBG);
+SPECIAL = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn];
 
-ERR_VED     = Ved.init_ftype (NULL);
+This.is.std.out.fd = IO.open_fn (This.is.std.out.fn);
+This.is.std.err.fd = IO.open_fn (This.is.std.err.fn);
+SCRATCHFD          = IO.open_fn (SCRATCH);
+
 OUT_VED     = Ved.init_ftype (This.is.std.out.type);
-OUTBG_VED   = Ved.init_ftype (This.is.std.out.type);
+ERR_VED     = Ved.init_ftype (NULL);
 SCRATCH_VED = Ved.init_ftype (NULL);
 
-SCRATCH_VED._fd = SCRATCHFD;
-OUTBG_VED._fd   = STDOUTFDBG;
-ERR_VED._fd     = This.is.std.err.fd;
 OUT_VED._fd     = This.is.std.out.fd;
-
-SPECIAL         = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn, STDOUTBG];
+ERR_VED._fd     = This.is.std.err.fd;
+SCRATCH_VED._fd = SCRATCHFD;
 
 ERR_VED.set (This.is.std.err.fn, VED_ROWS, NULL;_autochdir = 0);
 OUT_VED.set (This.is.std.out.fn, VED_ROWS, NULL;_autochdir = 0);
-OUTBG_VED.set (STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
 SCRATCH_VED.set (SCRATCH, VED_ROWS, NULL;_autochdir = 0);
 
-if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
-  This.err_handler ("cannot create directory", BGDIR);
+if (COM_OPTS.bg_jobs)
+  {
+  STDOUTBG   = This.is.my.tmpdir + "/__STDOUTBG__.txt";
+  BGDIR      = This.is.my.tmpdir + "/__PROCS__";
+  STDOUTFDBG = IO.open_fn (STDOUTBG);
+  OUTBG_VED  = Ved.init_ftype (This.is.std.out.type);
+  OUTBG_VED._fd = STDOUTFDBG;
+  OUTBG_VED.set (STDOUTBG, VED_ROWS, NULL;_autochdir = 0);
+  SPECIAL = [SPECIAL, STDOUTBG];
+
+  if (-1 == Dir.make (BGDIR, File->PERM["PRIVATE"];strict))
+    This.err_handler ("cannot create directory", BGDIR);
+  }
 
 ifnot (access (RDFIFO, F_OK))
   if (-1 == remove (RDFIFO))
@@ -864,6 +874,7 @@ public define init_commands ()
 
 __use_namespace (This.is.my.namespace);
 
+
 ifnot (access (This.is.my.basedir + "/lib/vars.slc", F_OK))
   Load.file (This.is.my.basedir + "/lib/vars.slc", This.is.my.namespace);
 else ifnot (access (This.is.my.basedir + "/lib/vars.sl", F_OK))
@@ -924,12 +935,14 @@ private define __rehash__ ()
   __initrline ();
 }
 
+
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
 Com.let ("COMMANDS_FOR_PAGER", fexpr (`()
     strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`).call ());
 
-App.build_table ();
+if (This.has.other_apps)
+  App.build_table ();
 
 I->init ();
 
