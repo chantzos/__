@@ -113,9 +113,9 @@ class Com
       sig = SIGKILL;
 
 %    if (0 == isnotsu && Env->UID)
-%      Os.Signal.send (atoi (pid), SIGKILL);
+%      Sys.Signal.send (atoi (pid), SIGKILL);
 %    else if (-1 == kill (atoi (pid), SIGALRM))
-    if (-1 == Os.Signal.send (atoi (pid), sig))
+    if (-1 == Sys.Signal.send (atoi (pid), sig))
       {
       IO.tostderr (pid + ": " + errno_string (errno));
       return;

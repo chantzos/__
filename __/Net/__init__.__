@@ -195,7 +195,7 @@ update_config=1
         return -1;
 
       if (SERVER_PID)
-        if (Os.Pid.exists (SERVER_PID))
+        if (Sys.Pid.exists (SERVER_PID))
           return 0;
         else
           SERVER_PID = NULL;
@@ -234,7 +234,7 @@ update_config=1
         p.stdin.in = passwd;
 
       SERVER_PID = p.execv (argv, 1);
-      ifnot (Os.Pid.exists (SERVER_PID))
+      ifnot (Sys.Pid.exists (SERVER_PID))
         self.err ("error while starting wpa_supplicant";;__return__ (-1));
       SERVER_PID;
     end

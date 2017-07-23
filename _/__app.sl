@@ -41,7 +41,6 @@ Class.load ("Smg");
 Class.load ("Input");
 Class.load ("Rand");
 Class.load ("Crypt");
-Class.load ("Re");
 Class.load ("Os");
 Class.load ("Opt");
 Class.load ("Rline");

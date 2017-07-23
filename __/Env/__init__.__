@@ -4,9 +4,10 @@ class Env
   let PID            = getpid ();
   let UID            = getuid ();
   let GID            = getgid ();
-  let USER           = Sys.getpwname (UID);
-  let GROUP          = Sys.getgrname (GID);
-  let HOSTNAME       = Sys.gethostname ();
+
+  let USER           = NULL;
+  let GROUP          = NULL;
+  let HOSTNAME       = NULL;
   let TERM           = getenv ("TERM");
   let LANG           = getenv ("LANG");
   let LD_LIBRARY_PATH = getenv ("LD_LIBRARY_PATH");

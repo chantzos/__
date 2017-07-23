@@ -1,16 +1,23 @@
-public variable Dir, File, Proc;
-eval ("static define OS_PATH ();", "Env");
-eval ("static define SUDO_BIN ();", "Sys");
+public variable Dir, File, Proc, Os;
 
 Class.load ("Load");
 Class.load ("Exc");
-Class.load ("Sys");
 Class.load ("Env");
+Class.load ("Re");
+Class.load ("Sys");
+
+Env.let ("USER", Sys.getpwname (Env->UID));
+Env.let ("GROUP",  Sys.getgrname (Env->GID));
+Env.let ("HOSTNAME", Sys.gethostname ());
+
 Class.load ("Array");
 Class.load ("Assoc");
 Class.load ("Diff");
 Class.load ("File");
 Class.load ("Dir");
+
+Sys.let ("SUDO_BIN", Sys.which ("sudo"));
+
 Class.load ("Path");
 Class.load ("Stack");
 Class.load ("Struct");
@@ -19,14 +26,11 @@ Class.load ("IO");
 Class.load ("Slang");
 Class.load ("Me");
 
-Sys.let ("SLSH_BIN", Env->BIN_PATH + "/__slsh");
-Sys.let ("SUDO_BIN", Sys.which ("sudo"));
-
 eval ("static define COLOR ();", "Smg");
 
 if (NULL == Env->LD_LIBRARY_PATH)
-  Env.let ("LD_LIBRARY_PATH",
-  Env->STD_C_PATH + ":/usr/local/lib:/lib:/usr/lib");
+  Env.let ("LD_LIBRARY_PATH", Env->STD_C_PATH +
+    ":/usr/local/lib:/lib:/usr/lib");
 
 if (NULL == Env->TERM)
   {
