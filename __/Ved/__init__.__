@@ -1606,13 +1606,8 @@ class Ved
       return;
 
     ifnot (NULL == pat)
-    try
+    if (NULL == (pat = Re.compile (pat), pat))
       {
-      pat = pcre_compile (pat, PCRE_UCP|PCRE_UTF8|PCRE_NO_UTF8_CHECK);
-      }
-    catch ParseError:
-      {
-      IO.tostderr (__get_exception_info.message);
       Smg.send_msg_dr ("Error while compiling pattern", 1, buf.ptr[0], buf.ptr[1]);
       return;
       }

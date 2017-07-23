@@ -558,7 +558,6 @@ Class.load ("Os");
 Class.load ("Opt");
 Class.load ("String");
 Class.load ("Rline");
-Class.load ("Re");
 Class.load ("Subst");
 Class.load ("Proc");
  

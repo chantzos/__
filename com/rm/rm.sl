@@ -1,4 +1,3 @@
-Class.load ("Re");
 Class.load ("Path");
 
 private variable VERBOSE = 0;

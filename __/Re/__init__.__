@@ -2,34 +2,43 @@ class Re
   import pcre
   let DEF_OPTS = PCRE_UTF8|PCRE_UCP|PCRE_NO_UTF8_CHECK;
 
+  def compile (pat)
+    variable e, opts = qualifier ("opts");
+
+    ifnot (NULL == opts)
+      opts |= Re->DEF_OPTS;
+    else
+      opts = Re->DEF_OPTS;
+
+    try (e)
+      {
+      pcre_compile (pat, opts);
+      }
+    catch ParseError:
+      {
+      ifnot (qualifier_exists ("silent"))
+        IO.tostderr ("PCRE PARSE ERROR", e.message);
+
+      return NULL;
+      }
+  end
+
   subclass Array
     __init__
       match
     end
 
     def match (a, pat)
-      variable i, p, matches = 0,
+      variable i, matches = 0,
         len = length (a),
-        opts = qualifier ("opts"),
         stop = qualifier ("stop", len),
         start = qualifier ("start", 0),
         lines = {},
-        indices = {};
+        indices = {},
+        p = self.compile (pat;;__qualifiers);
 
-      ifnot (NULL == opts)
-        opts |= Re->DEF_OPTS;
-      else
-        opts = Re->DEF_OPTS;
-
-      try
-        {
-        p = pcre_compile (pat, opts);
-        }
-      catch ParseError:
-        {
-        IO.tostderr ("PCRE PARSE ERROR", __get_exception_info.message);
+      if (NULL == p)
         return struct {indices = Integer_Type[0], lines = String_Type[0]};
-        }
 
      _for i (start, len - 1)
        if (pcre_exec (p, a[i]))

@@ -70,11 +70,7 @@ subclass Search
 
     rows[*] = MSGROW;
 
-    try
-      {
-      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP|PCRE_NO_UTF8_CHECK);
-      }
-    catch ParseError:
+   if (NULL == (pat = Re.compile (str), pat))
       {
       Smg.send_msg_dr ("error compiling pcre pattern", 1, PROMPTROW, s_col);
       return;
@@ -152,11 +148,7 @@ subclass Search
 
     rows[*] = MSGROW;
 
-    try
-      {
-      pat = pcre_compile (str, PCRE_UTF8|PCRE_UCP|PCRE_NO_UTF8_CHECK);
-      }
-    catch ParseError:
+    if (NULL == (pat = Re.compile (str), pat))
       {
       Smg.send_msg_dr ("error compiling pcre pattern", 1, PROMPTROW, s_col);
       return;

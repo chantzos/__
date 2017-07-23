@@ -1,5 +1,3 @@
-Class.load ("Re");
-
 verboseon ();
 
 private variable

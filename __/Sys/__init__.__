@@ -257,6 +257,45 @@ class Sys
     end
   end
 
+  subclass Proc
+    __init__
+      table
+      search
+    end
+
+    def table ()
+      variable ps = Sys.which ("ps");
+
+      if (NULL == ps)
+        return String_Type[0];
+
+      variable fp = popen ("ps aux", "r");
+      if (NULL == fp)
+        return String_Type[0];
+
+      fgetslines (fp);
+    end
+
+    def search (pat)
+      variable
+        i,
+        table = self.table ();
+
+      table = Re.Array.match (table[[:-2]], pat;;__qualifiers);
+
+      variable p = struct
+        {
+        com = table.lines,
+        pid = Integer_Type[length (table.lines)]
+        };
+
+      _for i (0, length (table.lines) - 1)
+        p.pid[i] = atoi (strtok (table.lines[i])[1]);
+
+      p;
+    end
+  end
+
   fun mode_conversion (mode)
   fun getpwuidgid (user)
 end

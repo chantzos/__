@@ -1,4 +1,3 @@
-Class.load ("Re");
 Class.load ("String");
 
 private variable
