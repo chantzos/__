@@ -1,5 +1,38 @@
 Load.file (Env->SRC_C_PATH + "/makefile", "Me");
 
+private define file_callback (file, st, interactive)
+{
+  variable f = path_extname (file);
+  ifnot (f == ".slc")
+    return 1;
+
+  if (-1 == File.remove (file, interactive, 0; verbose = 1))
+    return -1;
+
+  ifnot (NULL == @interactive)
+    if ("exit" == @interactive)
+      return -1;
+
+  return 1;
+}
+
+private define rm_bytecompiled (argv)
+{
+  variable
+    i,
+    dir = Opt.Arg.exists ("--from_dist", &argv;del_arg),
+    interactive = Opt.Arg.exists ("--interactive", &argv;del_arg);
+
+  ifnot (NULL == interactive)
+    interactive = "yes";
+
+  dir = {[Env->SRC_PATH], [Env->STD_PATH, Env->USER_PATH, Env->LOCAL_PATH]}
+    [NULL != dir];
+
+  _for i (0, length (dir) - 1)
+    Path.walk (dir[i], NULL, &file_callback; fargs = {&interactive});
+}
+
 private define __bytecompile__ (argv)
 {
   variable dont_move = Opt.Arg.exists ("--dont-move", &argv;del_arg);
@@ -567,6 +600,13 @@ private define my_commands ()
   a["search_project"].args = [
     "--pat= pattern pattern",
     "--include_c void include in searching the C namespace"];
+
+  a["remove_bytecompiled"] = @Argvlist_Type;
+  a["remove_bytecompiled"].func = &rm_bytecompiled;
+  a["remove_bytecompiled"].args = [
+    "--interactive void prompt before removing (off by default)",
+    "--from_dist void clean up distributed path (makes sense but little) " +
+      "default source directory"];
 
   a;
 }

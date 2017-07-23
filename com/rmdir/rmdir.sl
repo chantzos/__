@@ -47,6 +47,10 @@ define main ()
 
   _for i (length (path_arr) - 1, 0, -1)
     {
+    ifnot (NULL == interactive)
+      if ("exit" == interactive)
+        break;
+
     st = stat_file (path_arr[i]);
 
     if (NULL== st)

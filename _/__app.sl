@@ -165,7 +165,6 @@ Class.load ("Com");
 
 VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
-
 Load.file (This.is.my.basedir + "/" + This.is.my.name);
 
 if (NULL == This.is.std.err.fn)
@@ -176,6 +175,9 @@ if (NULL == This.is.std.out.fn)
 
 ifnot (__is_initialized (&SCRATCH))
   SCRATCH  = This.is.my.tmpdir + "/__SCRATCH__.txt";
+
+ifnot (__is_initialized (&GREPFILE))
+  GREPFILE = This.is.my.tmpdir + "/__GREP__.list";
 
 RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
 WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
