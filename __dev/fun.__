@@ -1,7 +1,7 @@
 % the general idea is described briefly at: 6e45f00 git commit
 % on 13 of July
 
-variable Thispath = path_dirname (__FILE__);
+variable ThisPath = path_dirname (__FILE__);
 
 % extended defined SLang functions, prefixed with __ %
 
@@ -217,7 +217,7 @@ private variable __fid__ = -1;
 private variable __DEPTH__ = 0;
 private variable __INSTANCES__ = {};
 private variable __CLASSES__   = {};
-private variable __CLASSPATH__ = String_Type[0];
+private variable __CLASSPATH__ = [ThisPath];
 private variable __ENV_BEG_TOKEN__ = "envbeg";
 private variable __ENV_END_TOKEN__ = "envend";
 private variable __ENV_BEG_TOKEN_LEN__ = strlen (__ENV_BEG_TOKEN__);
@@ -659,7 +659,7 @@ private define __class__ ()
     __restore_instance__;
 }
 
-public define function ()
+public define fun ()
 {
   variable e;
   try (e)
@@ -672,6 +672,11 @@ public define function ()
     }
   catch AnyError:
     Exc.print (e);
+}
+
+public define funcall ()
+{
+  (@fun ().__funcref) ();
 }
 
 public define subclass (name)
@@ -777,22 +782,43 @@ public define class ()
         "class name is missing, qualifier \"as\"";
       error = SyntaxError);
 
-  ifnot (NULL == from)
+  ifnot (NULL == from) {
+  forever
+  ifnot (path_is_absolute (from))
     {
-    if (-1 == access (from, F_OK|R_OK))
-      ifnot (path_is_absolute (from))
-        from = Thispath + "/" + from;
+    variable lfrom = from;
+    variable i;
+    _for i (0, length (__CLASSPATH__) - 1)
+      {
+      from = __CLASSPATH__[i] + "/" + lfrom;
+      ifnot (access (from, F_OK|R_OK))
+        break 2;
+      ifnot (access ((from = from + "/" + as, from), F_OK|R_OK))
+        break 2;
+      ifnot (access ((from = from + "/" + as + ".__", from), F_OK|R_OK))
+        break 2;
+      }
 
-    if (-1 == access (from, F_OK|R_OK))
-      __ferror__ ("cannot find class " + as + " file";
-        error = SyntaxError);
-
-    if (_NARGS)
-      pop ();
-
-    variable fp = fopen (from, "r");
-    strjoin (fgetslines (fp));
+    __ferror__ ("cannot find class " + as + " file"; error = SyntaxError);
     }
+  else
+    {
+    ifnot (access (from, F_OK|R_OK))
+      break;
+    ifnot (access ((from = from + "/" + as, from), F_OK|R_OK))
+      break;
+    ifnot (access ((from = from + ".__", from), F_OK|R_OK))
+      break;
+
+    __ferror__ ("cannot find class " + as + " file"; error = SyntaxError);
+    }
+
+  if (_NARGS)
+    pop ();
+
+  variable fp = fopen (from, "r");
+  strjoin (fgetslines (fp));
+  }
 
   super = issubclass ? __CLASSES__[-1].name : as;
 
@@ -1017,4 +1043,4 @@ class (`
 
 import ("fork");
 
-class (;from = "Class/Pipe.__", as = "Pipe");
+class (;from = "Class", as = "Pipe");
