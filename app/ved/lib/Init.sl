@@ -570,7 +570,7 @@ public define init_ved ()
   if (__stdin)
     {
     if (ftype == NULL)
-      ftype = "txt";
+      ftype = VED_OPTS.def_ftype;
 
     fname = Ved->VED_DIR + "/__STDIN__." + ftype;
 

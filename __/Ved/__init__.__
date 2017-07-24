@@ -51,7 +51,7 @@ class Ved
 
   var public MARKS        = Assoc_Type[Struct_Type];
   var public VED_WIND     = Assoc_Type[Wind_Type];
-  var public FTYPES       = Assoc_Type[Integer_Type];
+  var public FTYPES       = Assoc_Type[Struct_Type];
   var public REG          = Assoc_Type[String_Type];
   var public VED_CUR_WIND = NULL;
   var public UNDELETABLE  = String_Type[0];
@@ -70,6 +70,7 @@ class Ved
     del_frame = 1,
     new_frame = 1,
     new_wind = 1,
+    def_ftype = "txt",
     };
 
   var VED_INFOCLRFG = Smg->COLOR.infofg;
@@ -84,8 +85,24 @@ class Ved
   var public VED_PAGER = Assoc_Type[Ref_Type, &__invalid__];
   var public VEDCOUNT;
 
+  def set_ftype (name, dir, type)
+    variable t = assoc_key_exists (FTYPES, name)
+      ? FTYPES[name]
+      : struct {dir, type};
+
+    ifnot (NULL == dir)
+      t.dir = dir;
+
+    ifnot (NULL == type)
+      t.type = type;
+    else
+      t.type = @Ftype_Type;
+
+    FTYPES[name] = t;
+  end
+
   def build_ftype_table () proc
-    variable i, ii, ft;
+    variable i, ii, ft, dir;
     variable nss = [Env->USER_DATA_PATH, Env->STD_DATA_PATH];
 
     _for i (0, length (nss) - 1)
@@ -95,8 +112,8 @@ class Ved
         continue;
 
       _for ii (0, length (ft) - 1)
-        if (Dir.isdirectory (nss[i] + "/ftypes/" + ft[ii]))
-          FTYPES[ft[ii]] = 0;
+        if (Dir.isdirectory ((dir = nss[i] + "/ftypes/" + ft[ii], dir)))
+          set_ftype (NULL, ft[ii], dir, NULL);
       }
   end
 
@@ -299,12 +316,12 @@ class Ved
 
     if (NULL == ftype)
       if (NULL == fn)
-        ftype = "txt";
+        ftype = VED_OPTS.def_ftype;
       else
         {
         ext = strtrim_beg (path_extname (fn), ".");
         ifnot (strlen (ext))
-          ftype = "txt";
+          ftype = VED_OPTS.def_ftype;
         else
           ftype = ext;
         }
@@ -315,21 +332,45 @@ class Ved
       else if ("h" == ftype)
         ftype = "c";
       else
-        ftype = "txt";
+        ftype = VED_OPTS.def_ftype;
 
     ftype;
   end
 
   def! init_ftype (ftype)
-    if (NULL == ftype || 0 == any (assoc_get_keys (FTYPES) == ftype))
-      ftype = "txt";
+    variable types = assoc_get_keys (FTYPES);
+    variable exists = NULL;
+    if (NULL == ftype || NULL == (exists = wherefirst
+        (ftype == types), exists))
+      (ftype = VED_OPTS.def_ftype, exists = 1);
 
-    variable type = @Ftype_Type;
-    variable f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +
-      ftype + "_functions";
+    variable type;
+    variable dir = NULL;
 
-    if (-1 == access (f + ".slc", F_OK))
-      f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" + ftype + "_functions";
+    ifnot (NULL == exists)
+      {
+      type = FTYPES[ftype];
+      ifnot (NULL == type.type._type)
+        return @type.type;
+      else
+        (dir = type.dir, type = type.type);
+      }
+    else
+      type = @Ftype_Type;
+
+    variable f;
+
+    ifnot (NULL == dir)
+      f = dir + "/" + ftype + "_functions";
+    else
+      {
+      f = (dir = Env->USER_DATA_PATH + "/ftypes/" + ftype, dir + "/" +
+        ftype + "_functions");
+
+      if (-1 == access (f + ".slc", F_OK))
+        f = (dir = Env->STD_DATA_PATH + "/ftypes/" + ftype, dir + "/" +
+           ftype + "_functions");
+      }
 
     % allow the exception, 
     Load.file (f, NULL); % that merely means a generous fatal
@@ -340,8 +381,7 @@ class Ved
       %fatal
       throw ClassError, "Fatal: " + ftype + "_settype (), missing function declaration";
 
-    FTYPES[ftype] = 1;
-
+    self.set_ftype (type._type, dir, type);
     type;
   end
 

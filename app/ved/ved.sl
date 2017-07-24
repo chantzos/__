@@ -4,18 +4,43 @@ This.is.shell = 0;
 % re-declare - see Ved/__init__.__
 private define init_ftype (self, ftype)
 {
-  if (NULL == ftype || 0 == any (assoc_get_keys (FTYPES) == ftype))
-    ftype = "txt";
+  variable types = assoc_get_keys (FTYPES);
+  variable exists = NULL;
+  if (NULL == ftype || NULL == (exists = wherefirst
+      (ftype == types), exists))
+    (ftype = VED_OPTS.def_ftype, exists = 1);
 
-  variable
-    type = @Ftype_Type,
-    f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/" +  ftype + "_functions";
+  variable type;
+  variable dir = NULL;
 
-  if (-1 == access (f + ".slc", F_OK))
-    f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/" + ftype + "_functions";
+  ifnot (NULL == exists)
+    {
+    type = FTYPES[ftype];
+    ifnot (NULL == type.type._type)
+      return @type.type;
+    else
+      (dir = type.dir, type = type.type);
+    }
+  else
+    type = @Ftype_Type;
 
-  Load.file (f, NULL);
+  variable f;
 
+  ifnot (NULL == dir)
+    f = dir + "/" + ftype + "_functions";
+  else
+    {
+    f = (dir = Env->USER_DATA_PATH + "/ftypes/" + ftype, dir + "/" +
+      ftype + "_functions");
+
+    if (-1 == access (f + ".slc", F_OK))
+      f = (dir = Env->STD_DATA_PATH + "/ftypes/" + ftype, dir + "/" +
+         ftype + "_functions");
+    }
+
+  % allow the exception, 
+  Load.file (f, NULL); % that merely means a generous fatal
+                       % on any error
   type._type = ftype;
   type.set = __get_reference (ftype + "_settype");
   if (NULL == type.set)
@@ -34,8 +59,7 @@ private define init_ftype (self, ftype)
     %fatal
     throw ClassError, "Fatal: " + ftype + "_ved (), missing function declaration";
 
-  FTYPES[ftype] = 1;
-
+  self.set_ftype (type._type, dir, type);
   type;
 }
 

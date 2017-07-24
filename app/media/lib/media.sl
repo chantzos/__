@@ -239,7 +239,7 @@ private define med_on_carriage_return (s)
 
 public define init_media ()
 {
-  MED_LIST_BUF = Ved.init_ftype ("txt");
+  MED_LIST_BUF = Ved.init_ftype (NULL);
   Ved.initbuf (MED_LIST_BUF, MED_LIST_FN, VED_ROWS, [""], Ved.deftype ();indent = 2);
 
   MED_LIST_BUF.__NOR__["beg"][string ('\r')]         = &med_on_carriage_return;

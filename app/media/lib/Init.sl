@@ -139,7 +139,7 @@ public define on_wind_new (w)
   SPECIAL = [SPECIAL, This.is.std.out.fn];
 
   variable aved = Ved.init_ftype (This.is.std.out.type);
-  variable bved = Ved.init_ftype ("txt");
+  variable bved = Ved.init_ftype (NULL);
 
   aved._fd = IO.open_fn (This.is.std.out.fn);
   bved._fd = IO.open_fn (b);
