@@ -35,7 +35,7 @@ class Re
         start = qualifier ("start", 0),
         lines = {},
         indices = {},
-        p = self.compile (pat;;__qualifiers);
+        p = Re.compile (pat;;__qualifiers);
 
       if (NULL == p)
         return struct {indices = Integer_Type[0], lines = String_Type[0]};

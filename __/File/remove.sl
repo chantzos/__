@@ -21,20 +21,20 @@ private define remove (self, file, interactive, isdir)
       case 'y':
         if (-1 == (@f) (file))
           {
-          IO.tostderr (file + ": " + errno_string (errno));
+          IO.tostderr (file + ": " + errno_string (errno);;__qualifiers);
           return -1;
           }
         else
           {
           if (verbose)
-            IO.tostdout (file + ": removed " + type);
+            IO.tostdout (file + ": removed " + type;;__qualifiers);
           return 0;
           }
       }
 
       {
       case 'q':
-        IO.tostderr ("removing " + type + " `" + file + "' aborting ...");
+        IO.tostderr ("removing " + type + " `" + file + "' aborting ...";;__qualifiers);
         @interactive = "exit";
         return 0;
       }
@@ -44,20 +44,20 @@ private define remove (self, file, interactive, isdir)
         @interactive = NULL;
         if (-1 == (@f) (file))
           {
-          IO.tostderr (file + ": " + errno_string (errno));
+          IO.tostderr (file + ": " + errno_string (errno);;__qualifiers);
           return -1;
           }
         else
           {
           if (verbose)
-            IO.tostdout (file + ": removed " + type);
+            IO.tostdout (file + ": removed " + type;;__qualifiers);
           return 0;
           }
       }
 
       {
       case 'n':
-        IO.tostderr (file + ": Not confirming to remove " + type);
+        IO.tostderr (file + ": Not confirming to remove " + type;;__qualifiers);
         return 0;
       }
 
@@ -65,13 +65,13 @@ private define remove (self, file, interactive, isdir)
 
   if (-1 == (@f) (file))
     {
-    IO.tostderr (file + ": " + errno_string (errno));
+    IO.tostderr (file + ": " + errno_string (errno);;__qualifiers);
     return -1;
     }
   else
     {
     if (verbose)
-      IO.tostdout (file + ": removed " + type);
+      IO.tostdout (file + ": removed " + type;;__qualifiers);
     return 0;
     }
 }

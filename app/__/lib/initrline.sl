@@ -6,7 +6,8 @@ private define file_callback (file, st, interactive)
   ifnot (f == ".slc")
     return 1;
 
-  if (-1 == File.remove (file, interactive, 0; verbose = 1))
+  if (-1 == File.remove (file, interactive, 0;;
+      struct {verbose = 1, @__qualifiers}))
     return -1;
 
   ifnot (NULL == @interactive)
@@ -30,7 +31,10 @@ private define rm_bytecompiled (argv)
     [NULL != dir];
 
   _for i (0, length (dir) - 1)
-    Path.walk (dir[i], NULL, &file_callback; fargs = {&interactive});
+    Path.walk (dir[i], NULL, &file_callback;
+      fd = SCRATCHFD, fargs = {&interactive});
+
+  __scratch (NULL;_i = 1000);
 }
 
 private define __bytecompile__ (argv)

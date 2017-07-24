@@ -15,7 +15,8 @@ private define process_dir (w, dir, dir_st)
 
   if (w.dir_method != NULL)
     {
-	   status = (@w.dir_method) (dir, dir_st, __push_list (w.dir_method_args);;__qualifiers);
+	   status = (@w.dir_method) (dir, dir_st, __push_list (w.dir_method_args)
+      ;;__qualifiers);
 
 	   if (status <= 0)
     return status;
@@ -26,7 +27,7 @@ private define process_dir (w, dir, dir_st)
    	variable file = ();
    	file = path_concat (dir, file);
 
-   	variable st = (@w.stat_func)(file);
+   	variable st = (@w.stat_func) (file);
    	if (st == NULL)
    	  {
 	     IO.tostderr (sprintf ("Unable to stat %s: %s", file, errno_string (errno)));
@@ -46,7 +47,8 @@ private define process_dir (w, dir, dir_st)
    	if (w.file_method == NULL)
    	  continue;
 
-   	status = (@w.file_method) (file, st, __push_list(w.file_method_args);;__qualifiers);
+   	status = (@w.file_method) (file, st, __push_list (w.file_method_args)
+      ;;__qualifiers);
    	if (status <= 0)
    	  return status;
     }
@@ -56,7 +58,7 @@ private define process_dir (w, dir, dir_st)
 
 private define fswalk (w, start)
 {
-  variable st = (@w.stat_func)(start);
+  variable st = (@w.stat_func) (start);
   ifnot (stat_is ("dir", st.st_mode))
    	throw ClassError, "FSwalkInvalidParmError::" + _function_name +
       "::" + start + " is not a directory";
@@ -70,18 +72,19 @@ private define fswalk_new (dir_method, file_method)
     (qualifier_exists ("followlinks") &&
     (0 != qualifier ("followlinks"))));
 
-   struct
-     {
-  	  walk = &fswalk,
-  	  file_method = file_method,
-  	  file_method_args = qualifier ("fargs", {}),
-  	  dir_method = dir_method,
-  	  dir_method_args = qualifier ("dargs", {}),
-  	  stat_func = (followlinks ? &stat_file : &lstat_file),
-     };
+  struct
+    {
+ 	  walk = &fswalk,
+ 	  file_method = file_method,
+ 	  file_method_args = qualifier ("fargs", {}),
+ 	  dir_method = dir_method,
+ 	  dir_method_args = qualifier ("dargs", {}),
+ 	  stat_func = (followlinks ? &stat_file : &lstat_file),
+    };
 }
 
 private define walk (self, dir, dir_method, file_method)
 {
-  fswalk_new (dir_method, file_method;;__qualifiers).walk (dir;;__qualifiers);
+  fswalk_new (dir_method, file_method;;__qualifiers).walk
+    (dir;;__qualifiers);
 }
