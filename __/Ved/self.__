@@ -482,7 +482,7 @@ beg
 
     w.cur_frame = w.frames - 1;
 
-    variable ft = get_ftype (self, fn);
+    variable ft = get_ftype_name (self, fn);
     s = init_ftype (self, ft);
     s.set (fn, w.frame_rows[-1], NULL;;__qualifiers);
     setbuf (self, s._abspath;;__qualifiers);

@@ -310,7 +310,7 @@ class Ved
     s._flags |= VED_MODIFIED;
   end
 
-  def get_ftype (fn)
+  def get_ftype_name (fn)
     variable ftype = qualifier ("ftype");
     variable ext;
 
@@ -1787,7 +1787,7 @@ class Ved
 
       variable cw, ft, s;
       cw = Ved.get_cur_wind ();
-      ft = Ved.get_ftype (fn;;__qualifiers);
+      ft = Ved.get_ftype_name (fn;;__qualifiers);
       s = Ved.init_ftype (ft;;__qualifiers);
       s.set (fn, cw.frame_rows[Ved.get_cur_frame ()], NULL;;__qualifiers);
       Ved.setbuf (s._abspath;;__qualifiers);

@@ -533,7 +533,10 @@ private define __search_project__ (argv)
 {
   variable pat = Opt.Arg.getlong ("pat", NULL, &argv;del_arg);
   if (NULL == pat)
-    return;
+    if (1 == length (argv))
+      return;
+    else
+      pat = argv[1];
 
   variable excludedirs = String_Type[0];
 

@@ -8,7 +8,7 @@ private define add (self, s, rows)
   if (any (s.fname == w.bufnames))
     return exists;
 
-  variable ftype = Ved.get_ftype (s.fname);
+  variable ftype = Ved.get_ftype_name (s.fname);
 
   variable c;
 

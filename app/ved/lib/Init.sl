@@ -53,7 +53,7 @@ private define addfname (fname)
 
   ifnot (any (w.bufnames == absfname))
     {
-    variable ft = Ved.get_ftype (fname;;__qualifiers);
+    variable ft = Ved.get_ftype_name (fname;;__qualifiers);
     s = Ved.init_ftype (ft;;__qualifiers);
     s.set (fname, w.frame_rows[Ved.get_cur_frame ()], NULL);
     }
@@ -618,7 +618,7 @@ public define init_ved ()
   if (1 == length (files))
     {
     if (NULL == ftype)
-      ftype = Ved.get_ftype (files[0]);
+      ftype = Ved.get_ftype_name (files[0]);
 
     ftype = Ved.init_ftype (ftype);
 
