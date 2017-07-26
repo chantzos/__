@@ -24,6 +24,10 @@ private define __err_handler__ (self, s)
 }
 
 This.err_handler   = &__err_handler__;
+This.is.my.name = "____" == path_basename_sans_extname (This.has.argv[0])
+   ? "__"
+   : strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
+This.is.my.namespace = "__" + strup (This.is.my.name) + "__";
 This.is.child      = getenv ("ISACHILD");
 This.is.at.session = getenv ("SESSION");
 
@@ -72,12 +76,6 @@ ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
 
 ifnot (access (Env->LOCAL_CLASS_PATH + "/__app.slc", F_OK))
   Load.file (Env->LOCAL_CLASS_PATH + "/__app.slc");
-
-This.is.my.name = "____" == path_basename_sans_extname (This.has.argv[0])
-   ? "__"
-   : strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
-
-This.is.my.namespace = "__" + strup (This.is.my.name) + "__";
 
 if (NULL == This.is.my.basedir)
   This.is.my.basedir = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
@@ -875,6 +873,25 @@ public define init_commands ()
 
 __use_namespace (This.is.my.namespace);
 
+% default mainloop - can be set as private and be the one that will be
+% called
+static define mainloop ()
+{
+  forever
+    {
+    Rline.set (Ved.get_cur_rline ());
+    Rline.readline (Ved.get_cur_rline ());
+    topline ("(" + This.is.my.name + ")");
+    }
+}
+
+% default error handler - can be change from init_[appname] function
+private define __err_handler__ (t, s)
+{
+  __messages;
+  mainloop ();
+}
+
 ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
   Load.file (This.is.my.basedir + "/lib/Init.slc", This.is.my.namespace);
 else ifnot (access (This.is.my.basedir + "/lib/Init.sl", F_OK))
@@ -962,6 +979,10 @@ if (This.has.sigint)
   sigprocmask (SIG_UNBLOCK, [SIGINT]);
   signal (SIGINT, &sigint_handler);
   }
+
+% this sets the default error handler, can be change
+% from withing the next function
+This.err_handler = &__err_handler__;
 
 (@__get_reference ("init_" + This.is.my.name));
 

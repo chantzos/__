@@ -239,7 +239,7 @@ class App
 
     Ved.setbuf (s._abspath);
 
-    topline (" -- pager -- (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
+    topline ("(pager) (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
 
     __draw_buf (s;;struct {@__qualifiers, pos = pos, _i = _i});
 

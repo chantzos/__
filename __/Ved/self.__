@@ -323,7 +323,7 @@ beg
       }
 
     cur.draw ();
-    topline (" -- " + This.is.my.name + " --");
+    topline ("(" + This.is.my.name + ")");
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (cur._dir);

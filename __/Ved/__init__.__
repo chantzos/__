@@ -508,7 +508,7 @@ class Ved
   end
 
   def __cline__ (s) proc
-    topline (" -- command --");
+    topline ("(command)");
     variable rl = Ved.get_cur_rline ();
     Rline.set (rl);
     Rline.readline (rl;ved = s,
@@ -521,7 +521,7 @@ class Ved
       return -1;
       }
 
-    topline (" -- pager --");
+    topline ("(pager)");
     s = get_cur_buf (NULL);
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
     0;
@@ -613,7 +613,7 @@ class Ved
   end
 
   def _on_lang_change_ (mode, ptr) public proc
-    topline (" -- " + mode + " --");
+    topline ("(" + mode + ")");
     Smg.setrcdr (ptr[0], ptr[1]);
   end
 
@@ -889,7 +889,7 @@ class Ved
   end
 
   def on_wind_change (w) public proc
-    topline (" -- " + This.is.my.name + " --");
+    topline ("(" + This.is.my.name + ")");
     Ved.setbuf (w.frame_names[w.cur_frame]);
   end
 
@@ -1232,7 +1232,7 @@ class Ved
     SPECIAL = [SPECIAL, fn];
 
     (@__get_reference ("__initrline"));
-    topline (" -- " + This.is.my.name + " --");
+    topline ("(" + This.is.my.name + ")");
     Ved.draw_wind ();
   end
 

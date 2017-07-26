@@ -1,5 +1,3 @@
-Class.load ("Path");
-
 verboseon ();
 
 variable

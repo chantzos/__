@@ -1,6 +1,6 @@
 public define on_wind_change (w)
 {
-  topline (" -- " + This.is.my.name + " --");
+  topline ("(" + This.is.my.name + ")");
   Ved.setbuf (w.frame_names[w.cur_frame]);
   This.is.std.out.fd = Ved.get_cur_buf ()._fd;
 }
@@ -25,7 +25,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = oved._fd;
 
-  topline (" -- " + This.is.my.name + " --");
+  topline ("(" + This.is.my.name + ")");
 
   Com.post_header ();
 
@@ -150,44 +150,12 @@ public define rlineinit ()
     onnolength = &toplinedr,
     onnolengthargs = {""},
     on_lang = &toplinedr,
-    on_lang_args = {" -- shell --"}
+    on_lang_args = {"[shell]"}
     });
 
   IARG = length (rl.history);
 
   rl;
-}
-
-private define mainloop ()
-{
-  forever
-    {
-    Rline.set (Ved.get_cur_rline ());
-    Rline.readline (Ved.get_cur_rline ());
-    topline (" -- " + This.is.my.name + " --");
-    }
-}
-
-public define init_shell ()
-{
-  OUT_VED.opt_show_tilda = 0;
-  OUT_VED.opt_show_status_line = 0;
-
-  Ved.setbuf (OUT_VED._abspath);
-
-  if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
-    {
-    __runcom  (["intro"], NULL);
-    () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
-    }
-
-  topline (" -- " + This.is.my.name + " --");
-
-  Com.post_header ();
-
-  __draw_buf (OUT_VED);
-
-  mainloop ();
 }
 
 private define __err_handler__ (this, __r__)
@@ -203,13 +171,27 @@ private define __err_handler__ (this, __r__)
   mainloop ();
 }
 
-This.err_handler = &__err_handler__;
-%public define shell ();
+public define init_shell ()
+{
+  This.err_handler = &__err_handler__;
 
-%public define init_shell ()
-%{
-%  Load.file (This.is.my.basedir + "/lib/shell",
-%    This.is.my.namespace);
-%
-%  shell ();
-%}
+  OUT_VED.opt_show_tilda = 0;
+  OUT_VED.opt_show_status_line = 0;
+
+  Ved.setbuf (OUT_VED._abspath);
+
+  if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
+    {
+    __runcom  (["intro"], NULL);
+    () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
+    }
+
+  topline ("(" + This.is.my.name + ")");
+
+  Com.post_header ();
+
+  __draw_buf (OUT_VED);
+
+  mainloop ();
+}
+

@@ -1,13 +1,3 @@
-private define mainloop ()
-{
-  forever
-    {
-    Rline.set (Ved.get_cur_rline ());
-    Rline.readline (Ved.get_cur_rline ());
-    topline (" -- " + This.is.my.name + " --");
-    }
-}
-
 private define med_draw_box (s, buf, hl, draw)
 {
   variable row = qualifier ("first_row", 1);
@@ -270,11 +260,3 @@ public define init_media ()
 
   mainloop ();
 }
-
-private define __err_handler__ (t, s)
-{
-  __messages;
-  mainloop ();
-}
-
-This.err_handler = &__err_handler__;

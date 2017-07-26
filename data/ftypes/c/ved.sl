@@ -10,7 +10,7 @@ define c_ved (s, fname)
 
   Ved.preloop (s);
 
-  toplinedr (" -- pager --");
+  toplinedr ("(pager)");
 
   s.vedloop ();
 }

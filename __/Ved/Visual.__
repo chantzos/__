@@ -1062,7 +1062,7 @@ subclass Visual
     variable keep;
     if (draw)
       {
-      topline ("-- pager --");
+      topline ("(pager)");
 
       keep = @s.ptr;
       s.ptr[1] = vs.ptr[1];
@@ -1092,7 +1092,7 @@ subclass Visual
       }
     else
       {
-      toplinedr ("-- pager --");
+      toplinedr ("(pager)");
       vs.ptr = @s.ptr;
       vs._i = @s._i;
       }
@@ -1105,7 +1105,7 @@ subclass Visual
   end
 
   def v_init (s) proc
-    toplinedr ("-- visual --");
+    toplinedr ("(visual)");
     variable lnr = __vlnr (s, '.');
     variable v = @vis;
 

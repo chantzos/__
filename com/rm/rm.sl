@@ -1,5 +1,3 @@
-Class.load ("Path");
-
 private variable VERBOSE = 0;
 
 private define my_verboseon ()

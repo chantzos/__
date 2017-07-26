@@ -627,7 +627,7 @@ public define rlineinit ()
     onnolength = &toplinedr,
     onnolengthargs = {""},
     on_lang = &toplinedr,
-    on_lang_args = {" -- " + This.is.my.name + " --"}
+    on_lang_args = {"[" + This.is.my.name + "]"}
     });
 
   IARG = length (rl.history);

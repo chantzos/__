@@ -571,7 +571,7 @@ subclass Insert
       s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
       }
 
-    topline (" -- pager --");
+    topline ("(pager)");
 
     __vdraw_tail (s);
   end
@@ -1131,7 +1131,7 @@ subclass Insert
 
     s.opt_show_status_line = 1;
 
-    topline (" -- insert --");
+    topline ("(insert)");
 
     variable sa = @Insert_Type;
 

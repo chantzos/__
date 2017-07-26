@@ -26,12 +26,6 @@ public define toplinedr (str)
     b.ptr[0], b.ptr[1], COLUMNS);
 }
 
-%public define _new_frame_ (s)
-%{
-%  Ved.new_frame (Ved->VED_DIR + "/" + string (_time) + ".noname");
-%  s = Ved.get_cur_buf ();
-%}
-
 variable VED_CLINE = Assoc_Type[Ref_Type];
 
 private define addfname (fname)
@@ -423,7 +417,7 @@ define __vmessages ()
   VED_ISONLYPAGER = 1;
   Ved.setbuf (s._abspath);
 
-  topline (" -- pager -- (MESSAGES BUF) --";row = s.ptr[0], col = s.ptr[1]);
+  topline ("(pager) (MESSAGES BUF) --";row = s.ptr[0], col = s.ptr[1]);
 
   variable st = fstat (s._fd);
 
@@ -555,10 +549,10 @@ private define ved_err_handler (t, _s_)
   s.vedloop ();
 }
 
-This.err_handler = &ved_err_handler;
-
 public define init_ved ()
 {
+  This.err_handler = &ved_err_handler;
+
   variable __stdin = Opt.Arg.exists ("-", &This.has.argv;del_arg);
   variable ftype = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
   variable fname, files;
