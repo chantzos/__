@@ -105,7 +105,7 @@ define main ()
     if (Dir.isdirectory (files[i]))
       {
       ifnot (NULL == recursive)
-        Path.walk (files[i], &dir_callback, &file_callback;
+        Dir.walk (files[i], &dir_callback, &file_callback;
           dargs = {NULL == directories ? NULL : mode}, fargs = {mode});
       else
         if (stat_is ("lnk", stat_file (files[i]).st_mode))

@@ -18,7 +18,6 @@ Class.load ("Dir");
 
 Sys.let ("SUDO_BIN", Sys.which ("sudo"));
 
-Class.load ("Path");
 Class.load ("Stack");
 Class.load ("Struct");
 Class.load ("List");

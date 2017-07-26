@@ -225,11 +225,11 @@ define main ()
       ulist = {},
       llist = {};
 
-    Path.walk (LOCALMANDIR, NULL, &file_callback;fargs = {llist});
+    Dir.walk (LOCALMANDIR, NULL, &file_callback;fargs = {llist});
     llist = list_to_array (llist, String_Type);
     llist = llist[where ("man" == array_map (String_Type,  &substr, llist, ll + 1, 3))];
 
-    Path.walk (MANDIR, NULL, &file_callback;fargs = {ulist});
+    Dir.walk (MANDIR, NULL, &file_callback;fargs = {ulist});
     ulist = list_to_array (ulist, String_Type);
     ulist = ulist[where ("man" == array_map (String_Type,  &substr, ulist, lu + 1, 3))];
 

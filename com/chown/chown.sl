@@ -235,7 +235,7 @@ define main ()
     if (Dir.isdirectory (files[i]))
       {
       ifnot (NULL == recursive)
-        Path.walk (files[i], &dir_callback, &file_callback;uselstat,
+        Dir.walk (files[i], &dir_callback, &file_callback;uselstat,
             dargs = {uid, gid, user, group}, fargs = {uid, gid, user, group});
       else
         chown_it (files[i], uid, gid, user, group);

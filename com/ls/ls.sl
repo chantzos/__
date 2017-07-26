@@ -624,7 +624,7 @@ define main ()
       {
       MAXDEPTH = length (strtok (dir[i], "/")) + maxdepth;
 
-      Path.walk (dir[i], &dir_callback, &file_callback;
+      Dir.walk (dir[i], &dir_callback, &file_callback;
         dargs = {filelist, opts},
         fargs = {filelist, opts}
         );

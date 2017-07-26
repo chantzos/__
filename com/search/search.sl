@@ -117,7 +117,7 @@ private define file_callback (file, st)
 private define recursivefunc (dir, depth)
 {
   MAXDEPTH = length (strtok (dir, "/")) + depth;
-  Path.walk (dir, &dir_callback_a, &file_callback);
+  Dir.walk (dir, &dir_callback_a, &file_callback);
   0;
 }
 
@@ -200,7 +200,7 @@ private define findfilesfunc (dir, depth)
   MAXDEPTH = length (strtok (dir, "/")) + depth;
 
   variable filelist = {};
-  Path.walk (dir, &dir_callback, &file_callback_b; fargs = {filelist});
+  Dir.walk (dir, &dir_callback, &file_callback_b; fargs = {filelist});
 
   ifnot (length (filelist))
     return String_Type[0];
@@ -213,7 +213,7 @@ private define danglinglinksfunc (dir, depth)
   MAXDEPTH = length (strtok (dir, "/")) + depth;
 
   variable filelist = {};
-  Path.walk (dir, &dir_callback, &file_callback_c; fargs = {filelist});
+  Dir.walk (dir, &dir_callback, &file_callback_c; fargs = {filelist});
 
   ifnot (length (filelist))
     return String_Type[0];

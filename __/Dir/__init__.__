@@ -114,5 +114,7 @@ class Dir
     ar;
   end
 
- fun move (source, dest, opts)
+  fun walk (dir, dir_callback, file_callback)
+  fun list (dir)
+  fun move (source, dest, opts)
 end

@@ -31,7 +31,7 @@ private define rm_bytecompiled (argv)
     [NULL != dir];
 
   _for i (0, length (dir) - 1)
-    Path.walk (dir[i], NULL, &file_callback;
+    Dir.walk (dir[i], NULL, &file_callback;
       fd = SCRATCHFD, fargs = {&interactive});
 
   __scratch (NULL;_i = 1000);

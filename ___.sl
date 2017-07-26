@@ -715,7 +715,7 @@ ROOTPATH = realpath (ROOTPATH + "/..");
     This.exit ("cannot change mode to " + BIN_PATH + "/COM.sl " +
       errno_string (errno), 1);
 
-  Path.walk (SRC_COM_PATH + "/", &__scripts_dir_callback__, NULL);
+  Dir.walk (SRC_COM_PATH + "/", &__scripts_dir_callback__, NULL);
 
   () = chdir (SRC_PATH);
 }
@@ -760,10 +760,10 @@ ROOTPATH = realpath (ROOTPATH + "/..");
     This.exit ("cannot change mode to " + BIN_PATH + "/APP.sl " +
       errno_string (errno), 1);
 
-  Path.walk (SRC_APP_PATH + "/", &__apps_dir_callback__, NULL);
+  Dir.walk (SRC_APP_PATH + "/", &__apps_dir_callback__, NULL);
 
   ifnot (access (SRC_USER_APP_PATH, F_OK))
-    Path.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
+    Dir.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
 
   () = chdir (SRC_PATH);
 }
@@ -838,7 +838,7 @@ private define __main__ ()
   set_import_module_path (get_import_module_path + ":" + SRC_TMP_PATH +
     ":" + STD_C_PATH);
 
-  Path.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
+  Dir.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_LIB_PATH, STD_LIB_PATH},
     fargs = {SRC_LIB_PATH, STD_LIB_PATH, 1});
 
@@ -867,118 +867,118 @@ private define __main__ ()
   if (VERBOSE)
     io.tostdout ("installing libraries");
 
-  Path.walk (STD_CLASS_PATH, NULL, &clean_classes);
+  Dir.walk (STD_CLASS_PATH, NULL, &clean_classes);
 
-  Path.walk (SRC_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
+  Dir.walk (SRC_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_CLASS_PATH, STD_CLASS_PATH},
     fargs = {SRC_CLASS_PATH, STD_CLASS_PATH, 0});
 
   if (VERBOSE)
     io.tostdout ("installing commands");
 
-  Path.walk (SRC_COM_PATH, &lib_dir_callback, &file_callback_libs;
+  Dir.walk (SRC_COM_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_COM_PATH, STD_COM_PATH},
     fargs = {SRC_COM_PATH, STD_COM_PATH, 1});
 
   __install_scripts__;
   __install_apps__;
 
-  Path.walk (SRC_DATA_PATH, &lib_dir_callback, &file_callback_libs;
+  Dir.walk (SRC_DATA_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_DATA_PATH, STD_DATA_PATH},
     fargs = {SRC_DATA_PATH, STD_DATA_PATH, 1});
 
-  Path.walk (SRC_APP_PATH, &lib_dir_callback, &file_callback_libs;
+  Dir.walk (SRC_APP_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_APP_PATH, STD_APP_PATH},
     fargs = {SRC_APP_PATH, STD_APP_PATH, 1});
 
   ifnot (access (SRC_USER_PATH, F_OK|R_OK))
     {
     ifnot (access (SRC_USER_COM_PATH, F_OK|R_OK))
-      Path.walk (SRC_USER_COM_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_USER_COM_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_COM_PATH, USER_COM_PATH},
         fargs = {SRC_USER_COM_PATH, USER_COM_PATH, 1});
 
     ifnot (access (SRC_USER_DATA_PATH, F_OK|R_OK))
-      Path.walk (SRC_USER_DATA_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_USER_DATA_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_DATA_PATH, USER_DATA_PATH},
         fargs = {SRC_USER_DATA_PATH, USER_DATA_PATH, 1});
 
     ifnot (access (SRC_USER_APP_PATH, F_OK|R_OK))
-      Path.walk (SRC_USER_APP_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_USER_APP_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_APP_PATH, USER_APP_PATH},
         fargs = {SRC_USER_APP_PATH, USER_APP_PATH, 1});
 
-    Path.walk (USER_CLS_PATH, NULL, &clean_classes);
+    Dir.walk (USER_CLS_PATH, NULL, &clean_classes);
 
     ifnot (access (SRC_USER_CLASS_PATH + "/__app.sl", F_OK|R_OK))
       __bytecompile__ (SRC_USER_CLASS_PATH + "/__app.sl");
 
     ifnot (access (SRC_USER_CLASS_PATH, F_OK|R_OK))
-      Path.walk (SRC_USER_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_USER_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH},
         fargs = {SRC_USER_CLASS_PATH, USER_CLS_PATH, 0});
 
     ifnot (access (SRC_USER_LIB_PATH, F_OK|R_OK))
-      Path.walk (SRC_USER_LIB_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_USER_LIB_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_USER_LIB_PATH, USER_LIB_PATH},
         fargs = {SRC_USER_LIB_PATH, USER_LIB_PATH, 1});
 
     ifnot (access (SRC_USER_APP_PATH, F_OK|R_OK))
       {
       () = chdir (BIN_PATH);
-      Path.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
+      Dir.walk (SRC_USER_APP_PATH + "/", &__apps_dir_callback__, NULL);
       () = chdir (SRC_PATH);
       }
 
     ifnot (access (SRC_USER_COM_PATH, F_OK|R_OK))
       {
       () = chdir (BIN_PATH);
-      Path.walk (SRC_USER_COM_PATH + "/", &__scripts_dir_callback__, NULL);
+      Dir.walk (SRC_USER_COM_PATH + "/", &__scripts_dir_callback__, NULL);
       () = chdir (SRC_PATH);
       }
 
    ifnot (access (SRC_USER_C_PATH, F_OK|R_OK))
-     Path.walk (SRC_USER_C_PATH, NULL, &__compile_user_module__);
+     Dir.walk (SRC_USER_C_PATH, NULL, &__compile_user_module__);
    }
 
   ifnot (access (SRC_LOCAL_PATH, F_OK|R_OK))
     {
     ifnot (access (SRC_LOCAL_COM_PATH, F_OK|R_OK))
-      Path.walk (SRC_LOCAL_COM_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_LOCAL_COM_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_LOCAL_COM_PATH, LOCAL_COM_PATH},
         fargs = {SRC_LOCAL_COM_PATH, LOCAL_COM_PATH, 1});
 
     ifnot (access (SRC_LOCAL_APP_PATH, F_OK|R_OK))
-      Path.walk (SRC_LOCAL_APP_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_LOCAL_APP_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_LOCAL_APP_PATH, LOCAL_APP_PATH},
         fargs = {SRC_LOCAL_APP_PATH, LOCAL_APP_PATH, 1});
 
-    Path.walk (LOCAL_CLASS_PATH, NULL, &clean_classes);
+    Dir.walk (LOCAL_CLASS_PATH, NULL, &clean_classes);
 
     ifnot (access (SRC_LOCAL_CLASS_PATH + "/__app.sl", F_OK|R_OK))
       __bytecompile__ (SRC_LOCAL_CLASS_PATH + "/__app.sl");
 
     ifnot (access (SRC_LOCAL_CLASS_PATH, F_OK|R_OK))
-      Path.walk (SRC_LOCAL_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_LOCAL_CLASS_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_LOCAL_CLASS_PATH, LOCAL_CLASS_PATH},
         fargs = {SRC_LOCAL_CLASS_PATH, LOCAL_CLASS_PATH, 0});
 
     ifnot (access (SRC_LOCAL_LIB_PATH, F_OK|R_OK))
-      Path.walk (SRC_LOCAL_LIB_PATH, &lib_dir_callback, &file_callback_libs;
+      Dir.walk (SRC_LOCAL_LIB_PATH, &lib_dir_callback, &file_callback_libs;
         dargs = {SRC_LOCAL_LIB_PATH, LOCAL_LIB_PATH},
         fargs = {SRC_LOCAL_LIB_PATH, LOCAL_LIB_PATH, 1});
 
     ifnot (access (SRC_LOCAL_APP_PATH, F_OK|R_OK))
       {
       () = chdir (BIN_PATH);
-      Path.walk (SRC_LOCAL_APP_PATH + "/", &__apps_dir_callback__, NULL);
+      Dir.walk (SRC_LOCAL_APP_PATH + "/", &__apps_dir_callback__, NULL);
       () = chdir (SRC_PATH);
       }
 
     ifnot (access (SRC_LOCAL_COM_PATH, F_OK|R_OK))
       {
       () = chdir (BIN_PATH);
-      Path.walk (SRC_LOCAL_COM_PATH + "/", &__scripts_dir_callback__, NULL);
+      Dir.walk (SRC_LOCAL_COM_PATH + "/", &__scripts_dir_callback__, NULL);
       () = chdir (SRC_PATH);
       }
    }

@@ -786,7 +786,7 @@ static define __filtercommands (s, ar, chars)
 private define filtercommands (s, ar)
 {
   ar = ar[where (1 < strlen (ar))];
-  ar = ar[Array.__wherenot (ar, ["w!", "global"])];
+  ar = ar[Array.__wherenot (ar, ["w!", "global", "cd", "ved"])];
 
   variable chars = [0, '~', '_'];
   ifnot ("shell" == This.is.my.name)
@@ -927,7 +927,6 @@ private define __rehash__ ()
 {
   __initrline ();
 }
-
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 

@@ -72,7 +72,7 @@ private define copy_recursive (self, source, dest)
 
   variable exit_code = 0;
 
-  Path.walk (source, &cpr_dir_callback, &cpr_file_callback;
+  Dir.walk (source, &cpr_dir_callback, &cpr_file_callback;
     dargs = {source, dest, opts, &exit_code, verbose},
     fargs = {source, dest, opts, &exit_code, verbose},
     maxdepth = opts.maxdepth);

@@ -292,7 +292,7 @@ define main ()
     if (Dir.isdirectory (files[i]))
       {
       MAXDEPTH = length (strtok (files[i], "/")) + maxdepth;
-      Path.walk (files[i], &dir_callback, &file_callback;fargs = {type});
+      Dir.walk (files[i], &dir_callback, &file_callback;fargs = {type});
 
       continue;
       }

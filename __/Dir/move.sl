@@ -25,7 +25,7 @@ private define move (self, source, dest, opts)
     sourcefiles = {},
     st_dest = stat_file (dest);
 
-  Path.walk (source, &dir_callback, &file_callback;
+  self.walk (source, &dir_callback, &file_callback;
       dargs = {sourcedirs}, fargs = {sourcefiles});
 
   if (NULL != st_dest && opts.backup)

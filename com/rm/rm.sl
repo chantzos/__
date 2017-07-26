@@ -148,7 +148,7 @@ define main ()
 
   if (length (dirlist))
     _for i (0, length (dirlist) - 1)
-      Path.walk (dirlist[i], &dir_callback, &file_callback;
+      Dir.walk (dirlist[i], &dir_callback, &file_callback;
         dargs = {filelist},
         fargs = {filelist, opts});
 

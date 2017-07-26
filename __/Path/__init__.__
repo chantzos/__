@@ -1,4 +1,0 @@
-class Path
-  fun walk (dir, dir_callback, file_callback)
-  fun exists (dir)
-end

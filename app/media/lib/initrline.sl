@@ -228,7 +228,7 @@ private define play_audio (argv)
 
   _for i (0, length (files) - 1)
     if (Dir.isdirectory (files[i]))
-      Path.walk (files[i], NULL, &file_callback;fargs = {list, MED_AUD_EXT});
+      Dir.walk (files[i], NULL, &file_callback;fargs = {list, MED_AUD_EXT});
     else
       () = file_callback (files[i], NULL, list, MED_AUD_EXT);
 
@@ -274,7 +274,7 @@ private define play_video (argv)
 
   _for i (0, length (files) - 1)
     if (Dir.isdirectory (files[i]))
-      Path.walk (files[i], NULL, &file_callback;fargs = {list, MED_VID_EXT});
+      Dir.walk (files[i], NULL, &file_callback;fargs = {list, MED_VID_EXT});
     else
       () = file_callback (files[i], NULL, list, MED_VID_EXT);
 

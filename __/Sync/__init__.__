@@ -142,7 +142,7 @@ class Sync
       exit_code = 0,
       dirs = {};
 
-    Path.walk (other, &dir_callback_a, &file_callback_a;
+    Dir.walk (other, &dir_callback_a, &file_callback_a;
        dargs = {s, dirs, cur, other}, fargs = {s, cur, other, &exit_code});
 
     if (exit_code)
@@ -493,7 +493,7 @@ class Sync
       return exit_code;
       }
 
-    Path.walk (source, &dir_callback, &file_callback;;struct {
+    Dir.walk (source, &dir_callback, &file_callback;;struct {
       dargs = {s, source, dest, &exit_code}, fargs = {s, source, dest, &exit_code},
       @__qualifiers, uselstat});
 

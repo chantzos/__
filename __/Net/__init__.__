@@ -349,12 +349,12 @@ update_config=1
           return;
 
       variable netw = Assoc_Type[Scan_Type];
-      variable i, line, tok, len = length (scan);
+      variable i, tok, len = length (scan);
 
       _for i (0, len - 1)
         {
-        line = strtok (scan[i]);
-        ifnot (5 == length (line))
+        tok = strtok (scan[i]);
+        ifnot (5 == length (tok))
           continue;
 
         netw[tok[4]] = @Scan_Type;
