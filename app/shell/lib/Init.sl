@@ -164,6 +164,7 @@ private define __err_handler__ (this, __r__)
 
   EXITSTATUS = 1;
 
+  IO.tostdout ("");
   Com.post_header ();
 
   __draw_buf (Ved.get_cur_buf ());

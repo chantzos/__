@@ -3,7 +3,7 @@ class Load
   var LOADED   = Assoc_Type[Integer_Type, 0];
 
   def file (?)
-    variable __file = "", ns = NULL;
+    variable self, __file = "", ns = NULL;
 
     if (2 == _NARGS)
       __file = ();
@@ -11,7 +11,7 @@ class Load
     if (3 == _NARGS)
       (__file, ns) = ();
 
-    pop ();
+    self = ();
 
     if (NULL == ns || "" == ns)
       ns = "Global";
@@ -26,7 +26,10 @@ class Load
       () = evalfile (__file, ns);
       }
     catch OpenError:
-      throw ClassError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
+      try
+        self.file (__file + ".__", ns;;struct {@__qualifiers, unhandled});
+      catch OpenError:
+        throw ClassError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
     catch ParseError:
       throw ClassError, "Load::file::ParseError, " + __file, __get_exception_info;
     catch RunTimeError:
