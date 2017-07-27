@@ -382,26 +382,67 @@ private define _read_ ()
   ifnot (_NARGS)
     return;
 
-  variable file = ();
+  variable ar, size;
 
-  if (-1 == access (file, F_OK|R_OK))
-    return;
+  if ("r!" == qualifier ("argv0"))
+    {
+    variable argv = __pop_list (_NARGS);
+    argv = list_to_array (argv, String_Type);
+    ifnot (strlen (argv[0]))
+      return;
 
-  variable st = stat_file (file);
+    variable issu = "sudo" == argv[0];
+    if (issu && 1 == length (argv))
+      return;
 
-  ifnot (File.is_type (st.st_mode, "reg"))
-    return;
+    ifnot (path_is_absolute (argv[issu]))
+      argv[issu] = Sys.which (argv[issu]);
 
-  ifnot (st.st_size)
-    return;
+    if (NULL == argv[issu])
+      return;
 
-  variable ar = Ved.getlines (file, s._indent, st);
+    variable p = Proc.init (issu, 1, 1);
+    if (issu)
+      {
+      variable passwd = Os.__getpasswd ();
+      if (NULL == passwd)
+        return;
+
+      p.stdin.in = passwd;
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv[[1:]]];
+      }
+
+    variable status = p.execv (argv, NULL);
+
+    if (status.exit_status)
+      return;
+
+    ar = strtok (p.stdout.out, "\n");
+    size = Array.String.len (ar);
+    }
+  else
+    {
+    variable file = ();
+    if (-1 == access (file, F_OK|R_OK))
+      return;
+
+    variable st = stat_file (file);
+
+    ifnot (File.is_type (st.st_mode, "reg"))
+      return;
+
+    ifnot (st.st_size)
+      return;
+
+    ar = Ved.getlines (file, s._indent, st);
+    size = st.st_size;
+    }
 
   variable lnr = __vlnr (s, '.');
 
   s.lines = [s.lines[[:lnr]], ar, s.lines[[lnr + 1:]]];
   s._len = length (s.lines) - 1;
-  s.st_.st_size += st.st_size;
+  s.st_.st_size += size;
 
   set_modified (s);
   s._i = s._ii;
@@ -503,6 +544,7 @@ VED_CLINE["bd!"] =      &_bdelete;
 VED_CLINE["bp"]  =      &_chbuf_;
 VED_CLINE["bn"]  =      &_chbuf_;
 VED_CLINE["r"]   =      &_read_;
+VED_CLINE["r!"]  =      &_read_;
 VED_CLINE["q"]   =      &cl_quit;
 VED_CLINE["Q"]   =      &cl_quit;
 VED_CLINE["q!"]  =      &cl_quit;
