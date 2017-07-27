@@ -367,17 +367,7 @@ subclass Visual
 
       if ('!' == chr)
         {
-        variable f = Class.__FUNCREF__ ("Api", "reset_app");
-        variable api = __get_reference ("Api");
-        (@f) (@api);
-
-        _for i (0, length (vs.lines) - 1)
-          () = system (vs.lines[i]);
-
-        IO.tostdout ("press any key to continue");
-        () = Input.getch ();
-        f = Class.__FUNCREF__ ("Api", "restore_app");
-        (@f) (@api);
+        __vsystem (vs.lines);
         break;
         }
 
@@ -646,17 +636,7 @@ subclass Visual
         ifnot (strlen (vs.sel[0]))
           continue;
 
-        variable f = Class.__FUNCREF__ ("Api", "reset_app");
-        variable api = __get_reference ("Api");
-        (@f) (@api);
-
-        () = system (vs.sel[0]);
-
-        IO.tostdout ("press any key to continue");
-        () = Input.getch ();
-
-        f = Class.__FUNCREF__ ("Api", "restore_app");
-        (@f) (@api);
+        __vsystem ([vs.sel[0]]);
         break;
         }
 

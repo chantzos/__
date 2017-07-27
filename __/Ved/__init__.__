@@ -212,6 +212,24 @@ class Ved
       () = Input.getch ();
   end
 
+  def __vsystem (lines) proc
+    variable len = length (lines);
+    ifnot (len)
+      return;
+
+    variable f = Class.__FUNCREF__ ("Api", "reset_app");
+    variable api = __get_reference ("Api"), i;
+    (@f) (@api);
+
+    _for i (0, length (lines) - 1)
+      () = system (lines[i]);
+
+    IO.tostdout ("press any key to continue");
+    () = Input.getch ();
+    f = Class.__FUNCREF__ ("Api", "restore_app");
+    (@f) (@api);
+  end
+
   def __vset_col__ (s, linlen, dir) proc
     if ('+' == dir)
       if (s.ptr[1] + 1 < linlen - s._indent)
@@ -1318,7 +1336,7 @@ class Ved
   end
 
   def __on_escape__ (s) proc
-    variable keys = [033, 'w', 's', '`'];
+    variable keys = [033, 'w', 's', '`', '!'];
     variable key = Input.getch ();
     ifnot (any (key == keys))
       return;
@@ -1337,6 +1355,11 @@ class Ved
       {
       case '`':
         handle_w (s);
+      }
+
+      {
+      case '!':
+        __vsystem ([__vline (s, '.')]);
       }
 
       {
