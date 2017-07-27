@@ -578,12 +578,7 @@ public define rlineinit ()
   variable rl = Rline.init (&my_commands;;struct
     {
     @__qualifiers (),
-    histfile = This.is.my.histfile,
-    onnolength = &toplinedr,
-    onnolengthargs = {""},
     starthook = &starthook,
-    on_lang = &toplinedr,
-    on_lang_args = {"[" + This.is.my.name + "]"}
     });
 
   IARG = length (rl.history);

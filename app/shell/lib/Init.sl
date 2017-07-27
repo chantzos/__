@@ -143,18 +143,12 @@ public define rlineinit ()
   variable rl = Rline.init (&my_commands;;struct
     {
     @__qualifiers (),
-    histfile = This.is.my.histfile,
     filtercommands = &filtercommands,
     filterargs = &filterargs,
     tabhook = &tabhook,
-    onnolength = &toplinedr,
-    onnolengthargs = {""},
-    on_lang = &toplinedr,
-    on_lang_args = {"[shell]"}
     });
 
   IARG = length (rl.history);
-
   rl;
 }
 

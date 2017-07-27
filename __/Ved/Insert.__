@@ -984,7 +984,8 @@ subclass Insert
       {
       __check_msg__ (s);
 
-      is.chr = Input.getch (;on_lang = &_on_lang_change_, on_lang_args = {"insert", s.ptr});
+      is.chr = Input.getch (;
+        on_lang = &_on_lang_change_, on_lang_args = {"insert", s.ptr});
 
       if (033 == is.chr)
         {

@@ -630,7 +630,7 @@ class Ved
   def lexicalhl (s, lines, vlines) proc
   end
 
-  def _on_lang_change_ (mode, ptr) public proc
+  def _on_lang_change_ (mode, ptr) proc
     topline ("(" + mode + ")");
     Smg.setrcdr (ptr[0], ptr[1]);
   end

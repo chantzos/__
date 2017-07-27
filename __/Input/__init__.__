@@ -206,7 +206,7 @@ class Input
           else
             (@callbackf);
 
-        Input.getch ();
+        Input.getch (;;__qualifiers);
         }
     else
       chr;
@@ -221,7 +221,7 @@ class Input
   end
 
   def getch ()
-    (@[&__getch, &__tty_getch][This.is.tty ()]) ();
+    (@[&__getch, &__tty_getch][This.is.tty ()]) (;;__qualifiers);
   end
 
   def get_en_lang ()

@@ -945,7 +945,13 @@ public define __initrline ()
     wind_mang = __get_reference ("wind_mang"),
     parse_argtype = &__parse_argtype,
     filterargs = &filterexargs,
-    filtercommands = &filtercommands);
+    filtercommands = &filtercommands,
+    on_lang = &toplinedr,
+    on_lang_args   = {"(" + This.is.my.name + ")"},
+    histfile = This.is.my.histfile,
+    onnolength = &toplinedr,
+    onnolengthargs = {""},
+    );
 }
 
 private define __rehash__ ()
