@@ -26,10 +26,20 @@ class Load
       () = evalfile (__file, ns);
       }
     catch OpenError:
-      try
-        self.file (__file + ".__", ns;;struct {@__qualifiers, unhandled});
-      catch OpenError:
-        throw ClassError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
+      if (qualifier_exists ("abort_endless_recursive_call"))
+        throw OpenError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
+      else
+        try
+          {
+          (@Class.__FUNCREF__ ("Load", "file")) (Load, __file + ".__", ns;;
+            struct {@__qualifiers, abort_endless_recursive_call});
+          }
+        catch OpenError:
+          throw ClassError, "Load::file::OpenError, " + __file + ", " + __get_exception_info.message;
+        catch ParseError:
+          throw ClassError, "Load::file::ParseError, " + __file, __get_exception_info;
+        catch RunTimeError:
+          throw ClassError, "Load::file::RunTimeError, " + __file, __get_exception_info;
     catch ParseError:
       throw ClassError, "Load::file::ParseError, " + __file, __get_exception_info;
     catch RunTimeError:

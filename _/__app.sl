@@ -124,12 +124,7 @@ if (-1 == access (This.is.my.basedir, F_OK))
       This.is.my.basedir), F_OK))
     if (-1 == access ((This.is.my.basedir = Env->USER_APP_PATH + "/" + This.is.my.name,
         This.is.my.basedir), F_OK))
-      This.err_handler (This.is.my.name, "no such application");
-
-if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".slc", F_OK|R_OK))
-  if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".sl", F_OK|R_OK))
-    if (-1 == access (This.is.my.basedir + "/" + This.is.my.name + ".__", F_OK|R_OK))
-      This.err_handler ("Couldn't find application " + This.is.my.name);
+      This.err_handler (This.is.my.name + ": no such application");
 
 if (-1 == Dir.make_parents (This.is.my.tmpdir, File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.tmpdir);
@@ -162,7 +157,20 @@ Class.load ("Com");
 
 VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
-Load.file (This.is.my.basedir + "/" + This.is.my.name);
+
+try
+  {
+  (@Class.__FUNCREF__ ("Load", "file"))
+    (Load, This.is.my.basedir + "/" + This.is.my.name, This.is.my.namespace);
+  }
+catch OpenError:
+   This.err_handler ("Couldn't find application " + This.is.my.name);
+catch AnyError:
+   {
+   This.at_exit ();
+   Exc.print (NULL);
+   This.err_handler ("... exiting ...");
+   }
 
 if (NULL == This.is.std.err.fn)
   This.is.std.err.fn = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
