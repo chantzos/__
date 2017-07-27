@@ -49,15 +49,19 @@ private define init_ftype (self, ftype)
 
   f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/ved";
 
-  if (-1 == access (f + ".slc", F_OK))
+  if (-1 == access (f + ".slc", F_OK|R_OK))
     f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/ved";
 
-  Load.file (f, NULL);
+  if (-1 == access (f + ".slc", F_OK|R_OK))
+    type.ved = &__vdef_ved;
+  else
+    {
+    Load.file (f, NULL);
 
-  type.ved = __get_reference (ftype + "_ved");
-  if (NULL == type.ved)
-    %fatal
-    throw ClassError, "Fatal: " + ftype + "_ved (), missing function declaration";
+    type.ved = __get_reference (ftype + "_ved");
+    if (NULL == type.ved)
+      type.ved = &__vdef_ved;
+    }
 
   self.set_ftype (type._type, dir, type);
   type;

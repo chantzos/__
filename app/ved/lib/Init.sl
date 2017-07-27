@@ -259,12 +259,10 @@ private define tabhook (s)
 public define rlineinit ()
 {
   variable rl = Rline.init (&my_commands;;struct {
-    histfile = This.is.my.histfile,
+    @__qualifiers,
     historyaddforce = 1,
     tabhook = &tabhook,
-    %totype = "Func_Type",
     parse_argtype = &__parse_argtypes__,
-    @__qualifiers
     });
 
   (@__get_reference ("IARG")) = length (rl.history);

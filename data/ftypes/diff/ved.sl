@@ -1,17 +1,7 @@
 define diff_ved (s, fname)
 {
   ifnot (SCRATCH == fname)
-    s.set (fname, VED_ROWS, NULL;;__qualifiers);
-
-  Ved.setbuf (s._abspath;;__qualifiers);
-
-  Ved.write_prompt (" ", 0);
-
-  s.draw ();
-
-  Ved.preloop (s);
-
-  toplinedr ("(pager)");
-
-  s.vedloop ();
+    __vdef_ved (s, fname);
+  else
+    __vdef_ved (s, fname;dont_set);
 }
