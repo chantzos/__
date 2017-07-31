@@ -11,7 +11,7 @@ This.framesize = &_myframesize_;
 public define list_ved (s, fname)
 {
   This.has.max_frames = 2;
-  wind_init ("a", 2;force);
+  wind_init (qualifier ("wind_name", "a"), 2;force);
 
   __initrline ();
 

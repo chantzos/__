@@ -500,17 +500,23 @@ update_config=1
         self.err ("bring up";;__return__ (-1));
 
       variable argv = [Net->IW_BIN, "dev", IFACE, "scan"];
-      variable p = Proc.init (0, 1, 1);
+
+      variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
+
+      ifnot (NULL == passwd)
+        {
+        ifnot (passwd[-1] == '\n')
+          passwd += "\n";
+
+        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        }
+
+      variable p = Proc.init (NULL != passwd, 1, 1);
+
+      ifnot (NULL == passwd)
+        p.stdin.in = passwd;
 
       variable status = p.execv (argv, NULL);
-      if (status.exit_status)
-        ifnot (NULL == p.stderr.out)
-          self.err (strjoin (strtok (p.stderr.out, "\n"), "\n");;__return__);
-
-      p = Proc.init (0, 1, 1);
-      argv = [Net->WP_CLNT_BIN, "scan_results"];
-      status = p.execv (argv, NULL);
-
       if (status.exit_status)
         ifnot (NULL == p.stderr.out)
           self.err (strjoin (strtok (p.stderr.out, "\n"), "\n");;__return__);

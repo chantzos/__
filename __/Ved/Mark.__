@@ -21,6 +21,7 @@ subclass Mark
 
     if ('a' <= m <= 'z')
       {
+      Smg.send_msg_dr ("set [" + char (m) + "] mark", 1, s.ptr[0], s.ptr[1]);
       m = string (m);
       mark_init (m);
       Ved.storePos (s, MARKS[m].pos);

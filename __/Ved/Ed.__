@@ -251,6 +251,7 @@ subclass Ed
 
 
   def __del_lines__ (s, chr) proc
+    variable reg = qualifier ("reg", "\"");
     variable lnr = __vlnr (s, '.');
 
     if (lnr == s._len)
@@ -263,7 +264,7 @@ subclass Ed
 
     if ('G' == chr)
       {
-      Ved.Reg.set ("\"", strjoin (s.lines[[lnr:]], "\n") + "\n";
+      Ved.Reg.set (reg, strjoin (s.lines[[lnr:]], "\n") + "\n";
           msg = "deleted lines till eof and ");
       Ved.Vundo.set (s, s.lines[[lnr:]], [lnr:s._len];deleted);
       if (lnr)
@@ -274,7 +275,7 @@ subclass Ed
     else
       {
       s._ii = 0;
-      Ved.Reg.set ("\"", strjoin (s.lines[[:lnr]], "\n") + "\n";
+      Ved.Reg.set (reg, strjoin (s.lines[[:lnr]], "\n") + "\n";
           msg = "deleted lines till bof and ");
       Ved.Vundo.set (s, s.lines[[:lnr]], [0:lnr];deleted);
       s.lines = s.lines[[lnr+1:]];
@@ -299,6 +300,7 @@ subclass Ed
     s._i = s._ii;
 
     set_modified (s);
+    seltoX (Ved.Reg.get (reg));
     s.draw ();
   end
 
@@ -620,11 +622,11 @@ subclass Ed
     s._index = start;
 
     set_modified (s);
+    seltoX (word);
 
     s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
     waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
-
     __vdraw_tail (s);
   end
 
@@ -647,6 +649,7 @@ subclass Ed
         s._index = s._indent;
         s._findex = s._indent;
         set_modified (s);
+        seltoX (line + "\n");
         return 0;
         }
 
@@ -670,9 +673,11 @@ subclass Ed
     if (s._i > s._len)
       s._i = s._len;
 
-    Ved.Vundo.set (s, strtok (strtrim_end (Ved.Reg.get (reg)), "\n"), [i];_i = s._i, deleted);
+    Ved.Vundo.set (s, strtok (strtrim_end (Ved.Reg.get (reg)), "\n"), [i];
+      _i = s._i, deleted);
 
     set_modified (s;_i = s._i);
+    seltoX (line + "\n");
 
     0;
   end

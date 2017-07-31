@@ -69,7 +69,6 @@ class Ved
     {
     del_frame = 1,
     new_frame = 1,
-    new_wind = 1,
     def_ftype = "txt",
     };
 
@@ -1249,7 +1248,7 @@ class Ved
   end
 
   def _del_wind_ (s) proc
-    ifnot (VED_OPTS.new_wind)
+    ifnot (This.has.new_windows)
       return;
 
     Ved.del_wind (VED_CUR_WIND);
@@ -1271,7 +1270,7 @@ class Ved
   end
 
   def _new_wind_ (s) public proc
-    ifnot (VED_OPTS.new_wind)
+    ifnot (This.has.new_windows)
       return;
 
     new_wind (;on_wind_new);
@@ -1279,7 +1278,7 @@ class Ved
   end
 
   def _goto_wind_ (s, chr) proc
-    ifnot (VED_OPTS.new_wind)
+    ifnot (This.has.new_windows)
       return;
 
     if (any (['0':'9'] == chr))

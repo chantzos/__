@@ -118,7 +118,8 @@ class Proc
     (fd.read, fd.write) = pipe ();
 
     Array.map (Integer_Type, &set_pipe_capacity, NULL,
-      [fd.read, fd.write], qualifier ("fd_size", DEF_PIPE_CAPACITY);discard);
+      [fd.read, fd.write], qualifier ("fd_size", DEF_PIPE_CAPACITY);
+      "map->Discard Value");
 
     variable retval = dup2_fd (fd.write, _fileno (fp));
     % do something
@@ -137,7 +138,8 @@ class Proc
     (fd.read, fd.write) = pipe ();
 
     Array.map (Integer_Type, &set_pipe_capacity, NULL,
-      [fd.read, fd.write], qualifier ("fd_size", DEF_PIPE_CAPACITY);discard);
+      [fd.read, fd.write], qualifier ("fd_size", DEF_PIPE_CAPACITY);
+      "map->Discard Value");
 
     () = write (fd.write, fd.in);
 

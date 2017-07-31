@@ -73,7 +73,7 @@ private define _edit_other ()
 
   ifnot (_NARGS)
     {
-    ifnot ("e" == string (qualifier ("argv0")))
+    ifnot ("e" == qualifier ("argv0"))
       return;
 
     variable key;
@@ -137,7 +137,7 @@ private define _buffer_other_ ()
       b = w.bufnames[w.prev_buf_ind];
     else
       if (0 == ind)
-        b = ar[- 1];
+        b = ar[-1];
       else
         b = ar[ind - 1];
   else
