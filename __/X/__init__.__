@@ -1,10 +1,10 @@
 class X
+  import xclient
 
   var public Xsrv = NULL;
   let XINIT_BIN = Sys.which ("xinit");
   let ISCROUTON = NULL != Sys.which ("croutonversion");
 
-#if This.request.X
   def is_running ()
     XIsRunning (); % from the xclient-module
   end
@@ -23,6 +23,12 @@ class X
   end
 
   def Xstart () proc
+    if (This.is.at.X)
+      return;
+
+    if (NULL == Xsrv)
+      Class.load ("Xsrv");
+
     if (NULL == XINIT_BIN)
       throw ClassError, "xinit cannot be found in $PATH";
 
@@ -51,17 +57,10 @@ class X
   end
 
   def comlist (a)
+    ifnot (This.request.X)
+      return;
+
     a["!Xstart"] = @Argvlist_Type;
     a["!Xstart"].func = &Xstart;
   end
-#endif
-
-#ifnot This.request.X
-  def is_running ()
-    NULL != getenv ("DISPLAY");
-  end
-
-  def comlist (a)
-  end
-#endif
 end

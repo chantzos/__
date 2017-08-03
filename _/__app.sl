@@ -914,16 +914,9 @@ else ifnot (access (This.is.my.basedir + "/lib/initrline.sl", F_OK))
 else ifnot (access (This.is.my.basedir + "/lib/initrline.__", F_OK))
   Load.file (This.is.my.basedir + "/lib/initrline.__", This.is.my.namespace);
 
-if (This.request.X)
-  Class.load ("Xclnt");
-
-Class.load ("X";force);
+Class.load ("X");
 
 This.is.at.X = X.is_running ();
-
-if (This.request.X)
-  ifnot (This.is.at.X)
-    Class.load ("Xsrv");
 
 public define __initrline ()
 {
