@@ -45,7 +45,7 @@ class Array
     if (ar[0] == ar[-1])
      return [0];
 
-    where (shift (NULL, ar, -1) != ar);
+    i[where (shift (NULL, ar, -1) != ar)];
   end
 
   def unique (a)

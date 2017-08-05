@@ -123,13 +123,13 @@ define getpwuid (user_ar)
     uids,
     line,
     indices,
-    ar = String_Type[length (user_ar)],
+    ar = array_map (String_Type, &string, user_ar),
     lines = File.readlines ("/etc/passwd");
 
   if (NULL == lines)
-    return array_map (String_Type, &string, user_ar);
+    return ar;
 
-  uids = Array.unique (user_ar);
+  uids = user_ar[Array.__unique (user_ar)];
 
   _for i (0, length (uids) - 1)
     {
@@ -159,13 +159,13 @@ define getgrgid (group_ar)
     gids,
     line,
     indices,
-    ar = String_Type[length (group_ar)],
+    ar = array_map (String_Type, &string, group_ar),
     lines = File.readlines ("/etc/group");
 
   if (NULL == lines)
-    return array_map (String_Type, &string, group_ar);
+    return ar;
 
-  gids = Array.unique (group_ar);
+  gids = group_ar[Array.__unique (group_ar)];
 
   _for i (0, length (gids) - 1)
     {

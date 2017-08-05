@@ -26,6 +26,7 @@ class Rline
     tabhook,
     filtercommands,
     filterargs,
+    on_right_arrow,
     on_lang,
     on_lang_args,
     argvlist,
@@ -289,6 +290,7 @@ class Rline
     rl.starthook = qualifier ("starthook"),
     rl.on_lang = qualifier ("on_lang", &_Null);
     rl.on_lang_args = qualifier ("on_lang_args", {});
+    rl.on_right_arrow = qualifier ("on_right_arrow", &_Null);
     rl.histfile = qualifier ("histfile");
     rl.history = qualifier ("history", String_Type[0]);
     rl.historyaddforce = qualifier ("historyaddforce");
@@ -300,7 +302,7 @@ class Rline
     rl.osappnew = qualifier ("osappnew");
     rl.osapprec = qualifier ("osapprec");
     rl.childrec = qualifier ("childrec");
-    rl.wind_mang = qualifier ("wind_mang");
+    rl.wind_mang = qualifier ("wind_mang", &_Null);
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
     rl.funclist = __get_qualifier_as (Assoc_Type, qualifier ("funclist"), NULL);
     rl.lnrs = Integer_Type[0];
@@ -2321,16 +2323,13 @@ class Rline
         }
 
       if (s._ind == 0 == strlen (s.argv[0]))
-        if (any (['~', '!', '_', '`'] == s._chr))
+        if (any (['~', '!', '_', '`', Input->RIGHT] == s._chr))
           if ('`' == s._chr)
             {
-            ifnot (NULL == s.wind_mang)
-              {
-              s.wind_mang ();
-              continue;
-              }
+            s.wind_mang ();
+            continue;
             }
-          else
+          else ifnot (Input->RIGHT == s._chr)
             {
             commands = assoc_get_keys (s.argvlist);
             commands = commands[wherenot (strncmp (commands,
@@ -2342,6 +2341,11 @@ class Rline
               return;
               }
 
+            continue;
+            }
+          else
+            {
+            s.on_right_arrow ();
             continue;
             }
 

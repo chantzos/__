@@ -939,6 +939,7 @@ public define __initrline ()
     parse_argtype = &__parse_argtype,
     filterargs = &filterexargs,
     filtercommands = &filtercommands,
+    on_right_arrow = &__edit__,
     on_lang = &toplinedr,
     on_lang_args   = {"(" + This.is.my.name + ")"},
     histfile = This.is.my.histfile,
