@@ -1150,6 +1150,9 @@ void Xspawn ()
         close (ConnectionNumber (dpy));
 
       setsid ();
+
+ //     sleep (0.5);
+
       execvp ((char*)command[0], (char**)command);
       }
 

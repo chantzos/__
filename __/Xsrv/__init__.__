@@ -158,9 +158,9 @@ class Xsrv
     ifnot (NULL == SETXKBMAP_BIN)
       () = system (SETXKBMAP_BIN + " -layout \"us,el\" -option \"grp:alt_space_toggle\"");
 
-    sleep (0.2);
-    () = system (X_TERM_BIN + " -name __SHELL -e " + Env->BIN_PATH +
-        "/__shell &");
+    sleep (1);
+
+    Xspawn ([X_TERM_BIN, "-name", "__SHELL", "-e", Env->BIN_PATH + "/__shell"]);
   end
 
   def Srv_set_keys () public proc

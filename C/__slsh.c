@@ -511,10 +511,11 @@ static void __wnsize (void)
 {
   struct winsize ws;
 
-  if (ioctl(1, TIOCGWINSZ, &ws) == -1)
+  if (ioctl (1, TIOCGWINSZ, &ws) == -1)
     {
     Lines = 24;
     Columns = 78;
+    return;
     }
 
   Lines = ws.ws_row;
@@ -628,6 +629,7 @@ static SLang_Intrin_Fun_Type Intrinsics [] =
 
 void __init (void)
 {
+  return;
   __wnsize ();
 }
 

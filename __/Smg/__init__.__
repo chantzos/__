@@ -1,6 +1,10 @@
 class Smg
   import slsmg
 
+  beg
+    __WNsize ();
+  end
+
   var public MSGROW = LINES - 1;;
   var public PROMPTROW = MSGROW - 1;
 
