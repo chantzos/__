@@ -16,6 +16,7 @@ class Proc
     stderr,
     execv,
     execve,
+    wait,
     atexit,
     connect,
   end
@@ -214,7 +215,7 @@ class Proc
     fork ();
   end
 
-  def __exec_proc__ (s, argv, bg, env) proc
+  def __exec_proc__ (s, argv, env) proc
     variable status = 0;
 
     s.pid = dopid (s;;__qualifiers);
@@ -258,23 +259,29 @@ class Proc
           _exit (1);
           }
       }
+  end
 
-    if (NULL == bg)
-      {
-      status = waitpid (s.pid, 0);
-      s.atexit ();
-      return status;
-      }
-
-    s.pid;
+  def __wait__ (s) proc
+    waitpid (s.pid, 0);
+    s.atexit ();
   end
 
   def __execve__ (s, argv, env, bg) proc
-    __exec_proc__ (s, argv, bg, env;;__qualifiers);
+   __exec_proc__ (s, argv, env;;__qualifiers);
+
+   ifnot (NULL == bg)
+     return s.pid;
+
+   s.wait ();
   end
 
   def __execv__ (s, argv, bg) proc
-    __exec_proc__ (s, argv, bg, NULL;;__qualifiers);
+    __exec_proc__ (s, argv, NULL;;__qualifiers);
+
+   ifnot (NULL == bg)
+     return s.pid;
+
+   s.wait ();
   end
 
   def init (in, out, err)
@@ -294,6 +301,7 @@ class Proc
     p.connect = &connect_to_socket;
     p.execve = &__execve__;
     p.execv = &__execv__;
+    p.wait = &__wait__;
     p.setid = __get_qualifier_as (Integer_Type, qualifier ("setid"), NULL);
     p.uid   = __get_qualifier_as (Integer_Type, qualifier ("uid"), NULL);
     p.gid   = __get_qualifier_as (Integer_Type, qualifier ("gid"), NULL);
@@ -309,7 +317,7 @@ class Proc
       () = (@fun) (NULL, fda);
       () = close (fda);
       () = close (fdb);
-      `).call (&get_max_pipe_capacity);
+    `).call (&get_max_pipe_capacity);
   end
 
 end
