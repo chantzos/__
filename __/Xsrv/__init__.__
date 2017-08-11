@@ -57,6 +57,7 @@ class Xsrv
     [
     string (Mod4Mask),
     string (Mod4Mask|Mod1Mask),
+    string (Mod4Mask|Mod1Mask|ShiftMask),
     string (Mod4Mask|ShiftMask),
     string (Mod4Mask|ControlMask),
     string (Mod1Mask),
@@ -81,6 +82,7 @@ class Xsrv
       struct {fun = &Xresize_stack_sideways, args = {-12}},
       struct {fun = &Xresize_stack_sideways, args = {12}},
       }),
+    Assoc.new (Struct_Type, NULL, NULL),
     Assoc.new (Struct_Type, ["k", "q", "f", "s"], {
       struct {fun = &Xkill_client, args = {}},
       struct {fun = &Xquit, args = {}},
@@ -104,6 +106,31 @@ class Xsrv
 
   let DESKLEN = length (DESKTOP_CLASSES.class);
 
+  def Xtoclnt () proc
+    if (NULL == RDFD)
+      {
+      Xsrv.let ("WRFD", open (WRFIFO, O_WRONLY));
+      Xsrv.let ("RDFD", open (RDFIFO, O_RDONLY));
+      }
+
+    variable str = Sock.get_str (RDFD);
+    ifnot (any (["getdeskclassnames"] == str))
+      {
+      Sock.send_int (WRFD, ERR);
+      return;
+      }
+
+    Sock.send_int (WRFD, 0);
+
+    variable did = Sock.get_int (RDFD);
+
+    variable ar = XGetDeskClassNames (did);
+    if (NULL == ar)
+      ar = String_Type[0];
+
+    Sock.send_str_ar (RDFD, WRFD, ar);
+  end
+
   beg
     _for $5 (0, DESKLEN - 1)
       if ($5 > 9)
@@ -125,7 +152,10 @@ class Xsrv
           struct {fun = &__client_to_desk, args = {$5}};
        }
 
-     __uninitialize (&$5);
+    __uninitialize (&$5);
+
+    COMMANDS ()[string (Mod4Mask|Mod1Mask|ShiftMask)]["bracketright"] =
+      struct {fun = &Xtoclnt, args = {}};
   end
 
   % should be replaced by md5sum?
@@ -286,6 +316,8 @@ class Xsrv
   end
 
   def start ()
+    putenv ("__XSRV__=");
+
     Xstart ();
 
     variable xauthfile = getenv ("XAUTHORITY");

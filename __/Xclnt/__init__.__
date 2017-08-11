@@ -6,10 +6,8 @@ class Xclnt
   let RDFIFO = XDIR + "/Clfifo";
   let! WRFD = NULL;
   let! RDFD = NULL;
-  let MODIFIER = 'a';
-  let KEY = "bracketleft";
-  let! DESKLEN = 13;
-  let CUR_ID = 0;
+  let MODIFIER = "uas";
+  let KEY = "bracketright";
   let ERR = 0xc8;
 
   subclass Desk
@@ -25,31 +23,33 @@ class Xclnt
     def get_cur ()
     end
 
-    def get_winds (desk)
-      ifnot (-1 < desk < Xclnt->DESKLEN)
+    def get_winds (did)
+      if (NULL == getenv ("__XSRV__"))
         return NULL;
 
       XSendKey (Xclnt->MODIFIER, Xclnt->KEY);
 
-      Xclnt.let ("RDFD", open (Xclnt->RDFIFO, O_RDONLY));
-      Xclnt.let ("WRFD", open (Xclnt->WRFIFO, O_WRONLY));
+      if (NULL == Xclnt->RDFD)
+        {
+        Xclnt.let ("RDFD", open (Xclnt->RDFIFO, O_RDONLY));
+        Xclnt.let ("WRFD", open (Xclnt->WRFIFO, O_WRONLY));
+        }
 
       Sock.send_str (Xclnt->WRFD, "getdeskclassnames");
       if (Xclnt->ERR == Sock.get_int (Xclnt->RDFD))
         return NULL;
 
-      Sock.send_int (Xclnt->WRFD, desk);
+      Sock.send_int (Xclnt->WRFD, did);
       return Sock.get_str_ar (Xclnt->RDFD, Xclnt->WRFD);
     end
 
     def change_by_id (did)
-      if (0 == (-1 < did < Xclnt->DESKLEN) || did == Xclnt->CUR_ID)
+      if (NULL == getenv ("__XSRV__"))
         return;
     end
 
     def change_by_name (did)
-      if (0 == (-1 < did < Xclnt->DESKLEN) || did == Xclnt->CUR_ID)
-        return;
+      return;
     end
   end
 end

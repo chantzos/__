@@ -17,67 +17,101 @@ Version 2, June 1991
 #include <X11/keysym.h>
 #include <X11/extensions/XTest.h>
 #include <X11/Xatom.h>
+#include <X11/Xmu/Atoms.h>
 #include <errno.h>
 #include <slang.h>
 
 SLANG_MODULE(xclient);
 
-static void gen_key_intrin (char *mode, char *key);
-static int XIsRunning_intrin (void);
-
 static Display *dpy;
 
 static void gen_key_intrin (char *mode, char *key)
 {
-  KeySym keysym, mod;
-  KeyCode keycode, modkey;
+  int len = 6;
+  KeySym keysym = NoSymbol, mod[len];
+  KeyCode keycode = 0x0;
 
-  switch (*mode)
+  for (int i = 0; i < len; i++)
+    mod[i] = NoSymbol;
+
+  while (*mode)
     {
-    case 'c':
-      mod = XK_Control_L;
-      break;
+    switch (*mode)
+      {
+	    	case 's':
+     			mod[0] = XK_Shift_L;
+     			break;
 
-    case 'C':
-      mod = XK_Control_R;
-      break;
+    		case 'S':
+     			mod[0] = XK_Shift_R;
+     			break;
 
-    case 'a':
-      mod = XK_Alt_L;
-      break;
+      case 'c':
+        mod[1] = XK_Control_L;
+        break;
 
-    case 'A':
-      mod = XK_Alt_R;
-      break;
+      case 'C':
+        mod[1] = XK_Control_R;
+        break;
 
-    case 'u':
-      mod = XK_Super_L;
-      break;
+    		case 'm':
+     			mod[2] = XK_Meta_L;
+     			break;
 
-    case 'U':
-      mod = XK_Super_R;
-      break;
+    		case 'M':
+     			mod[2] = XK_Meta_R;
+     			break;
 
-    default:
-      return;
+      case 'a':
+        mod[3] = XK_Alt_L;
+        break;
+
+      case 'A':
+        mod[3] = XK_Alt_R;
+        break;
+
+      case 'u':
+        mod[4] = XK_Super_L;
+        break;
+
+      case 'U':
+        mod[4] = XK_Super_R;
+        break;
+
+	    	case 'h':
+			    mod[5] = XK_Hyper_L;
+			    break;
+
+    		case 'H':
+			    mod[5] = XK_Hyper_R;
+			    break;
+     }
+
+    mode++;
     }
 
   if ((dpy = XOpenDisplay (NULL)) == NULL)
     return;
 
-  if((keysym = XStringToKeysym (key)) == NoSymbol)
+  if ((keysym = XStringToKeysym (key)) == NoSymbol)
     return;
 
-  if((keycode = XKeysymToKeycode (dpy, keysym)) == 0)
+	 for (int i = 0; i < len; i++)
+		  if (mod[i] != NoSymbol)
+			   XTestFakeKeyEvent (dpy, XKeysymToKeycode(dpy, mod[i]), 1, 0);
+
+ 	if ((keysym = XStringToKeysym (key)) == NoSymbol)
     return;
 
-  if ((modkey = XKeysymToKeycode (dpy, mod)) == 0)
+  if ((keycode = XKeysymToKeycode (dpy, keysym)) == 0)
     return;
 
-  XTestFakeKeyEvent (dpy, modkey, True, 0);
   XTestFakeKeyEvent (dpy, keycode, True, 0);
   XTestFakeKeyEvent (dpy, keycode, False, 0);
-  XTestFakeKeyEvent (dpy, modkey, False, 0);
+
+	 for (int i=0; i < len; i++)
+		  if (mod[i] != NoSymbol)
+			   XTestFakeKeyEvent (dpy, XKeysymToKeycode(dpy, mod[i]), 0, 0);
 
   XCloseDisplay (dpy);
 }
@@ -95,7 +129,11 @@ static void XStoreStr_intrin (char *str, int *nth)
   unsigned int size;
   size = (unsigned int) strlen (str);
 
-  XSetSelectionOwner (dpy, XA_PRIMARY, None, CurrentTime);
+  Atom sseln = XA_PRIMARY;
+ // if (*nth == 1)
+ //   sseln = XA_CLIPBOARD(dpy);
+
+  XSetSelectionOwner (dpy, sseln, None, CurrentTime);
   XStoreBytes (dpy, str, size);
   XCloseDisplay (dpy);
 }
@@ -126,7 +164,7 @@ static SLang_Intrin_Fun_Type xclient_Intrinsics [] =
 {
   MAKE_INTRINSIC_I("XFetchStr", XFetchStr_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_SI("XStoreStr", XStoreStr_intrin, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_IS("XSendKey", gen_key_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_SS("XSendKey", gen_key_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("XIsRunning", XIsRunning_intrin, SLANG_INT_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
