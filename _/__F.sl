@@ -250,4 +250,10 @@ public define function ()
    if (__FUNCDEPTH__)
      __restore_instance__;
 }
+
+public define funcall ()
+{
+  (@fexpr ().__funcref) ();
+}
+
 `, "__F");
