@@ -94,7 +94,8 @@ if (NULL == This.is.my.histfile)
   This.is.my.histfile = Env->USER_DATA_PATH + "/.__" + Env->USER +
     "_" + This.is.my.name + "history";
 
-fexpr (`(ar, tok, i)
+funcall (String_Type[0], NULL, NULL,
+`       (ar, tok, i)
   ar = File.readlines (Env->STD_DATA_PATH + "/genconf/conf");
 
   if (0 == access (This.is.my.genconf, F_OK|R_OK) &&
@@ -115,7 +116,14 @@ fexpr (`(ar, tok, i)
     else
       This.is.my.settings[tok[0]] = tok[1];
     }
-`).call (String_Type[0], NULL, NULL);
+`);
+
+funcall (`
+  ifnot (assoc_key_exists (This.is.my.settings, "PASSWD_TIMEOUT"))
+    return;
+
+  Os.set_passwd_timeout (atoi (This.is.my.settings["PASSWD_TIMEOUT"]));
+`);
 
 This.is.std.out.type = "ashell";
 
@@ -516,7 +524,7 @@ private define __write__ (argv)
   else
     s = Ved.get_cur_buf ();
 
-  variable lnrs = [0:s._len];
+  variable lnrs = qualifier ("lnrs", [0:s._len]);
   variable range = NULL;
   variable append = NULL;
   variable ind;
