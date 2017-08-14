@@ -12,6 +12,17 @@ class Os
     timeout = tim;
   end
 
+  def reset_passwd ()
+    ifnot (last_request_time)
+      return;
+
+    last_request_time -= timeout - 1;
+  end
+
+  def get_passwd_timeout ()
+    timeout;
+  end
+
   def getpasswd ()
     variable passwd = "";
     variable prompt = "password:";
