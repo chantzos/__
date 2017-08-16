@@ -524,7 +524,7 @@ private define __write__ (argv)
   else
     s = Ved.get_cur_buf ();
 
-  variable lnrs = qualifier ("lnrs", [0:s._len]);
+  variable lnrs = [0:s._len];
   variable range = NULL;
   variable append = NULL;
   variable ind;
@@ -534,6 +534,7 @@ private define __write__ (argv)
   variable command;
 
   % the getlong method should parse range
+
   if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &argv;fun_args =
        {s, lnrs}, del_arg, defval = lnrs), lnrs))
     return;
@@ -811,24 +812,27 @@ private define filtercommands (s, ar)
 
 public define __parse_argtype (s, arg, type, baselen)
 {
-  ifnot (any (s.argv[0] == ["w", "w!"]))
+  ifnot (any (s.argv[0] == ["w", "w!", "global"]))
     return 0;
 
-  ifnot ("--bufname=" == arg)
+  ifnot (any (["--action=", "--bufname="] == arg))
     return 0;
 
-  variable bufnames = Ved.get_cur_wind ().bufnames;
+  variable names = "--bufname=" == arg
+    ? Ved.get_cur_wind ().bufnames
+    : ["write", "delete", "eval", "system"];
 
   variable rl = Rline.init (NULL);
   Rline.set (rl);
   Rline.prompt (rl, rl._lin, rl._col);
 
-  () = Rline.commandcmp (rl, bufnames;already_filtered);
+  () = Rline.commandcmp (rl, names;already_filtered);
   if (strlen (rl.argv[0]))
     {
     s.argv[s._ind] += rl.argv[0];
     s._col = baselen + strlen (s.argv[s._ind]) + 1;
     Rline.parse_args (s);
+    Rline.prompt (s, s._lin, s._col);
     return 1;
     }
 

@@ -241,6 +241,7 @@ class Ved
 
     IO.tostdout ("press any key to continue");
     () = Input.getch ();
+    IO.tostdout ("");
     f = Class.__FUNCREF__ ("Api", "restore_app");
     (@f) (@api);
   end
@@ -1350,6 +1351,24 @@ class Ved
     Ved.writefile (s, NULL, s.ptr, NULL, NULL;send_msg);
   end
 
+  def __vslang_load (lines) proc
+    variable ns = qualifier ("ns", "Global");
+
+    ifnot (strncmp (lines[0], "ns:", 3))
+      {
+      variable t = strtrim_beg (substr (lines[0], 4, -1));
+      ifnot (strlen (t))
+        lines[0] = "";
+      else
+        {
+        ns = strtok (t)[0];
+        lines[0] = substr (t, strlen (ns) + 1, -1);
+        }
+      }
+
+    __eval (strjoin (lines, "\n"), ns);
+  end
+
   def __on_escape__ (s) proc
     variable keys = [033, 'w', 's', '`', '!'];
     variable key = Input.getch ();
@@ -1375,6 +1394,11 @@ class Ved
       {
       case '!':
         __vsystem ([__vline (s, '.')]);
+      }
+
+      {
+      case '$':
+        __vslang_load ([__vline (s, '.')]);
       }
 
       {
@@ -1576,21 +1600,24 @@ class Ved
     Smg.askprintstr (ar, char_ar, &cmp_lnrs;hl_region = hl_reg);
   end
 
-  def __delete__ (buf, pat, lnrs, whenmatch) proc
+  def __filter_global__ (buf, pat, lnrs, whenmatch) proc
+    if (NULL == pat)
+      return (lnrs[*] = 1, lnrs);
+
     variable lnr, line, len, i;
-    ifnot (NULL == pat)
-      { % code style violation (clever)
-      variable __pcre_exec = fexpr (`(pat, line)
-      try
-        {
-        pcre_exec (pat, line, 0);
-        }
-      catch AnyError:
-        {
-        Exc.print (NULL);
-        0;
-        }
-        `);
+    variable __pcre_exec = fexpr (`(pat, line)
+    try
+      {
+      pcre_exec (pat, line, 0);
+      }
+    catch AnyError:
+      {
+      Exc.print (NULL);
+      0;
+      }
+    `);
+
+    variable llnrs = Integer_Type[length (lnrs)];
 
     _for i (0, length (lnrs) -1)
       {
@@ -1600,17 +1627,20 @@ class Ved
         ifnot (whenmatch)
           continue;
         else
-          buf.lines[lnr] = NULL;
+          llnrs[i] = 1;
       else
         ifnot (whenmatch)
-          buf.lines[lnr] = NULL;
+          llnrs[i] = 1;
       }
 
-    }
-  else % end of code style violation
-    buf.lines[[lnrs[0]:lnrs[-1]]] = NULL;
+    llnrs;
+  end
 
-    variable nulllines = _isnull (buf.lines);
+  def __delete__ (buf, lnrs) proc
+    IO.tostderr (length (where (lnrs)));
+    IO.tostderr (where (lnrs));
+    buf.lines[where (lnrs)] = NULL;
+    variable len, nulllines = _isnull (buf.lines);
 
     len = buf._len - length (nulllines);
 
@@ -1638,16 +1668,52 @@ class Ved
     buf.draw ();
   end
 
-  def __write__ (buf, pat, lnrs, whenmatch) proc
+  def __system__ (buf, lnrs) proc
+    variable lines = buf.lines[where (lnrs)];
+    __vsystem (array_map (String_Type, &strtrim_beg, lines, "!"));
+  end
+
+  def __eval__ (buf, lnrs) proc
+    __vslang_load (buf.lines[where (lnrs)]);
+  end
+
+  def __write__ (buf, lnrs) proc
+    Smg.atrceraseeol (PROMPTROW, 0);
+    variable fn = "", r;
     variable rl = Ved.get_cur_rline ();
-    variable argv = ["w", "--bufname=" + buf._abspath,
-      sprintf ("--range=%d,%d", lnrs[0], lnrs[-1])];
+    Rline.set (rl;col = 0, row = PROMPTROW);
 
-     Rline.set (rl;line = strjoin (argv, " "), argv = argv,
-       col = int (sum (strlen (argv))) + length (argv),
-       ind = length (argv) - 1);
+    forever
+      {
+      r = Rline.fnamecmpToprow (rl, &fn;
+        header = "filename to write selected lines, >> at the end to append");
+      variable len = strlen (fn);
+      if (033 == r || 0 == len)
+        return;
 
-     Rline.readline (rl);
+      if (r)
+        break;
+
+      fn = Rline.getline (;line = fn, col = strlen (fn), argv = [fn]);
+      len = strlen (fn);
+      break;
+      }
+
+    variable append = 0;
+    if (2 < len)
+      if (">>" == substr (fn, len - 1, -1))
+        {
+        append = 1;
+        fn = strtrim (substr (fn, 1, len - 2));
+        }
+
+    ifnot (access (fn, F_OK))
+      ifnot (append)
+        if ('n' == IO.ask ([fn + ": exists, overwrite? y/n"], ['y', 'n']))
+          return;
+
+    Ved.writefile (buf, 1, buf.ptr, fn, append;
+      lines = buf.lines[where (lnrs)]);
   end
 
   def __global () public proc
@@ -1660,6 +1726,7 @@ class Ved
     variable args = __pop_list (_NARGS);
     variable buf = get_cur_buf (NULL);
     variable lnrs = [0:buf._len];
+    variable acts = ["write", "delete", "eval", "system"];
 
     args = list_to_array (args, String_Type);
 
@@ -1667,15 +1734,10 @@ class Ved
     action = Opt.Arg.getlong ("action", NULL, &args;del_arg);
     whenmatch = NULL == Opt.Arg.exists ("--whenNotMatch", &args;del_arg);
 
-    if (NULL == action || 0 == strlen (action))
+    if (NULL == action || 0 == strlen (action) || 0 == any (action == acts))
       {
-      Smg.send_msg_dr ("--action= argument is required, supported are [write, delete]", 1, buf.ptr[0], buf.ptr[1]); 
-      return;
-      }
-
-    ifnot (any (action == ["delete", "write"]))
-      {
-      Smg.send_msg_dr ("supported actions are [delete,write]", 1, buf.ptr[0], buf.ptr[1]);
+      Smg.send_msg_dr ("--action= argument is required, supported are [" +
+        strjoin (acts, ", ") + "]", 1, buf.ptr[0], buf.ptr[1]);
       return;
       }
 
@@ -1690,10 +1752,9 @@ class Ved
       return;
       }
 
-    if (action == "write")
-      __write__ (buf, pat, lnrs, whenmatch);
-    else
-     __delete__ (buf, pat, lnrs, whenmatch);
+    variable llnrs = __filter_global__ (buf, pat, lnrs, whenmatch);
+    (@[&__write__, &__delete__, &__eval__, &__system__][wherefirst (action == acts)])
+      (buf, llnrs);
   end
 
   def __substitute () public proc

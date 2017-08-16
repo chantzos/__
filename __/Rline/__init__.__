@@ -257,9 +257,9 @@ class Rline
   def set (s)
     s._state = 1;
     s._row = s._prow;
-    s._col = qualifier ("col", strlen (s._pchar));
     s.ptr = qualifier ("ptr", [s._prow, 1]);
     s._lin = s._pchar + qualifier ("line", "");
+    s._col = qualifier ("col", strlen (s._pchar));
     s._ind = qualifier ("ind", 0);
     s._chr = 0;
     s.lnrs = [s._prow];
@@ -1802,7 +1802,6 @@ class Rline
       else
         pat = "";
 
-
     if ("String" == type)
       {
       Smg.atrcaddnstr ("arg should be a string", 1, MSGROW, 0, s._columns);
@@ -1826,55 +1825,55 @@ class Rline
       }
 
     if ("pcrepattern" == type)
+      {
+      Smg.atrcaddnstr ("arg type should be " + type, 1, MSGROW, 0, s._columns);
+
+      prompt (NULL, s, s._lin, s._col);
+
+      getpattern (s, &pat;;__qualifiers ());
+
+      if (strlen (pat))
         {
-        Smg.atrcaddnstr ("arg type should be " + type, 1, MSGROW, 0, s._columns);
-
-        prompt (NULL, s, s._lin, s._col);
-
-        getpattern (s, &pat;;__qualifiers ());
-
-        if (strlen (pat))
-          {
-          s.argv[s._ind] += pat;
-          s._col = baselen + strlen (s.argv[s._ind]) + 1;
-          parse_args (NULL, s);
-          }
-
-        s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
-        restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
-        prompt (NULL, s, s._lin, s._col);
-
-        return;
-        }
-
-    if (any (["filename", "directory", "device", "mountpoint"] == type))
-        {
-        prompt (NULL, s, s._lin, s._col);
-
-        if ("device" == type)
-          tmp = strlen (pat) ? pat : "/dev/sd";
-        else if ("mountpoint" == type)
-          tmp = strlen (pat) ? pat : "/media/removable/";
-        else
-          tmp = strlen (pat) ? pat : "";
-
-        if (any (["directory", "mountpoint"]  == type))
-          () = fnamecmpToprow (NULL, s, &tmp;only_dirs);
-        else if ("device" == type)
-          () = fnamecmpToprow (NULL, s, &tmp;only_blcks);
-        else
-          () = fnamecmpToprow (NULL, s, &tmp);
-
-        s.argv[s._ind] += tmp;
+        s.argv[s._ind] += pat;
         s._col = baselen + strlen (s.argv[s._ind]) + 1;
         parse_args (NULL, s);
-
-        ifnot (any (__HISTORY__["FNAME"] == s.argv[s._ind]))
-          Array.insert (&__HISTORY__["FNAME"], s.argv[s._ind]);
-
-        s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
-        prompt (NULL, s, s._lin, s._col);
         }
+
+      s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
+      restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
+      prompt (NULL, s, s._lin, s._col);
+
+      return;
+      }
+
+    if (any (["filename", "directory", "device", "mountpoint"] == type))
+      {
+      prompt (NULL, s, s._lin, s._col);
+
+      if ("device" == type)
+        tmp = strlen (pat) ? pat : "/dev/sd";
+      else if ("mountpoint" == type)
+        tmp = strlen (pat) ? pat : "/media/removable/";
+      else
+        tmp = strlen (pat) ? pat : "";
+
+      if (any (["directory", "mountpoint"]  == type))
+        () = fnamecmpToprow (NULL, s, &tmp;only_dirs);
+      else if ("device" == type)
+        () = fnamecmpToprow (NULL, s, &tmp;only_blcks);
+      else
+        () = fnamecmpToprow (NULL, s, &tmp);
+
+      s.argv[s._ind] += tmp;
+      s._col = baselen + strlen (s.argv[s._ind]) + 1;
+      parse_args (NULL, s);
+
+      ifnot (any (__HISTORY__["FNAME"] == s.argv[s._ind]))
+        Array.insert (&__HISTORY__["FNAME"], s.argv[s._ind]);
+
+      s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
+      prompt (NULL, s, s._lin, s._col);
+      }
   end
 
   def parse_argtype (s, arg, type, baselen) proc

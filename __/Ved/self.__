@@ -75,6 +75,22 @@ beg
     ifnot (strlen (arg))
       return NULL;
 
+    variable llnrs;
+    try
+      {
+      llnrs = eval (arg);
+      if (Array_Type == typeof (llnrs))
+        if (Integer_Type == _typeof (llnrs))
+          {
+          llnrs = llnrs[array_sort (llnrs)];
+          if (0 > llnrs[0] || llnrs[1] > s._len)
+            return NULL;
+          return llnrs;
+          }
+      }
+    catch AnyError:
+      {}
+
     if ("%" == arg)
       return lnrs;
 

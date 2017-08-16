@@ -10,9 +10,9 @@ subclass Visual
     clr = Smg->COLOR.visual,
     l_mode, l_down, l_up, l_page_up, l_page_down,
     l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', Input->DOWN, Input->UP,
-      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b, Input->HOME, '!'],
+      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b, Input->HOME, '!', '$'],
     c_mode, c_left, c_right,
-    c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT, '!'],
+    c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT, '!', '$'],
     bw_mode, bw_down, bw_up, bw_left, bw_right, bw_maxlen,
     bw_keys = ['x', 'I', 'i', 'd', 'y', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
     needsdraw, startrow, startlnr, startcol, startindex,
@@ -371,6 +371,12 @@ subclass Visual
         break;
         }
 
+      if ('$' == chr)
+        {
+        __vslang_load (vs.lines);
+        break;
+        }
+
       if ('>' == chr)
         {
         loop (VEDCOUNT)
@@ -637,6 +643,15 @@ subclass Visual
           continue;
 
         __vsystem ([vs.sel[0]]);
+        break;
+        }
+
+      if ('$' == chr)
+        {
+        ifnot (strlen (vs.sel[0]))
+          continue;
+
+        __vslang_load ([vs.sel[0]]);
         break;
         }
 

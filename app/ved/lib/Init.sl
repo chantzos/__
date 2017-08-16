@@ -241,7 +241,7 @@ private define _filter_bufs_ (v)
   ar[array_sort (ar)];
 }
 
-private define __parse_argtypes__ (s, arg, type, baselen)
+private define __parse_argtypes__ ()
 {
   __parse_argtype; % arguments are already on the stack
 }
