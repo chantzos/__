@@ -1354,6 +1354,8 @@ class Ved
   def __vslang_load (lines) proc
     variable ns = qualifier ("ns", "Global");
 
+    lines[0] = strtrim_beg (lines[0]);
+
     ifnot (strncmp (lines[0], "ns:", 3))
       {
       variable t = strtrim_beg (substr (lines[0], 4, -1));
@@ -1370,7 +1372,71 @@ class Ved
   end
 
   def __on_escape__ (s) proc
-    variable keys = [033, 'w', 's', '`', '!'];
+    variable rl = Rline.init (NULL;prow = 7, pchar = "");
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
+
+    variable names = ["escape", "write", "substitute", "windmenu",
+      "eval", "system"];
+
+    () = Rline.commandcmp (rl, names;already_filtered,
+      help = [
+        "to command line",
+        "write current buffer",
+        "make substitutions (for current line)",
+        "window menu",
+        "evaluate current line",
+        "send current line to system ()"]);
+
+    ifnot (strlen (rl.argv[0]))
+      {
+      s.draw ();
+      return;
+      }
+
+    switch (rl.argv[0])
+      {
+      case "write":
+        __write_on_esc__ (s);
+      }
+
+      {
+      case "escape":
+        () = __cline__ (s);
+      }
+
+      {
+      case "windmenu":
+        handle_w (s);
+      }
+
+      {
+      case "system":
+        __vsystem ([__vline (s, '.')]);
+      }
+
+      {
+      case "eval":
+        __vslang_load ([__vline (s, '.')]);
+      }
+
+      {
+      case "substitute":
+        rl = Ved.get_cur_rline ();
+        variable argv = ["substitute", "--dont-ask-when-subst",
+          "--global", "--range=.", "--pat="];
+
+        Rline.set (rl;line = strjoin (argv, " "), argv = argv,
+          col = int (sum (strlen (argv))) + length (argv),
+          ind = length (argv) - 1);
+
+        Rline.readline (rl);
+      }
+
+    s.draw ();
+    return;
+
+    variable keys = [033, 'w', 's', '`', '$', '!'];
     variable key = Input.getch ();
     ifnot (any (key == keys))
       return;
@@ -1403,8 +1469,8 @@ class Ved
 
       {
       case 's':
-        variable rl = Ved.get_cur_rline ();
-        variable argv = ["substitute", "--dont-ask-when-subst",
+        rl = Ved.get_cur_rline ();
+        argv = ["substitute", "--dont-ask-when-subst",
           "--global", "--range=.", "--pat="];
 
         Rline.set (rl;line = strjoin (argv, " "), argv = argv,
@@ -1766,9 +1832,10 @@ class Ved
     args = list_to_array (args, String_Type);
 
     pat = Opt.Arg.getlong ("pat", NULL, &args;del_arg, ret_arg);
-    sub = Opt.Arg.getlong ("sub", NULL, &args;del_arg, ret_arg);
+    sub = Opt.Arg.getlong ("sub", NULL, &args;
+      "defval on no value" = "", del_arg, ret_arg);
 
-    if (NULL == pat || NULL == sub || anynot (strlen ([pat, sub])))
+    if (NULL == pat || NULL == sub || anynot (strlen ([pat])))
       {
       Smg.send_msg_dr ("--pat= and --sub= are required", 1, buf.ptr[0], buf.ptr[1]);
       return;
@@ -1780,9 +1847,9 @@ class Ved
     if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &args;fun_args =
        {buf, lnrs}, del_arg, defval = lnrs), lnrs))
       {
-       Smg.send_msg_dr (Opt.err ());
-       return;
-       }
+      Smg.send_msg_dr (Opt.err (), 1, buf.ptr[0], buf.ptr[1]);
+      return;
+      }
 
     variable s = Subst.new (pat, sub;
       fname = buf._abspath, global = global, askwhensubst = ask,

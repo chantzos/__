@@ -6,6 +6,7 @@
 --excludeextension=   string exclude file with extension
 --maxdepth=           int  descend at most `levels' of directories
 --rmspacesfromtheend  void remove spaces from the end of a string (predefined)
+--rmcrlf              void remove CRLF (dos)
 --pat=                pcrepattern  pcre pattern (required)
 --sub=                pcrepattern substitution (required)
 --global              void do global substitutions

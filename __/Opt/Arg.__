@@ -6,9 +6,35 @@ subclass Arg
     getlong
   end
 
+  def compare (arg, argv)
+    variable index = wherenot (strncmp (@argv, arg, strlen (arg)));
+    variable ret = qualifier_exists ("ret_arg");
+
+    ifnot (length (index))
+      {
+      if (ret)
+        NULL;
+
+      return NULL;
+      }
+
+    if (ret)
+      ret = (@argv)[index[0]];
+    else
+      ret = NULL;
+
+    if (qualifier_exists ("del_arg"))
+      Array.delete_at (argv, index[0]);
+
+    ifnot (NULL == ret)
+      ret;
+
+    index[0];
+  end
+
   def getlong (arg, type, argv)
     variable opt, ind, defval = qualifier ("defval");
-    (opt, ind) = self.compare ("--" + arg + "=", argv;;struct {@__qualifiers, ret_arg});
+    (opt, ind) = Arg_compare (self, "--" + arg + "=", argv;;struct {@__qualifiers, ret_arg});
 
     if (NULL == ind)
       {
@@ -22,7 +48,7 @@ subclass Arg
     if (2 > length (opt))
       {
       Opt.err ("No value specified");
-      return defval;
+      return qualifier ("defval on no value");
       }
 
     opt = strjoin (opt[[1:]], "=");
@@ -107,32 +133,6 @@ subclass Arg
       ret;
 
     index;
-  end
-
-  def compare (arg, argv)
-    variable index = wherenot (strncmp (@argv, arg, strlen (arg)));
-    variable ret = qualifier_exists ("ret_arg");
-
-    ifnot (length (index))
-      {
-      if (ret)
-        NULL;
-
-      return NULL;
-      }
-
-    if (ret)
-      ret = (@argv)[index[0]];
-    else
-      ret = NULL;
-
-    if (qualifier_exists ("del_arg"))
-      Array.delete_at (argv, index[0]);
-
-    ifnot (NULL == ret)
-      ret;
-
-    index[0];
   end
 
   def replace (argv, atindex, witharg)

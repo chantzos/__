@@ -341,6 +341,7 @@ class Smg
     variable header = " ";
     variable headclr = headerclr;
     variable chr = NULL;
+    variable row = qualifier ("row", PROMPTROW - 1);
     variable type = typeof (str);
     variable ar = (any ([String_Type, BString_Type] == type))
       ? strchop (strtrim_end (str), '\n', 0)
@@ -363,7 +364,7 @@ class Smg
       }
 
     ar = printstrar (self, ar, PROMPTROW - 1, &len, cmp_lnrs;;
-      struct {@__qualifiers, header = header, headerclr = headclr});
+      struct {headerclr = headclr, @__qualifiers, header = header});
 
     ifnot (NULL == charar)
       {
@@ -382,7 +383,7 @@ class Smg
     variable len = length (lar);
     variable fgclr = qualifier ("fgclr", 5);
     variable bgclr = qualifier ("bgclr", 11);
-    variable maxlen = max (strlen (lar)) + 1;
+    variable maxlen = qualifier ("maxlen", max (strlen (lar)) + 1);
 
   %  if (maxlen > COLUMNS)
   %    _for i (0, len - 1)

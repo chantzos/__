@@ -1360,10 +1360,13 @@ class Rline
       chr,
       tmp,
       help,
-      indices,
+      indices = array_sort (commands),
       orighelp = qualifier ("help");
 
-    commands = commands[array_sort (commands)];
+    commands = commands[indices];
+
+    ifnot (NULL == orighelp)
+      orighelp = orighelp[indices];
 
     forever
       {

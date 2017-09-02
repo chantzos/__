@@ -36,6 +36,16 @@ define assign_func (func)
       INPLACE = 1;
       GLOBAL = 1;
     }
+
+    {
+    case "rmcrlf":
+      PAT = "\\R";
+      SUBSTITUTE = "";
+      WHENSUBST = NULL;
+      WHENWRITE = 1;
+      INPLACE = 1;
+      GLOBAL = 1;
+    }
 }
 
 define unified_diff (lines, fname)
@@ -221,6 +231,7 @@ define main ()
   c.add ("hidden-files", &HIDDENFILES);
   c.add ("maxdepth", &maxdepth;type = "int");
   c.add ("rmspacesfromtheend", &assign_func, "rmspacesfromtheend");
+  c.add ("rmcrlf", &assign_func, "rmcrlf");
   c.add ("excludedir", &EXCLUDEDIRS;type = "string", append);
   c.add ("excludeextension", &EXCLUDE_FILE_EXT;type = "string", append);
   c.add ("pat", &PAT;type = "string");

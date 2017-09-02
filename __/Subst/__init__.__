@@ -4,7 +4,7 @@ class Subst
     variable newlines = 0;
 
     _for i (1, strlen (pat) - 1)
-      if ('n' == pat[i] && '\\' == pat[i - 1])
+      if (any (['n'] == pat[i]) && '\\' == pat[i - 1])
         newlines++;
 
     newlines;
@@ -196,7 +196,8 @@ class Subst
           }
         while (found = pcre_exec (s.pat, str, 0), found && s.global);
 
-        tok = strtok (sprintf ("%s%s", finished, str), "\n");
+%        tok = strtok (sprintf ("%s%s", finished, str), "\n");
+        tok = strchop (sprintf ("%s%s", finished, str), '\n', 0);
 
         s.indices = [s.indices, [s.lnronfile:s.lnronfile + newlines]];
 

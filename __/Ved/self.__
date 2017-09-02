@@ -78,15 +78,32 @@ beg
     variable llnrs;
     try
       {
-      llnrs = eval (arg);
-      if (Array_Type == typeof (llnrs))
-        if (Integer_Type == _typeof (llnrs))
+      variable depth = _stkdepth;
+      eval (arg);
+      loop (1)
+        {
+        if (_stkdepth == depth)
+          break;
+
+        if (_stkdepth - depth > 1)
           {
-          llnrs = llnrs[array_sort (llnrs)];
-          if (0 > llnrs[0] || llnrs[1] > s._len)
-            return NULL;
-          return llnrs;
+          loop (_stkdepth - depth)
+            pop;
+
+          break;
           }
+
+        llnrs = ();
+        if (Array_Type == typeof (llnrs))
+          if (Integer_Type == _typeof (llnrs))
+            {
+            llnrs = llnrs[array_sort (llnrs)];
+            if (0 > llnrs[0] || llnrs[1] > s._len)
+              return NULL;
+
+            return llnrs;
+            }
+        }
       }
     catch AnyError:
       {}
