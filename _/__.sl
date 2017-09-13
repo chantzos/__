@@ -488,7 +488,7 @@ static define __ ()
     {
     lexi = ();
     args = __pop_list (_NARGS - 1);
-    n = sscanf (lexi, "%[a-zA-Z]::%[a-zA-Z_]::%s", &from, &fun, &caller);
+    n = sscanf (lexi, "%[a-zA-Z]::%[a-zA-Z_0-9]::%s", &from, &fun, &caller);
 
     ifnot (1 < n)
       throw ClassError, "FuncDefinitionParseError::__::" + lexi;
