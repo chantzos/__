@@ -167,7 +167,7 @@ private define __copy__ (self, source, dest, st_source, st_dest, opts)
   () = chmod (dest, mode);
 
   if (verbose && strlen (backuptext))
-    IO.tostdout (sprintf ("%`%s' -> `%s' %s", source, dest, backuptext));
+    IO.tostdout (sprintf ("`%s' -> `%s' %s", source, dest, backuptext));
 
   0;
 }

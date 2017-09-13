@@ -45,6 +45,51 @@ class File
   fun extract (archive, verbose, dir, strip)
   fun remove (file, interactive, isdir)
 
+  subclass Is
+    __init__
+      dos
+      unix
+    end
+
+    def __is_routine__ (file, buf) proc
+      if (-1 == access (file, F_OK))
+        return 0;
+
+      variable fp = qualifier ("fp", fopen (file, "r"));
+      if (NULL == fp)
+        return 0;
+
+      variable curseek = ftell (fp);
+
+      if (-1 == fseek (fp, 0, SEEK_SET))
+        return 0;
+
+      variable bts = fgets (buf, fp);
+      () = fseek (fp, curseek, SEEK_SET);
+      bts;
+    end
+
+    def dos (file)
+      variable
+        buf,
+        bts = __is_routine__ (file, &buf;;__qualifiers);
+
+      (bts > 1 && buf[-2] == 13 && buf[-1] == 10);
+    end
+
+    def unix (file)
+      variable
+        buf,
+        bts = __is_routine__ (file, &buf;;__qualifiers);
+
+      (bts && buf[-1] == 10 && (bts == 1 || buf[-2] != 10));
+    end
+
+    % bzip2 =  (bts > 9 && substr (buf, 1, 10) == "BZh91AY&SY");
+    % gzip  =  (bts == 3 && buf[0] == 31 && buf[1] == 139 && buf[2] == 8);
+
+  end
+
   def is_type (mode, type)
     NULL == mode ? 0 : stat_is (type, mode);
   end
