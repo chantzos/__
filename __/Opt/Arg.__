@@ -19,15 +19,10 @@ subclass Arg
       }
 
     if (ret)
-      ret = (@argv)[index[0]];
-    else
-      ret = NULL;
+      (@argv)[index[0]];
 
     if (qualifier_exists ("del_arg"))
       Array.delete_at (argv, index[0]);
-
-    ifnot (NULL == ret)
-      ret;
 
     index[0];
   end
@@ -122,15 +117,10 @@ subclass Arg
       }
 
     if (ret)
-      ret = (@argv)[index];
-    else
-      ret = NULL;
+      (@argv)[index];
 
     if (qualifier_exists ("del_arg"))
       Array.delete_at (argv, index);
-
-    ifnot (NULL == ret)
-      ret;
 
     index;
   end

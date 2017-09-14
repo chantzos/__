@@ -70,6 +70,7 @@ class Ved
     del_frame = 1,
     new_frame = 1,
     def_ftype = "txt",
+    force,
     };
 
   var VED_INFOCLRFG = Smg->COLOR.infofg;
@@ -1927,11 +1928,25 @@ class Ved
     variable wc = VED_CUR_WIND, i, w = NULL, j, found,
       nwns,owns = assoc_get_keys (VED_WIND);
 
+    variable checked = qualifier_exists ("checked");
+
     _for i (0, length (pj) - 1)
       {
       fn = pj[i];
-      if (access (fn, F_OK|R_OK))
-        continue;
+      ifnot (checked)
+        {
+        variable retval = Ved.checkfile (fn);
+
+        ifnot (any ([1, -1] == retval))
+          {
+          variable buf = Ved.get_cur_buf ();
+          variable err = Ved.err ();
+          Smg.send_msg_dr (err, 1, buf.ptr[0], buf.ptr[1]);
+          IO.tostderr (err);
+          ifnot (0 == retval)
+            continue;
+          }
+        }
 
       new_wind (;on_wind_new);
 

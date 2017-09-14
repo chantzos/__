@@ -82,7 +82,10 @@ class File
         buf,
         bts = __is_routine__ (file, &buf;;__qualifiers);
 
-      (bts && buf[-1] == 10 && (bts == 1 || buf[-2] != 10));
+      switch (bts)
+        {case -1: 0;}
+        {case  1: buf[-1] == 10;}
+        {buf[-1] == 10 && buf[-2] != 13;}
     end
 
     % bzip2 =  (bts > 9 && substr (buf, 1, 10) == "BZh91AY&SY");

@@ -22,7 +22,7 @@ private define __write_info__ (s)
 
   () = File.write (info._abspath,
     Smg.__HLINE__ () + "\n" +
-    "repository : " + s.name + "\n" +
+    "repository : " + s.name + "   " + s.dir + "\n" +
     "branches   : " + strjoin (s.branches, ", ") + "\n" +
     "current    : " + (NULL == s.cur_branch ? "None yet" : s.cur_branch) + "\n" +
     "remote url : " + (NULL == s.remote_url ? "" : s.remote_url));
@@ -216,7 +216,7 @@ private define __commitall__ (argv)
     return;
     }
 
-  () = App.Run.as.child (["__ved", "--ftype=diff", SCRATCH]);
+  () = App.Run.as.child (["__ved", "--force", "--ftype=diff", SCRATCH]);
 
   variable lines = File.readlines (SCRATCH);
 
@@ -293,7 +293,7 @@ private define __commit__ (argv)
     return;
     }
 
-  () = App.Run.as.child (["__ved", "--ftype=diff", SCRATCH]);
+  () = App.Run.as.child (["__ved", "--force", "--ftype=diff", SCRATCH]);
 
   variable lines = File.readlines (SCRATCH);
 

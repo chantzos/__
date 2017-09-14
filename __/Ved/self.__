@@ -36,22 +36,57 @@ beg
     v._findex = pos._findex;
   end
 
+  def checkfile (file)
+    if (any (file == SPECIAL))
+      return 1;
+
+    variable st = stat_file (file);
+
+    if (Dir.__isdirectory (file, st))
+      self.err (file + ": File is a directory";;__return__ (-3));
+
+    if (-1 == access (file, F_OK))
+      self.err (file + ": File doesn't exists";;__return__ (-1));
+
+    if (NULL == st)
+      self.err (file + ": " + errno_string (errno);;__return__ (-4));
+
+    if (-1 == access (file, R_OK))
+      self.err (file + ": File is not readable";;__return__ (-2));
+
+    if (-1 == access (file, W_OK))
+      self.err (file + ": File is not writable";;__return__ (0));
+
+    ifnot (st.st_size)
+      return 1;
+
+    variable fp = fopen (file, "r");
+    if (NULL == fp)
+      self.err (file + ": " + errno_string (errno);;__return__ (-4));
+
+    ifnot (File.Is.unix (file;fp = fp))
+      ifnot (File.Is.dos (file;fp = fp))
+        if (NULL == VED_OPTS.force)
+          self.err (file +
+            ": File is not a unix nor a dos file";;__return__ (-5));
+
+    1;
+  end
+
   def getlines (fname, indent, st)
-    if (-1 == access (fname, F_OK))
-      {
-      st.st_size = 0;
-      return [__get_null_str (indent)];
-      }
+    variable retval = self.checkfile (fname);
 
-    if (-1 == access (fname, R_OK))
-      {
-      Smg.send_msg (fname + ": is not readable", 1);
-      st.st_size = 0;
-      return [__get_null_str (indent)];
-      }
+    ifnot (1 == retval)
+      ifnot (retval)
+        Smg.send_msg (self.err (), 1);
+      else
+        {
+        ifnot (-1 == retval)
+          Smg.send_msg (self.err (), 1);
 
-    if (-1 == access (fname, W_OK))
-      Smg.send_msg (fname + ": is Read Only", 1);
+        st.st_size = 0;
+        return [__get_null_str (indent)];
+        }
 
     variable lines = File.readlines (fname);
 

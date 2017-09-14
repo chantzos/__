@@ -40,8 +40,14 @@ private define addfname (fname)
   else
     absfname = fname;
 
-  if (Dir.isdirectory (fname))
-    return;
+  variable retval = Ved.checkfile (fname);
+  ifnot (any ([1, -1] == retval))
+    {
+    variable buf = Ved.get_cur_buf ();
+    Smg.send_msg_dr (Ved.err (), 1, buf.ptr[0], buf.ptr[1]);
+    ifnot (0 == retval)
+      return;
+    }
 
   variable w = Ved.get_cur_wind ();
 
@@ -593,6 +599,7 @@ public define init_ved ()
 {
   This.err_handler = &ved_err_handler;
 
+  VED_OPTS.force = Opt.Arg.exists ("--force", &This.has.argv;del_arg);
   variable __stdin = Opt.Arg.exists ("-", &This.has.argv;del_arg);
   variable ftype = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
   variable fname, files;
@@ -630,6 +637,8 @@ public define init_ved ()
 
   files = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
 
+  variable buf, retval;
+
   ifnot (NULL == files)
     {
     files = strchopr (files, ',', 0);
@@ -637,10 +646,29 @@ public define init_ved ()
       ifnot (path_is_absolute (files[fname]))
         files[fname] = path_concat (getcwd, files[fname]);
 
-    PROJECT_VED ([NULL, files];ftype = ftype);
+    _for fname (0, length (files) - 1)
+      {
+      retval = Ved.checkfile (files[fname]);
+      ifnot (any ([1, -1] == retval))
+        {
+        IO.tostderr (Ved.err ());
+        ifnot (0 == retval)
+          files[fname] = NULL;
+        }
+      }
+
+    files = files[wherenot (_isnull (files))];
+    ifnot (length (files))
+      This.exit (1);
+
+    PROJECT_VED ([NULL, files];checked);
 
     Ved.del_wind ("a");
-    Ved.get_cur_buf ().ved (files[-1]);
+    buf = Ved.get_cur_buf ();
+    if (NULL == buf)
+      This.exit (1);
+
+    buf.ved (buf._abspath);
     This.exit (0);
     }
 
@@ -648,6 +676,25 @@ public define init_ved ()
   (lnr, ) = Opt.Arg.compare ("+", &This.has.argv;del_arg, ret_arg);
 
   files = This.has.argv[[1:]];
+  variable fn;
+  _for fname (0, length (files) - 1)
+    {
+    fn = files[fname];
+    ifnot (path_is_absolute (fn))
+      fn = path_concat (getcwd, fn);
+
+    retval = Ved.checkfile (fn);
+    ifnot (any ([1, -1] == retval))
+      {
+      IO.tostderr (Ved.err ());
+      ifnot (0 == retval)
+        files[fname] = NULL;
+      }
+    }
+
+  files = files[wherenot (_isnull (files))];
+  ifnot (length (files))
+    This.exit (1);
 
   if (1 == length (files))
     {
@@ -675,13 +722,12 @@ public define init_ved ()
     This.exit (0);
     }
 
-  _for fname (0, length (files) - 1)
-    ifnot (path_is_absolute (files[fname]))
-      files[fname] = path_concat (getcwd, files[fname]);
-
-  PROJECT_VED ([NULL, files];ftype = ftype);
+  PROJECT_VED ([NULL, files];checked);
 
   Ved.del_wind ("a");
-  Ved.get_cur_buf ().ved (files[-1]);
+  buf = Ved.get_cur_buf ();
+  if (NULL == buf)
+    This.exit (1);
+  buf.ved (buf._abspath);
   This.exit (0);
 }
