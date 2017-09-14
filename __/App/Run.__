@@ -172,7 +172,7 @@ subclass Run
 
       p.stdin.in = passwd;
 
-      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", " ", argv];
       }
 
     variable status;

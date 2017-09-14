@@ -133,7 +133,7 @@ class Sys
           passwd = strtrim_end (passwd) + "\n";
 
       variable com = (NULL == passwd ? "" : "printf \"" + passwd +
-         "\" | " + Sys->SUDO_BIN + " -S -E -p \"\" ") +
+         "\" | " + Sys->SUDO_BIN + " -S -E -p \" \" ") +
          "sh -c \"printf \"mem\" >" + POWER_DIR + "/state\"";
 
       () = system (com);
@@ -194,7 +194,7 @@ class Sys
           passwd = strtrim_end (passwd) + "\n";
 
       variable com = (NULL == passwd ? "" : "printf \"" + passwd +
-         "\" | " + Sys->SUDO_BIN + " -S -E -p \"\" ") +
+         "\" | " + Sys->SUDO_BIN + " -S -E -p \" \" ") +
          "sh -c \"printf \"" + string (v) + "\" >" + BACKLIGHT_DIR +
          "/brightness\"";
 
@@ -230,7 +230,7 @@ class Sys
     p.stdin.in = passwd;
 
     return [-1, 0][0 == p.execv (
-      [Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
+      [Sys->SUDO_BIN, "-S", "-E", "-p", " ", Sys->SLSH_BIN,
       Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", string (sig),
       string (pid)], NULL).exit_status];
     end

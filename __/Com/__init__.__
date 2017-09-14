@@ -83,7 +83,7 @@ class Com
         return NULL;
         }
 
-      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", " ", argv];
       }
 
     argv, p;
@@ -93,7 +93,7 @@ class Com
     variable p = Proc.init (1, 0, 0);
     p.stdin.in = passwd;
 
-    () = p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", "", Sys->SLSH_BIN,
+    () = p.execv ([Sys->SUDO_BIN, "-S", "-E", "-p", " ", Sys->SLSH_BIN,
       Env->STD_LIB_PATH + "/proc/sendsignalassu.slc", sig, pid], NULL);
   end
 

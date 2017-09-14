@@ -78,7 +78,7 @@ subclass Srv
     Rline.prompt (s, s._lin, s._col);
 
     variable saved = Input->rmap.right;
-    Input->rmap.right = [saved, Input->F2];
+    Input->rmap.right = [saved, Input->F2, Input->F4];
     () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 

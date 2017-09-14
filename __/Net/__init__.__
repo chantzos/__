@@ -156,7 +156,7 @@ update_config=1
         ifnot (passwd[-1] == '\n')
           passwd += "\n";
 
-        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", " ", argv];
         }
 
       variable p = Proc.init (NULL != passwd, 1, 1);
@@ -217,7 +217,7 @@ update_config=1
         ifnot (passwd[-1] == '\n')
           passwd += "\n";
 
-        argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv];
+        argv = [Sys->SUDO_BIN, "-S", "-E", "-p", " ", argv];
         }
 
       variable isstdout = qualifier ("stdout");
@@ -268,7 +268,7 @@ update_config=1
         ifnot (passwd[-1] == '\n')
           passwd += "\n";
 
-        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", " ", argv];
         }
 
       variable p = Proc.init (NULL != passwd, 1, 1);
@@ -508,7 +508,7 @@ update_config=1
         ifnot (passwd[-1] == '\n')
           passwd += "\n";
 
-        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", "", argv];
+        argv = [Sys->SUDO_BIN, "-S",  "-E", "-p", " ", argv];
         }
 
       variable p = Proc.init (NULL != passwd, 1, 1);

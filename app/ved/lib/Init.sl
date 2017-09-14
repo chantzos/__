@@ -415,7 +415,7 @@ private define _read_ ()
         return;
 
       p.stdin.in = passwd;
-      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", "", argv[[1:]]];
+      argv = [Sys->SUDO_BIN, "-S", "-E", "-p", " ", argv[[1:]]];
       }
 
     variable status = p.execv (argv, NULL);
