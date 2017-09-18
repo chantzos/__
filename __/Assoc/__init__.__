@@ -1,7 +1,9 @@
 class Assoc
   def new (dtype, keys, values)
     variable def = qualifier ("default");
-    variable a = NULL == def ? Assoc_Type[dtype] : Assoc_Type[dtype, def];
+    variable a = qualifier_exists ("default")
+      ? Assoc_Type[dtype, def]
+      : Assoc_Type[dtype];
 
     if (NULL == keys)
       return a;
