@@ -246,12 +246,12 @@ class Rline
       {
       ifnot (NULL == s.funclist)
         if (any (assoc_get_keys (s.funclist) == s.argv[0]))
-          __exec_proc__ (s, s.funclist);
+          __exec_proc__ (s, s.funclist;;__qualifiers);
 
       return;
       }
 
-    __exec_proc__ (s, s.argvlist);
+    __exec_proc__ (s, s.argvlist;;__qualifiers);
   end
 
   def set (s)
