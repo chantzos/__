@@ -905,7 +905,7 @@ static define mainloop ()
     }
 }
 
-% default error handler - can be change from init_[appname] function
+% default error handler - can be changed from init_[appname] function
 private define __err_handler__ (t, s)
 {
   __messages;
@@ -1000,9 +1000,16 @@ if (This.has.sigint)
   signal (SIGINT, &sigint_handler);
   }
 
-% this sets the default error handler, can be change
-% from withing the next function
 This.err_handler = &__err_handler__;
+
+funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
+`       (path, app)
+  ifnot (access (path + "/" + app + ".slc", F_OK|R_OK))
+    Load.file   (path + "/" + app + ".slc");
+  else
+  ifnot (access (path + "/" + app + ".sl", F_OK|R_OK))
+    Load.file   (path + "/" + app + ".sl");
+`);
 
 (@__get_reference ("init_" + This.is.my.name));
 
