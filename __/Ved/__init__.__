@@ -228,23 +228,8 @@ class Ved
     s.vedloop ();
   end
 
-  def __vsystem (lines) proc
-    variable len = length (lines);
-    ifnot (len)
-      return;
-
-    variable f = Class.__FUNCREF__ ("Api", "reset_app");
-    variable api = __get_reference ("Api"), i;
-    (@f) (@api);
-
-    _for i (0, length (lines) - 1)
-      () = system (lines[i]);
-
-    IO.tostdout ("press any key to continue");
-    () = Input.getch ();
-    IO.tostdout ("");
-    f = Class.__FUNCREF__ ("Api", "restore_app");
-    (@f) (@api);
+  def __vsystem () public proc
+    (@__get_reference ("__system")) (;;__qualifiers);
   end
 
   def __vset_col__ (s, linlen, dir) proc

@@ -385,4 +385,21 @@ class App
 
     Ved.draw_wind ();
   end
+
+  def __system (lines) public proc
+    variable i, len = length (lines);
+    ifnot (len)
+      return;
+
+    Api.reset_app ();
+
+    _for i (0, length (lines) - 1)
+      () = system (lines[i]);
+
+    IO.tostdout ("press any key to continue");
+    () = Input.getch ();
+    IO.tostdout ("");
+
+    Api.restore_app ();
+  end
 end
