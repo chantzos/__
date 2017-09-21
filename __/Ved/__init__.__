@@ -1362,7 +1362,7 @@ class Ved
     Rline.set (rl);
     Rline.prompt (rl, rl._lin, rl._col);
 
-    variable names = ["escape", "write", "substitute", "windmenu",
+    variable names = ["escape", "write", "substitute",
       "eval", "system"];
 
     () = Rline.commandcmp (rl, names;already_filtered,
@@ -1370,7 +1370,6 @@ class Ved
         "to command line",
         "write current buffer",
         "make substitutions (for current line)",
-        "window menu",
         "evaluate current line",
         "send current line to system ()"]);
 
@@ -1420,53 +1419,6 @@ class Ved
       }
 
     s.draw ();
-    return;
-
-    variable keys = [033, 'w', 's', '`', '$', '!'];
-    variable key = Input.getch ();
-    ifnot (any (key == keys))
-      return;
-
-    switch (key)
-      {
-      case 'w':
-        __write_on_esc__ (s);
-      }
-
-      {
-      case 033:
-        () = __cline__ (s);
-      }
-
-      {
-      case '`':
-        handle_w (s);
-      }
-
-      {
-      case '!':
-        __vsystem ([strtrim_beg (__vline (s, '.'), "!")]);
-      }
-
-      {
-      case '$':
-        __vslang_load ([__vline (s, '.')]);
-      }
-
-      {
-      case 's':
-        rl = Ved.get_cur_rline ();
-        argv = ["substitute", "--dont-ask-when-subst",
-          "--global", "--range=.", "--pat="];
-
-        Rline.set (rl;line = strjoin (argv, " "), argv = argv,
-          col = int (sum (strlen (argv))) + length (argv),
-          ind = length (argv) - 1);
-
-        Rline.readline (rl);
-      }
-
-    return;
   end
 
   def _set_nr_ (s, incrordecr) proc
@@ -1516,8 +1468,7 @@ class Ved
       }
 
     variable isdbl = _slang_guess_type (nr) == Double_Type;
-    variable convf = [&atoi, &atof];
-    convf = convf[isdbl];
+    variable convf = [&atoi, &atof][isdbl];
 
     if ("+" == incrordecr)
       nr = (@convf) (nr) + count;

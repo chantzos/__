@@ -246,7 +246,28 @@ class Rline
       {
       ifnot (NULL == s.funclist)
         if (any (assoc_get_keys (s.funclist) == s.argv[0]))
+          {
           __exec_proc__ (s, s.funclist;;__qualifiers);
+          return;
+          }
+
+      variable is_system_com = 0;
+
+      if ('!' == s.argv[0][0])
+        if (This.is.shell)
+          {
+          s.argv[0] = s.argv[0][[1:]];
+          is_system_com = 1;
+          }
+        else
+          if (strlen (s.argv[0]) > 2 && '!' == s.argv[0][1])
+            {
+            s.argv[0] = s.argv[0][[2:]];
+            is_system_com = 1;
+            }
+
+        if (is_system_com)
+          (@__get_reference ("__system")) ([strjoin (s.argv, " ")]);
 
       return;
       }
@@ -1922,8 +1943,18 @@ class Rline
         if (assoc_key_exists (s.argvlist, s.argv[0]))
           file = s.argvlist[s.argv[0]].dir;
         else
-          if (assoc_key_exists (s.funclist, s.argv[0]))
-            file = s.funclist[s.argv[0]].dir;
+        if (assoc_key_exists (s.funclist, s.argv[0]))
+          file = s.funclist[s.argv[0]].dir;
+        else
+        if ('!' == s.argv[0][0] && This.is.shell)
+          {
+          if (assoc_key_exists (s.argvlist, s.argv[0][[1:]]))
+            file = s.argvlist[s.argv[0][[1:]]].dir;
+          }
+        else
+          if (strlen (s.argv[0]) > 2 && s.argv[0][[:1]] == "!!"
+              && This.is.shell == 0)
+            file = s.argvlist[s.argv[0][[1:]]].dir;
 
         if (NULL == file)
           return 0;
