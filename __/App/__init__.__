@@ -394,10 +394,14 @@ class App
     Api.reset_app ();
 
     _for i (0, length (lines) - 1)
-      () = system (lines[i]);
+      () = system (strtrim_beg (lines[i], "!"));
 
-    IO.tostdout ("press any key to continue");
-    () = Input.getch ();
+    ifnot (qualifier_exists ("return_on_completion"))
+      {
+      IO.tostdout ("press any key to continue");
+      () = Input.getch ();
+      }
+
     IO.tostdout ("");
 
     Api.restore_app ();
