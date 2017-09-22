@@ -114,6 +114,24 @@ class Dir
     ar;
   end
 
+  def are_same (a, b)
+    if (a == b)
+      return Dir.isdirectory (a);
+
+    variable
+      sta = stat_file (a),
+      stb = stat_file (b);
+
+   if (any (NULL == [sta, stb]))
+     return 0;
+
+   if (anynot (array_map (Integer_Type, Dir.__isdirectory, Dir,
+       [a, b], [sta, stb])))
+     return 0;
+
+   sta.st_ino == stb.st_ino && sta.st_dev == stb.st_dev;
+  end
+
   fun walk (dir, dir_callback, file_callback)
   fun list (dir)
   fun move (source, dest, opts)

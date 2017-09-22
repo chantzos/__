@@ -28,6 +28,8 @@ class File
     S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH,         % 0622
     ]);
 
+  let ARCHIVE_EXT = [".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar"];
+
   fun copy (src, dest)
   fun copy_recursive (source, dest)
   fun copy_opts ()

@@ -1358,7 +1358,7 @@ class Ved
   end
 
   def __on_escape__ (s) proc
-    variable rl = Rline.init (NULL;prow = 7, pchar = "");
+    variable rl = Rline.init (NULL;pchar = "");
     Rline.set (rl);
     Rline.prompt (rl, rl._lin, rl._col);
 
@@ -1388,11 +1388,6 @@ class Ved
       {
       case "escape":
         () = __cline__ (s);
-      }
-
-      {
-      case "windmenu":
-        handle_w (s);
       }
 
       {

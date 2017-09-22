@@ -558,8 +558,8 @@ private define starthook (s)
 
             s._col = strlen (s.argv[0]) + 2 + strlen (MED_AUD_DIR[0]);
             s.argv = [s.argv, MED_AUD_DIR[0]];
-            Rline.parse_args (NULL, s);
-            Rline.prompt (NULL, s, s._lin, s._col);
+            Rline.parse_args (s);
+            Rline.prompt (s, s._lin, s._col);
             s._chr = '\t';
             return -1;
             }

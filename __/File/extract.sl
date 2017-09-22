@@ -136,13 +136,13 @@ define extract (self, archive, verbose, dir, strip)
     () = chdir (newdir);
     }
 
-  ifnot (any (type == [".xz", ".bz2", ".zip", ".gz", ".tgz", ".rar"]))
+  ifnot (any (type == File->ARCHIVE_EXT))
     {
     IO.tostderr (sprintf ("%s: Unkown type", type));
     return -1;
     }
 
-  method = methods[where (type == [".xz", ".gz", ".tgz", ".bz2", ".zip", ".rar"])[0]];
+  method = methods[where (type == File->ARCHIVE_EXT)[0]];
   retval = (@method) (archive, verbose, type);
 
   ifnot (saveddir == dir)
