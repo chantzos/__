@@ -246,13 +246,17 @@ public define init_media ()
   loop (1)
   ifnot (NULL == Opt.Arg.exists ("--play", &This.has.argv;del_arg))
     {
+    variable fun = ["videoplay", "audioplay"][
+      NULL == Opt.Arg.exists ("--video", &This.has.argv;del_arg)];
+    variable random = Opt.Arg.exists ("--random", &This.has.argv;del_arg);
     variable files = Opt.Arg.getlong ("from-file", "fname", &This.has.argv;
       del_arg);
 
     variable s = Ved.get_cur_rline ();
     Rline.set (s);
 
-    __eval ("populate_audiodir;", This.is.my.namespace);
+    if ("audioplay" == fun && NULL == files)
+      __eval ("populate_audiodir;", This.is.my.namespace);
 
     ifnot (NULL == files)
        files = File.readlines (files);
@@ -260,8 +264,8 @@ public define init_media ()
       ifnot (strlen (MED_AUD_DIR[0]))
          break;
 
-    s.argv = ["audioplay",
-       NULL == files ? "--ignore" : "--no-random",
+    s.argv = [fun, (NULL == files || NULL != random)
+      ? "--ignore" : "--no-random",
       (NULL == files
         ? MED_AUD_DIR[0]
         : files)];
