@@ -1,5 +1,6 @@
 subclass Search
   __init__
+    state
     word
     run
     last
@@ -10,6 +11,31 @@ subclass Search
   var s_lnr;
   var s_found;
   var s_ltype = NULL;
+  var s_state = NULL;
+
+  def state (?)
+    variable action = ();
+    variable narg = ();
+
+    if ("get" == action)
+      return s_state;
+
+    if ("init" == action || NULL == s_state)
+      s_state = struct {code = 0, code_str};
+
+    if ("set" == action)
+      {
+      s_state.code = narg;
+      pop;
+      }
+
+    s_state.code_str = [
+      "Not yet a value, or nothing found",
+      "accepted result",
+      "aborted with escape, when the found value was: " + string (s_found),
+      "aborted because of the \"abort_on_pat\" qualifier that matched"
+        ][s_state.code];
+  end
 
   def s_exit_rout (s, pat, draw, cur_lang) proc
     ifnot (NULL == cur_lang)
@@ -45,10 +71,10 @@ subclass Search
         s.ptr[1] = s_fcol;
         s._index = s_fcol;
         s._findex = s._indent;
-        s.draw ();
+        s.draw (;dont_draw);
         }
 
-    Smg.setrcdr (s.ptr[0], s.ptr[1]);
+    Smg.setrc (s.ptr[0], s.ptr[1]);
     Smg.send_msg (" ", 0);
     Smg.atrcaddnstr (" ", 0, PROMPTROW, 0, COLUMNS);
 
@@ -223,7 +249,8 @@ subclass Search
       typesearch = type == "forward" ? &s_forward : &s_backward,
       pchr = type == "forward" ? "/" : "?",
       pat = qualifier ("pat",  ""),
-      str = pchr + pat;
+      str = pchr + pat,
+      abort_on_pat = qualifier ("abort_on_pat");
 
     s_found = 0;
     s_lnr = qualifier ("lnr", __vlnr (s, '.'));
@@ -253,6 +280,7 @@ subclass Search
 
       if (033 == chr)
         {
+        Search_state (self, -1, "set");
         s_exit_rout (s, NULL, 0, cur_lang);
         break;
         }
@@ -269,6 +297,14 @@ subclass Search
         s_col++;
         dothesearch = 1;
         }
+
+      ifnot (NULL == abort_on_pat)
+        if (abort_on_pat == pat)
+          {
+          self.state (-2, "set");
+          s_exit_rout (s, NULL, 0, cur_lang);
+          break;
+          }
 
       if (any (chr == Input->rmap.backspace) && strlen (pat))
         if (s_col - 1)
@@ -301,6 +337,7 @@ subclass Search
 
       if ('\r' == chr)
         {
+        self.state (s_found, "set");
         s_exit_rout (s, pat, s_found, cur_lang);
         break;
         }

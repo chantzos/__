@@ -78,8 +78,7 @@ class Ved
   var VED_PROMPTCLR = Smg->COLOR.prompt;
   var VED_PREV_WIND = NULL;
 
-  def __invalid__ () proc
-    pop ();
+  def __invalid__ (s) proc
   end
 
   var public VED_PAGER = Assoc_Type[Ref_Type, &__invalid__];
@@ -553,7 +552,7 @@ class Ved
       return;
 
     ifnot (retval)
-      (@VED_PAGER[string (s._chr)]) (s);
+      (@VED_PAGER[string (s._chr)]) (s;;__qualifiers);
 
     () = (@s.__NOR__["end"][string (s._chr)]) (s);
   end
@@ -597,7 +596,7 @@ class Ved
           }
         }
 
-      s.vedloopcallback ();
+      s.vedloopcallback (;;__qualifiers);
 
       __check_msg__ (get_cur_buf (NULL));
 
@@ -613,7 +612,7 @@ class Ved
   end
 
   def _vedloop_ (s) proc
-    () = _loop_ (s);
+    () = _loop_ (s;;__qualifiers);
     ifnot (s.opt_show_status_line)
       __vunset_status_line_clr (s, 1);
   end
@@ -1635,9 +1634,6 @@ class Ved
   end
 
   def __delete__ (buf, lnrs) proc
-    IO.tostderr (length (where (lnrs)));
-    IO.tostderr (where (lnrs));
-    buf.lines[where (lnrs)] = NULL;
     variable len, nulllines = _isnull (buf.lines);
 
     len = buf._len - length (nulllines);
@@ -1987,7 +1983,7 @@ class Ved
       ifnot (_set_nr_ (s, "//"; abort, count = VEDCOUNT))
         return;
 
-    Ved.Search.run (s);
+    Ved.Search.run (s;;__qualifiers);
   end
 
   def __search_word__ (s) proc
@@ -2095,9 +2091,38 @@ class Ved
     Ved.Pager.page_down (s);
   end
 
+  def __app_detach__ (s) proc
+    App.detach ();
+  end
+
+  def __app_new__ (s) proc
+    if (s._chr == Input->F2)
+      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ());
+    else
+      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ();issu = 1);
+  end
+
+  def __app_rec__ (s) proc
+    (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ());
+  end
+
+  def __child_rec__ (s) proc
+    (@__get_reference ("App->child_reconnect")) (Ved.get_cur_rline ());
+  end
+
+  def __wind_menu__ (s) proc
+    (@__get_reference ("wind_mang")) (Ved.get_cur_rline ());
+  end
+
   beg
-    VED_PAGER[string (Input->rmap.windnext[0])] = &next_wind;
-    VED_PAGER[string (Input->F12)]              = &paste_xsel;
+    VED_PAGER[string (Input->F1)]      = &__app_rec__;
+    VED_PAGER[string (Input->F2)]      = &__app_new__;
+    VED_PAGER[string (Input->F3)]      = &__child_rec__;
+    VED_PAGER[string (Input->F4)]      = &__app_new__;
+    VED_PAGER[string (Input->F5)]      = &__wind_menu__;
+    VED_PAGER[string (Input->F6)]      = &next_wind;
+    VED_PAGER[string (Input->F12)]     = &paste_xsel;
+    VED_PAGER[string (Input->DETACH)]  = &__app_detach__;
     VED_PAGER[string (',')]            = &handle_comma;
     VED_PAGER[string ('"')]            = &__register__;
     VED_PAGER[string (Input->CTRL_a)]  = &_incr_nr_;

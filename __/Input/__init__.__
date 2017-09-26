@@ -62,10 +62,10 @@ class Input
     {
     osapprec    = [F1, 0x1006f], % Esc_p
     osappnew    = [F2, 0x10065], % Esc_f
-    childrec     =[F3],
+    childrec    = [F3],
     osappnew_su = [F4],
     windmenu    = [F5, 0x10076], % Esc_w
-    windnext     =[F6],
+    windnext    = [F6],
     battery     = [F9, 0x10061],  % Esc_b
     changelang  = [F10, 0x1006b], % Esc_l
     home        = [HOME, CTRL_a],
