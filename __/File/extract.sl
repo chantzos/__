@@ -88,6 +88,12 @@ private define func_unzip (archive, verbose, type)
   status.exit_status;
 }
 
+define at_exit (saveddir)
+{
+  ifnot (Dir.are_same (saveddir, getcwd))
+    () = chdir (saveddir);
+}
+
 define extract (self, archive, verbose, dir, strip)
 {
   variable
@@ -97,9 +103,10 @@ define extract (self, archive, verbose, dir, strip)
     type = path_extname (archive),
     methods = [&func_z, &func_z, &func_z, &func_z, &func_unzip, &func_unrar],
     bsname = path_basename_sans_extname (archive),
-    saveddir = getcwd ();
+    saveddir = getcwd (),
+    are_same = Dir.are_same (saveddir, dir);
 
-  ifnot (saveddir == dir)
+  ifnot (are_same)
     if (-1 == chdir (dir))
       {
       IO.tostderr (sprintf ("couldn't change directory to: %s", dir));
@@ -139,14 +146,14 @@ define extract (self, archive, verbose, dir, strip)
   ifnot (any (type == File->ARCHIVE_EXT))
     {
     IO.tostderr (sprintf ("%s: Unkown type", type));
+    at_exit (saveddir);
     return -1;
     }
 
   method = methods[where (type == File->ARCHIVE_EXT)[0]];
   retval = (@method) (archive, verbose, type);
 
-  ifnot (saveddir == dir)
-    () = chdir (saveddir);
+  at_exit (saveddir);
 
   retval;
 }
