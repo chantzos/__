@@ -14,7 +14,6 @@ define main ()
     dir = NULL,
     strip = NULL,
     exit_code = 0,
-    noverbose = NULL,
     c = Opt.Parse.new (&_usage);
 
   c.add ("to-dir", &dir;type = "string");
@@ -34,8 +33,6 @@ define main ()
   files = __argv[[i:]];
   files = files[where (strncmp (files, "--", 2))];
 
-  noverbose = NULL == noverbose ? "1" : "0";
-
   ifnot (NULL == dir)
     _for i (0, length (files) - 1)
       ifnot (path_is_absolute (files[i]))
@@ -43,7 +40,21 @@ define main ()
 
   dir = NULL == dir ? getcwd () : dir;
 
+  variable saveerrfd = dup_fd (fileno (stderr));
+  () = dup2_fd (This.is.std.err.fd, 2);
+
+  if (VERBOSE)
+    {
+    variable saveoutfd = dup_fd (fileno (stdout));
+    () = dup2_fd (This.is.std.out.fd, 1);
+    }
+
   exit_code = array_map (Integer_Type, File.extract, File, files, VERBOSE, dir, strip);
+
+  () = dup2_fd (saveerrfd, 2);
+
+  if (VERBOSE)
+    () = dup2_fd (saveoutfd, 1);
 
   exit_me (any (exit_code));
 }
