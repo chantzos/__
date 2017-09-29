@@ -1634,6 +1634,7 @@ class Ved
   end
 
   def __delete__ (buf, lnrs) proc
+    buf.lines[where (lnrs)] = NULL;
     variable len, nulllines = _isnull (buf.lines);
 
     len = buf._len - length (nulllines);
@@ -2092,26 +2093,32 @@ class Ved
   end
 
   def __app_detach__ (s) proc
-    App.detach ();
+    App.detach (;;__qualifiers);
   end
 
   def __app_new__ (s) proc
     if (s._chr == Input->F2)
-      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ());
+      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ()
+        ;;__qualifiers);
     else
-      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ();issu = 1);
+      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ()
+        ;;struct {@__qualifiers, issu = 1});
   end
 
   def __app_rec__ (s) proc
-    (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ());
+    (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ()
+    ;;__qualifiers);
+
   end
 
   def __child_rec__ (s) proc
-    (@__get_reference ("App->child_reconnect")) (Ved.get_cur_rline ());
+    (@__get_reference ("App->child_reconnect")) (Ved.get_cur_rline ()
+      ;;__qualifiers);
   end
 
   def __wind_menu__ (s) proc
-    (@__get_reference ("wind_mang")) (Ved.get_cur_rline ());
+    (@__get_reference ("wind_mang")) (Ved.get_cur_rline ()
+      ;;__qualifiers);
   end
 
   beg

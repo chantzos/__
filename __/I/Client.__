@@ -53,8 +53,12 @@ subclass Client
 
     Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
+    if (0 == qualifier_exists ("mode") ||
+        0 == (qualifier ("mode") == "Insert"))
+      {
+      Rline.set (s);
+      Rline.prompt (s, s._lin, s._col);
+      }
   end
 
   def appreconnect (s)
@@ -99,8 +103,12 @@ subclass Client
 
     Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
+    if (0 == qualifier_exists ("mode") ||
+        0 == (qualifier ("mode") == "Insert"))
+      {
+      Rline.set (s);
+      Rline.prompt (s, s._lin, s._col);
+      }
   end
 
   def idle ()

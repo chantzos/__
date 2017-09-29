@@ -1122,6 +1122,13 @@ subclass Insert
         ins_char (is, s, line);
         continue;
         }
+
+      if (any (is.chr == [[Input->F1:Input->F6], Input->DETACH]))
+        {
+        (@VED_PAGER[string (is.chr)]) (s;mode = "Insert");
+        Smg.setrcdr (s.ptr[0], s.ptr[1]);
+        continue;
+        }
       }
   end
 
