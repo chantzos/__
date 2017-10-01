@@ -33,7 +33,8 @@ subclass Git
     {
     [EXEC, "init"],
     [EXEC, "status", "-s"],
-    [EXEC, "log", "--pretty=format:commit: %h%ncommiter: %cn %cD%n%n  %B"],
+    [EXEC, "log", "--shortstat",
+      "--pretty=format:commit: %h%ncommiter: %cn %cD%n%n  %B"],
     [EXEC, "diff"],
     [EXEC, "add", "-v"],
     [EXEC, "branch"],

@@ -163,10 +163,10 @@ private define __log__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  variable max_count = Opt.Arg.compare ("--max-count=", &argv);
+  variable max_count = Opt.Arg.getlong ("max-count", "int", &argv);
 
   if (NULL == max_count)
-    argv = [argv[0], "--max-count=10", argv[[1:]]];
+    argv = [argv[0], "--max-count=20", argv[[1:]]];
 
   variable patch = Opt.Arg.exists ("--patch_show", &argv);
   ifnot (NULL == patch)
@@ -176,6 +176,11 @@ private define __log__ (argv)
       Array.delete_at (&argv, patch);
 
   variable args = argv[[1:]];
+
+  patch = any ("-p" == args);
+
+  if (patch)
+    args = [args, "--unified=0"];
 
   ifnot (length (args))
     args = {"--after=" + string (localtime (_time).tm_year + 1900 - 2)};
@@ -187,9 +192,20 @@ private define __log__ (argv)
     variable i, ia = -1,
       ar = File.readlines (SCRATCH);
 
-    _for i (0, length (ar) - 1)
-      ifnot (strncmp (ar[i], "commit: ", 8))
-        (ia++, ar[i] += " [~" + string (ia) + "]");
+    if (0 == patch || (patch && (NULL == max_count || max_count < 200)))
+      if (0 == patch)
+        {
+        _for i (0, length (ar) - 1)
+          ifnot (strncmp (ar[i], "commit: ", 8))
+            (ia++, ar[i] += " [~" + string (ia) + "]");
+        }
+      else
+        for (i = 0; i < length (ar); i++)
+          ifnot (strncmp (ar[i], "commit: ", 8))
+            {
+            (ia++, ar[i] += " [~" + string (ia) + "]");
+            i += 12;
+            }
 
      () = File.write (DIFF, ar);
      viewdiff;
