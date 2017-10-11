@@ -4,6 +4,7 @@ class Os
   var last_request_time = 0;
   var timeout = 30 * 60;
   var cached_passwd = NULL;
+  var max_tries = 3;
 
   def set_passwd_timeout (tim)
     ifnot (Integer_Type == typeof (tim))
@@ -59,7 +60,7 @@ class Os
     auth (user, passwd);
   end
 
-  def __getpasswd ()
+  def __getpasswd__ (self) proc
     if (do_cache)
       ifnot (qualifier_exists ("uncached"))
         ifnot (NULL == cached_passwd)
@@ -109,6 +110,28 @@ class Os
         }
 
     passwd;
+  end
+
+  def __getpasswd ()
+    variable tries = 0;
+    variable passwd = NULL;
+    while (tries < max_tries)
+     {
+     passwd = __getpasswd__ (self);
+     ifnot (NULL == passwd)
+       if (strlen (passwd))
+         break;
+
+     tries++;
+     if (tries < max_tries)
+       {
+       Smg.send_msg_dr ("password is not correct, try for " +
+         string (max_tries - tries) + " more times", 1, NULL, NULL);
+       sleep (1);
+       }
+     }
+
+   passwd;
   end
 
   fun login ()
