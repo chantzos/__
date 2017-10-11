@@ -261,6 +261,118 @@ class Proc
       }
   end
 
+  % adopted for S-Lang, from a stackoverflow post
+  %  (a tee in C implementation)
+  def tee (fname, argv, env)
+    variable pid, pid_output, fd_rd, fd_wr, ifd_rd, ifd_wr,
+      iout = _fileno (stdout);
+
+    (fd_rd, fd_wr) = pipe ();
+
+    ifd_rd = _fileno (fd_rd);
+    ifd_wr = _fileno (fd_wr);
+
+    pid = fork ();
+
+    ifnot (pid)
+      {
+      () = dup2_fd (fd_wr, iout);
+      () = _close (ifd_rd);
+      () = _close (ifd_wr);
+
+      if (NULL == env)
+        if (-1 == execv (argv[0], argv))
+          {
+          IO.tostderr ("error calling execv: ", errno_string (errno));
+          _exit (1);
+          }
+        else
+          {}
+      else
+        if (-1 == execve (argv[0], argv, env))
+          {
+          IO.tostderr ("error calling execve: ", errno_string (errno));
+          _exit (1);
+          }
+      }
+
+    () = _close (ifd_wr);
+
+    variable flags = qualifier ("flags");
+    if (NULL == flags)
+      flags = ">";
+
+    flags = File->FLAGS[flags];
+
+    variable mode = qualifier ("mode");
+    if (NULL == mode)
+      if (flags & O_CREAT)
+        mode = File->PERM["_PRIVATE"];
+      else
+        mode = 0;
+
+    variable nread, buf, logfd, total_wr_bts, wr_bts;
+
+    pid_output = fork ();
+
+    ifnot (pid_output)
+      {
+      logfd = open (fname, flags, mode);
+
+      while (0 != (nread = read (fd_rd, &buf, 1024), nread))
+        {
+        if (nread < 0)
+          {
+          if (errno == EINTR)
+            continue;
+
+          IO.tostderr ("error reading from pipe,", errno_string (errno));
+          _exit (1);
+          }
+
+        total_wr_bts = 0;
+        while (total_wr_bts < nread)
+          {
+          wr_bts = write (fileno (stdout), substr (buf, total_wr_bts + 1, -1));
+
+          if (wr_bts < 0)
+            {
+            if (errno == EINTR)
+              continue;
+
+            IO.tostderr ("error writting to stdout,", errno_string (errno));
+            _exit (1);
+            }
+
+          total_wr_bts += wr_bts;
+          }
+
+          total_wr_bts = 0;
+          while (total_wr_bts < nread)
+            {
+            wr_bts = write (logfd, substr (buf, total_wr_bts + 1, -1));
+
+            if (wr_bts < 0)
+              {
+              if (errno == EINTR)
+                continue;
+
+              IO.tostderr ("error writting to " + fname + ",", errno_string (errno));
+              _exit (1);
+              }
+
+           total_wr_bts += wr_bts;
+           }
+         }
+
+       _exit (0);
+       }
+
+     () = _close (ifd_rd);
+     () = waitpid (pid_output, 0);
+     waitpid (pid, 0);
+  end
+
   def __wait__ (s) proc
     waitpid (s.pid, 0);
     s.atexit ();
