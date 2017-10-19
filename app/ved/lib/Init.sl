@@ -582,7 +582,7 @@ private define ved_err_handler (t, _s_)
     IO.tostderr ("Else it would be set in the clipboard if available");
     variable chr = Input.getch ();
     if ('\r' == chr)
-      App.Run.as.child (["__ved", This.is.std.err.fn]);
+      __editor (This.is.std.err.fn);
     else
       seltoX ("ved " + This.is.std.err.fn);
 

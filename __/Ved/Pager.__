@@ -37,7 +37,7 @@ subclass Pager
     if (Dir.isdirectory (fname))
       return;
 
-    App.Run.as.child (["__ved", fname]);
+    (@__get_reference ("__editor")) (fname);
   end
 
   def word_change_case (s, what)

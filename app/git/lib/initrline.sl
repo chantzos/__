@@ -232,7 +232,7 @@ private define __commitall__ (argv)
     return;
     }
 
-  () = App.Run.as.child (["__ved", "--force", "--ftype=diff", SCRATCH]);
+  __editor ("--force", "--ftype=diff", SCRATCH);
 
   variable lines = File.readlines (SCRATCH);
 
@@ -309,7 +309,7 @@ private define __commit__ (argv)
     return;
     }
 
-  () = App.Run.as.child (["__ved", "--force", "--ftype=diff", SCRATCH]);
+  __editor ("--force", "--ftype=diff", SCRATCH);
 
   variable lines = File.readlines (SCRATCH);
 

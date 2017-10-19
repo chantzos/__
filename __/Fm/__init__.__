@@ -24,7 +24,7 @@ class Fm
   end
 
   def __edit_tagged__ (this) proc
-    App.Run.as.child (["__ved", this.tagged]);
+    __editor (this.tagged);
   end
 
   def __open_image__ (img) proc
@@ -221,7 +221,7 @@ class Fm
     if ("reg" == type)
       {
       if (File.Is.unix (line))
-        App.Run.as.child (["__ved", line]);
+        __editor (line);
       else
         {
         variable ext = path_extname (line);
@@ -238,14 +238,14 @@ class Fm
             __open_pdf__ (line);
           else
             if (File.Is.dos (line))
-              App.Run.as.child (["__ved", line]);
+              __editor (line);
         %   __system (["mplayer -fs -utf8 \"" + line + "\""]);
         }
       }
     else
     if ("lnk" == type && (NULL != (line = readlink (line), line) &&
         (File.Is.unix (line) || File.Is.dos (line))))
-      App.Run.as.child (["__ved", line]);
+      __editor (line);
 
     return -1;
   end

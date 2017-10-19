@@ -426,8 +426,7 @@ private variable __TRACK__ = function (`
   variable tracked = File.exists (__SRC_TRACK_DIR__ + "/" +
     __SRC_TRACK_FILE__);
 
-  App.Run.as.child (["__ved", __SRC_TRACK_DIR__ + "/" +
-    __SRC_TRACK_FILE__]);
+  __editor (__SRC_TRACK_DIR__ + "/" + __SRC_TRACK_FILE__);
 
   loop (1)
   ifnot (tracked)
@@ -483,7 +482,7 @@ private define __search__ (argv)
   Com.Fork.tofg (p, argv, env);
 
   ifnot (EXITSTATUS)
-    App.Run.as.child (["__ved", GREPFILE]);
+    __editor (GREPFILE);
 
   Com.post_header ();
   __draw_buf (Ved.get_cur_buf ());
@@ -575,7 +574,7 @@ private define __ved__ (argv)
 
   Com.pre_header ("ved " + fname);
 
-  App.Run.as.child (["__ved", fname];;__qualifiers ());
+  __editor (fname;;__qualifiers ());
 
   Com.post_header ();
 
@@ -615,7 +614,7 @@ private define __help (argv)
   ifnot (NULL == Opt.Arg.exists ("--edit", &argv))
     {
     variable f = Me.get_src_path (k.dir) + "/help.txt";
-    App.Run.as.child (["__ved", f]);
+    __editor (f);
     return;
     }
 
@@ -632,7 +631,7 @@ private define __info (argv)
   ifnot (NULL == Opt.Arg.exists ("--edit", &argv))
     {
     variable f = I.get_src_path (k.dir) + "/desc.txt";
-    App.Run.as.child (["__ved", f]);
+    __editor (f);
     return;
     }
 
@@ -652,7 +651,7 @@ private define __edit_history (argv)
   if (length (rl.history))
     Rline.writehistory (rl.history, rl.histfile);
 
-  App.Run.as.child (["__ved", rl.histfile]);
+  __editor (rl.histfile);
 
   rl.history = Rline.readhistory (rl.histfile);
 }
@@ -807,7 +806,7 @@ private define __builtins__ (a)
       `).__funcref;
     }
 
-  if (This.request.net)
+  if (This.request.net) % development
     {
     a["__net"] = @Argvlist_Type;
     a["__net"].func = function (`

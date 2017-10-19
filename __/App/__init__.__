@@ -406,4 +406,9 @@ class App
 
     Api.restore_app ();
   end
+
+  def __editor () public proc
+    variable files = __pop_list (_NARGS);
+    App.Run.as.child (["__ved", __push_list (files)];;__qualifiers);
+  end
 end
