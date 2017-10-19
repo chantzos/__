@@ -1,0 +1,604 @@
+class Fm
+  var tagged_funcs = [
+    "remove", "media_player", "edit", "extract_here", "extract_to"];
+
+  var video_ext = [".avi", ".mp4", ".mkv", ".webm", ".flv", ".mpeg", ".mov"];
+  var audio_ext = [".ogg", ".mp3"];
+  var image_ext = [".jpeg", ".jpg", ".gif", ".tiff", ".png"];
+
+  def __get_file__ (line, pref) proc
+    line = strtok (line);
+    if (line[0] == pref)
+      line = line[[1:]];
+
+    strjoin (line[[1:]], " ");
+
+    switch (line[0][0])
+      {case 'd': "dir";}
+      {case '-': "reg";}
+      {case 'l': line = (), strtrim (strtok (line, "->")[0]), "lnk";}
+      {case 'c': "chr";}
+      {case 'p': "fifo";}
+      {case 's': "sock";}
+      {case 'b': "blk";}
+  end
+
+  def __edit_tagged__ (this) proc
+    App.Run.as.child (["__ved", this.tagged]);
+  end
+
+  def __open_image__ (img) proc
+    variable exec = Sys.which ("feh");
+    if (NULL == exec)
+      return;
+
+    __system ([exec + " \"" + img + "\""]);
+  end
+
+  def __open_pdf__ (pdf) proc
+    variable exec = Sys.which ("apvlv");
+    if (NULL == exec)
+      return;
+
+    __system ([exec + " \"" + pdf + "\""]);
+  end
+
+  def __play_media__ (this) proc
+    variable fn = File.mktmp (This.is.my.tmpdir, "playlist");
+    if (-1 == File.write (fn.file, qualifier ("medialist", this.tagged)))
+      return;
+
+    variable medt = qualifier ("media_type", "audio");
+    variable random = qualifier ("random", "no-random");
+
+    App.Run.as.child (["__media", "--play", "--" + medt,
+      "--" + random, "--from-file=" + fn.file]);
+  end
+
+  def __remove_tagged__ (this) proc
+    variable i, retval, inter = 0;
+
+    _for i (0, length (this.tagged) - 1)
+      {
+      retval = 'y';
+      ifnot (inter)
+        retval = IO.ask (["remove " + this.tagged[i],
+           "y[es]/n[o]/a[ll]"], ['y', 'n', 'a']);
+
+      switch (retval)
+        {
+        case 'y' || case 'a':
+
+        if ('a' == retval)
+          inter = 0;
+
+        if (Dir.isdirectory (this.tagged[i]))
+          {
+          __runcom (["rm", "--recursive", this.tagged[i]], NULL);
+          continue;
+          }
+
+        if (-1 == remove (this.tagged[i]))
+          {
+          Smg.send_msg_dr ("failed to remove " + this.tagged[i], 1,
+            this.buf.ptr[0], this.buf.ptr[1]);
+          continue;
+          }
+
+        Smg.send_msg_dr ("removed " + this.tagged[i], 0, this.buf.ptr[0],
+          this.buf.ptr[1]);
+        continue;
+        }
+
+        {
+        case 'n':
+        Smg.send_msg_dr (this.tagged[i] + " aborted ...", 0, this.buf.ptr[0],
+          this.buf.ptr[1]);
+        continue;
+        }
+      }
+  end
+
+  def __extract_file__ (file, buf, dir) proc
+    Smg.send_msg_dr ("extracting " + file + " ...", 0, buf.ptr[0],
+      buf.ptr[1]);
+
+    if (-1 == File.extract (file, 0, dir, NULL))
+      Smg.send_msg_dr ("failed to extract " + file, 1, buf.ptr[0],
+        buf.ptr[1]);
+  end
+
+  def __extract_tagged__ (this, dir) proc
+    variable i;
+    _for i (0, length (this.tagged) - 1)
+      __extract_file__ (this.tagged[i], this.buf, dir);
+  end
+
+  def __on_tagged_key__ (s) proc
+    variable this = s.__VAR__["this"];
+    variable taglen = length (this.tagged);
+
+    ifnot (taglen)
+      return;
+
+    variable rl = Rline.init (NULL;pchar = "");
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
+
+    () = Rline.commandcmp (rl, tagged_funcs;already_filtered,
+      help = [
+        "   remove tagged files",
+        "   play tagged files with the media player",
+        "   edit tagged files with ved",
+        "   extract archive" + ["", "s"][1 < taglen] + " in this directory",
+        "   extract archive" + ["", "s"][1 < taglen] + " to ..."]);
+
+    ifnot (strlen (rl.argv[0]))
+      {
+      s.draw ();
+      return -1;
+      }
+
+    Rline.prompt (rl, "", 0);
+
+    switch (rl.argv[0])
+      {
+      case "remove":
+        __remove_tagged__ (this);
+      }
+
+      {
+      case "media_player":
+        __play_media__ (this);
+      }
+
+      {
+      case "edit":
+        __edit_tagged__ (this);
+      }
+
+      {
+      case "extract_here":
+        __extract_tagged__ (this, this.dir);
+      }
+
+      {
+      case "extract_to":
+        variable dir = "/", r;
+        Rline.set (rl;col = 0, row = PROMPTROW - 1);
+        r = Rline.fnamecmpToprow (rl, &dir;
+        header = "extract archive" + ["", "s"][taglen > 1]  +
+          " to directory", only_dirs);
+
+        variable len = strlen (dir);
+        if (033 == r || 0 == len)
+          return;
+
+        __extract_tagged__ (this, dir);
+        }
+
+    this.tagged = String_Type[0];
+    this.exec (this.dir);
+  end
+
+  def __on_n__ (s) proc
+    variable this = s.__VAR__["this"];
+
+    if (this.prev.in_stack.idx >= length (this.prev.in_stack.dirs) - 2)
+      return -1;
+
+    variable dir = (this.prev.in_stack.idx++,
+      this.prev.in_stack.dirs[this.prev.in_stack.idx]);
+
+    this.exec (dir;do_not_insert_in_stack);
+    return -1;
+  end
+
+  def __on_b__ (s) proc
+    variable this = s.__VAR__["this"];
+
+    if (2 > length (this.prev.in_stack.dirs))
+      return -1;
+
+    ifnot (this.prev.in_stack.idx)
+      return -1;
+
+    variable dir = (this.prev.in_stack.idx--,
+      this.prev.in_stack.dirs[this.prev.in_stack.idx]);
+
+    this.exec (dir;do_not_insert_in_stack);
+    return -1;
+  end
+
+  def __on_carriage_return__ (s) proc
+    variable this = s.__VAR__["this"];
+    variable line, type = __get_file__ (__vline (s, '.'), this.pref);
+    line = ();
+
+    if ("dir" == type)
+       this.exec (line);
+    else
+    if ("reg" == type)
+      {
+      if (File.Is.unix (line))
+        App.Run.as.child (["__ved", line]);
+      else
+        {
+        variable ext = path_extname (line);
+        if (any (ext == video_ext))
+          __play_media__ (this;media_type = "video", medialist = [line]);
+        else
+          if (any (ext == audio_ext))
+            __play_media__ (this;media_type = "audio", medialist = [line]);
+          else
+          if (any (ext == image_ext))
+            __open_image__ (line);
+          else
+          if (ext == ".pdf")
+            __open_pdf__ (line);
+          else
+            if (File.Is.dos (line))
+              App.Run.as.child (["__ved", line]);
+        %   __system (["mplayer -fs -utf8 \"" + line + "\""]);
+        }
+      }
+    else
+    if ("lnk" == type && (NULL != (line = readlink (line), line) &&
+        (File.Is.unix (line) || File.Is.dos (line))))
+      App.Run.as.child (["__ved", line]);
+
+    return -1;
+  end
+
+  def __on_space_beg__ (s) proc
+    variable this = s.__VAR__["this"];
+    variable line, type = __get_file__ (__vline (s, '.'), this.pref);
+    line = ();
+    line = path_concat (this.dir, line);
+    variable idx = wherefirst (line == this.tagged);
+
+    variable lnr = __vlnr (s, '.');
+
+    ifnot (NULL == idx)
+      {
+      this.tagged[idx] = NULL;
+      this.tagged = this.tagged[wherenot (_isnull (this.tagged))];
+
+      s.lines[lnr] = "  " + substr (s.lines[lnr], 3, -1);
+      s.draw ();
+      return -1;
+      }
+
+    this.tagged = [this.tagged, line];
+
+    s.lines[lnr] = " " + this.pref  + substr (s.lines[lnr], 3, -1);
+    this.chr = ' ';
+    s._chr = 'j';
+    0;
+  end
+
+  def __on_space_end__ (s) proc
+    variable this = s.__VAR__["this"];
+    if (NULL == this.chr || 0 == (this.chr == ' '))
+      return 0;
+
+    this.chr = NULL;
+    s.draw ();
+    0;
+  end
+
+  def __on_left_arrow__ (s) proc
+    variable this = s.__VAR__["this"];
+    if (NULL == this.prev.in_path.dir)
+      return -1;
+
+    this.exec (this.prev.in_path.dir);
+
+    -1;
+  end
+
+  def __on_tilda__ (s) proc
+    variable this = s.__VAR__["this"];
+
+    this.exec ("$HOME"$);
+    -1;
+  end
+
+  def __on_bslash__ (s) proc
+    variable state = Ved.Search.state ("get");
+    IO.tostderr (state.code);
+    ifnot (-2 == state.code)
+      return -1;
+
+    variable this = s.__VAR__["this"];
+    this.exec ("//");
+    -1;
+  end
+
+  def __init_buf__ () proc
+    variable s =  qualifier ("mktmp", File.mktmp (This.is.my.tmpdir, "fm"));
+    variable buf = Ved.init_ftype (NULL);
+    buf._fd = s.fd;
+    buf.set (s.file, VED_ROWS, NULL;show_tilda = 0,
+      show_status_line = 0, _autochdir = 0);
+
+    buf.__NOR__["beg"][string ('~')] = &__on_tilda__;
+    buf.__NOR__["beg"][string ('n')] = &__on_n__;
+    buf.__NOR__["beg"][string ('b')] = &__on_b__;
+    buf.__NOR__["beg"][string (Input->LEFT)] = &__on_left_arrow__;
+    buf.__NOR__["beg"][string ('\r')] = &__on_carriage_return__;
+    buf.__NOR__["beg"][string (' ')] = &__on_space_beg__;
+    buf.__NOR__["end"][string ('j')] = &__on_space_end__;
+    buf.__NOR__["end"][string (Input->BSLASH)] = &__on_bslash__;
+
+    buf;
+  end
+
+  def __sort_func__ (st, sort) proc
+    switch (sort)
+      {case "name" : return NULL;}
+      {case "size" : return st.st_size;}
+      {case "mtime": return st.st_mtime;}
+      {case "ctime": return st.st_ctime;}
+      {case "atime": return st.st_atime;}
+      {NULL;}
+  end
+
+  def __build_list__ (self, sort) proc
+    variable
+      i,
+      st,
+      str,
+
+    fl = listdir (self.dir);
+
+    variable list = [
+      stat_mode_to_string (self.st.st_mode) + " " + self.dir + (
+        self.dir == "/" ? "" : "/") + (["+", "-"][NULL == wherefirst
+        (self.dir + "/" == self.tagged)])
+      ];
+
+    ifnot (NULL == self.prev.in_path.dir)
+      list = [list,
+      stat_mode_to_string (self.prev.in_path.st.st_mode) + " ../"];
+
+    if (NULL == fl || 0 == length (fl))
+      return list;
+
+    variable
+      type = funcall (sort,
+        `  (sort)
+          switch (sort)
+            {case "name": return Null_Type;}
+            {case "size": return ULLong_Type;}
+            {return UInteger_Type;}
+        `),
+      dirs  = Assoc_Type[type],
+      links = Assoc_Type[type],
+      files = Assoc_Type[type],
+      fifos = Assoc_Type[type],
+      chrs  = Assoc_Type[type],
+      socks = Assoc_Type[type],
+      blks  = Assoc_Type[type];
+
+    fl = fl[wherenot ("." == fl)];
+
+    variable tag;
+
+    _for i (0, length (fl) - 1)
+      {
+      st = lstat_file (fl[i]);
+      if (NULL == st)
+        {
+        IO.tostderr (fl[i], errno_string (errno));
+        continue;
+        }
+
+      str = stat_mode_to_string (st.st_mode);
+
+      tag = ["-", "+"][
+        (NULL != wherefirst (path_concat (self.dir, fl[i] + ["", "/"]
+        ['d' == str[0]]) == self.tagged))];
+
+      switch (str[0])
+        {case '-': files[str + "  " + fl[i] + tag] = __sort_func__ (st, sort);}
+        {case 'd': dirs[str + "  " + fl[i] + "/" + tag] = __sort_func__ (st, sort);}
+        {case 'l': variable lnk = readlink (fl[i]);
+          links[str + "  " + fl[i] + " -> " + lnk + tag] = __sort_func__ (st, sort);}
+        {case 'c': chrs[str + "  " + fl[i] + tag]  = __sort_func__ (st, sort);}
+        {case 's': socks[str + "  " + fl[i] + tag] = __sort_func__ (st, sort);}
+        {case 'p': fifos[str + "  " + fl[i] + tag] = __sort_func__ (st, sort);}
+        {case 'b': blks[str + "  " + fl[i] + tag] = __sort_func__ (st, sort);}
+      }
+
+    if ("name" == sort)
+      {
+      list = [list,
+        (dirs  = assoc_get_keys (dirs),  dirs[array_sort (dirs)]),
+        (files = assoc_get_keys (files), files[array_sort (files)]),
+        (links = assoc_get_keys (links), links[array_sort (links)]),
+        (chrs  = assoc_get_keys (chrs),  chrs[array_sort (chrs)]),
+        (fifos = assoc_get_keys (fifos), fifos[array_sort (fifos)]),
+        (socks = assoc_get_keys (socks), socks[array_sort (socks)]),
+        (blks  = assoc_get_keys (blks),  blks[array_sort (blks)]),
+      ];
+      }
+    else
+      {
+      list = [list,
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))],
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))],
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))],
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))],
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))],
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))],
+        assoc_get_keys (dirs)[array_sort (assoc_get_values (dirs))]
+      ];
+      }
+
+    variable len = strlen (list);
+    _for i (0, length (list) - 1)
+      list[i] = ["   ", " * "][list[i][-1] == '+'] +
+        substr (list[i], 1, len[i] - 1);
+
+    list;
+  end
+
+  def __at_exit__ (self) proc
+    ifnot (NULL == self.oldpwd)
+      {
+      () = chdir (self.oldpwd);
+      self.oldpwd = NULL;
+      }
+
+    ifnot (NULL == self.cur_opts.vedisonlypager)
+      VED_ISONLYPAGER = self.cur_opts.vedisonlypager;
+
+    variable buf;
+    ifnot (NULL == self.cur_opts.buf)
+      {
+      buf = self.cur_opts.buf;
+
+      Ved.setbuf (buf._abspath);
+      }
+
+    topline ("(" + This.is.my.name + ")");
+    Ved.draw_wind ();
+  end
+
+  def __exec__ (self, dir) proc
+    dir = funcall (dir,
+      `  (dir)
+        if (any ([".", "./"] == dir))
+          getcwd;
+        else
+        ifnot (path_is_absolute (dir))
+          getcwd + dir;
+        else
+          dir;
+      `);
+
+    if (-1 == access (dir, F_OK|R_OK))
+      {
+      self.err (dir + ": cannot access, " + errno_string (errno));
+      return -1;
+      }
+
+    variable st = stat_file (dir);
+
+    ifnot (Dir.__isdirectory (dir, st))
+      {
+      self.err (dir + ": not a directory");
+      return -1;
+      }
+
+    if (-1 == chdir (dir))
+      {
+      self.err (dir + ": cannot change directory, " + errno_string (errno));
+      return -1;
+      }
+
+    self.dir = realpath (dir); % assuming safety
+    self.st = st;
+
+    ifnot (qualifier_exists ("do_not_insert_in_stack"))
+      if (-1 == self.prev.in_stack.idx ||
+          0 == (self.prev.in_stack.dirs[self.prev.in_stack.idx] == self.dir))
+        {
+        self.prev.in_stack.idx++;
+        list_insert (self.prev.in_stack.dirs, self.dir,
+                     self.prev.in_stack.idx);
+        }
+
+    if (NULL == self.oldpwd)
+      self.oldpwd = getcwd;
+
+    ifnot ("/" == self.dir)
+      {
+      self.prev.in_path.dir = path_dirname (self.dir);
+      self.prev.in_path.st  = stat_file (self.prev.in_path.dir);
+      }
+    else
+      self.prev.in_path.dir = NULL;
+
+    variable sort_by = qualifier ("sort_by", "name");
+
+    if (NULL == self.cur_opts.vedisonlypager)
+      self.cur_opts.vedisonlypager = VED_ISONLYPAGER;
+
+    if (NULL == self.cur_opts.buf)
+      self.cur_opts.buf = @Ved.get_cur_buf ();
+
+    VED_ISONLYPAGER = 1;
+
+    self.buf.lines = self.build_list (sort_by);
+    self.buf._len = length (self.buf.lines) - 1;
+    self.buf._i = 0;
+    self.buf.ptr[0] = 2 + (self.buf._len > 1
+      ? NULL != self.prev.in_path.dir
+      : 0);
+
+    Ved.setbuf (self.buf._abspath);
+
+    self.buf.draw (;dont_draw);
+    Ved.preloop (self.buf);
+
+    toplinedr ("(fm)";row = self.buf.ptr[0], col = 0);
+    self.buf.vedloop (;abort_on_pat = "/");
+
+    self.at_exit ();
+    0;
+  end
+
+  def my_err () proc
+    variable args = __pop_list (_NARGS - 1);
+    if (length (args))
+      {
+      IO.tostderr (args[0]);
+      Smg.send_msg (args[0], 1);
+      }
+
+    variable this = ();
+    this.at_exit ();
+  end
+
+  def init ()
+    variable s = struct
+      {
+      buf = __init_buf__,
+      exec = &__exec__,
+      build_list = &__build_list__,
+      at_exit = &__at_exit__,
+      err = &my_err,
+      error = self.err,
+      pref = "*",
+      chr,
+      dir,
+      st,
+      tagged = String_Type[0],
+      prev = struct
+        {
+        in_path = struct
+          {
+          dir,
+          st,
+          },
+        in_stack = struct
+          {
+          idx = -1,
+          dirs = {},
+          },
+        },
+      oldpwd,
+      cur_opts = struct
+        {
+        buf,
+        vedisonlypager,
+        }
+     };
+
+    VED_PAGER[string (';')] = &__on_tagged_key__;
+    s.buf.__VAR__["this"] = s;
+    s;
+  end
+end
