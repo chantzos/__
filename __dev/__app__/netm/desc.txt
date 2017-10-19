@@ -1,0 +1,7 @@
+DESCRIPTION: A network managment application
+VERSION    : 0.1
+AUTHOR     : Agathoklis D. Chatzimanikas
+MAINTAINER : Agathoklis D. Chatzimanikas
+EMAIL      : aga dot chatzimanikas at gmail dot com
+URL        :
+LICENSE    : GPL2

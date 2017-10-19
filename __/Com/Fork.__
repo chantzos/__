@@ -168,10 +168,11 @@ subclass Fork
 
     variable err = File.read (This.is.std.err.fd;offset = ERR_VED.st_.st_size);
 
-    if (strlen (err))
-      if (This.is.shell)
-        IO.tostdout (strtrim_end (err));
-      else
-        __toscratch  (err);
+    ifnot (NULL == err)
+      if (strlen ((err = strtrim_end (err), err)))
+        if (This.is.shell)
+          IO.tostdout (strtrim_end (err));
+        else
+          __toscratch  (err);
   end
 end

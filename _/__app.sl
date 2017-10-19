@@ -255,13 +255,19 @@ private define draw_wind (argv)
 
 private define __clear__ (argv)
 {
-  variable fn = SCRATCH;
-  if (Opt.Arg.exists ("--stdout", &argv))
-    fn = This.is.std.out.fn;
-  else if (Opt.Arg.exists ("--stderr", &argv))
-    fn = This.is.std.err.fn;
+  variable
+    clearstdout = Opt.Arg.exists ("--stdout", &argv),
+    fn = (clearstdout
+      ? This.is.std.out.fn
+      : Opt.Arg.exists ("--stderr", &argv)
+        ? This.is.std.err.fn
+        : SCRATCH);
 
   () = File.write (fn, "\000");
+
+  if (clearstdout)
+    if ("shell" == This.is.my.name)
+      __draw_buf (Ved.get_cur_buf ());
 }
 
 private define __echo__ (argv)

@@ -1,0 +1,354 @@
+method (`
+  variable check_os_table = fun (``
+    variable p = Sys.Proc.search (" ((/usr)?/bin/)?wpa_supplicant .*");
+
+    if (length (p.pid))
+      {
+      IO.tostdout ("Running Instance" +
+        ["s", ""][1 == length (p.pid)]);
+      IO.tostdout (p.com);
+      __draw_buf (OUT_VED);
+
+      if (qualifier_exists ("killother"))
+        {
+        variable i, retval = IO.ask (["kill " + string (p.pid[0]) + " ? [y/n]"],
+          ['y', 'n']);
+        if ('y' == retval)
+          {
+          _for i (0, length (p.pid) - 1)
+            if (-1 == Sys.Signal.send (p.pid[0], SIGKILL;
+               passwd = Os.__getpasswd ()))
+              return 1;
+
+           return 0;
+         }
+        }
+
+      return 1;
+      }
+
+    0;
+  ``;ns = current_namespace ()).__funcref;
+
+  variable l = listdir (MY.runpath);
+  ifnot (length (l))
+    return (@check_os_table) (;;__qualifiers);
+
+  variable inter = NULL;
+  variable i, pid;
+  _for i (0, length (l) - 1)
+    {
+    pid = atoi (l[i]);
+    if (Sys.Pid.exists (pid))
+      return 1;
+
+    if (-1 == File.remove (MY.runpath + "/" + l[i], &inter, 0))
+      return -1;
+    }
+
+  (@check_os_table) (;;__qualifiers);
+`;as = "isrunning");
+
+method (`
+  envbeg private variable rl; envend
+  (argv)
+  rl = @MY.Rline;
+  rl.argv = argv;
+  rl.execline (;;__qualifiers);
+`;as = "exec");
+
+public variable NetCommands = fun (`
+  variable a = init_commands ();
+
+  a["setup_conf"] = @Argvlist_Type;
+  a["setup_conf"].func = fun (``
+    envbeg private variable msg, conf; envend
+    (argv)
+    if (1 == length (argv))
+      conf = MY.conf;
+    else
+      conf = argv[1];
+
+    if (-1 == access (conf, F_OK|R_OK))
+      msg = "MsgErr:", conf + " :", errno_string (errno);
+    else
+      {
+      if (-1 == Net.wifi.set_conf (conf))
+        msg = "MsgErr: " + Net.wifi.err ();
+      else
+        msg = "MsgOk: " + conf + ": setup configuration file";
+
+      MY.conf = conf;
+      }
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["is_wpa_running"] = @Argvlist_Type;
+  a["is_wpa_running"].func = fun (``
+    envbeg variable retval = 0; envend
+    (argv)
+    retval = NetRl.isrunning ();
+
+    if (retval)
+      IO.tostdout ("wpa_supplicant is running");
+    else
+      IO.tostdout ("wpa_supplicant is not running");
+
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["bring_up"] = @Argvlist_Type;
+  a["bring_up"].func = fun (``
+    envbeg variable retval, msg; envend
+    retval = Net.wifi.bring_up (;passwd = Os.__getpasswd ());
+
+    if (-1 == retval)
+      msg = Net.wifi.err ();
+    else
+      msg = "Network is up";
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["bring_down"] = @Argvlist_Type;
+  a["bring_down"].func = fun (``
+    envbeg variable retval, msg; envend
+    retval = Net.wifi.bring_down (;passwd = Os.__getpasswd ());
+
+    if (-1 == retval)
+      msg = Net.wifi.err ();
+    else
+      msg = "Network is down";
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["start_wpa"] = @Argvlist_Type;
+  a["start_wpa"].func = fun (``
+    envbeg variable retval = 0, msg; envend
+    ifnot (NULL == MY.pidfile)
+      {
+      IO.tostdout ("wpa_supplicant is already running");
+      __draw_buf (OUT_VED);
+      return;
+      }
+
+    if (NetRl.isrunning (;killother))
+      {
+      IO.tostdout ("Another instance of wpa_supplicant is running");
+      __draw_buf (OUT_VED);
+      return;
+      }
+
+    variable qualif = struct {stdout = This.is.std.out.fn,
+      stderr = This.is.std.out.fn, passwd = Os.__getpasswd ()};
+
+    NetRl.exec (["bring_up"]);
+    NetRl.exec (["setup_conf"]);
+
+    retval = Net.wifi.start_server (;;qualif);
+
+    if (-1 == retval)
+      IO.tostdout ("Error: " + Net.wifi.err ());
+    else
+      {
+      sleep (1);
+      () = NetRl.isrunning ();
+      IO.tostdout ("wpa_supplicant is running");
+      MY.pidfile = MY.runpath + "/" + string (retval);
+      () = File.write (MY.pidfile, "\\0");
+      NetRl.exec (["scan_interval"]);
+      }
+
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["connect"] = @Argvlist_Type;
+  a["connect"].func = fun (``
+    NetRl.exec (["start_wpa"]);
+    Smg.send_msg_dr ("Trying to get ip", 0, NULL, NULL);
+    NetRl.exec (["get_ip"]);
+  ``).__funcref;
+
+  a["scan"] = @Argvlist_Type;
+  a["scan"].func = fun (``
+    envbeg variable retval, msg; envend
+    retval = Net.wifi.scan ();
+    if (NULL == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      msg = IO.fmt ({retval});
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["parse_wpa_scan"] = @Argvlist_Type;
+  a["parse_wpa_scan"].func = fun (``
+    envbeg variable retval, msg; envend
+    retval = Net.wifi.scan ();
+    if (NULL == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      {
+      retval = Net.wifi.parse_wpa_scan (retval);
+      msg = retval;
+      }
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["scan_iw"] = @Argvlist_Type;
+  a["scan_iw"].func = fun (``
+    envbeg variable retval, msg; envend
+    (argv)
+    retval = Net.wifi.scan_iw (;passwd = Os.__getpasswd ());
+
+    if (NULL == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      msg = IO.fmt ({retval});
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["parse_iw_scan"] = @Argvlist_Type;
+  a["parse_iw_scan"].func = fun (``
+    envbeg variable retval, msg; envend
+    (argv)
+    retval = Net.wifi.scan_iw (;passwd = Os.__getpasswd ());
+
+    if (NULL == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      {
+      retval = Net.wifi.parse_iw_scan (retval);
+      msg = retval;
+      }
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["terminate"] = @Argvlist_Type;
+  a["terminate"].func = fun (``
+    envbeg variable retval, msg; envend
+    if (NULL == MY.pidfile)
+      return;
+
+    retval = Net.wifi.terminate ();
+
+    if (-1 == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      {
+      msg = "exit status: " + string (retval);
+      () = remove (MY.pidfile);
+      MY.pidfile = NULL;
+      NetRl.exec (["bring_down"]);
+      }
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["is_up"] = @Argvlist_Type;
+  a["is_up"].func = fun (``
+    envbeg variable retval = 0, msg; envend
+    (argv)
+    retval = Net.wifi.is_up ();
+    msg = ["Network is down", "Network is up"];
+
+    if (-1 == retval)
+      msg = Net.wifi.err ();
+    else
+      msg = msg[retval];
+
+    IO.tostdout (msg);
+
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["reconfigure"] = @Argvlist_Type;
+  a["reconfigure"].func = fun (``
+    envbeg variable retval = 0, msg; envend
+    (argv)
+    retval = Net.wifi.reconfigure ();
+    if (NULL == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      msg = "reconfigured";
+
+    IO.tostdout (msg);
+
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["list_networks"] = @Argvlist_Type;
+  a["list_networks"].func = fun (``
+    envbeg variable retval = 0, msg; envend
+    (argv)
+    retval = Net.wifi.list_networks ();
+    if (NULL == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      msg = IO.fmt ({retval});
+
+    IO.tostdout (msg);
+
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["scan_interval"] = @Argvlist_Type;
+  a["scan_interval"].func = fun (``
+    envbeg private variable msg, retval, sec; envend
+    (argv)
+    sec = Opt.Arg.getlong ("sec", "int", &argv;del_arg);
+    if (NULL == sec)
+      sec = MY.scan_interval;
+
+    retval = Net.wifi.scan_interval (sec);
+    if (-1 == retval)
+      msg = "ERROR: " + Net.wifi.err ();
+    else
+      msg = "set the scan interval time for " + string (sec) +
+        " seconds";
+
+    IO.tostdout (msg);
+
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["get_ip"] = @Argvlist_Type;
+  a["get_ip"].func = fun (``
+    envbeg variable retval, msg; envend
+    retval = Net.wifi.get_ip (;passwd = Os.__getpasswd ());
+
+    if (-1 == retval)
+      msg = "Err: " + Net.wifi.err ();
+    else
+      msg = "exit status: " + string (retval);
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a;
+`).__funcref;
+
+() = fun (`
+  variable rl = Rline.init (NetCommands;;struct
+    {
+    @__qualifiers (),
+    histfile = This.is.my.histfile,
+%    tabhook = &tabhook,
+    });
+
+  rl;
+`;as = "rlineinit", scope = "public");

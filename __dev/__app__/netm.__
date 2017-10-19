@@ -1,0 +1,25 @@
+#!/usr/bin/env __slsh
+
+if (__argc > 1)
+  $0 = __argv[1];
+else
+  $0 = "$HOME/__"$;
+
+$1 = path_basename_sans_extname (__argv[0]);
+$2 = ($2 = path_concat (getcwd (), path_dirname (__FILE__)),
+  $2[[-2:]] == "/."
+  ? substr ($2, 1, strlen ($2) - 2)
+  : $2);
+
+$2 = realpath ($2);
+
+__set_argc_argv ([__argv,
+  "--basedir="  + $2 + "/" + $1,
+  "--tmpdir="   + $2 + "/tmp/" + string (getpid),
+  "--datadir="  + $2 + "/data",
+  "--histfile=" + $2 + "/." + __tmp ($1) + "_" +
+    string (getuid) + ".history"]);
+
+() = evalfile (__tmp ($2) + "/fun.__");
+
+() = evalfile ($0 + "/std/__/__app");

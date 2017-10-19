@@ -461,8 +461,8 @@ class Com
 
     % (ugly) hack to fix the err messages from sudo to mess the screen
     % since we don't open the stderr stream in the process
-    if (issu)
-      Smg.clear_and_redraw ();
+%    if (issu)
+%      Smg.clear_and_redraw ();
 
     self.post_exec (header;;__qualifiers ());
   end
