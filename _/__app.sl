@@ -789,7 +789,36 @@ private define __builtins__ (a)
     a["__project_new"].args = ["--from-file= filename read from filename"];
     }
 
-  variable lbuiltin = Env->LOCAL_LIB_PATH + "/__builtin__/__funs.__"; 
+  if (This.request.fm)
+    {
+    Class.load ("Fm");
+    a["__fm"] = @Argvlist_Type;
+    a["__fm"].func = function (`
+        (argv)
+      variable dir;
+
+      if (1 == length (argv))
+        dir = getcwd ();
+      else
+        dir = argv[1];
+      variable fn = Class.__FUNCREF__ ("Fm", "init");
+      variable fm = (@fn) ((@__get_reference ("Fm")));
+      () = fm.exec (dir);
+      `).__funcref;
+    }
+
+  if (This.request.net)
+    {
+    a["__net"] = @Argvlist_Type;
+    a["__net"].func = function (`
+      (argv)
+
+      __system ([Env->SRC_PATH + "/__dev/__app__/netm.__ " + Env->ROOT_PATH];
+        return_on_completion);
+      `).__funcref;
+    }
+
+  variable lbuiltin = Env->LOCAL_LIB_PATH + "/__builtin__/__funs.__";
   ifnot (access (lbuiltin, F_OK|R_OK))
     fexpr (File.read (lbuiltin)).call (a);
 }

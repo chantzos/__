@@ -170,7 +170,7 @@ public variable NetCommands = fun (`
   a["connect"] = @Argvlist_Type;
   a["connect"].func = fun (``
     NetRl.exec (["start_wpa"]);
-    Smg.send_msg_dr ("Trying to get ip", 0, NULL, NULL);
+    Smg.send_msg_dr ("getting ip with dhcpcd", 0, NULL, NULL);
     NetRl.exec (["get_ip"]);
   ``).__funcref;
 
@@ -347,7 +347,6 @@ public variable NetCommands = fun (`
     {
     @__qualifiers (),
     histfile = This.is.my.histfile,
-%    tabhook = &tabhook,
     });
 
   rl;

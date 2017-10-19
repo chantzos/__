@@ -52,17 +52,19 @@ static define __INIT__ (role)
       Ref_Type, qualifier ("exit"), &__def_exit__),
     request = struct
       {
-      X,
-      profile,
-      debug,
+      X,       % can start X (graphical) server 
+      profile, % turns on profiler
+      debug,   % turns on debugger
+      fm = 1,  % file manager
+      net = 1, % a network sample application 
       },
     has = struct
       {
-      frames      = 1,
-      max_frames  = 2,
-      sigint      = 1,
-      new_windows = 1,
-      other_apps  = 1,
+      frames      = 1, % how many frames should draw at initialization
+      max_frames  = 2, % maximum frames
+      sigint      = 1, % default sigint handler
+      new_windows = 1, % if can start other windows of the same application
+      other_apps  = 1, % if can start other applications
       screenactive,
       argv = qualifier ("setargv")
         ? fexpr (`__argv;__set_argc_argv (String_Type[0]);`).call ()
