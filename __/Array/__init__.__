@@ -78,6 +78,21 @@ class Array
     Not (NULL, ara, __where (NULL, ara, arb));
   end
 
+  def __extend (?)
+    variable elems = __pop_list (_NARGS - 2);
+    variable ar = ();
+    variable s = ();
+    variable at = qualifier ("at");
+
+    if (NULL == at)
+      ifnot (qualifier_exists ("prepend"))
+        @ar = [@ar, __push_list (elems)];
+      else
+        @ar = [__push_list (elems), @ar];
+    else
+      @ar = [(@ar)[[:at-1]], __push_list (elems), (@ar)[[at:]]];
+  end
+
   subclass String
     __init__
       len
