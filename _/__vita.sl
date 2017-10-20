@@ -122,7 +122,7 @@ private define Exc_fmt (self, e)
   if (NULL == e)
     e = __get_exception_info;
 
-  if (self.isnot (e))
+  if (Exc_isnot (NULL, e))
     e = struct {error = 0, description = "", file = "", line = 0, function = "", object, message = "",
     Exception = "No exception in the stack"};
 
@@ -139,13 +139,13 @@ Error:       %d",
 
 private define Exc_print (self, e)
 {
-  if (0 == self.isnot (e) ||
-     (0 == (e = __get_exception_info, self.isnot (e))))
-   IO.tostderr (self.fmt (e));
+  if (0 == Exc_isnot (NULL, e) ||
+     (0 == (e = __get_exception_info, Exc_isnot (NULL, e))))
+   IO_tostderr (NULL, Exc_fmt (NULL, e));
 
-  while (self.isnot (e) == 0 == self.isnot (e.object))
+  while (Exc_isnot (NULL, e) == 0 == Exc_isnot (NULL, e.object))
     {
-    IO.tostderr (self.fmt (e.object));
+    IO_tostderr (NULL, Exc_fmt (NULL, e.object));
     e = e.object;
     }
 }
@@ -188,9 +188,9 @@ private define Struct_to_string (self, s)
   loop (length (fields))
     fmt += "%S : %%S\n";
 
-  fmt = sprintf (fmt[[:-2]], Array.push (fields));
+  fmt = sprintf (fmt[[:-2]], Array_push (NULL, fields));
 
-  sprintf (fmt, Stack.reverse (_push_struct_field_values (s), pop ()));
+  sprintf (fmt, Stack_reverse (NULL, _push_struct_field_values (s), pop ()));
 }
 
 public variable Struct = struct {__name, to_string = &Struct_to_string};
@@ -218,15 +218,16 @@ private define Assoc_to_string (self, a)
   loop (length (keys))
     fmt += "%S : %%S\n";
 
-  fmt = sprintf (fmt[[:-2]], Array.push (keys));
+  fmt = sprintf (fmt[[:-2]], Array_push (NULL, keys));
 
-  sprintf (fmt, Array.push (values));
+  sprintf (fmt, Array_push (NULL, values));
 }
 
 public variable Assoc = struct {__name, to_string = &Assoc_to_string};
 
 __use_namespace ("List");
 
+private define List_to_string ();
 private define List_to_string (self, l)
 {
   variable
@@ -239,13 +240,13 @@ private define List_to_string (self, l)
   _for i (0, length (l) - 1)
     if ((t = typeof (l[i]), t) == Struct_Type)
       str += sprintf ("%s-= %S) =-\n%s%s", sp, t,
-        Struct.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+        Struct_to_string (NULL, l[i];;struct {@__qualifiers, pad = pad + 2}), n);
     else if (t == Assoc_Type)
       str += sprintf ("%s-= (%S) =-\n%s%s", sp, t,
-        Assoc.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+        Assoc_to_string (NULL, l[i];;struct {@__qualifiers, pad = pad + 2}), n);
     else if (t == List_Type)
       str += sprintf ("%s-= (%S) =-\n%s%s", sp, t,
-        self.to_string (l[i];;struct {@__qualifiers, pad = pad + 2}), n);
+        List_to_string (NULL, l[i];;struct {@__qualifiers, pad = pad + 2}), n);
     else
       str += sprintf ("%s-= (%S) =-\n%S%s", sp, t, l[i], n);
 

@@ -439,9 +439,9 @@ static define err_handler (e, s)
 
   ifnot (qualifier_exists ("dont_print_err"))
     {
-    IO.tostderr (Struct.to_string (s), "\nArgs: ",
-      List.to_string (s.args));
-    Exc.print (e);
+    IO_tostderr (NULL, Struct_to_string (NULL, s), "\nArgs: ",
+      List_to_string (NULL, s.args));
+    Exc_print (NULL, e);
     }
 
   if (NULL == s.class)
@@ -787,12 +787,12 @@ private define parse_load_include (funs, sub_funs, eval_buf, tokens, line)
 
     ifnot (found)
       {
-      IO.tostderr ("WARNING:", "Class::__INIT__::" + _function_name +
+      IO_tostderr (NULL, "WARNING:", "Class::__INIT__::" + _function_name +
         ": cannot locate class " + lcname + ", from " + lfrom);
       return;
       }
     else
-      IO.tostderr ("WARNING:", "Class::__INIT__::" + _function_name +
+      IO_tostderr (NULL, "WARNING:", "Class::__INIT__::" + _function_name +
         ": found class " + lcname + ", from " + lfrom + ", but on the sources path");
     }
 
@@ -1760,7 +1760,7 @@ private define __LoadClass__ (cname)
             throw ClassError, sprintf ("%s (), classname: %s, unable to locate it, even after looking in the sources paths",
                 _function_name, cname);
 
-          IO.tostderr (sprintf ("WARNING: %s (), classname: %s, unable to locate it",
+          IO_tostderr (NULL, sprintf ("WARNING: %s (), classname: %s, unable to locate it",
               _function_name, cname), "\nlooking (falling back) to",
               __SRC_CPATHS[i], "\nyou might want to re-install");
 
