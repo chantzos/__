@@ -617,4 +617,51 @@ beg
       opt_show_status_line = 1,
       };
   end
+
+  def unified_diff (?)
+    variable buf, self;
+    if (_NARGS == 1)
+      buf = get_cur_buf (NULL);
+    else
+      buf = ();
+
+    self = ();
+
+    variable diff_exec = Sys.which ("diff");
+    if (NULL == diff_exec)
+      return NULL;
+
+    variable
+      status,
+      % using the scratch file is convienent for a possible reuse
+      file = qualifier ("file", @__get_reference ("SCRATCH")),
+      isbigin = Array.String.len (buf.lines) > Proc->DEF_PIPE_CAPACITY,
+      p = Proc.init (isbigin ? 0 : 1, 1, 1),
+      com = [diff_exec, "-u", buf._abspath, "-"];
+
+    % a file descriptor can overflow easily, so be safe and redirect
+    p.stdout.file = file;
+
+    if (isbigin)
+      {
+      variable ftmp = File.mktmp (Env->TMP_PATH, "unified_diff");
+      () = File.write (ftmp.file, buf.lines;fd = ftmp.fd);
+      com[-1] = ftmp.file;
+      }
+    else
+      p.stdin.in = strjoin (buf.lines, "\n") + "\n";
+
+    status = p.execv (com, NULL);
+
+    if (NULL == status)
+      return NULL;
+
+    ifnot (2 > status.exit_status)
+      return NULL;
+
+    ifnot (status.exit_status)
+      return NULL;
+
+    File.read (file);
+  end
 end

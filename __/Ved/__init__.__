@@ -2121,6 +2121,15 @@ class Ved
       ;;__qualifiers);
   end
 
+  def __ved_funs__ (a) public proc
+    a["__diff"] = @Argvlist_Type;
+    a["__diff"].func = function (`
+        (argv)
+      () = Ved.unified_diff ();
+      App.scratch (Ved.get_cur_buf ());
+      `).__funcref;
+  end
+
   beg
     VED_PAGER[string (Input->F1)]      = &__app_rec__;
     VED_PAGER[string (Input->F2)]      = &__app_new__;

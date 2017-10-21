@@ -323,6 +323,9 @@ class App
   end
 
   def __toscratch  (str) public proc
+    if (qualifier_exists ("clear"))
+      () = File.write (SCRATCH, "");
+
     IO.print (str;fd = SCRATCHFD);
   end
 
