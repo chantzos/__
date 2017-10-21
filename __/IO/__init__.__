@@ -17,8 +17,14 @@ class IO
         : NULL
       : tofp;
 
+    variable seek = qualifier ("seek", SEEK_END);
+
     ifnot (NULL == tofp)
       {
+      if (-1 == fseek (tofp, 0, seek))
+        throw ClassError, sprintf ("IO_fseekError:%S, %s",
+          ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
+
       if (any (-1 == array_map (Integer_Type, &fprintf, tofp, "%s", str)))
         throw ClassError, sprintf ("IO_WriteError:%S, %s",
           ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
@@ -28,7 +34,7 @@ class IO
       variable fd = __get_qualifier_as (FD_Type, qualifier ("fd"),
         [This.is.std.out.fd, This.is.std.err.fd][ufd - 1]);
 
-      if (-1 == lseek (fd, 0, SEEK_END))
+      if (-1 == lseek (fd, 0, seek))
         throw ClassError, sprintf ("IO_LseekError:%S, %s",
           ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
 

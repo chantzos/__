@@ -78,6 +78,7 @@ class Array
     Not (NULL, ara, __where (NULL, ara, arb));
   end
 
+  % unsafe but see 3daa1df
   def __extend (?)
     variable elems = __pop_list (_NARGS - 2);
     variable ar = ();

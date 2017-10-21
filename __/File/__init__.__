@@ -189,8 +189,9 @@ class File
       return -1;
       }
 
-    variable fd = open (file, O_WRONLY|O_CREAT|O_TRUNC, __get_qualifier_as
-       (Integer_Type, qualifier ("mode"), PERM["__STATIC"]));
+    variable fd = qualifier ("fd",
+        open (file, O_WRONLY|O_CREAT|O_TRUNC, __get_qualifier_as
+        (Integer_Type, qualifier ("mode"), PERM["__STATIC"])));
 
     if (NULL == fd)
       {
