@@ -21,10 +21,6 @@ class IO
 
     ifnot (NULL == tofp)
       {
-      if (-1 == fseek (tofp, 0, seek))
-        throw ClassError, sprintf ("IO_fseekError:%S, %s",
-          ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;
-
       if (any (-1 == array_map (Integer_Type, &fprintf, tofp, "%s", str)))
         throw ClassError, sprintf ("IO_WriteError:%S, %s",
           ["stdout", "stderr"][ufd - 1], errno_string (errno)), NULL;

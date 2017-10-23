@@ -1,0 +1,18 @@
+private variable DEV_OPTS = Assoc_Type[Integer_Type];
+DEV_OPTS["slang"] = 1;
+DEV_OPTS["F"] = 1;
+
+ifnot (access (Env->LOCAL_LIB_PATH + "/__devel__/__devel_opts__.__", F_OK|R_OK))
+  fexpr (File.read (Env->LOCAL_LIB_PATH +
+    "/__devel__/__devel_opts__.__")).call (DEV_OPTS);
+
+public define __init_devel__ ()
+{
+  if (DEV_OPTS["slang"])
+    Load.file (Env->SRC_PATH + "/__dev/_/__slang__.__");
+
+  if (DEV_OPTS["F"])
+    Load.file (Env->SRC_PATH + "/__dev/_/__F__.__");
+}
+
+__init_devel__ ();

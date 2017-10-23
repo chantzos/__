@@ -66,6 +66,7 @@ This.request.X = fexpr (`(nox)
 
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
+This.request.devel = Opt.Arg.exists ("--devel", &This.has.argv;del_arg);
 This.is.my.basedir = Opt.Arg.getlong ("basedir", NULL, &This.has.argv;del_arg);
 This.is.my.datadir = Opt.Arg.getlong ("datadir", NULL, &This.has.argv;del_arg);
 This.is.my.tmpdir  = Opt.Arg.getlong ("tmpdir",  NULL, &This.has.argv;del_arg);
@@ -1037,6 +1038,9 @@ if (This.has.sigint)
   }
 
 This.err_handler = &__err_handler__;
+
+if (This.request.devel)
+  Load.file (Env->SRC_PROTO_PATH + "/__dev.__");
 
 funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
 `       (path, app)

@@ -55,6 +55,7 @@ static define __INIT__ (role)
       X,       % can start X (graphical) server 
       profile, % turns on profiler
       debug,   % turns on debugger
+      devel,   % turns on development
       fm = 1,  % file manager
       net = 1, % a network sample application 
       },
