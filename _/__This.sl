@@ -59,6 +59,12 @@ static define __INIT__ (role)
       fm = 1,  % file manager
       net = 1, % a network sample application 
       },
+    enable = struct
+      {
+      devel,
+      profile,
+      debug,
+      },
     has = struct
       {
       frames      = 1, % how many frames should draw at initialization

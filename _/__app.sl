@@ -1,4 +1,4 @@
-__use_namespace ("__APP__");
+__use_namespace ("_");
 
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
@@ -145,22 +145,35 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
     Env->USER_DATA_PATH, Env->SRC_USER_DATA_PATH), File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
 
-public variable Profile = struct {set = function (`
-  (self)
-  if (NULL == This.request.profile)
-    ifnot (qualifier_exists ("set"))
-      return;
+static variable enable = struct
+  {
+  devel = function (`
+    envbeg public define __init_devel (); envend
+    (self)
+    Load.file (Env->SRC_PROTO_PATH + "/__dev.__");
+    __init_devel ();
+    `).__funcref,
+  profile = function (`
+    (self)
+    if (NULL == This.request.profile)
+      ifnot (qualifier_exists ("set"))
+        return;
+      else
+        This.request.profile = 1;
+
+    ifnot (access (Env->STD_CLASS_PATH + "/__profile.slc", F_OK|R_OK))
+      Load.file (Env->STD_CLASS_PATH + "/__profile.slc", "__");
     else
-      This.request.profile = 1;
+      ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
+        Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
+  `).__funcref,
+  debug = function (`
+    (self)
+    This.request.debug = 1;
+    `).__funcref,
+  };
 
-  ifnot (access (Env->STD_CLASS_PATH + "/__profile.slc", F_OK|R_OK))
-    Load.file (Env->STD_CLASS_PATH + "/__profile.slc", "__");
-  else
-    ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
-      Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
-`).__funcref};
-
-Profile.set ();
+_ -> enable.profile ();
 
 Class.load ("Com");
 
@@ -825,7 +838,7 @@ private define __builtins__ (a)
     fexpr (File.read (lbuiltin)).call (a);
 }
 
-static define __filtercommands (s, ar, chars)
+public define __filtercommands (s, ar, chars)
 {
   variable i;
   ifnot (any (chars == s._chr))
@@ -949,6 +962,8 @@ private define __err_handler__ (t, s)
   mainloop ();
 }
 
+if (This.request.devel) _ -> enable.devel ();
+
 ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
   Load.file (This.is.my.basedir + "/lib/Init.slc", This.is.my.namespace);
 else ifnot (access (This.is.my.basedir + "/lib/Init.sl", F_OK))
@@ -1038,9 +1053,6 @@ if (This.has.sigint)
   }
 
 This.err_handler = &__err_handler__;
-
-if (This.request.devel)
-  Load.file (Env->SRC_PROTO_PATH + "/__dev.__");
 
 funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
 `       (path, app)

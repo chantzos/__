@@ -18,8 +18,9 @@ __set_argc_argv ([__argv,
   "--tmpdir="   + $2 + "/tmp/" + string (getpid),
   "--datadir="  + $2 + "/data",
   "--histfile=" + $2 + "/." + __tmp ($1) + "_" +
-    string (getuid) + ".history"]);
+    string (getuid) + ".history",
+  "--devel"]);
 
-() = evalfile (__tmp ($2) + "/fun.__");
+%() = evalfile (__tmp ($2) + "/fun.__");
 
 () = evalfile ($0 + "/std/__/__app");
