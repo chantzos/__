@@ -1,7 +1,12 @@
+This.is.my.settings["ON_RECONNECT_REQ_DEF_APPS"] = "git";
+
 Class.load ("Sync");
 
 public define on_wind_new (w)
 {
+  ifnot (Env->SRC_PATH + "/" == getcwd ())
+    () = chdir (Env->SRC_PATH);
+
   This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT_" + w.name + "_" + string (_time)[[5:]] +
   "." + This.is.std.out.type;
 

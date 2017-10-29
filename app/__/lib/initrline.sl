@@ -1,5 +1,16 @@
 Load.file (Env->SRC_C_PATH + "/makefile", "Me");
 
+variable DIFF_VED = NULL;
+variable DIFF = This.is.my.tmpdir + "/__DIFF__.diff";
+
+private define __init_diff_buf__ ()
+{
+  DIFF_VED = Ved.init_ftype ("diff");
+  DIFF_VED._fd = IO.open_fn (DIFF);
+  DIFF_VED.set (DIFF, VED_ROWS, NULL;
+    _autochdir = 0, show_tilda = 0, show_status_line = 0);
+}
+
 private define file_callback (file, st, interactive)
 {
   variable f = path_extname (file);
@@ -331,6 +342,57 @@ private define __myrepo (argv)
   __draw_buf (Ved.get_cur_buf ());
 }
 
+private define __diff__ (argv)
+{
+  variable
+    diff_exec = Sys.which ("diff"),
+    this_p = Env->SRC_PATH,
+    that_p = This.is.my.settings["BACKUP_DIR"];
+
+  if (length (argv) > 1)
+    that_p = argv[1];
+
+  ifnot (strlen (that_p))
+    return;
+
+  ifnot (0 == access (that_p, F_OK|R_OK))
+    return;
+
+  if (NULL == diff_exec)
+    return;
+
+  if (NULL == DIFF_VED)
+    __init_diff_buf__ ();
+
+  variable
+    i,
+    status,
+    p = Proc.init (0, 1, 1),
+    dirs = ["local", "usr", "com", "app", "___", "__", "_"],
+    p_argv = [diff_exec, "-Naur"];
+
+  p.stderr.file = This.is.std.err.fn;
+  p.stderr.wr_flags = ">>";
+  p.stdout.file = DIFF;
+  p.stdout.wr_flags = ">>";
+
+  () = File.write (DIFF, "");
+
+  i = length (dirs);
+
+  while (i)
+    {
+    i--;
+    status = p.execv ([p_argv,
+      this_p + "/" + dirs[i], that_p + "/" + dirs[i]], NULL);
+    }
+
+  variable ved = @Ved.get_cur_buf ();
+  __viewfile  (DIFF_VED, "diff", [1, 0], 0);
+  Ved.setbuf (ved._abspath);
+  Ved.draw_wind ();
+}
+
 private define __exclude (sync)
 {
   ifnot (access (This.is.my.datadir + "/exclude_dirs", F_OK))
@@ -614,6 +676,9 @@ private define my_commands ()
     "--interactive void prompt before removing (off by default)",
     "--from_dist void clean up distributed path (makes sense but little) " +
       "default source directory"];
+
+  a["diff"] = @Argvlist_Type;
+  a["diff"].func = &__diff__;
 
   a;
 }

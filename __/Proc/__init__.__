@@ -76,10 +76,11 @@ class Proc
   def parse_flags (fd) proc
     ifnot (NULL == fd.wr_flags)
       {
-      ifnot (assoc_key_exists (File->FLAGS, fd.wr_flags))
-        fd.wr_flags = File->FLAGS[">"];
-      else
-        fd.wr_flags = File->FLAGS[fd.wr_flags];
+      if (String_Type == typeof (fd.wr_flags))
+        ifnot (assoc_key_exists (File->FLAGS, fd.wr_flags))
+          fd.wr_flags = File->FLAGS[">"];
+        else
+          fd.wr_flags = File->FLAGS[fd.wr_flags];
       }
     else
       if (-1 == access (fd.file, F_OK))
@@ -158,20 +159,22 @@ class Proc
 
   def atexit (s) proc
     ifnot (NULL == s.stdout)
-      {
-      close_fd (s.stdout, stdout);
-
       if (NULL == s.stdout.file)
+        {
+        close_fd (s.stdout, stdout);
         s.stdout.out = File.read (s.stdout.read);
-      }
+        }
+      else
+        () = dup2_fd (s.stdout.keep, 1);
 
     ifnot (NULL == s.stderr)
-      {
-      close_fd (s.stderr, stderr);
-
       if (NULL == s.stderr.file)
+        {
+        close_fd (s.stderr, stderr);
         s.stderr.out = File.read (s.stderr.read);
-      }
+        }
+      else
+        () = dup2_fd (s.stderr.keep, 2);
 
     ifnot (NULL == s.stdin)
       if (NULL == s.stdin.file)

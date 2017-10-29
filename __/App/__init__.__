@@ -357,7 +357,6 @@ class App
       return;
 
     variable __i = __get_qualifier_as (Integer_Type, qualifier ("_i"), 0);
-
     __viewfile  (SCRATCH_VED, "SCRATCH", [1, 0], __i);
     Ved.setbuf (ved._abspath);
     ved.draw ();
