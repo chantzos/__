@@ -14,7 +14,7 @@ public define on_wind_new (w)
 
   variable oved = Ved.init_ftype (This.is.std.out.type);
 
-  oved._fd = IO.open_fn (This.is.std.out.fn);
+  oved._fd = File.open (This.is.std.out.fn);
 
   oved.set (This.is.std.out.fn, VED_ROWS, NULL);
 
@@ -52,7 +52,7 @@ public define _new_frame_ (s)
   s = Ved.new_frame (This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] +
     "." + This.is.std.out.type;show_tilda = 0, show_status_line = 0);
 
-  s._fd = IO.open_fn (s._abspath);
+  s._fd = File.open (s._abspath);
   This.is.std.out.fd = s._fd;
   Com.post_header ();
 

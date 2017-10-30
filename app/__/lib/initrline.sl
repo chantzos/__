@@ -6,7 +6,7 @@ variable DIFF = This.is.my.tmpdir + "/__DIFF__.diff";
 private define __init_diff_buf__ ()
 {
   DIFF_VED = Ved.init_ftype ("diff");
-  DIFF_VED._fd = IO.open_fn (DIFF);
+  DIFF_VED._fd = File.open (DIFF);
   DIFF_VED.set (DIFF, VED_ROWS, NULL;
     _autochdir = 0, show_tilda = 0, show_status_line = 0);
 }

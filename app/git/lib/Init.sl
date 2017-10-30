@@ -95,8 +95,8 @@ public define on_wind_new (w)
   variable aved = Ved.init_ftype (This.is.std.out.type);
   variable bved = Ved.init_ftype (NULL);
 
-  aved._fd = IO.open_fn (This.is.std.out.fn);
-  bved._fd = IO.open_fn (b);
+  aved._fd = File.open (This.is.std.out.fn);
+  bved._fd = File.open (b);
 
   aved.set (This.is.std.out.fn, w.frame_rows[0], NULL;
     indent = 2, _autochdir = 0, show_tilda = 0,
@@ -144,7 +144,7 @@ private define __init_me__ ()
 {
   DIFF_VED = Ved.init_ftype ("diff");
 
-  DIFF_VED._fd = IO.open_fn (DIFF);
+  DIFF_VED._fd = File.open (DIFF);
   DIFF_VED.set (DIFF, VED_ROWS, NULL;
     _autochdir = 0, show_tilda = 0, show_status_line = 0);
 

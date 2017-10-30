@@ -23,6 +23,8 @@ class App
   var public SCRATCH;
   var public STDOUTBG;
   var public GREPFILE;
+  var public DIFFFILE;
+  var public DIFF_VED;
   var public BGDIR;
   var public RDFIFO;
   var public WRFIFO;

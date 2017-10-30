@@ -103,34 +103,6 @@ class File
     access (file, F_OK) ? 0 : 1;
   end
 
-  def read (file)
-    variable fd;
-
-    ifnot (FD_Type == typeof (file))
-      {
-      if (-1 == access (file, F_OK|R_OK))
-        throw ClassError, sprintf ("IO_Read_Error::read, %S, %s", file,
-          errno_string (errno));
-
-      fd = open (file, O_RDONLY);
-
-      if (NULL == fd)
-        throw ClassError, sprintf ("IO::read file descriptor: %S", errno_string (errno));
-      }
-   else
-     fd = file;
-
-    variable buf;
-    variable str = "";
-
-    () = lseek (fd, qualifier ("offset", 0), qualifier ("seek_pos", SEEK_SET));
-
-    while (read (fd, &buf, 4096) > 0)
-      str += buf;
-
-    str;
-  end
-
   def readlines (file)
     variable
       end = qualifier ("end", NULL),
@@ -286,5 +258,69 @@ class File
     variable d = Diff.new (al, bl);
     variable file = d[wherenot (strncmp (d, "+", 1))[0]];
     struct {file = dir + "/" + substr (file, 2, -1), fd = fd};
+  end
+
+  % both open () and read () better be at the end of the file unit
+  def read (file)
+     variable fd;
+
+    ifnot (FD_Type == typeof (file))
+      {
+      if (-1 == access (file, F_OK|R_OK))
+        throw ClassError, sprintf ("IO_Read_Error::read, %S, %s", file,
+          errno_string (errno));
+
+      fd = open (file, O_RDONLY);
+
+      if (NULL == fd)
+        throw ClassError, sprintf ("IO::read file descriptor: %S", errno_string (errno));
+      }
+   else
+     fd = file;
+
+    variable buf;
+    variable str = "";
+
+    () = lseek (fd, qualifier ("offset", 0), qualifier ("seek_pos", SEEK_SET));
+
+    while (read (fd, &buf, 4096) > 0)
+      str += buf;
+
+    str;
+  end
+
+  def open (file)
+    variable
+      fd,
+      acc = access (file, F_OK),
+      flags = qualifier ("flags"),
+      perm  = qualifier ("perm", PERM["_PRIVATE"]);
+
+    ifnot (NULL == flags)
+      flags = FLAGS[flags];
+    else
+      flags = acc == -1 ? FLAGS["<>"] : FLAGS["<>|"];
+
+    if (-1 == acc)
+      fd = open (file, flags, perm);
+    else
+      {
+      fd = open (file, flags);
+      ifnot (NULL == fd)
+        {
+        variable st = fstat (fd);
+        if (-1 == Sys.checkperm (st.st_mode, perm))
+          if (-1 == Sys.setperm (file, perm))
+            throw ClassError, "File::open::wrong permissions for " +
+              file;
+
+        return fd;
+        }
+      }
+
+    if (NULL == fd)
+      throw ClassError, "File::open::" + file + ", " + errno_string (errno);
+
+    fd;
   end
 end

@@ -201,19 +201,30 @@ if (NULL == This.is.std.out.fn)
   This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
 
 ifnot (__is_initialized (&SCRATCH))
-  SCRATCH  = This.is.my.tmpdir + "/__SCRATCH__.txt";
+  {
+  SCRATCH   = This.is.my.tmpdir + "/__SCRATCH__.txt";
+  SCRATCHFD = File.open (SCRATCH);
+  }
 
 ifnot (__is_initialized (&GREPFILE))
   GREPFILE = This.is.my.tmpdir + "/__GREP__.list";
+
+ifnot (__is_initialized (&DIFFFILE))
+  {
+  DIFFFILE = This.is.my.tmpdir + "/__DIFF__.diff";
+  DIFF_VED = Ved.init_ftype ("diff");
+  DIFF_VED._fd = File.open (DIFFFILE);
+  DIFF_VED.set (DIFFFILE, VED_ROWS, NULL;
+    _autochdir = 0, show_tilda = 0, show_status_line = 0);
+  }
 
 RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
 WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
 
 SPECIAL = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn];
 
-This.is.std.out.fd = IO.open_fn (This.is.std.out.fn);
-This.is.std.err.fd = IO.open_fn (This.is.std.err.fn);
-SCRATCHFD          = IO.open_fn (SCRATCH);
+This.is.std.out.fd = File.open (This.is.std.out.fn);
+This.is.std.err.fd = File.open (This.is.std.err.fn);
 
 OUT_VED     = Ved.init_ftype (This.is.std.out.type);
 ERR_VED     = Ved.init_ftype (NULL);
@@ -231,7 +242,7 @@ if (COM_OPTS.bg_jobs)
   {
   STDOUTBG   = This.is.my.tmpdir + "/__STDOUTBG__.txt";
   BGDIR      = This.is.my.tmpdir + "/__PROCS__";
-  STDOUTFDBG = IO.open_fn (STDOUTBG);
+  STDOUTFDBG = File.open (STDOUTBG);
   OUTBG_VED  = Ved.init_ftype (This.is.std.out.type);
   OUTBG_VED._fd = STDOUTFDBG;
   OUTBG_VED.set (STDOUTBG, VED_ROWS, NULL;_autochdir = 0);

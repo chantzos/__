@@ -17,8 +17,8 @@ public define on_wind_new (w)
   variable aved = Ved.init_ftype (This.is.std.out.type);
   variable bved = Ved.init_ftype (NULL);
 
-  aved._fd = IO.open_fn (This.is.std.out.fn);
-  bved._fd = IO.open_fn (b);
+  aved._fd = File.open (This.is.std.out.fn);
+  bved._fd = File.open (b);
 
   aved.set (This.is.std.out.fn, w.frame_rows[0], NULL;
     _autochdir = 0, show_tilda = 0, show_status_line = 0);
