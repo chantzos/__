@@ -1,16 +1,5 @@
 Load.file (Env->SRC_C_PATH + "/makefile", "Me");
 
-variable DIFF_VED = NULL;
-variable DIFF = This.is.my.tmpdir + "/__DIFF__.diff";
-
-private define __init_diff_buf__ ()
-{
-  DIFF_VED = Ved.init_ftype ("diff");
-  DIFF_VED._fd = File.open (DIFF);
-  DIFF_VED.set (DIFF, VED_ROWS, NULL;
-    _autochdir = 0, show_tilda = 0, show_status_line = 0);
-}
-
 private define file_callback (file, st, interactive)
 {
   variable f = path_extname (file);
@@ -361,9 +350,6 @@ private define __diff__ (argv)
   if (NULL == diff_exec)
     return;
 
-  if (NULL == DIFF_VED)
-    __init_diff_buf__ ();
-
   variable
     i,
     status,
@@ -373,10 +359,10 @@ private define __diff__ (argv)
 
   p.stderr.file = This.is.std.err.fn;
   p.stderr.wr_flags = ">>";
-  p.stdout.file = DIFF;
+  p.stdout.file = DIFFFILE;
   p.stdout.wr_flags = ">>";
 
-  () = File.write (DIFF, "");
+  () = File.write (DIFFFILE, "");
 
   i = length (dirs);
 

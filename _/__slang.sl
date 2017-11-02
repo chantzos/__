@@ -110,3 +110,11 @@ public define __eval (buf, ns)
     }
 }
 
+% like new_exception but don't throw an error
+% if exception is already defined
+public define __new_exception (exc, super, desc)
+{
+  try
+    new_exception (exc, super, desc);
+  catch RunTimeError: {}
+}

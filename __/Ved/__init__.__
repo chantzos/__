@@ -2125,8 +2125,11 @@ class Ved
     a["__diff"] = @Argvlist_Type;
     a["__diff"].func = function (`
         (argv)
-      () = Ved.unified_diff ();
-      App.scratch (Ved.get_cur_buf ());
+      variable ved = @Ved.get_cur_buf ();
+      () = Ved.unified_diff (ved);
+      __viewfile  (DIFF_VED, "diff", [1, 0], 0);
+      Ved.setbuf (ved._abspath);
+      Ved.draw_wind ();
       `).__funcref;
   end
 

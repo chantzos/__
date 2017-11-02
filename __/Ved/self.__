@@ -633,8 +633,7 @@ beg
 
     variable
       status,
-      % using the scratch file is convienent for a possible reuse
-      file = qualifier ("file", @__get_reference ("SCRATCH")),
+      file = qualifier ("file", @__get_reference ("DIFFFILE")),
       isbigin = Array.String.len (buf.lines) > Proc->DEF_PIPE_CAPACITY,
       p = Proc.init (isbigin ? 0 : 1, 1, 1),
       com = [diff_exec, "-u", buf._abspath, "-"];
@@ -649,7 +648,7 @@ beg
       com[-1] = ftmp.file;
       }
     else
-      p.stdin.in = strjoin (buf.lines, "\n") + "\n";
+      p.stdin.in = strjoin (buf.lines, "\n");
 
     status = p.execv (com, NULL);
 
