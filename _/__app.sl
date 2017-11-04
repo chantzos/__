@@ -837,8 +837,7 @@ private define __builtins__ (a)
     {
     a["__net"] = @Argvlist_Type;
     a["__net"].func = function (`
-      (argv)
-
+        (argv)
       __system ([Env->SRC_PATH + "/__dev/__app__/netm.__ " + Env->ROOT_PATH];
         return_on_completion);
       `).__funcref;
@@ -1061,6 +1060,7 @@ if (This.has.sigint)
   {
   sigprocmask (SIG_UNBLOCK, [SIGINT]);
   signal (SIGINT, &sigint_handler);
+  This.is.my.sigint_handler = &sigint_handler;
   }
 
 This.err_handler = &__err_handler__;

@@ -112,6 +112,7 @@ static define __INIT__ (role)
         settings = Assoc_Type[String_Type],
         genconf,
         conf,
+        sigint_handler,
         },
       std = struct
         {

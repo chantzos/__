@@ -294,7 +294,7 @@ private define __function__ ()
     if (__fun__[[:__ENV_BEG_TOKEN_LEN__ - 1]] == __ENV_BEG_TOKEN__)
        __find_env__;
 
-  __as__        = qualifier ("as", sprintf ("fun_%d", (__fid__++, __fid__)));
+  __as__        = qualifier ("as", sprintf ("__dev_fun_%d", (__fid__++, __fid__)));
   __f__         = @__F_Type;
   __f__.__ns    = qualifier ("ns", __as__);
   __scope__     = qualifier ("scope", "private");

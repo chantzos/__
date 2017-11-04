@@ -383,10 +383,8 @@ class App
   def __messages () public proc
     loop (_NARGS) pop ();
     variable ved = @Ved.get_cur_buf ();
-
     __viewfile  (ERR_VED, "MSG", NULL, NULL);
     Ved.setbuf (ved._abspath);
-
     Ved.draw_wind ();
   end
 
@@ -395,10 +393,29 @@ class App
     ifnot (len)
       return;
 
+    variable sigint_handl;
+    sigint_handl = function (`
+      envbeg private define my_sigint_handler (); envend
+        (sig)
+      IO.tostderr ("Process Interrupted by the user");
+      signal (sig, &my_sigint_handler);
+      `;as = "my_sigint_handler").__funcref;
+
+    ifnot (This.has.sigint)
+      sigprocmask (SIG_UNBLOCK, [SIGINT]);
+
+    signal (SIGINT, sigint_handl);
+
     Api.reset_app ();
 
-    _for i (0, length (lines) - 1)
-      () = system (strtrim_beg (lines[i], "!"));
+    _for i (0, len - 1)
+      () = system_intr (strtrim_beg (lines[i], "!"));
+
+    ifnot (This.has.sigint)
+      sigprocmask (SIG_BLOCK, [SIGINT]);
+
+    ifnot (NULL == This.is.my.sigint_handler)
+      signal (SIGINT, This.is.my.sigint_handler);
 
     ifnot (qualifier_exists ("return_on_completion"))
       {
