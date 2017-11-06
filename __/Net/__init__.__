@@ -29,6 +29,7 @@ class Net
       reconfigure
       scan_interval
       at_exit
+      info
     end
 
     var DEV = "nl80211";
@@ -37,6 +38,28 @@ class Net
     var IFACEDIR = NULL;
     var SERVER_PID = NULL;
     var SERVER_CONF = NULL;
+
+    var COM = struct
+      {
+      start_server,
+      is_up,
+      get_ip,
+      scan_iw,
+      set_interface,
+      };
+
+    def info ()
+      struct
+        {
+        device = DEV,
+        socket = SERVER_SOCK,
+        iface  = IFACE,
+        ifacedir = IFACEDIR,
+        server_pid = SERVER_PID,
+        server_conf = SERVER_CONF,
+        commands = COM
+        };
+    end
 
     def set_conf (conf)
       if (-1 == access (conf, F_OK))
@@ -122,7 +145,10 @@ update_config=1
       if (NULL == IFACE)
         self.err ("cannot find available iface";;__return__ (-1));
 
-      variable fp = popen (Net->IP_BIN + " link show " + IFACE, "r");
+      if (NULL == COM.is_up)
+        COM.is_up = Net->IP_BIN + " link show " + IFACE;
+
+      variable fp = popen (COM.is_up, "r");
       if (NULL == fp)
         self.err ("error while calling " + Net->IP_BIN +
            " link show " + IFACE;;__return__ (-1));
@@ -146,6 +172,9 @@ update_config=1
       else
          if ("up" == what)
            return 1;
+
+      if (NULL == COM.set_interface)
+        COM.set_interface = Net->IP_BIN + " link set " +  IFACE + " up|down";
 
       variable argv = [Net->IP_BIN, "link", "set", IFACE, what];
 
@@ -210,6 +239,9 @@ update_config=1
       variable argv = [Net->WP_SERV_BIN, "-D" + DEV, "-i" + IFACE,
          "-c" + SERVER_CONF];
 
+      if (NULL == COM.start_server)
+        COM.start_server = strjoin (argv, " ");
+
       variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
 
       ifnot (NULL == passwd)
@@ -259,7 +291,12 @@ update_config=1
       if (NULL == SERVER_PID)
         self.err ("wpa_supplicant hasn't been started";;__return__ (-1));
 
-      variable argv = [Net->DH_BIN, IFACE];
+      variable
+        timeout = qualifier ("timeout", 20),
+        argv = [Net->DH_BIN, "--timeout", string (timeout), IFACE];
+
+      if (NULL == COM.get_ip)
+        COM.get_ip = strjoin (argv, " ");
 
       variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
 
@@ -291,6 +328,7 @@ update_config=1
         self.err ("wpa_supplicant hasn't been started";;__return__ (-1));
 
       variable argv = [Net->WP_CLNT_BIN, "scan_interval", string (sec)];
+
       variable p = Proc.init (0, 1, 1);
 
       variable status = p.execv (argv, NULL);
@@ -500,6 +538,8 @@ update_config=1
         self.err ("bring up";;__return__ (-1));
 
       variable argv = [Net->IW_BIN, "dev", IFACE, "scan"];
+      if (NULL == COM.scan_iw)
+        COM.scan_iw = strjoin (argv, " ");
 
       variable passwd = __get_qualifier_as (String_Type, qualifier ("passwd"), NULL);
 
@@ -554,5 +594,37 @@ update_config=1
     beg
       find_iface;
     end
+  end
+
+  def ping ()
+    variable h = qualifier ("host");
+    variable ping_exec = Sys.which ("ping");
+    if (NULL == ping_exec)
+      {
+      self.err ("ping executable cannot be found in PATH");
+      return NULL;
+      }
+
+    if (NULL == h)
+      ifnot (assoc_key_exists (This.is.my.settings, "PING_HOST"))
+        {
+        self.err ("Host is not specified, use the qualifier \"host\"");
+        return NULL;
+        }
+      else
+        if (strlen (This.is.my.settings["PING_HOST"]))
+          h = This.is.my.settings["PING_HOST"];
+        else
+          {
+          self.err ("option in This.is.my.settings[\"PING_HOST\"] is an empty string");
+          return NULL;
+          }
+
+    variable p = Proc.init (0, 1, 1);
+    variable status = p.execv ([ping_exec, "-c", "1", h], NULL);
+    variable buf = p.stdout.out + "\n" + p.stderr.out + "\n" +
+      "exit status: " + string (status.exit_status);
+
+    strjoin (strtok (buf, "\n"), "\n");
   end
 end

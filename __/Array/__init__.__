@@ -13,6 +13,10 @@ class Array
     return {self.push (a)};
   end
 
+  def to_string (a)
+    array_map (String_Type, &string, a);
+  end
+
   def push (a)
     variable i;
     _for i (0, length (a) - 1)

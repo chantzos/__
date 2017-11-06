@@ -3,8 +3,8 @@ class Struct
     wherefirst (get_struct_field_names (s) == f);
   end
 
-  def to_string (s)
-    variable fields = get_struct_field_names (s);
+  def __to_string (s)
+    variable fields = qualifier ("fields", get_struct_field_names (s));
     variable fmt = "";
     loop (length (fields))
       fmt += "%S : %%S\n";
@@ -12,5 +12,26 @@ class Struct
     fmt = sprintf (fmt[[:-2]], Array.push (fields));
 
     sprintf (fmt, Stack.reverse (_push_struct_field_values (s), pop ()));
+  end
+
+  var level = 0;
+  def to_string (s)
+    level++;
+    variable max_l = qualifier ("max_level", 3);
+    variable buf = "";
+    variable fields = get_struct_field_names (s);
+    variable i, f, v;
+
+    _for i (0, length (fields) - 1)
+      {
+      v = get_struct_field (s, fields[i]);
+      f = typeof (v);
+      if (Struct_Type == f && level <= max_l)
+        buf += "\n" + fields[i] + ":" + self.to_string (v);
+      }
+
+    buf += "\n" + __to_string (NULL, s;fields = fields);
+    buf;
+    level--;
   end
 end

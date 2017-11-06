@@ -1,17 +1,18 @@
 method (`
   variable check_os_table = fun (``
-    variable p = Sys.Proc.search (" ((/usr)?/bin/)?wpa_supplicant .*");
+    variable p = qualifier ("table",
+      Sys.Proc.search (" ((/usr)?/bin/)?wpa_supplicant .*"));
 
     if (length (p.pid))
       {
-      IO.tostdout ("Running Instance" +
-        ["s", ""][1 == length (p.pid)]);
+      IO.tostdout ("Running Instance" + ["s", ""][1 == length (p.pid)]);
       IO.tostdout (p.com);
       __draw_buf (OUT_VED);
 
       if (qualifier_exists ("killother"))
         {
-        variable i, retval = IO.ask (["kill " + string (p.pid[0]) + " ? [y/n]"],
+        variable i, retval = IO.ask (["kill " + strjoin (Array.to_string (p.pid), ", ")
+          + " ? [y/n]"],
           ['y', 'n']);
         if ('y' == retval)
           {
@@ -21,7 +22,7 @@ method (`
               return 1;
 
            return 0;
-         }
+          }
         }
 
       return 1;
@@ -40,7 +41,9 @@ method (`
     {
     pid = atoi (l[i]);
     if (Sys.Pid.exists (pid))
-      return 1;
+      if (-1 == (@check_os_table) (;;
+        struct {table = struct {pid = [pid], com = [""]}, @__qualifiers}))
+        return -1;
 
     if (-1 == File.remove (MY.runpath + "/" + l[i], &inter, 0))
       return -1;
@@ -172,6 +175,7 @@ public variable NetCommands = fun (`
     NetRl.exec (["start_wpa"]);
     Smg.send_msg_dr ("getting ip with dhcpcd", 0, NULL, NULL);
     NetRl.exec (["get_ip"]);
+    NetRl.exec (["ping"]);
   ``).__funcref;
 
   a["scan"] = @Argvlist_Type;
@@ -328,12 +332,34 @@ public variable NetCommands = fun (`
   a["get_ip"] = @Argvlist_Type;
   a["get_ip"].func = fun (``
     envbeg variable retval, msg; envend
-    retval = Net.wifi.get_ip (;passwd = Os.__getpasswd ());
+    retval = Net.wifi.get_ip (;timeout = 10, passwd = Os.__getpasswd ());
 
     if (-1 == retval)
       msg = "Err: " + Net.wifi.err ();
     else
       msg = "exit status: " + string (retval);
+
+    IO.tostdout (msg);
+    __draw_buf (OUT_VED);
+  ``).__funcref;
+
+  a["info"] = @Argvlist_Type;
+  a["info"].func = fun (``
+    envbeg variable msg; envend
+      msg = Net.wifi.info ();
+      __toscratch (Struct.to_string (msg));
+      __scratch (NULL);
+  ``).__funcref;
+
+  a["ping"] = @Argvlist_Type;
+  a["ping"].func = fun (``
+    envbeg variable msg; envend
+    msg = Net.ping ();
+    if (NULL == msg)
+      msg = Net.err ();
+
+    if (qualifier_exists ("send_result"))
+      return msg;
 
     IO.tostdout (msg);
     __draw_buf (OUT_VED);
