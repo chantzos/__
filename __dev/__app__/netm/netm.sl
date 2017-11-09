@@ -5,6 +5,8 @@ This.has.sigint      = 1;
 This.has.new_windows = 0;
 This.has.other_apps  = 1;
 
+This.on.exit.clean_tmp = 1;
+
 This.request.net = 0;
 
 This.is.std.out.type = "txt";

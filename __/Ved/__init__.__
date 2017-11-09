@@ -1066,7 +1066,7 @@ class Ved
 
     ifnot (length (w.bufnames))
       if (1 == length (winds))
-        exit_me (0);
+        This.exit (0);
       else
         {
         assoc_delete_key (VED_WIND, VED_CUR_WIND);
@@ -1103,7 +1103,7 @@ class Ved
           1, NULL, NULL);
 
         if ('q' == Input.getch ())
-          exit_me (0);
+          This.exit (0);
         }
 
       Ved.setbuf (w.bufnames[i]);

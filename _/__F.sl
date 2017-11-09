@@ -251,6 +251,11 @@ public define function ()
      __restore_instance__;
 }
 
+public define fun ()
+{
+  function ();
+}
+
 public define funcall ()
 {
   (@fexpr ().__funcref) ();

@@ -2,16 +2,47 @@ __use_namespace ("_");
 
 sigprocmask (SIG_BLOCK, [SIGINT]);
 
-public variable APP_ERR, I, App, X;
+public variable APP_ERR, I, App, X, Dir;
 
 public define exit_me (x)
 {
   if (Array_Type == typeof (x))
     x = atoi (x[0]);
 
-  This.at_exit ();
+  ifnot (qualifier_exists ("dont_call_handlers"))
+    This.at_exit ();
 
-  (@__get_reference ("I->at_exit")) ();
+  if (This.on.exit.clean_tmp && __is_initialized (&Dir))
+    funcall (`
+      envbeg
+        variable w, i, dirlist = {}, filelist = {};
+
+        private define dir_callback (dir, st, list)
+          {
+          list_append (list, dir);
+          1;
+          }
+
+        private define file_callback (file, st)
+          {
+          () = remove (file);
+          1;
+          }
+       envend
+
+       Dir.walk (This.is.my.tmpdir, &dir_callback, &file_callback;
+          dargs = {dirlist});
+
+       dirlist = (dirlist = list_to_array (dirlist, String_Type),
+       dirlist[array_sort (dirlist;dir = -1)]);
+
+       _for i (0, length (dirlist) - 1)
+         () = rmdir (dirlist[i]);
+     `);
+
+  variable f = __get_reference ("I->at_exit");
+  ifnot (NULL == f)
+    (@f) ();
 
   exit (x);
 }
@@ -20,7 +51,7 @@ private define __err_handler__ (self, s)
 {
   self.at_exit ();
   IO.tostderr (s);
-  exit (1);
+  exit_me (1;dont_call_handlers);
 }
 
 This.err_handler   = &__err_handler__;
@@ -583,9 +614,10 @@ private define __edit__ (argv)
 {
   variable s = Ved.get_cur_buf ();
   Ved.preloop (s);
-  topline ("-- pager --");
+  topline ("(pager)");
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
   s.vedloop ();
+  topline ("(" + This.is.my.name + ")");
 }
 
 private define __ved__ (argv)

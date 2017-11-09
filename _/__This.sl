@@ -1,12 +1,14 @@
 __use_namespace ("This");
 
+public define exit_me ();
+
 public variable This, Smg, Input;
 
 private define __def_exit__ ()
 {
   variable code = _NARGS > 1 ? () : 0;
   This.at_exit ();
-  exit (code);
+  exit_me (code;dont_call_handlers);
 }
 
 private define __def_at_exit__ (self)
@@ -81,6 +83,10 @@ static define __INIT__ (role)
       {
       reconnect,
       disconnect,
+      exit = struct
+        {
+        clean_tmp = 0,
+        },
       },
     is = struct
       {
