@@ -30,6 +30,8 @@ private variable __i__;
 private variable __len__;
 private variable __as__;
 private variable __scope__;
+private variable __func_name__ = "__dev_fun_";
+private variable __anon_name__ = "__FUNCTION__";
 private variable __fid__ = -1;
 private variable __DEPTH__ = 0;
 private variable __INSTANCES__ = {};
@@ -294,7 +296,7 @@ private define __function__ ()
     if (__fun__[[:__ENV_BEG_TOKEN_LEN__ - 1]] == __ENV_BEG_TOKEN__)
        __find_env__;
 
-  __as__        = qualifier ("as", sprintf ("__dev_fun_%d", (__fid__++, __fid__)));
+  __as__        = qualifier ("as", __func_name__ + string ((__fid__++, __fid__)));
   __f__         = @__F_Type;
   __f__.__ns    = qualifier ("ns", __as__);
   __scope__     = qualifier ("scope", "private");
@@ -312,7 +314,7 @@ private define __function__ ()
       {
       __funcref = __f__.__funcref,
       call      = __f__.call,
-      __ns      = __f__.__ns
+      __ns      = __f__.__ns,
       };
 
   __uninitialize (&__f__);
@@ -493,7 +495,15 @@ public define fun ()
 
 public define funcall ()
 {
-  (@fun ().__funcref) ();
+  variable e, f;
+  try (e)
+    {
+    f = __function__ (;as = __anon_name__, print_err);
+    (@f.__funcref) (;;__qualifiers);
+    eval ("private define " + __anon_name__ + " ();", __anon_name__);
+    }
+  catch AnyError:
+    Exc.print (e);
 }
 
 public define subclass (name)

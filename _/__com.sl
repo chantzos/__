@@ -17,7 +17,10 @@ Class.load ("Smg";__init__ = "__tty_init__", as = "SmgTTY");
 
 public define exit_me (x)
 {
-  This.exit (x);
+  ifnot (qualifier_exists ("dont_call_handlers"))
+    This.at_exit ();
+
+  exit (x);
 }
 
 public define verboseon ()

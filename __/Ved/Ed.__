@@ -162,6 +162,10 @@ subclass Ed
     variable reg = Ved.Reg.get (qualifier ("reg", "\""));
     variable lnr = __vlnr (s, '.');
     variable isP = 'P' == qualifier ("_chr", s._chr);
+    variable line = qualifier ("line");
+
+    ifnot (NULL == line)
+      s.lines[lnr] = line;
 
     if (NULL == reg)
       if (qualifier_exists ("return_line"))
@@ -211,7 +215,8 @@ subclass Ed
 
     set_modified (s);
 
-    s.draw ();
+    ifnot (qualifier_exists ("dont_draw"))
+      s.draw ();
 
     if (qualifier_exists ("return_line"))
       return s.lines[lnr];

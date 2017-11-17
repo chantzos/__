@@ -252,7 +252,7 @@ ifnot (__is_initialized (&DIFFFILE))
 RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
 WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
 
-SPECIAL = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn];
+SPECIAL = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn, DIFFFILE];
 
 This.is.std.out.fd = File.open (This.is.std.out.fn);
 This.is.std.err.fd = File.open (This.is.std.err.fn);
@@ -604,6 +604,9 @@ private define __write__ (argv)
 
   command = argv[0];
   file = length (argv) - 1 ? argv[1] : NULL;
+
+  ifnot (NULL == file)
+    file = Dir.eval (file);
 
   if (any (["w", "w!", "W"]  == command))
     Ved.writefile (s, "w!" == command, [PROMPTROW, 1], file, append;
