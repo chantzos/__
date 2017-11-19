@@ -265,6 +265,7 @@ static SLang_Intrin_Fun_Type Smg_Intrinsics [] =
    MAKE_INTRINSIC_6("slsmg_write_wrapped_string", smg_write_wrapped_string, SLANG_VOID_TYPE, S,I,I,I,I,I),
    MAKE_INTRINSIC_0("slsmg_char_at", smg_char_at, SLANG_INT_TYPE),
    MAKE_INTRINSIC_II("slsmg_set_screen_start", smg_set_screen_start, SLANG_VOID_TYPE),
+   MAKE_INTRINSIC_0("slsmg_get_screen_size", SLtt_get_screen_size, SLANG_VOID_TYPE),
    MAKE_INTRINSIC_I("slsmg_draw_hline", smg_draw_hline, SLANG_VOID_TYPE),
    MAKE_INTRINSIC_I("slsmg_draw_vline", smg_draw_vline, SLANG_VOID_TYPE),
    MAKE_INTRINSIC_III("slsmg_draw_object", smg_draw_object, SLANG_VOID_TYPE),
