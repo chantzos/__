@@ -39,6 +39,7 @@ class Ved
     name,
     dir,
     prev_buf_ind,
+    setframesize,
   end
 
   let VED_DIR = Env->TMP_PATH + "/ved/" + string (Env->PID);
@@ -991,6 +992,7 @@ class Ved
     VED_WIND[name].buffers = Assoc_Type[Ftype_Type];
     VED_WIND[name].bufnames = String_Type[0];
     VED_WIND[name].prev_buf_ind = -1;
+    VED_WIND[name].setframesize = setframesize;
 
     if (qualifier_exists ("on_wind_new"))
       on_wind_new (VED_WIND[name]);
@@ -1353,7 +1355,15 @@ class Ved
         }
       }
 
-    __eval (strjoin (lines, "\n"), ns);
+    try
+      {
+      __eval (strjoin (lines, "\n"), ns);
+      }
+    catch AnyError:
+      {
+      Exc.print (NULL);
+      (@__get_reference ("__messages"));
+      }
   end
 
   def __on_escape__ (s) proc
