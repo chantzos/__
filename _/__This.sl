@@ -74,6 +74,7 @@ static define __INIT__ (role)
       sigint      = 1, % default sigint handler
       new_windows = 1, % if can start other windows of the same application
       other_apps  = 1, % if can start other applications
+      atleast_rows= 6, % requires at least `rows'
       screenactive,
       argv = qualifier ("setargv")
         ? fexpr (`__argv;__set_argc_argv (String_Type[0]);`).call ()
@@ -81,6 +82,7 @@ static define __INIT__ (role)
       },
     on = struct
       {
+      sigwinch,
       reconnect,
       disconnect,
       exit = struct

@@ -17,6 +17,12 @@ subclass Client
     __->__ ("IClient", "SESSION_RDFIFO_FD", open (SESSION_RDFIFO, O_RDONLY), "Class::vset");
   end
 
+  var screen_size_changed = 0;
+
+  def __sigwinch_handler__ (sig) proc
+    screen_size_changed = 1;
+  end
+
   def appnew (s)
     variable apps = assoc_get_keys (App->APPS);
 
@@ -39,6 +45,9 @@ subclass Client
       signal (SIGINT, SIG_IGN, &handl);
       }
 
+    screen_size_changed = 0;
+    signal (SIGWINCH, &__sigwinch_handler__);
+
     variable is_su = __get_qualifier_as (Integer_Type, qualifier ("issu"), 0);
 
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
@@ -52,6 +61,10 @@ subclass Client
       exit_me (0);
 
     Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+
+    signal (SIGWINCH, This.on.sigwinch);
+    if (screen_size_changed)
+      (@This.on.sigwinch) (SIGWINCH);
 
     if (0 == qualifier_exists ("mode") ||
         0 == (qualifier ("mode") == "Insert"))
@@ -92,6 +105,9 @@ subclass Client
       signal (SIGINT, SIG_IGN, &handl);
       }
 
+    screen_size_changed = 0;
+    signal (SIGWINCH, &__sigwinch_handler__);
+
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
     () = Sock.get_int (SESSION_RDFIFO_FD);
     Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
@@ -102,6 +118,10 @@ subclass Client
       exit_me (0);
 
     Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+
+    signal (SIGWINCH, This.on.sigwinch);
+    if (screen_size_changed)
+      (@This.on.sigwinch) (SIGWINCH);
 
     if (0 == qualifier_exists ("mode") ||
         0 == (qualifier ("mode") == "Insert"))
@@ -118,11 +138,18 @@ subclass Client
       signal (SIGINT, SIG_IGN, &handl);
       }
 
+    screen_size_changed = 0;
+    signal (SIGWINCH, &__sigwinch_handler__);
+
     Sock.send_int (SESSION_WRFIFO_FD, Api->GO_IDLED);
     variable retval = Sock.get_int (SESSION_RDFIFO_FD);
 
     if (This.has.sigint)
       signal (SIGINT, handl);
+
+    signal (SIGWINCH, This.on.sigwinch);
+    if (screen_size_changed)
+      (@This.on.sigwinch) (SIGWINCH);
 
     return retval;
   end

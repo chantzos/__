@@ -66,6 +66,12 @@ subclass Srv
     assoc_delete_key (App->APPS[s.name], string (s.pid));
   end
 
+  var screen_size_changed = 0;
+
+  def __sigwinch_handler__ (sig) proc
+    screen_size_changed = 1;
+  end
+
   def appnew (s)
     ifnot (This.has.other_apps)
       return;
@@ -87,6 +93,9 @@ subclass Srv
       variable handl;
       signal (SIGINT, SIG_IGN, &handl);
       }
+
+    screen_size_changed = 0;
+    signal (SIGWINCH, &__sigwinch_handler__);
 
     loop (1)
     {
@@ -119,6 +128,10 @@ subclass Srv
     }
 
     Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+
+    signal (SIGWINCH, This.on.sigwinch);
+    if (screen_size_changed)
+      (@This.on.sigwinch) (SIGWINCH);
 
     if (0 == qualifier_exists ("mode") ||
         0 == (qualifier ("mode") == "Insert"))
@@ -158,10 +171,17 @@ subclass Srv
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
 
+      screen_size_changed = 0;
+      signal (SIGWINCH, &__sigwinch_handler__);
+
       variable retval = self.reconnect_to_app (s.argv[0]);
       if (1 == retval)
         {
         Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+
+        signal (SIGWINCH, This.on.sigwinch);
+        if (screen_size_changed)
+          (@This.on.sigwinch) (SIGWINCH);
 
         if (0 == qualifier_exists ("mode") ||
             0 == (qualifier ("mode") == "Insert"))
@@ -197,11 +217,18 @@ subclass Srv
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
 
+      signal (SIGWINCH, This.on.sigwinch);
+      if (screen_size_changed)
+        (@This.on.sigwinch) (SIGWINCH);
+
       self.connect_to_app (app;;__qualifiers);
 
       if (APP_ERR)
         {
         Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+        signal (SIGWINCH, This.on.sigwinch);
+        if (screen_size_changed)
+         (@This.on.sigwinch) (SIGWINCH);
 
         if (0 == qualifier_exists ("mode") ||
             0 == (qualifier ("mode") == "Insert"))
@@ -235,6 +262,9 @@ subclass Srv
       }
 
     Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    signal (SIGWINCH, This.on.sigwinch);
+    if (screen_size_changed)
+      (@This.on.sigwinch) (SIGWINCH);
 
     if (0 == qualifier_exists ("mode") ||
         0 == (qualifier ("mode") == "Insert"))

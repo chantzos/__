@@ -1,6 +1,7 @@
 This.is.shell = 0;
-This.has.frames = 2;
-This.has.new_windows  = 0;
+This.has.frames = 1;
+This.has.new_windows = 0;
+This.has.atleast_rows = 7;
 
 VED_OPTS.new_frame = 0;
 VED_OPTS.del_frame = 0;

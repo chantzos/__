@@ -1,8 +1,8 @@
 private define ask_tty (self, questar, ar)
 {
-  self.tostderr (questar);
-
-  variable len = COLUMNS - strlen (questar[-1]) - 1;
+  () = array_map (Integer_Type, &fprintf, stderr, "%S\n", questar);
+  variable len = COLUMNS - (Array_Type == typeof (questar)
+    ? strlen (questar[-1]) : strlen (questar)) - 1;
 
   loop (len)
     () = fprintf (stderr, "\b");
@@ -26,7 +26,7 @@ private define ask_smg (self, quest_ar, ar)
 
 private define ask (self, quest_ar, ar)
 {
-  if (This.is.tty ())
+  if (This.is.tty () || qualifier_exists ("use_tty"))
     ask_tty (self, quest_ar, ar;;__qualifiers);
   else
     if (This.is.smg ())

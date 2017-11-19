@@ -54,8 +54,9 @@ private define __err_handler__ (self, s)
   exit_me (1;dont_call_handlers);
 }
 
-This.err_handler   = &__err_handler__;
-This.is.my.name = "____" == path_basename_sans_extname (This.has.argv[0])
+This.err_handler = &__err_handler__;
+
+This.is.my.name  = "____" == path_basename_sans_extname (This.has.argv[0])
    ? "__"
    : strtrim_beg (path_basename_sans_extname (This.has.argv[0]), "_");
 This.is.my.namespace = "__" + strup (This.is.my.name) + "__";
@@ -112,12 +113,20 @@ ifnot (access (Env->LOCAL_CLASS_PATH + "/__app.slc", F_OK))
 if (NULL == This.is.my.basedir)
   This.is.my.basedir = Env->LOCAL_APP_PATH + "/" + This.is.my.name;
 
+if (NULL == This.is.my.datadir)
+  This.is.my.datadir = Env->USER_DATA_PATH + "/" + This.is.my.name;
+
 if (NULL == This.is.my.tmpdir)
   This.is.my.tmpdir  = Env->TMP_PATH + "/" + This.is.my.name + "/" +
     string (Env->PID);
 
-if (NULL == This.is.my.datadir)
-  This.is.my.datadir = Env->USER_DATA_PATH + "/" + This.is.my.name;
+% the error handler still will not do the right thing if the
+% application is started by another instance
+
+if (-1 == Dir.make_parents (This.is.my.tmpdir, File->PERM["PRIVATE"];strict))
+  This.err_handler ("cannot create directory " + This.is.my.tmpdir);
+
+I->init ();
 
 This.is.my.genconf = Env->USER_DATA_PATH + "/Generic/conf";
 This.is.my.conf    = This.is.my.datadir  + "/config/conf";
@@ -165,9 +174,6 @@ if (-1 == access (This.is.my.basedir, F_OK))
     if (-1 == access ((This.is.my.basedir = Env->USER_APP_PATH + "/" + This.is.my.name,
         This.is.my.basedir), F_OK))
       This.err_handler (This.is.my.name + ": no such application");
-
-if (-1 == Dir.make_parents (This.is.my.tmpdir, File->PERM["PRIVATE"];strict))
-  This.err_handler ("cannot create directory " + This.is.my.tmpdir);
 
 if (-1 == Dir.make_parents (This.is.my.datadir + "/config", File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.datadir + "/config");
@@ -224,6 +230,10 @@ catch AnyError:
    Exc.print (NULL);
    This.err_handler ("... exiting ...");
    }
+
+ifnot (NULL == This.has.atleast_rows)
+  if (LINES < This.has.atleast_rows)
+    This.err_handler (This.is.my.name + ": LINES [" + string (LINES) + "] are less than the requested");
 
 if (NULL == This.is.std.err.fn)
   This.is.std.err.fn = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
@@ -1070,13 +1080,38 @@ Com.let ("COMMANDS_FOR_PAGER", fexpr (`()
 if (This.has.other_apps)
   App.build_table ();
 
-I->init ();
-
 __initrline ();
 
 Smg.init ();
 
 Input.init ();
+
+This.on.sigwinch = fun (`
+    (sig)
+  signal (sig, This.on.sigwinch);
+
+  Smg.__init ();
+  putenv ("LINES=" + string (LINES));
+  putenv ("COLUMNS=" + string (COLUMNS));
+
+  Smg.at_exit ();
+
+  ifnot (NULL == This.has.atleast_rows)
+    if (LINES < This.has.atleast_rows)
+      {
+      variable retval =
+        IO.ask ("LINES [" + string (LINES) + "] are less than the requested, " +
+        "exit now [y/n]?", ['y', 'n'];use_tty);
+
+      if ('y' == retval)
+        App.quit_me ();
+      }
+
+  slsmg_get_screen_size ();
+  Smg.init ();
+  Input.init ();
+  Ved.handle_sigwinch ();
+  `).__funcref;
 
 public define sigint_handler ();
 public define sigint_handler (sig)
@@ -1108,6 +1143,8 @@ funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
   ifnot (access (path + "/" + app + ".sl", F_OK|R_OK))
     Load.file   (path + "/" + app + ".sl");
 `);
+
+signal (SIGWINCH, This.on.sigwinch);
 
 (@__get_reference ("init_" + This.is.my.name));
 

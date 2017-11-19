@@ -7,10 +7,16 @@ class Smg
 
   var public MSGROW = LINES - 1;;
   var public PROMPTROW = MSGROW - 1;
+  var static IMG = List_Type[LINES - 2];
 
-  def __init () proc
-    MSGROW    = LINES - 1;
-    PROMPTROW  = MSGROW - 1;
+  decl set_img
+
+  def __init ()
+    __WNsize ();
+    MSGROW = LINES - 1;
+    PROMPTROW = MSGROW - 1;
+    IMG = List_Type[LINES - 2];
+    set_img (NULL, [0:LINES - 3], NULL, NULL, NULL);
   end
 
   var __COLOR__ = struct
@@ -33,7 +39,6 @@ class Smg
   comment = "brown",
   };
 
-  var static IMG = List_Type[LINES - 2];
   var static MSG_SEND = 0;
   var SMGINITED = 0;
   var SUSPENDSTATE = 0;
@@ -61,8 +66,6 @@ class Smg
   end
 
   def init ()
-    __init ();
-
     if (SMGINITED)
       return;
 
@@ -182,23 +185,38 @@ class Smg
   end
 
   def set_img (lines, ar, clrs, cols)
-    variable i;
+    variable i, len = length (lines), imglen = length (IMG);
+
+    if (imglen < len)
+      {
+      lines = lines[[:imglen - 1]];
+      ifnot (NULL == ar)
+        ar = ar[[:imglen - 1]];
+
+      ifnot (NULL == clrs)
+        clrs = clrs[[:imglen - 1]];
+
+      ifnot (NULL == cols)
+        cols = cols[[:imglen - 1]];
+
+      len = imglen;
+      }
 
     if (NULL == clrs)
       {
-      clrs = Integer_Type[length (lines)];
+      clrs = Integer_Type[len];
       clrs[*] = 0;
       }
 
     if (NULL == cols)
       {
-      cols = Integer_Type[length (lines)];
+      cols = Integer_Type[len];
       cols[*] = 0;
       }
 
     if (NULL == ar)
       {
-      ar = String_Type[length (lines)];
+      ar = String_Type[len];
       ar[*] = " ";
       }
 
@@ -207,17 +225,21 @@ class Smg
   end
 
   def restore (r, ptr, redraw)
-    variable len = length (r);
-    variable ar = String_Type[0];
-    variable rows = Integer_Type[0];
-    variable clrs = Integer_Type[0];
-    variable cols = Integer_Type[0];
-    variable columns = qualifier ("columns", COLUMNS);
-    variable i;
+    variable
+      ar   = String_Type[0],
+      rows = Integer_Type[0],
+      clrs = Integer_Type[0],
+      cols = Integer_Type[0],
+      columns = qualifier ("columns", COLUMNS),
+      imglen = length (IMG);
 
-    _for i (0, len - 1)
+    variable i;
+    _for i (0, length (r) - 1)
       {
-      ar = [ar, IMG[r[i]][0]];
+      ifnot (r[i] < imglen)
+        continue;
+
+      ar   = [ar,   IMG[r[i]][0]];
       clrs = [clrs, IMG[r[i]][1]];
       rows = [rows, IMG[r[i]][2]];
       cols = [cols, IMG[r[i]][3]];

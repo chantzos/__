@@ -168,6 +168,8 @@ private define __err_handler__ (this, __r__)
 
 public define init_shell ()
 {
+  variable h;
+  signal (SIGWINCH, SIG_IGN, &h);
   This.err_handler = &__err_handler__;
 
   OUT_VED.opt_show_tilda = 0;
@@ -187,6 +189,7 @@ public define init_shell ()
 
   __draw_buf (OUT_VED);
 
+  signal (SIGWINCH, This.on.sigwinch);
   mainloop ();
 }
 

@@ -663,4 +663,80 @@ beg
 
     File.read (file);
   end
+
+  def handle_sigwinch ()
+    VED_ROWS = [1:LINES - 3];
+    Smg.cls ();
+
+    variable fnms, fnm, w, i, s, ii, cur;
+    variable winds = assoc_get_keys (VED_WIND);
+
+    _for i (0, length (winds) - 1)
+      {
+      w = VED_WIND[winds[i]];
+      w.frame_rows = (@w.setframesize) (w.frames);
+
+      if (length (w.frame_names))
+      _for ii (0, w.frames - 1)
+        {
+        fnm = w.frame_names[ii];
+        if (NULL == fnm)
+          continue;
+
+        s = w.buffers[w.frame_names[ii]];
+        s.rows = w.frame_rows[ii];
+        __vinitrowsbuffvars__ (s);
+        s._i = s._ii;
+
+        if (winds[i] == VED_CUR_WIND && ii == w.cur_frame)
+          cur = s;
+        else
+          s.draw (;dont_draw, no_statusline_clr);
+        }
+
+      _for ii (0, length (w.bufnames) - 1)
+        {
+        if (any (w.bufnames[ii] == w.frame_names))
+          continue;
+
+        s = w.buffers[w.bufnames[ii]];
+        s.rows = w.frame_rows[0];
+        __vinitrowsbuffvars__ (s);
+        s._i = s._ii;
+        s.draw (;dont_draw, no_statusline_clr);
+        }
+
+      _for ii (0, length (SPECIAL) - 1)
+        {
+        if (any (SPECIAL[ii] == w.frame_names))
+          continue;
+
+        if (NULL == wherefirst (SPECIAL[ii] == w.bufnames))
+          continue;
+
+        s = w.buffers[SPECIAL[ii]];
+        s.rows = VED_ROWS;
+        __vinitrowsbuffvars__ (s);
+        s._i = s._ii;
+
+        s.draw (;dont_draw, no_statusline_clr);
+        }
+
+      w.rline._prow = PROMPTROW;
+      w.rline._lines = LINES;
+      w.rline._columns = COLUMNS;
+      w.rline._row = PROMPTROW;
+      }
+
+    cur.draw ();
+    topline ("(" + This.is.my.name + ")");
+
+    if (This.is.my.name == "ved")
+      Smg.setrcdr (cur.ptr[0], cur.ptr[1]);
+    else
+      {
+      s = Ved.get_cur_rline ();
+      Rline.prompt (s, s._lin, s._col);
+      }
+  end
 end
