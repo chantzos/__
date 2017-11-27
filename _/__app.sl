@@ -1,6 +1,6 @@
 __use_namespace ("_");
 
-sigprocmask (SIG_BLOCK, [SIGINT]);
+sigprocmask (SIG_BLOCK, [SIGINT, SIGALRM]);
 
 public variable APP_ERR, I, App, X, Dir;
 
@@ -700,7 +700,7 @@ private define __info (argv)
 
   ifnot (NULL == Opt.Arg.exists ("--edit", &argv))
     {
-    variable f = I.get_src_path (k.dir) + "/desc.txt";
+    variable f = Me.get_src_path (k.dir) + "/desc.txt";
     __editor (f);
     return;
     }
@@ -1094,6 +1094,7 @@ This.on.sigwinch = fun (`
   putenv ("LINES=" + string (LINES));
   putenv ("COLUMNS=" + string (COLUMNS));
 
+  Input.at_exit ();
   Smg.at_exit ();
 
   ifnot (NULL == This.has.atleast_rows)

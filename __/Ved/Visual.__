@@ -508,7 +508,7 @@ subclass Visual
     variable is_wrapped = __vis_wrapped__ (s, strlen (vs.lines[cur]),
       vs.index[cur], vs.findex[cur]);
 
-    variable retval = __left (s, is_wrapped);
+    variable retval = __vleft__ (s, is_wrapped);
 
     if (-1 == retval)
       return;
@@ -555,7 +555,7 @@ subclass Visual
   end
 
   def v_c_right (vs, s, cur) proc
-    variable retval = __right (s, vs.linlen[-1]);
+    variable retval = __vright__ (s, vs.linlen[-1]);
 
     if (-1 == retval)
       return;

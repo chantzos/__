@@ -395,7 +395,8 @@ beg
     topline ("(" + This.is.my.name + ")");
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
-      () = chdir (cur._dir);
+      ifnot (Dir.are_same (getcwd (), cur._dir))
+        () = chdir (cur._dir);
   end
 
   % many functions (like the next) imply no errors.

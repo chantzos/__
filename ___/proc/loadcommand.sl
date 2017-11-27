@@ -48,6 +48,7 @@ else
   BGPIDFILE = BG + "/" + string (Env->PID) + ".RUNNING";
   () = open (BGPIDFILE, O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
 
+  sigprocmask (SIG_UNBLOCK, [SIGALRM]);
   signal (SIGALRM, &sigalrm_handler);
   }
 

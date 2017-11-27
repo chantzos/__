@@ -218,7 +218,7 @@ private define __commitall__ (argv)
 {
   variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
 
-  () = File.write (SCRATCH, "\000\n-- DIFF --");
+  () = File.write (SCRATCH, "\n-- DIFF --");
 
   if (Scm.Git.status (;redir_to_file = SCRATCH, flags = ">>"))
     {

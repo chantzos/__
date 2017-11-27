@@ -391,7 +391,7 @@ subclass Insert
     variable plen = strlen (@line);
     variable len = (@line = s.lines[is.lnr], strlen (@line));
 
-    __adjust_col (s, len, plen);
+    __vadjust_col__ (s, len, plen);
 
     if (s.ptr[0] < s.vlins[-1])
       {
@@ -448,7 +448,7 @@ subclass Insert
     variable plen = strlen (@line);
     variable len = (@line = s.lines[is.lnr], strlen (@line));
 
-    __adjust_col (s, len, plen);
+    __vadjust_col__ (s, len, plen);
 
     if (s.ptr[0] > s.vlins[0])
       {

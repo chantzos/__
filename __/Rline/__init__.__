@@ -2306,7 +2306,7 @@ class Rline
 
       if (any (Input->rmap.windnext == s._chr))
         {
-        (@__get_reference ("next_wind")) (s);
+        (@__get_reference ("__vnext_wind")) (s);
         set (NULL, s);
         prompt (NULL, s, s._lin, s._col);
         continue;

@@ -120,11 +120,11 @@ public define on_wind_new (w)
   Ved.draw_wind ();
 }
 
-public define _del_frame_ (s)
+public define __vdel_frame (s)
 {
 }
 
-public define _new_frame_ (s)
+public define __vnew_frame (s)
 {
 }
 

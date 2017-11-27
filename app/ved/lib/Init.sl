@@ -497,7 +497,7 @@ define __vmessages ()
   Ved.draw_wind ();
 }
 
-public define handle_comma (s)
+public define __vhandle_comma (s)
 {
   variable chr = Input.getch ();
   variable refresh = 1;
@@ -538,7 +538,7 @@ private define __detach__ (s)
   App.detach ();
 }
 
-VED_PAGER[string (',')] = &handle_comma;
+VED_PAGER[string (',')] = &__vhandle_comma;
 VED_PAGER[string (Input->F1)] = &__app_reconnect;
 VED_PAGER[string (Input->F2)] = &__app_new;
 VED_PAGER[string (Input->CTRL_j)] = &__detach__;
