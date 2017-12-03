@@ -11,22 +11,14 @@ class Xsrv
   let X_TERM_BIN = (NULL == URXVTD_BIN
     ? Sys.which ("xterm") : Sys.which ("urxvtc"));
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
+  let LANG_LAYOUT = NULL;
+  let LANG_KEY = "grp:alt_space_toggle";
+  let XMODMAPRC = NULL;
+  let XMODMAP_BIN = Sys.which ("xmodmap");
   let ERR = 0xc8;
 
-  def __desktop_change () public proc
-  end
-
-  def __rotate_desk () public proc
-  end
-
-  def __follow_client () public proc
-  end
-
-  def __client_to_desk () public proc
-  end
-
-  def __last_desk () public proc
-  end
+  decl public __desktop_change, __rotate_desk, __follow_client
+  decl public __client_to_desk, __last_desk
 
   % Config samples,
   % those can be set on SRC_PATH/local/__/Xlocalxsrv/__init.__ instead
@@ -184,9 +176,15 @@ class Xsrv
         }
       }
 
-    % local
     ifnot (NULL == SETXKBMAP_BIN)
-      () = system (SETXKBMAP_BIN + " -layout \"us,el\" -option \"grp:alt_space_toggle\"");
+      ifnot (NULL == LANG_LAYOUT)
+        () = system (SETXKBMAP_BIN + " -layout  \"" + LANG_LAYOUT +
+          "\" -option \"" + LANG_KEY + "\"");
+
+    ifnot (NULL == XMODMAP_BIN)
+      ifnot (NULL == XMODMAPRC)
+        ifnot (access (XMODMAPRC, R_OK|F_OK))
+          () = system (XMODMAP_BIN + " " + XMODMAPRC);
 
     sleep (1);
 

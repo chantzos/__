@@ -267,7 +267,12 @@ class Rline
             }
 
         if (is_system_com)
+          {
           (@__get_reference ("__system")) ([strjoin (s.argv, " ")]);
+          s.argv[0] = "!" + s.argv[0];
+          s.history = addhistory (NULL, s.history, s.argv, s.historyaddforce);
+          addlcmp (NULL, s.lcmp, s.argv[-1]);
+          }
 
       return;
       }

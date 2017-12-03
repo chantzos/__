@@ -1050,7 +1050,6 @@ private define parse_declare (eval_buf, tokens)
     if (idx + 1 > length (tokens))
       throw ClassError, "Class::__INIT__::function declaration, missing function name";
 
-
     if (is_var)
       decl_buf = scope + " variable " + strjoin (strtok (
         strjoin (tokens[[idx:]]), ","), ", ") + ";\n";

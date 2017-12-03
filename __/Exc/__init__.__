@@ -25,7 +25,7 @@ class Exc
       exc = struct {error = 0, description = "", file = "", line = 0, function = "", object, message = "",
       Exception = "No exception in the stack"};
 
-    strchop (sprintf ("Exception: %s\n\
+    sprintf ("Exception: %s\n\
 Message:     %s\n\
 Object:      %S\n\
 Function:    %s\n\
@@ -33,6 +33,12 @@ Line:        %d\n\
 File:        %s\n\
 Description: %s\n\
 Error:       %d",
-    _push_struct_field_values (exc)), '\n', 0);
+    _push_struct_field_values (exc));
+
+    if (qualifier_exists ("to_string"))
+      return;
+
+    "\n";
+    strtok ();
   end
 end

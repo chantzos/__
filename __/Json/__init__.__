@@ -1,16 +1,16 @@
 class Json
   import json
 
-
   var Type_Map = Ref_Type[0];
 
   def add_type_handler () proc
     variable func = ();
-     loop (_NARGS-1)
+     loop (_NARGS - 1)
        {
       	variable type = ();
       	variable idx = __class_id (type);
       	variable n = length (Type_Map);
+
       	if (idx >= n)
     	    {
     	    variable new_map = Ref_Type[idx+1];
@@ -30,7 +30,7 @@ class Json
   	     return func;
       }
      catch IndexError:
-       throw ClassError, "Json::get_encode_fun::Json_Invalid_Json_Error " +
+       throw Json_Invalid_Json_Error, "Json::get_encode_fun::Json_Invalid_Json_Error " +
          type + " does not represent a JSON data structure", __get_exception_info;
   end
 
@@ -45,7 +45,7 @@ class Json
   def json_encode_boolean (indent, q, data) proc
     if (data == 1) return "true"B;
     if (data == 0) return "false"B;
-    throw ClassError, "Json::json_encode_boolean::Json_Invalid_Json_Error " +
+    throw Json_Invalid_Json_Error, "Json::json_encode_boolean::Json_Invalid_Json_Error " +
       sprintf (`invalid boolean value '\%03o'; only '\000' and '\001' are allowed`, data);
   end
 
@@ -175,7 +175,7 @@ class Json
       return json_encode_object (data);
 
     variable type = _typeof (data);
-      throw ClassError, "Json::default_handler::Json_Invalid_Json_Error " +
+      throw Json_Invalid_Json_Error, "Json::default_handler::Json_Invalid_Json_Error " +
         type + " does not represent a JSON data structure";
   end
 
@@ -220,10 +220,32 @@ class Json
       };
   end
 
-  def json_encode (data)
-    variable q = process_qualifiers (;; __qualifiers);
-    variable func = get_encode_func (typeof (data));
-    variable json = (@func)(""B, q, data);
-    typecast (json, String_Type);
+  def encode (data)
+    try
+      {
+      variable
+        q = process_qualifiers (;; __qualifiers),
+        func = get_encode_func (typeof (data)),
+        js = (@func)(""B, q, data);
+      }
+    catch Json_Invalid_Json_Error:
+      {
+      self.err (Exc.fmt (NULL;to_string));
+      return NULL;
+      }
+
+    typecast (js, String_Type);
+  end
+
+  def decode (data)
+    try
+      {
+      json_decode (data);
+      }
+    catch Json_Parse_Error:
+      {
+      self.err (Exc.fmt (NULL));
+      NULL;
+      }
   end
 end

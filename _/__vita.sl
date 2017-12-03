@@ -110,23 +110,23 @@ public variable IO = struct {__name = NULL, tostderr = &IO_tostderr};
 
 __use_namespace ("Exc");
 
-private define Exc_isnot (self, e)
+private define Exc_isnot (self, exc)
 {
-  NULL == e || Struct_Type != typeof (e) ||
-  NULL == wherefirst (get_struct_field_names (e) == "object") ||
-  8 != length (get_struct_field_names (e));
+  NULL == exc || Struct_Type != typeof (exc) ||
+  NULL == wherefirst (get_struct_field_names (exc) == "object") ||
+  8 != length (get_struct_field_names (exc));
 }
 
-private define Exc_fmt (self, e)
+private define Exc_fmt (self, exc)
 {
-  if (NULL == e)
-    e = __get_exception_info;
+  if (NULL == exc)
+    exc = __get_exception_info;
 
-  if (Exc_isnot (NULL, e))
-    e = struct {error = 0, description = "", file = "", line = 0, function = "", object, message = "",
+  if (Exc_isnot (NULL, exc))
+    exc = struct {error = 0, description = "", file = "", line = 0, function = "", object, message = "",
     Exception = "No exception in the stack"};
 
-  strchop (sprintf ("Exception: %s\n\
+    sprintf ("Exception: %s\n\
 Message:     %s\n\
 Object:      %S\n\
 Function:    %s\n\
@@ -134,19 +134,25 @@ Line:        %d\n\
 File:        %s\n\
 Description: %s\n\
 Error:       %d",
-    _push_struct_field_values (e)), '\n', 0);
+    _push_struct_field_values (exc));
+
+    if (qualifier_exists ("to_string"))
+      return;
+
+    "\n";
+    strtok ();
 }
 
-private define Exc_print (self, e)
+private define Exc_print (self, exc)
 {
-  if (0 == Exc_isnot (NULL, e) ||
-     (0 == (e = __get_exception_info, Exc_isnot (NULL, e))))
-   IO_tostderr (NULL, Exc_fmt (NULL, e));
+  if (0 == Exc_isnot (NULL, exc) ||
+     (0 == (exc = __get_exception_info, Exc_isnot (NULL, exc))))
+   IO_tostderr (NULL, Exc_fmt (NULL, exc));
 
-  while (Exc_isnot (NULL, e) == 0 == Exc_isnot (NULL, e.object))
+  while (Exc_isnot (NULL, exc) == 0 == Exc_isnot (NULL, exc.object))
     {
-    IO_tostderr (NULL, Exc_fmt (NULL, e.object));
-    e = e.object;
+    IO_tostderr (NULL, Exc_fmt (NULL, exc.object));
+    exc = exc.object;
     }
 }
 
