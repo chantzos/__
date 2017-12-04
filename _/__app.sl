@@ -168,6 +168,9 @@ funcall (`
 
 This.is.std.out.type = "ashell";
 
+if (NULL == Sys->SUDO_BIN)
+  This.error_handler ("sudo executable cannot be found in PATH");
+
 if (-1 == access (This.is.my.basedir, F_OK))
   if (-1 == access ((This.is.my.basedir = Env->STD_APP_PATH + "/" + This.is.my.name,
       This.is.my.basedir), F_OK))

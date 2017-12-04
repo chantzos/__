@@ -292,9 +292,13 @@ private define __install_distribution (argv)
   variable exec = Env->SRC_PATH + "/___.sl";
   variable myargv = [Sys->SLSH_BIN, exec, "-v", "--no-color"];
   variable install_mdls = Opt.Arg.exists ("--compile-modules", &argv;del_arg);
+  variable warnings = Opt.Arg.exists ("--disable-warnings", &argv;del_arg);
 
   if (NULL == install_mdls)
     myargv = [myargv, "--compile=no"];
+
+  if (NULL == warnings)
+    myargv = [myargv, "--warnings"];
 
   variable handler;
   signal (SIGINT, SIG_IGN, &handler);
@@ -355,6 +359,7 @@ private define __diff__ (argv)
     status,
     p = Proc.init (0, 1, 1),
     dirs = ["local", "usr", "com", "app", "___", "__", "_"],
+    files = ["___.sl", "README.md"],
     p_argv = [diff_exec, "-Naur"];
 
   p.stderr.file = This.is.std.err.fn;
@@ -373,7 +378,23 @@ private define __diff__ (argv)
       this_p + "/" + dirs[i], that_p + "/" + dirs[i]], NULL);
     }
 
+  i = length (files);
+
+  while (i)
+    {
+    i--;
+    status = p.execv ([p_argv,
+      this_p + "/" + files[i], that_p + "/" + files[i]], NULL);
+    }
+
   variable ved = @Ved.get_cur_buf ();
+
+  if (1 == stat_file (DIFFFILE).st_size)
+    {
+    Smg.send_msg_dr ("No differences have been found", 0, ved.ptr[0], ved.ptr[1]);
+    return;
+    }
+
   __viewfile  (DIFF_VED, "diff", [1, 0], 0);
   Ved.setbuf (ved._abspath);
   Ved.draw_wind ();
@@ -624,7 +645,9 @@ private define my_commands ()
 
   a["install_distribution"] = @Argvlist_Type;
   a["install_distribution"].func = &__install_distribution;
-  a["install_distribution"].args = ["--compile-modules void compile modules"];
+  a["install_distribution"].args = [
+    "--compile-modules void compile modules",
+    "--disable-warnings void disable warnings (enabled by default)"];
 
   a["myrepo"] = @Argvlist_Type;
   a["myrepo"].func = &__myrepo;

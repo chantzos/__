@@ -9,6 +9,7 @@ if (any ("--help" == __argv or  "-h" == __argv))
      "  --debug        compile modules with debug flags",
      "  --no-x         don't compile X code (xlib headers and libs are required)",
      "  --compile=no   don't compile modules (usefull _only_ at later installations)",
+     "  -W|--warnings  enable warnings (some checks for executables)",
      "",
      "PREQUISITIES:",
      "",
@@ -48,22 +49,33 @@ if (is_enough)
       exit (1);
       }
 
+public variable DEBUG = any ("--debug" == __argv);
+
 private variable SRC_PATH =
   (SRC_PATH = path_concat (getcwd (), path_dirname (__FILE__)),
     SRC_PATH[[-2:]] == "/."
       ? substr (SRC_PATH, 1, strlen (SRC_PATH) - 2)
       : SRC_PATH);
-private variable SRC_C_PATH = SRC_PATH + "/C";
-private variable SRC_TMP_PATH = SRC_PATH + "/tmp";
-private variable VERBOSE = any ("--verbose" == __argv or "-v" == __argv);
-private variable NOCOLOR = any ("--no-color" == __argv);
-private variable OUTCOLOR = NOCOLOR ? "" : "\e[37m";
-private variable ERRCOLOR = NOCOLOR ? "" : "\e[31m";
-private variable ESCCOLOR = NOCOLOR ? "" : "\e[m";
-private variable DONT_COMPILE_MODULES = any ("--compile=no" == __argv);
-private variable CC = "gcc";
-public  variable DEBUG = any ("--debug" == __argv);
-private variable X = any ("--no-x" == __argv) ? 0 : 1;
+private variable
+  SRC_C_PATH = SRC_PATH + "/C",
+  SRC_TMP_PATH = SRC_PATH + "/tmp",
+  WARNINGS = any ("--warnings" == __argv or "-W" == __argv),
+  VERBOSE = any ("--verbose" == __argv or "-v" == __argv),
+  NOCOLOR = any ("--no-color" == __argv),
+  X = [1, 0][any ("--no-x" == __argv)],
+  DONT_COMPILE_MODULES = any ("--compile=no" == __argv),
+  OUTCOLOR = NOCOLOR ? "" : "\e[37m",
+  ERRCOLOR = NOCOLOR ? "" : "\e[31m",
+  ESCCOLOR = NOCOLOR ? "" : "\e[m",
+  CC = "gcc";
+
+private variable REQ_EXECUTABLES = ["sudo"];
+private variable IMP_EXECUTABLES = ["xclip", "diff", "git", "patch"];
+private variable  OPT_EXECUTABLES = [
+  "mplayer", "tar", "unzip", "xz", "bzip2", "gzip", "ps", "ip", "iw",
+  "wpa_supplicant", "dhcpcd", "ping", "xinit", "xauth", "urxvtd",
+  "setxkbmap", "xmodmap", "mcookie", "amixer", "cc", "groff", "col",
+  "mount", "umount", "findmnt", "file"];
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
   "iconv", "json", "taglib", "fd"];
@@ -108,7 +120,7 @@ THESE["__APP__"] =
 
 public variable io;
 
-public define exit_me (self, msg, code)
+private define __exit_me__ (self, msg, code)
 {
   self.at_exit ();
 
@@ -118,11 +130,11 @@ public define exit_me (self, msg, code)
   exit (code);
 }
 
-private define at_exit (self)
+private define __at_exit__ (self)
 {
 }
 
-public variable This = struct {exit = &exit_me, at_exit = &at_exit};
+public variable This = struct {exit = &__exit_me__, at_exit = &__at_exit__};
 
 private define __sigint_handler__ (sig)
 {
@@ -135,7 +147,7 @@ public variable APP_ERR, App;
 
 public define send_msg_dr ();
 
-private define err_handler (self, s)
+private define __err_handler__ (self, s)
 {
   self.exit (NULL, 1);
 }
@@ -259,12 +271,6 @@ else
   if (-1 == mkdir (SRC_TMP_PATH))
     This.exit ("cannot create directory " + SRC_TMP_PATH + "\n" +
       errno_string (errno), 1);
-
-private define is_arg (arg, argv)
-{
-  variable index = wherenot (strncmp (argv, arg, strlen (arg)));
-  length (index) ? index[0] : NULL;
-}
 
 private define readfile (fname)
 {
@@ -562,9 +568,9 @@ eval ("static define COLOR ();", "Smg");
 
 __build__ ("__me__");
 
-This.exit = &exit_me;
-This.err_handler = &err_handler;
-This.at_exit = &at_exit;
+This.exit = &__exit_me__;
+This.err_handler = &__err_handler__;
+This.at_exit = &__at_exit__;
 This.has.max_frames = 2;
 
 private define __build_modules__ ()
@@ -983,14 +989,15 @@ private define __main__ ()
       }
    }
 
+  ifnot (WARNINGS)
+    This.exit ("installation completed", 0);
+
   variable warnings = ["Warnings:\n"];
 
   ifnot (string_match ("$PATH"$, BIN_PATH))
     warnings = [warnings, BIN_PATH, "is not a part of $PATH\n" +
-      BIN_PATH + " should be added to the $PATH environment variable\n"];
-
-  if (NULL == Sys.which ("xclip"))
-    warnings = [warnings, "xclip is not installed, xclipboard won't work\n"];
+      BIN_PATH + " should be added to the $PATH environment variable\n" +
+      "relative paths should work however\n"];
 
   if (NULL == getenv ("XAUTHORITY"))
     warnings = [warnings, "XAUTHORITY environment variable isn't set.\nThis is" +
@@ -1017,6 +1024,21 @@ private define __main__ ()
   if (NULL == getenv ("PATH"))
     warnings = [warnings, "PATH environment variable isn't set.\n" +
       "The programm will refuse to work\n"];
+
+  _for i (0, length (REQ_EXECUTABLES) - 1)
+    if (NULL == Sys.which (REQ_EXECUTABLES[i]))
+      warnings = [warnings, REQ_EXECUTABLES[i] + " is not installed, " +
+        "The programm will refuse to work\n"];
+
+  _for i (0, length (IMP_EXECUTABLES) - 1)
+    if (NULL == Sys.which (IMP_EXECUTABLES[i]))
+      warnings = [warnings, IMP_EXECUTABLES[i] + " is not installed, " +
+        "some critical functions won't be available"];
+
+  _for i (0, length (OPT_EXECUTABLES) - 1)
+    if (NULL == Sys.which (OPT_EXECUTABLES[i]))
+      warnings = [warnings, OPT_EXECUTABLES[i] + " is not installed, " +
+        "some functions won't be available"];
 
   if (length (warnings) > 1)
     io.tostderr (warnings);
