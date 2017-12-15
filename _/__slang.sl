@@ -42,20 +42,22 @@ public define __get_qualifier_as (dtype, q, value)
     : any ([AInteger_Type, AString_Type] == dtype)
       ? typeof (q) != Array_Type
         ? NULL
-        : AInteger_Type == dtype
+        : any (AInteger_Type == dtype)
           ? _typeof (q) == Integer_Type
             ? q
             : NULL
           : _typeof (q) == String_Type
             ? q
             : NULL
-      : dtype == typeof (q)
+      : any (dtype == typeof (q))
         ? q
         : NULL;
 
   if (NULL == q && NULL != value)
     throw ClassError, _function_name + ":: qualifier should be of " +
-      string (dtype);
+      (Array_Type == typeof (dtype)
+        ? strjoin (dtype, " or ")
+        : string (dtype));
   q;
 }
 
