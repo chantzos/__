@@ -79,15 +79,19 @@ private define _edit_other ()
 
   ifnot (_NARGS)
     {
-    ifnot ("e" == qualifier ("argv0"))
+    variable key = qualifier ("argv0");
+
+    ifnot (any (["e", "e!"] == key))
       return;
 
-    variable key;
-    Smg.send_msg_dr ("reload current buffer [y/n]", 1, NULL, NULL);
-    while (key = Input.getch (), 0 == any (['n', 'y'] == key));
+    if ("e" == key)
+      {
+      Smg.send_msg_dr ("reload current buffer [y/n]", 1, NULL, NULL);
+      while (key = Input.getch (), 0 == any (['n', 'y'] == key));
 
-    if ('n' == key)
-      return;
+      if ('n' == key)
+        return;
+      }
 
     __vreread (cb);
     Smg.send_msg_dr ("realoaded", 0, cb.ptr[0], cb.ptr[1]);
@@ -544,6 +548,7 @@ VED_PAGER[string (Input->F2)] = &__app_new;
 VED_PAGER[string (Input->CTRL_j)] = &__detach__;
 
 VED_CLINE["e"]   =      &_edit_other;
+VED_CLINE["e!"]  =      &_edit_other;
 VED_CLINE["b"]   =      &_edit_other;
 VED_CLINE["bd"]  =      &_bdelete;
 VED_CLINE["bd!"] =      &_bdelete;
