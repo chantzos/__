@@ -107,7 +107,7 @@ if (X)
 private variable THESE = Assoc_Type[String_Type];
 
 THESE["__me__"] = `public variable This = This->__INIT__ ("__INSTALL__";` +
-    `shell = 0, smg = 0, ved = 0, err_handler = NULL, at_exit = NULL, exit = NULL);`;
+    `name = "__INSTALL__", shell = 0, smg = 0, ved = 0, err_handler = NULL, at_exit = NULL, exit = NULL);`;
 
 THESE["__"] = `public variable This = This->__INIT__ ("__");`;
 

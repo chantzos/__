@@ -55,6 +55,7 @@ class Ved
   var public FTYPES       = Assoc_Type[Struct_Type];
   var public REG          = Assoc_Type[String_Type];
   var public VED_CUR_WIND = NULL;
+  var public VED_PREV_WIND = NULL;
   var public UNDELETABLE  = String_Type[0];
   var public SPECIAL      = String_Type[0];
   var public VED_ROWS     = [1:LINES - 3];
@@ -77,7 +78,6 @@ class Ved
   var VED_INFOCLRFG = Smg->COLOR.infofg;
   var VED_INFOCLRBG = Smg->COLOR.infobg;
   var VED_PROMPTCLR = Smg->COLOR.prompt;
-  var VED_PREV_WIND = NULL;
 
   def __invalid__ (s) proc
   end
@@ -934,19 +934,21 @@ class Ved
       else
         w = winds[to];
     else
-      ifnot (any ([",", "."] == to))
+      ifnot (any ([",", ".", "prev"] == to))
         return;
       else
         if (to == ",")
           w = winds[wherefirst (winds == VED_CUR_WIND) - 1];
-        else
+        else if (to == ".")
           {
           i = wherefirst (winds == VED_CUR_WIND);
           i = i == windlen - 1 ? 0 : i + 1;
           w = winds[i];
           }
+        else
+          w = VED_PREV_WIND;
 
-    if (w == VED_CUR_WIND)
+    if (NULL == w || w == VED_CUR_WIND || all (0 == (winds == w)))
       return;
 
     VED_PREV_WIND = VED_CUR_WIND;
@@ -957,11 +959,6 @@ class Ved
     on_wind_change (w);
 
     Ved.draw_wind ();
-  end
-
-  def __vnext_wind (s) public proc
-    if (This.has.new_windows)
-      wind_change (NULL, ".");
   end
 
   def on_wind_new (w) public proc
@@ -1914,6 +1911,15 @@ class Ved
     if (NULL == w)
       return;
 
+    variable ws = Ved.get_wind_names ();
+    if (NULL == wc || all (0 == (wc == ws)))
+      _for i (0, length (ws) - 1)
+        ifnot (ws[i] == w)
+          {
+          wc = ws[i];
+          break;
+          }
+
     VED_PREV_WIND = wc;
     VED_CUR_WIND = w;
 
@@ -2142,6 +2148,31 @@ class Ved
       `).__funcref;
   end
 
+  def __wind_rout__ (s, dir) proc
+    ifnot (This.has.new_windows)
+      return;
+
+    if (1 == length (VED_WIND))
+      {
+      if (Rline_Type == typeof (s))
+        __new_wind__ (get_cur_buf (NULL));
+      else
+        __new_wind__ (s);
+
+      return;
+      }
+
+    wind_change (NULL, dir);
+  end
+
+  def __vnext_wind (s) public proc
+    __wind_rout__ (s, ".");
+  end
+
+  def __vprev_wind (s) public proc
+    __wind_rout__ (s, "prev");
+  end
+
   beg
     VED_PAGER[string (Input->F1)]      = &__app_rec__;
     VED_PAGER[string (Input->F2)]      = &__app_new__;
@@ -2149,6 +2180,7 @@ class Ved
     VED_PAGER[string (Input->F4)]      = &__app_new__;
     VED_PAGER[string (Input->F5)]      = &__wind_menu__;
     VED_PAGER[string (Input->F6)]      = &__vnext_wind;
+    VED_PAGER[string (Input->F8)]      = &__vprev_wind;
     VED_PAGER[string (Input->F12)]     = &paste_xsel;
     VED_PAGER[string (Input->DETACH)]  = &__app_detach__;
     VED_PAGER[string (',')]            = &__vhandle_comma;

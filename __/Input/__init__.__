@@ -60,18 +60,20 @@ class Input
 
   let rmap = struct
     {
-    osapprec    = [F1, 0x1006f], % Esc_p
-    osappnew    = [F2, 0x10065], % Esc_f
-    childrec    = [F3],
-    osappnew_su = [F4],
+    app_rec     = F3,
+    app_new     = F2,
+    app_prev    = F1,
+    childrec    = F3,
+    app_menu    = F4,
     windmenu    = [F5, 0x10076], % Esc_w
     windnext    = [F6],
-    battery     = [F9, 0x10061],  % Esc_b
+    windprev    = [F8],
     changelang  = [F10, 0x1006b], % Esc_l
-    home        = [HOME, CTRL_a],
-    end         = [END, CTRL_e],
-    left        = [LEFT, CTRL_b],
+    home        = [HOME,  CTRL_a],
+    end         = [END,   CTRL_e],
+    left        = [LEFT,  CTRL_b],
     right       = [RIGHT, CTRL_f],
+    down        = [DOWN],
     backspace   = [BACKSPACE, CTRL_h, 0x07F],
     delete      = [DELETE],
     delword     = [CTRL_w],

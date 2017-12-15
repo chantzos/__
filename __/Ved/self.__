@@ -598,6 +598,16 @@ beg
       VED_CUR_WIND = i ? winds[i-1] : winds[-1];
       draw_wind (self);
       }
+
+    Array.delete_at (&winds, i);
+
+    if (any (VED_PREV_WIND == [name, VED_CUR_WIND]))
+      _for i (0, length (winds) - 1)
+        ifnot (winds[i] == VED_CUR_WIND)
+          {
+          VED_PREV_WIND = winds[i];
+          break;
+          }
   end
 
   def deftype ()

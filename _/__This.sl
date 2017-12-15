@@ -111,7 +111,7 @@ static define __INIT__ (role)
         {
         role = role,
         namespace,
-        name,
+        name = qualifier ("name"),
         tmpdir,
         basedir,
         datadir,
