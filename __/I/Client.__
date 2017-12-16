@@ -30,7 +30,7 @@ subclass Client
     Rline.prompt (s, s._lin, s._col);
 
     variable saved = Input->rmap.right;
-    Input->rmap.right = [saved, Input->F2, Input->F4];
+    Input->rmap.right = [saved, Input->rmap.app_new];
     () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
@@ -48,7 +48,8 @@ subclass Client
     screen_size_changed = 0;
     signal (SIGWINCH, &__sigwinch_handler__);
 
-    variable is_su = __get_qualifier_as (Integer_Type, qualifier ("issu"), 0);
+    variable is_su = __get_qualifier_as ([Char_Type, Integer_Type],
+        qualifier ("issu"), 0);
 
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
     () = Sock.get_int (SESSION_RDFIFO_FD);
@@ -75,6 +76,10 @@ subclass Client
   end
 
   def appreconnect (s)
+    variable request = [Api->APP_RECON_OTH, Api->APP_RECON_PREV]
+      [qualifier_exists ("previous")];
+
+    if (request == Api->APP_RECON_OTH) {
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_GET_CONNECTED);
 
     variable apps = Sock.get_str_ar (SESSION_RDFIFO_FD, SESSION_WRFIFO_FD);
@@ -87,7 +92,7 @@ subclass Client
     Rline.prompt (s, s._lin, s._col);
 
     variable saved = Input->rmap.right;
-    Input->rmap.right = [saved, Input->F1];
+    Input->rmap.right = [saved, Input->rmap.app_prev, Input->rmap.app_rec];
     () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
@@ -96,6 +101,7 @@ subclass Client
 
     if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
       return;
+    }
 
     Api.reset_app ();
 
@@ -108,9 +114,13 @@ subclass Client
     screen_size_changed = 0;
     signal (SIGWINCH, &__sigwinch_handler__);
 
-    Sock.send_int (SESSION_WRFIFO_FD, Api->APP_RECON_OTH);
-    () = Sock.get_int (SESSION_RDFIFO_FD);
-    Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+    Sock.send_int (SESSION_WRFIFO_FD, request);
+
+    if (request == Api->APP_RECON_OTH)
+      {
+      () = Sock.get_int (SESSION_RDFIFO_FD);
+      Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+      }
 
     variable retval = Sock.get_int (SESSION_RDFIFO_FD);
 

@@ -35,8 +35,8 @@ class Rline
     execline,
     onnolength,
     onnolengthargs,
-    osappnew,
-    osapprec,
+    app_new,
+    app_rec,
     childrec,
     wind_mang,
     parse_argtype,
@@ -325,8 +325,8 @@ class Rline
     rl._columns = qualifier ("columns", COLUMNS);
     rl.onnolength = qualifier ("onnolength");
     rl.onnolengthargs = qualifier ("onnolengthargs");
-    rl.osappnew = qualifier ("osappnew");
-    rl.osapprec = qualifier ("osapprec");
+    rl.app_new = qualifier ("app_new");
+    rl.app_rec = qualifier ("app_rec");
     rl.childrec = qualifier ("childrec");
     rl.wind_mang = qualifier ("wind_mang", &_Null);
     rl.parse_argtype = qualifier ("parse_argtype", &null_argtype);
@@ -899,7 +899,7 @@ class Rline
                 : length (ar) - 1;
           }
 
-      if (Input->DOWN == chr)
+      if (any (Input->rmap.down == chr))
         if (irow > lines || index + items > length (ar) - 1)
           (irow, icol, index) =
             lrow - (length (car) > lines ? lines : length (car)),
@@ -911,7 +911,7 @@ class Rline
           index += items;
           }
 
-      if (Input->LEFT == chr)
+      if (any (Input->rmap.left == chr))
         {
         icol--;
         index--;
@@ -2309,41 +2309,41 @@ class Rline
         continue;
         }
 
-      if (any (Input->rmap.windnext == s._chr))
+      if (any ([Input->rmap.windnext, Input->rmap.windprev] == s._chr))
         {
-        (@__get_reference ("__vnext_wind")) (s);
+        (@__get_reference (["__vnext_wind", "__vprev_wind"]
+          [any (Input->rmap.windprev == s._chr)])) (s);
         set (NULL, s);
         prompt (NULL, s, s._lin, s._col);
         continue;
         }
 
-      if (any (Input->rmap.osappnew == s._chr))
-        ifnot (NULL == s.osappnew)
+      if (any (Input->rmap.app_new == s._chr))
+        ifnot (NULL == s.app_new)
           {
-          s.osappnew ();
+          s.app_new ();
           continue;
           }
 
-      if (any (Input->rmap.osapprec == s._chr))
-        ifnot (NULL == s.osapprec)
+      if (any (Input->rmap.app_rec == s._chr))
+        ifnot (NULL == s.app_rec)
           {
-          s.osapprec ();
+          s.app_rec ();
           continue;
           }
 
-      if (any (Input->rmap.osappnew_su == s._chr))
-        ifnot (NULL == s.osappnew)
+      if (any (Input->rmap.app_prev == s._chr))
+        ifnot (NULL == s.app_rec)
           {
-          s.osappnew (;issu = 1);
+          s.app_rec (;previous);
           continue;
           }
 
-      if (any (Input->rmap.childrec == s._chr))
-        ifnot (NULL == s.childrec)
-          {
-          s.childrec ();
-          continue;
-          }
+      if (any (Input->rmap.app_menu == s._chr))
+        {
+        (@__get_reference ("App->app_menu")) (s);
+        continue;
+        }
 
       if (any (Input->rmap.windmenu == s._chr))
         ifnot (NULL == s.wind_mang)
@@ -2351,14 +2351,6 @@ class Rline
           s.wind_mang ();
           continue;
           }
-
-      if (033 == s._chr)
-        {
-        restore (NULL, Array.unique ([s.cmp_lnrs, s.lnrs[[:-2]]]),
-          s.ptr, 1, s._columns);
-
-        break;
-        }
 
       if (s._ind == 0 == strlen (s.argv[0]))
         if (any (['~', '!', '_', '`', Input->RIGHT] == s._chr))
@@ -2387,6 +2379,14 @@ class Rline
             prompt (NULL, s, s._lin, s._col);
             continue;
             }
+
+      if (033 == s._chr)
+        {
+        restore (NULL, Array.unique ([s.cmp_lnrs, s.lnrs[[:-2]]]),
+          s.ptr, 1, s._columns);
+
+        break;
+        }
 
       if ('\r' == s._chr)
         {

@@ -21,7 +21,8 @@ subclass Srv
   var CHILDREN_PIDS = Integer_Type[0];
   var CHILD_CUR     = NULL;
 
-  var CUR_APP = NULL;
+  var __APP__  = NULL;
+  var CUR_APP  = This.is.my.name + "::" + string (Env->PID);
   var PREV_APP = NULL;
 
   def idle ()
@@ -54,22 +55,63 @@ subclass Srv
   def app_at_exit (s)
     variable code = waitpid (s.pid, 0);
 
-    variable ind = wherefirst_eq (CONNECTED_PIDS, s.pid);
+    variable idx = wherefirst_eq (CONNECTED_PIDS, s.pid);
 
-    CONNECTED_PIDS[ind] = 0;
-    CONNECTED_APPS[ind] = NULL;
+    CONNECTED_PIDS[idx] = 0;
+    CONNECTED_APPS[idx] = NULL;
     CONNECTED_PIDS = CONNECTED_PIDS[where (CONNECTED_PIDS)];
     CONNECTED_APPS = CONNECTED_APPS[wherenot (_isnull (CONNECTED_APPS))];
 
     () = close (s.fd);
     () = remove (s.fifo);
     assoc_delete_key (App->APPS[s.name], string (s.pid));
+
+    variable name = s.name + "::" + string (s.pid);
+    if (name == CUR_APP)
+      CUR_APP = NULL;
+
+    if (name == PREV_APP)
+      PREV_APP = NULL;
   end
 
   var screen_size_changed = 0;
 
   def __sigwinch_handler__ (sig) proc
     screen_size_changed = 1;
+  end
+
+  def __exit_rout__ (s, handl) proc
+    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    signal (SIGWINCH, This.on.sigwinch);
+    if (screen_size_changed)
+      (@This.on.sigwinch) (SIGWINCH);
+
+    ifnot (NULL == CUR_APP)
+      {
+      PREV_APP = CUR_APP;
+      CUR_APP = This.is.my.name + "::" + string (Env->PID);
+      }
+    else
+      {
+      CUR_APP = This.is.my.name + "::" + string (Env->PID);
+      variable idx;
+      if (length (CONNECTED_APPS))
+        _for idx (0, length (CONNECTED_APPS) - 1)
+          ifnot (CONNECTED_APPS[idx] + "::" + string (CONNECTED_PIDS[idx])
+             == CUR_APP)
+            {
+            PREV_APP = CONNECTED_APPS[idx] + "::" + string (CONNECTED_PIDS[idx]);
+            break;
+            }
+
+      }
+
+    if (0 == qualifier_exists ("mode") ||
+        0 == (qualifier ("mode") == "Insert"))
+      {
+      Rline.set (s);
+      Rline.prompt (s, s._lin, s._col);
+      }
   end
 
   def appnew (s)
@@ -84,7 +126,7 @@ subclass Srv
     Rline.prompt (s, s._lin, s._col);
 
     variable saved = Input->rmap.right;
-    Input->rmap.right = [saved, Input->F2, Input->F4];
+    Input->rmap.right = [saved, Input->rmap.app_new];
     () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
@@ -109,16 +151,23 @@ subclass Srv
 
     forever
       {
+      __APP__ = CUR_APP;
       retval = self.mainloop (&issu);
       if (Api->APP_RECON_OTH == retval)
         {
-        retval = self.reconnect_to_app (CUR_APP);
+        retval = self.reconnect_to_app (__APP__);
+        if (1 == retval)
+          break 2;
+        }
+      else if (Api->APP_RECON_PREV == retval)
+        {
+        retval = self.reconnect_to_app (PREV_APP);
         if (1 == retval)
           break 2;
         }
       else if (Api->APP_CON_NEW == retval)
         {
-        self.connect_to_app (CUR_APP;issu = issu);
+        self.connect_to_app (__APP__;issu = issu);
         if (APP_ERR)
           break 2;
         }
@@ -127,18 +176,7 @@ subclass Srv
       }
     }
 
-    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
-
-    signal (SIGWINCH, This.on.sigwinch);
-    if (screen_size_changed)
-      (@This.on.sigwinch) (SIGWINCH);
-
-    if (0 == qualifier_exists ("mode") ||
-        0 == (qualifier ("mode") == "Insert"))
-      {
-      Rline.set (s);
-      Rline.prompt (s, s._lin, s._col);
-      }
+    __exit_rout__ (s, handl;;__qualifiers);
   end
 
   def get_connected_apps () proc
@@ -150,16 +188,29 @@ subclass Srv
     ifnot (This.has.other_apps)
       return;
 
-    variable apps = get_connected_apps ()[[1:]];
+    loop (1) {
+    variable apps;
+    if (qualifier_exists ("previous"))
+      ifnot (NULL == PREV_APP)
+        ifnot (CUR_APP == PREV_APP)
+          {
+          apps = [PREV_APP];
+          s.argv[0] = PREV_APP;
+          break;
+          }
+
+    apps = get_connected_apps ()[[1:]];
+
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
 
     variable saved = Input->rmap.right;
-    Input->rmap.right = [saved, Input->F1];
+    Input->rmap.right = [saved, Input->rmap.app_prev, Input->rmap.app_rec];
     () = Rline.commandcmp (s, apps;already_filtered);
     Input->rmap.right = saved;
 
     variable handl;
+    }
 
     if (any (apps == s.argv[0]))
       {
@@ -177,19 +228,7 @@ subclass Srv
       variable retval = self.reconnect_to_app (s.argv[0]);
       if (1 == retval)
         {
-        Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
-
-        signal (SIGWINCH, This.on.sigwinch);
-        if (screen_size_changed)
-          (@This.on.sigwinch) (SIGWINCH);
-
-        if (0 == qualifier_exists ("mode") ||
-            0 == (qualifier ("mode") == "Insert"))
-          {
-          Rline.set (s);
-          Rline.prompt (s, s._lin, s._col);
-          }
-
+        __exit_rout__ (s, handl;;__qualifiers);
         return;
         }
       }
@@ -225,35 +264,34 @@ subclass Srv
 
       if (APP_ERR)
         {
-        Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
-        signal (SIGWINCH, This.on.sigwinch);
-        if (screen_size_changed)
-         (@This.on.sigwinch) (SIGWINCH);
-
-        if (0 == qualifier_exists ("mode") ||
-            0 == (qualifier ("mode") == "Insert"))
-          {
-          Rline.set (s);
-          Rline.prompt (s, s._lin, s._col);
-          }
-
+        __exit_rout__ (s, handl;;__qualifiers);
         return;
         }
       }
 
     variable issu;
+
     forever
       {
+      __APP__ = CUR_APP;
       retval = self.mainloop (&issu);
       if (Api->APP_RECON_OTH == retval)
         {
-        retval = self.reconnect_to_app (CUR_APP);
+        retval = self.reconnect_to_app (__APP__);
+        if (1 == retval)
+          break;
+        }
+      else if (Api->APP_RECON_PREV == retval)
+        {
+        if (NULL == PREV_APP)
+          break;
+        retval = self.reconnect_to_app (PREV_APP);
         if (1 == retval)
           break;
         }
       else if (Api->APP_CON_NEW == retval)
         {
-        self.connect_to_app (CUR_APP;issu = issu);
+        self.connect_to_app (__APP__;issu = issu);
         if (APP_ERR)
           break;
         }
@@ -261,24 +299,14 @@ subclass Srv
         break;
       }
 
-    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
-    signal (SIGWINCH, This.on.sigwinch);
-    if (screen_size_changed)
-      (@This.on.sigwinch) (SIGWINCH);
-
-    if (0 == qualifier_exists ("mode") ||
-        0 == (qualifier ("mode") == "Insert"))
-      {
-      Rline.set (s);
-      Rline.prompt (s, s._lin, s._col);
-      }
+    __exit_rout__ (s, handl;;__qualifiers);
   end
 
   def mainloop (issu)
-    if (NULL == CUR_APP)
-      return;
+    if (NULL == __APP__)
+      return 1;
 
-    variable tok = strtok (CUR_APP, "::");
+    variable tok = strtok (__APP__, "::");
     variable app = tok[0];
     variable pid = tok[1];
     variable s = App->APPS[app][pid];
@@ -309,7 +337,13 @@ subclass Srv
         {
         s.state |= Api->IDLED;
         Sock.send_int (s.fd, 1);
-        CUR_APP = Sock.get_str (SRV_FIFO_FD);
+        __APP__ = Sock.get_str (SRV_FIFO_FD);
+        return retval;
+        }
+
+      if (Api->APP_RECON_PREV == retval)
+        {
+        s.state |= Api->IDLED;
         return retval;
         }
 
@@ -317,7 +351,7 @@ subclass Srv
         {
         s.state |= Api->IDLED;
         Sock.send_int (s.fd, 1);
-        CUR_APP = Sock.get_str (SRV_FIFO_FD);
+        __APP__ = Sock.get_str (SRV_FIFO_FD);
         Sock.send_int (s.fd, 1);
         @issu = Sock.get_int (SRV_FIFO_FD);
 
@@ -332,9 +366,11 @@ subclass Srv
     variable tok = strtok (k, "::");
     variable app = tok[0];
     variable pid = tok[1];
-    if (app == This.is.my.name && pid == string (Env->PID))
+    if (app == This.is.my.name && pid == string (Env->PID)
+      || 0 == assoc_key_exists (App->APPS, app)
+      || 0 == assoc_key_exists (App->APPS[app], pid))
       {
-      CUR_APP = NULL;
+      __APP__ = NULL;
       return 1;
       }
 

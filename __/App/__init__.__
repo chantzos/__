@@ -131,6 +131,7 @@ class App
 
     if (Rline.commandcmp (s, ar;accept_one_len, accept_space_as_return,
         accept_ws, already_filtered) == 1)
+
       if (NULL != s.argv && length (s.argv) && strlen (s.argv[0]) &&
         (i = wherefirst (ar == s.argv[0]), NULL != i))
           App.Connect.to.child (chs[i]);
@@ -294,12 +295,15 @@ class App
       Rline.set (rl);
       Rline.prompt (rl, rl._lin, rl._col);
 
+      variable saved = Input->rmap.right;
+      Input->rmap.right = [saved, Input->rmap.windmenu];
       variable commands = [
         "frame_new", "frame_next", "frame_prev", "frame_del",
         "wind_new",  "wind_del", "wind_next", "wind_prev",
         "wind_goto"];
 
       () = Rline.commandcmp (rl, commands; accept_space_as_return, already_filtered);
+      Input->rmap.right = saved;
 
       ifnot (strlen (rl.argv[0]))
         break;
@@ -431,5 +435,51 @@ class App
   def __editor () public proc
     variable files = __pop_list (_NARGS);
     App.Run.as.child (["__ved", __push_list (files)];;__qualifiers);
+  end
+
+  def app_menu (s) static proc
+    variable rl = Rline.init (NULL);
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
+    variable commands = [
+        "app_new", "app_new_as_super_user",
+        "app_reconnect", "child_reconnect",
+        ];
+
+    variable saved = Input->rmap.right;
+    Input->rmap.right = [saved, Input->rmap.app_menu];
+    () = Rline.commandcmp (rl, commands;accept_space_as_return, already_filtered);
+    Input->rmap.right = saved;
+
+    ifnot (strlen (rl.argv[0]))
+      return;
+
+    variable idx = where (commands == rl.argv[0]);
+
+    ifnot (length (idx))
+      return;
+
+    switch (rl.argv[0])
+
+      {
+      case "app_new" or case "app_new_as_super_user":
+        if (NULL == s.app_new)
+          return;
+        s.app_new (;issu = (rl.argv[0] == "app_new_as_super_user"));
+      }
+
+      {
+      case "app_reconnect":
+        if (NULL == s.app_rec)
+          return;
+        s.app_rec ();
+      }
+
+      {
+      case "child_reconnect":
+        if (NULL == s.childrec)
+          return;
+        s.childrec ();
+      }
   end
 end

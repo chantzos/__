@@ -7,7 +7,7 @@ class I
   end
 
   def app_reconnect (s) static proc
-    I.Child.appreconnect (s);
+    I.Child.appreconnect (s;;__qualifiers);
   end
 
   def app_idle () static proc
@@ -31,7 +31,7 @@ class I
   end
 
   def app_reconnect (s) static proc
-    I.Client.appreconnect (s);
+    I.Client.appreconnect (s;;__qualifiers);
   end
 
   def app_idle () static proc
@@ -55,7 +55,7 @@ class I
   end
 
   def app_reconnect (s) static proc
-    I.Srv.appreconnect (s);
+    I.Srv.appreconnect (s;;__qualifiers);
   end
 
   def app_idle () static proc

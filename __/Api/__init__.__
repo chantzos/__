@@ -12,6 +12,7 @@ class Api
   let CHILD_RECONNECT = 0x44c;
   let CHILD_RECON_OTH = 0x4b0;
   let CHILD_GET_CONNECTED = 0x514;
+  let APP_RECON_PREV = 0x578;
   let CONNECTED = 0x1;
   let IDLED = 0x2;
 

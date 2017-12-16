@@ -1054,8 +1054,8 @@ public define __initrline ()
 
   w.rline = rlineinit (;
     funclist = init_functions (),
-    osappnew = __get_reference ("I->app_new"),
-    osapprec = __get_reference ("I->app_reconnect"),
+    app_new = __get_reference ("I->app_new"),
+    app_rec = __get_reference ("I->app_reconnect"),
     childrec = __get_reference ("App->child_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
     parse_argtype = &__parse_argtype,
