@@ -1,3 +1,49 @@
+% as a general comment about the syntax highlight implementation
+% -  which is a (at least an ergonomical) requirenment -
+% I wish I had the time but also the desire (which i really dont,
+% for a system that does work, even much much more than it should,
+% for that detail - which is a requirenment but with the zero 
+% priority access to resources) and works quite fast __even__ in 
+% quite old computers) for better code (it was a fast prototype
+% at the age of birth).
+
+% but independendly from the implementation, for sure there is a 
+% much a better way to do the job, done with a better designed
+% regexp (again i wish i had the time to do some reading (which
+% is rather boring but quite interesting) and the desire (which
+% i really don't, as my mind do not like to use them much when
+% programming - but as a matter of fact i could use them:
+
+% at a time, in the bright vim times (20[07-10]), i used to use
+% them all the time, even complex ones; i liked vim patterns
+% (much more than pcre ones) but it was really that in vim's
+% search and replace implementation you could substitute with an
+% expression (where an expression in an editor, and especially in
+% a editor like vim (with its own perfect simple language albeit
+% slow and (mixed with normal commands) rather ugly) can be almost
+% everything - in my mind: an expression by itself is an independent
+% environment, that is self controlled and evolved from the experience,
+% but that can also receive influences from other expessions, either
+% from the relatives or the near neighborhood but even from the outter space
+% ideally without side effects in a cooperative environment - 
+% and vim is quite close to such a perfect environment (the best i saw ever)
+% (for quite a while i was using special designed vim buffers for
+% all kind of things including a package manager to manage the
+% [B]LFS Books (a rather complex task with uncountable without errors and
+% expected builds) written in vim's Language and where i had a ui for free),
+% in fact i could still use vimL if it wasn't for ...) -
+
+%  and __because the night__, I would like just to thanks our hero Bram
+% and the great community around him; happy to be a part for it for at least 3
+% years, but still get the mailing list :), this application is
+% based upon this amazing software
+% 
+% so ideally i could train myself in a standard specification (that
+% can be then translated to one of the regexp machines); i can't be
+% certain but i believe that the syntax can be formed by keywords
+% that easily match the way the human mind forms a sentence about the
+% specific request)))
+%
 private variable colors = [
 %comments
   3,
@@ -51,6 +97,7 @@ private variable regexps = [
 |(?<=&|\s|\[|\()(sum(?=\s|,))\
 |(?<=&|\s|\[|\()(max(?=\s|,))\
 |(?<=&|\s|\[|\()(pop(?=\s|,))\
+|(?<=&|\s|\[|\()(all(?=\s|,))\
 |(?<!\w)(\(\)(?=\s|,|\.|;|\)))\
 |(?<=&|\s|\[|\()(atoi(?=\s|,))\
 |(?<=&|\s|\[|\()(fork(?=\s|,))\
