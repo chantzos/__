@@ -482,4 +482,10 @@ class App
         s.childrec ();
       }
   end
+
+  def __exec_rline (argv) public proc
+    variable rl = @Ved.get_cur_rline ();
+    rl.argv = [argv];
+    rl.execline (;;__qualifiers);
+  end
 end
