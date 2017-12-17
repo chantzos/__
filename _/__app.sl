@@ -1166,7 +1166,7 @@ funcall (`
     f != NULL)
   __exec_rline (strtok (f, "::"));
 
-  variable idx, argv, rl = @Ved.get_cur_rline ();
+  variable idx, argv, app, rl = @Ved.get_cur_rline ();
   while (
     f = Opt.Arg.getlong_val ("app", NULL, &This.has.argv;del_arg),
     f != NULL)
@@ -1176,11 +1176,14 @@ funcall (`
     idx = is_substrbytes (f, "::");
     if (idx)
       {
-      rl.argv = [strtrim_beg (substr (f, 1, idx - 1), "_")];
+      rl.argv = [substr (f, 1, idx - 1)];
       argv = [argv, substr (f, idx + 2, -1)];
       }
     else
-      rl.argv = [strtrim_beg (f, "_")];
+      rl.argv = [f];
+
+    ifnot (any (rl.argv[-1] == ["__", "____"]))
+      rl.argv[-1] = strtrim_beg (rl.argv[-1], "__");
 
     I->app_new (rl;no_menu, argv = argv);
     }
