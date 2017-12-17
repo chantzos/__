@@ -166,7 +166,7 @@ private define __err_handler__ (this, __r__)
   mainloop ();
 }
 
-public define init_shell ()
+public define __init_shell ()
 {
   variable h;
   signal (SIGWINCH, SIG_IGN, &h);
@@ -177,6 +177,11 @@ public define init_shell ()
 
   Ved.setbuf (OUT_VED._abspath);
 
+  Com.post_header ();
+}
+
+public define init_shell ()
+{
   if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
     {
     __runcom  (["intro"], NULL);
@@ -185,11 +190,8 @@ public define init_shell ()
 
   topline ("(" + This.is.my.name + ")");
 
-  Com.post_header ();
-
   __draw_buf (OUT_VED);
 
   signal (SIGWINCH, This.on.sigwinch);
   mainloop ();
 }
-

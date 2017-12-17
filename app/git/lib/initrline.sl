@@ -163,7 +163,7 @@ private define __log__ (argv)
   if (CUR_REPO == "NONE")
     return;
 
-  variable max_count = Opt.Arg.getlong ("max-count", "int", &argv);
+  variable max_count = Opt.Arg.getlong_val ("max-count", "int", &argv);
 
   if (NULL == max_count)
     argv = [argv[0], "--max-count=20", argv[[1:]]];
@@ -216,7 +216,7 @@ private define __log__ (argv)
 
 private define __commitall__ (argv)
 {
-  variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
+  variable author = Opt.Arg.getlong_val ("author", NULL, &argv;del_arg);
 
   () = File.write (SCRATCH, "\n-- DIFF --");
 
@@ -283,7 +283,7 @@ private define __commitall__ (argv)
 
 private define __commit__ (argv)
 {
-  variable author = Opt.Arg.getlong ("author", NULL, &argv;del_arg);
+  variable author = Opt.Arg.getlong_val ("author", NULL, &argv;del_arg);
 
   if (length (argv) == 1)
     {

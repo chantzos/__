@@ -48,7 +48,7 @@ private define __at_exit ()
 
 This.at_exit = &__at_exit;
 
-public define init_netm ()
+public define __init_netm ()
 {
   Os.set_passwd_timeout (7200);
   MY = Type.get ("My";from = "Netm");
@@ -71,6 +71,10 @@ public define init_netm ()
       exit_me (1);
       }
 
+}
+
+public define init_netm ()
+{
   topline ("");
   mainloop ();
 }

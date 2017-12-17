@@ -99,10 +99,10 @@ This.request.X = fexpr (`(nox)
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 This.request.devel = Opt.Arg.exists ("--devel", &This.has.argv;del_arg);
-This.is.my.basedir = Opt.Arg.getlong ("basedir", NULL, &This.has.argv;del_arg);
-This.is.my.datadir = Opt.Arg.getlong ("datadir", NULL, &This.has.argv;del_arg);
-This.is.my.tmpdir  = Opt.Arg.getlong ("tmpdir",  NULL, &This.has.argv;del_arg);
-This.is.my.histfile= Opt.Arg.getlong ("histfile",NULL, &This.has.argv;del_arg);
+This.is.my.basedir = Opt.Arg.getlong_val ("basedir", NULL, &This.has.argv;del_arg);
+This.is.my.datadir = Opt.Arg.getlong_val ("datadir", NULL, &This.has.argv;del_arg);
+This.is.my.tmpdir  = Opt.Arg.getlong_val ("tmpdir",  NULL, &This.has.argv;del_arg);
+This.is.my.histfile= Opt.Arg.getlong_val ("histfile",NULL, &This.has.argv;del_arg);
 
 ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
   Load.file (Env->USER_CLASS_PATH + "/__app.slc");
@@ -587,7 +587,7 @@ private variable __WHICH__ = function (`
 private define __write__ (argv)
 {
   variable s;
-  variable bufname = Opt.Arg.getlong ("bufname", NULL, &argv;del_arg, ret_arg);
+  variable bufname = Opt.Arg.getlong_val ("bufname", NULL, &argv;del_arg, ret_arg);
 
   ifnot (NULL == bufname)
     {
@@ -607,9 +607,9 @@ private define __write__ (argv)
   variable file;
   variable command;
 
-  % the getlong method should parse range
+  % the getlong_val method should parse range
 
-  if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &argv;fun_args =
+  if (NULL == (lnrs = Opt.Arg.getlong_val ("range", "range", &argv;fun_args =
        {s, lnrs}, del_arg, defval = lnrs), lnrs))
     return;
 
@@ -886,8 +886,12 @@ private define __builtins__ (a)
     a["__net"] = @Argvlist_Type;
     a["__net"].func = function (`
         (argv)
-      __system ([Env->SRC_PATH + "/__dev/__app__/netm.__ " + Env->ROOT_PATH];
-        return_on_completion);
+      variable args = (1 < length (argv)
+        ? " " + strjoin (argv, " ")
+        : "");
+
+      __system ([Env->SRC_PATH + "/__dev/__app__/netm.__ " +
+        Env->ROOT_PATH + args];return_on_completion);
       `).__funcref;
     }
 
@@ -1020,6 +1024,9 @@ private define __err_handler__ (t, s)
   mainloop ();
 }
 
+eval (`public define init_` + This.is.my.name + ` (){This.exit (0);}`);
+eval (`public define __init_` + This.is.my.name + ` ();`);
+
 if (This.request.devel) _ -> enable.devel ();
 
 ifnot (access (This.is.my.basedir + "/lib/Init.slc", F_OK))
@@ -1150,5 +1157,15 @@ funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
 
 signal (SIGWINCH, This.on.sigwinch);
 
+(@__get_reference ("__init_" + This.is.my.name));
+
+funcall (`
+  variable f; while (
+    f = Opt.Arg.getlong_val ("command", NULL, &This.has.argv;del_arg),
+    f != NULL)
+  __exec_rline (strtok (f, "::"));
+`);
+
 (@__get_reference ("init_" + This.is.my.name));
 
+This.exit (0);

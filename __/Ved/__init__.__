@@ -1731,8 +1731,8 @@ class Ved
 
     args = list_to_array (args, String_Type);
 
-    pat = Opt.Arg.getlong ("pat", NULL, &args;del_arg);
-    action = Opt.Arg.getlong ("action", NULL, &args;del_arg);
+    pat = Opt.Arg.getlong_val ("pat", NULL, &args;del_arg);
+    action = Opt.Arg.getlong_val ("action", NULL, &args;del_arg);
     whenmatch = NULL == Opt.Arg.exists ("--whenNotMatch", &args;del_arg);
 
     if (NULL == action || 0 == strlen (action) || 0 == any (action == acts))
@@ -1742,7 +1742,7 @@ class Ved
       return;
       }
 
-    if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &args;fun_args =
+    if (NULL == (lnrs = Opt.Arg.getlong_val ("range", "range", &args;fun_args =
         {buf, lnrs}, del_arg, defval = lnrs), lnrs))
       return;
 
@@ -1766,8 +1766,8 @@ class Ved
 
     args = list_to_array (args, String_Type);
 
-    pat = Opt.Arg.getlong ("pat", NULL, &args;del_arg, ret_arg);
-    sub = Opt.Arg.getlong ("sub", NULL, &args;
+    pat = Opt.Arg.getlong_val ("pat", NULL, &args;del_arg, ret_arg);
+    sub = Opt.Arg.getlong_val ("sub", NULL, &args;
       "defval on no value" = "", del_arg, ret_arg);
 
     if (NULL == pat || NULL == sub || anynot (strlen ([pat])))
@@ -1779,7 +1779,7 @@ class Ved
     global = (NULL != Opt.Arg.exists ("--global", &args;del_arg));
     ask = (NULL == Opt.Arg.exists ("--dont-ask-when-subst", &args;del_arg));
 
-    if (NULL == (lnrs = Opt.Arg.getlong ("range", "range", &args;fun_args =
+    if (NULL == (lnrs = Opt.Arg.getlong_val ("range", "range", &args;fun_args =
        {buf, lnrs}, del_arg, defval = lnrs), lnrs))
       {
       Smg.send_msg_dr (Opt.err (), 1, buf.ptr[0], buf.ptr[1]);

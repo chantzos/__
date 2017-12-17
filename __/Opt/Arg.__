@@ -3,7 +3,7 @@ subclass Arg
     replace
     compare
     exists
-    getlong
+    getlong_val
   end
 
   def compare (arg, argv)
@@ -27,7 +27,7 @@ subclass Arg
     index[0];
   end
 
-  def getlong (arg, type, argv)
+  def getlong_val (arg, type, argv)
     variable opt, ind, defval = qualifier ("defval");
     (opt, ind) = Arg_compare (self, "--" + arg + "=", argv;;struct {@__qualifiers, ret_arg});
 
@@ -54,7 +54,7 @@ subclass Arg
     switch (type)
       {
       case "string":
-        return opt;
+        return strtrim (opt, "\"");
       }
 
       {

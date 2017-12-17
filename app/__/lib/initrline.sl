@@ -264,7 +264,7 @@ private define __classcompile__ (argv)
 
 private define __loadlib__ (argv)
 {
-  variable ns = Opt.Arg.getlong ("ns", NULL, &argv;del_arg);
+  variable ns = Opt.Arg.getlong_val ("ns", NULL, &argv;del_arg);
   if (NULL == ns)
     ns = "Global";
 
@@ -424,7 +424,7 @@ private define __sync_gen__ (argv, type)
   variable interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
   variable toorfrom;
 
-  toorfrom = Opt.Arg.getlong (type, "from" == type ? "dir" : NULL, &argv;del_arg,
+  toorfrom = Opt.Arg.getlong_val (type, "from" == type ? "dir" : NULL, &argv;del_arg,
     exists_err = "no" + (type == "from" ? "source" : "destination") + " specified, the --" +
         type + "= option is required");
 
@@ -471,7 +471,7 @@ private define __sync_to (argv)
 {
   if (strlen (This.is.my.settings["BACKUP_DIR"]))
     {
-    variable i = Opt.Arg.getlong ("to", NULL, &argv);
+    variable i = Opt.Arg.getlong_val ("to", NULL, &argv);
     if (NULL == i)
       argv = [argv, "--to=" + This.is.my.settings["BACKUP_DIR"]];
     }
@@ -486,7 +486,7 @@ private define __sync_from (argv)
 {
   if (strlen (This.is.my.settings["BACKUP_DIR"]))
     {
-    variable i = Opt.Arg.getlong ("from", "dir", &argv);
+    variable i = Opt.Arg.getlong_val ("from", "dir", &argv);
     if (NULL == i)
       argv = [argv, "--from=" + This.is.my.settings["BACKUP_DIR"]];
     }
@@ -503,7 +503,7 @@ private define __module_compile__ (argv)
   % -v -wrapper gdb,--args
   variable debug = Opt.Arg.exists ("--debug", &argv;del_arg);
   variable dont_inst = Opt.Arg.exists ("--dont-install", &argv;del_arg);
-  variable cflags = Opt.Arg.getlong ("cflags", NULL, &argv;del_arg);
+  variable cflags = Opt.Arg.getlong_val ("cflags", NULL, &argv;del_arg);
 
   ifnot (NULL == cflags)
     cflags = strjoin (strchop (cflags, ',', 0), " ");
@@ -600,7 +600,7 @@ private define __module_compile__ (argv)
 
 private define __search_project__ (argv)
 {
-  variable pat = Opt.Arg.getlong ("pat", NULL, &argv;del_arg);
+  variable pat = Opt.Arg.getlong_val ("pat", NULL, &argv;del_arg);
   if (NULL == pat)
     if (1 == length (argv))
       return;

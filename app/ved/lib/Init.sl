@@ -100,7 +100,7 @@ private define _edit_other ()
 
   variable args = list_to_array (__pop_list (_NARGS));
 
-  variable ft = Opt.Arg.getlong ("ftype", NULL, &args;del_arg);
+  variable ft = Opt.Arg.getlong_val ("ftype", NULL, &args;del_arg);
   ifnot (NULL == ft)
     {
     if (1 == _NARGS) % code needs to be written (change the filetype) 
@@ -600,13 +600,16 @@ private define ved_err_handler (t, _s_)
   s.vedloop ();
 }
 
-public define init_ved ()
+public define __init_ved ()
 {
   This.err_handler = &ved_err_handler;
+}
 
+public define init_ved ()
+{
   VED_OPTS.force = Opt.Arg.exists ("--force", &This.has.argv;del_arg);
   variable __stdin = Opt.Arg.exists ("-", &This.has.argv;del_arg);
-  variable ftype = Opt.Arg.getlong ("ftype", NULL, &This.has.argv;del_arg);
+  variable ftype = Opt.Arg.getlong_val ("ftype", NULL, &This.has.argv;del_arg);
   variable fname, files;
 
   ifnot (NULL == ftype)
@@ -640,7 +643,7 @@ public define init_ved ()
     This.exit (0);
     }
 
-  files = Opt.Arg.getlong ("pj", NULL, &This.has.argv;del_arg);
+  files = Opt.Arg.getlong_val ("pj", NULL, &This.has.argv;del_arg);
 
   variable buf, retval;
 

@@ -313,7 +313,7 @@ public variable NetCommands = fun (`
   a["scan_interval"].func = fun (``
     envbeg private variable msg, retval, sec; envend
     (argv)
-    sec = Opt.Arg.getlong ("sec", "int", &argv;del_arg);
+    sec = Opt.Arg.getlong_val ("sec", "int", &argv;del_arg);
     if (NULL == sec)
       sec = MY.scan_interval;
 

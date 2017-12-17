@@ -424,19 +424,19 @@ private define __tagwrite (argv)
       title = "",   artist = "", album = "",
       comment = "", genre = "",  track = 0, year = 0};
 
-  s.title = Opt.Arg.getlong ("title", NULL, &argv;del_arg,
+  s.title = Opt.Arg.getlong_val ("title", NULL, &argv;del_arg,
     defval = s.title);
-  s.artist = Opt.Arg.getlong ("artist", NULL, &argv;del_arg,
+  s.artist = Opt.Arg.getlong_val ("artist", NULL, &argv;del_arg,
     defval = s.artist);
-  s.album = Opt.Arg.getlong ("album", NULL, &argv;del_arg,
+  s.album = Opt.Arg.getlong_val ("album", NULL, &argv;del_arg,
     defval = s.album);
-  s.comment = Opt.Arg.getlong ("comment", NULL, &argv;del_arg,
+  s.comment = Opt.Arg.getlong_val ("comment", NULL, &argv;del_arg,
     defval = s.comment);
-  s.genre = Opt.Arg.getlong ("genre", NULL, &argv;del_arg,
+  s.genre = Opt.Arg.getlong_val ("genre", NULL, &argv;del_arg,
     defval = s.genre);
-  s.track = Opt.Arg.getlong ("track", "int", &argv;del_arg,
+  s.track = Opt.Arg.getlong_val ("track", "int", &argv;del_arg,
    defval = s.track);
-  s.year = Opt.Arg.getlong ("year", "int", &argv;del_arg,
+  s.year = Opt.Arg.getlong_val ("year", "int", &argv;del_arg,
     defval = s.year);
 
   variable retval = tagwrite (fname, s);

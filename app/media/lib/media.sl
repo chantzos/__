@@ -249,7 +249,7 @@ public define init_media ()
     variable fun = ["videoplay", "audioplay"][
       NULL == Opt.Arg.exists ("--video", &This.has.argv;del_arg)];
     variable random = Opt.Arg.exists ("--random", &This.has.argv;del_arg);
-    variable files = Opt.Arg.getlong ("from-file", "fname", &This.has.argv;
+    variable files = Opt.Arg.getlong_val ("from-file", "fname", &This.has.argv;
       del_arg);
 
     variable s = Ved.get_cur_rline ();
