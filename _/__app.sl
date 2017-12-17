@@ -1160,10 +1160,34 @@ signal (SIGWINCH, This.on.sigwinch);
 (@__get_reference ("__init_" + This.is.my.name));
 
 funcall (`
-  variable f; while (
+  variable f;
+  while (
     f = Opt.Arg.getlong_val ("command", NULL, &This.has.argv;del_arg),
     f != NULL)
   __exec_rline (strtok (f, "::"));
+
+  variable idx, argv, rl = @Ved.get_cur_rline ();
+  while (
+    f = Opt.Arg.getlong_val ("app", NULL, &This.has.argv;del_arg),
+    f != NULL)
+    {
+    argv = ["--idle"],
+
+    idx = is_substrbytes (f, "::");
+    if (idx)
+      {
+      rl.argv = [strtrim_beg (substr (f, 1, idx - 1), "_")];
+      argv = [argv, substr (f, idx + 2, -1)];
+      }
+    else
+      rl.argv = [strtrim_beg (f, "_")];
+
+    I->app_new (rl;no_menu, argv = argv);
+    }
+
+  ifnot (This.is.me == "MASTER")
+    ifnot (NULL == Opt.Arg.exists ("--idle", &This.has.argv;del_arg))
+      App.detach ();
 `);
 
 (@__get_reference ("init_" + This.is.my.name));

@@ -118,17 +118,22 @@ subclass Srv
     ifnot (This.has.other_apps)
       return;
 
+    variable retval, issu;
     variable apps = assoc_get_keys (App->APPS);
 
-    variable retval, issu;
+    ifnot (qualifier_exists ("no_menu"))
+      {
+      Rline.set (s);
+      Rline.prompt (s, s._lin, s._col);
 
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
+      variable saved = Input->rmap.right;
+      Input->rmap.right = [saved, Input->rmap.app_new];
+      () = Rline.commandcmp (s, apps;already_filtered);
+      Input->rmap.right = saved;
+      }
 
-    variable saved = Input->rmap.right;
-    Input->rmap.right = [saved, Input->rmap.app_new];
-    () = Rline.commandcmp (s, apps;already_filtered);
-    Input->rmap.right = saved;
+    ifnot (any (apps == s.argv[0]))
+      return;
 
     if (This.has.sigint)
       {
@@ -141,10 +146,7 @@ subclass Srv
 
     loop (1)
     {
-    if (any (apps == s.argv[0]))
-      self.connect_to_app (s.argv[0];;__qualifiers);
-    else
-      break;
+    self.connect_to_app (s.argv[0];;__qualifiers);
 
     if (APP_ERR)
       break;
@@ -399,7 +401,8 @@ subclass Srv
       return;
       }
 
-    variable argv = [app, NULL, NULL];
+    variable argv = [app, NULL, NULL,
+      __get_qualifier_as (AString_Type, qualifier ("argv"), String_Type[0])];
 
     if (This.request.profile)
       argv[1] = "--profile";
