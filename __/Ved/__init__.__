@@ -206,7 +206,11 @@ class Ved
   end
 
   def __vdebug (s, msg) public proc
-    Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
+    if (NULL == s)
+      Smg.send_msg_dr (msg, 1, NULL, NULL);
+    else
+      Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
+
     if (qualifier_exists ("hold"))
       () = Input.getch ();
   end
@@ -991,12 +995,11 @@ class Ved
     VED_WIND[name].setframesize = setframesize;
 
     if (qualifier_exists ("on_wind_new"))
-      on_wind_new (VED_WIND[name]);
+      on_wind_new (VED_WIND[name];;__qualifiers);
   end
 
   def new_wind () proc
     variable name = _NARGS ? () : NULL;
-
     variable i;
     variable winds = assoc_get_keys (VED_WIND);
     variable frames = __get_qualifier_as (Integer_Type, qualifier ("frames"), This.has.frames);
@@ -1240,13 +1243,24 @@ class Ved
   end
 
   def on_wind_new (w) public proc
-    variable fn = VED_DIR + "/" + string (_time) + ".noname";
-    variable s = Ved.init_ftype (NULL;;__qualifiers);
+    variable
+      fn,
+      is_special = [1, 0][qualifier_exists ("file")];
+
+    if (is_special)
+      fn = VED_DIR + "/" + string (_time) + ".noname.txt";
+    else
+      fn = qualifier ("file");
+
+    variable s = Ved.init_ftype (get_ftype_name (NULL, fn)
+      ;;__qualifiers);
+
     s.set (fn, w.frame_rows[0], NULL;_autochdir = 0);
 
     Ved.setbuf (fn;;__qualifiers);
 
-    SPECIAL = [SPECIAL, fn];
+    if (is_special)
+      SPECIAL = [SPECIAL, fn];
 
     (@__get_reference ("__initrline"));
     topline ("(" + This.is.my.name + ")");
@@ -1257,8 +1271,8 @@ class Ved
     ifnot (This.has.new_windows)
       return;
 
-    new_wind (;on_wind_new);
-    s = Ved.get_cur_buf ();
+    new_wind (;;struct {@__qualifiers, on_wind_new});
+    s = get_cur_buf (NULL);
   end
 
   def __goto_wind__ (s, chr) proc
@@ -2171,6 +2185,10 @@ class Ved
 
   def __vprev_wind (s) public proc
     __wind_rout__ (s, "prev");
+  end
+
+  def __vwind_new () public proc
+    __new_wind__ (NULL;;__qualifiers);
   end
 
   beg

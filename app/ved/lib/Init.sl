@@ -76,10 +76,11 @@ private define addfname (fname)
 private define _edit_other ()
 {
   variable cb = Ved.get_cur_buf ();
+  variable com = qualifier ("argv0");
 
   ifnot (_NARGS)
     {
-    variable key = qualifier ("argv0");
+    variable key = com;
 
     ifnot (any (["e", "e!"] == key))
       return;
@@ -113,8 +114,12 @@ private define _edit_other ()
       return;
     }
 
-  % one filename
-  addfname (args[0];ftype = ft);
+  variable i;
+  _for i (0, length (args) - 1)
+    if (com == "enew")
+      __vwind_new (;file = args[i], ftype = ft);
+    else
+      addfname (args[i];ftype = ft);
 }
 
 private define _buffer_other_ ()
@@ -549,6 +554,7 @@ VED_PAGER[string (Input->CTRL_j)] = &__detach__;
 
 VED_CLINE["e"]   =      &_edit_other;
 VED_CLINE["e!"]  =      &_edit_other;
+VED_CLINE["enew"]=      &_edit_other;
 VED_CLINE["b"]   =      &_edit_other;
 VED_CLINE["bd"]  =      &_bdelete;
 VED_CLINE["bd!"] =      &_bdelete;
