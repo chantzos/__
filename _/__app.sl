@@ -1,6 +1,6 @@
 __use_namespace ("_");
 
-sigprocmask (SIG_BLOCK, [SIGINT, SIGALRM]);
+sigprocmask (SIG_BLOCK, [SIGINT, SIGALRM, SIGWINCH]);
 
 public variable APP_ERR, I, App, X, Dir;
 
@@ -1119,8 +1119,10 @@ This.on.sigwinch = fun (`
       }
 
   slsmg_get_screen_size ();
+
   Smg.init ();
   Input.init ();
+
   Ved.handle_sigwinch ();
   `).__funcref;
 
@@ -1155,8 +1157,6 @@ funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
     Load.file   (path + "/" + app + ".sl");
 `);
 
-signal (SIGWINCH, This.on.sigwinch);
-
 (@__get_reference ("__init_" + This.is.my.name));
 
 funcall (`
@@ -1184,14 +1184,20 @@ funcall (`
 
     ifnot (any (rl.argv[-1] == ["__", "____"]))
       rl.argv[-1] = strtrim_beg (rl.argv[-1], "__");
+    else
+      if ("____" == rl.argv[-1])
+        rl.argv[-1] = "__";
 
-    I->app_new (rl;no_menu, argv = argv);
+    I->app_new (rl;no_menu, argv = argv,unhandled);
     }
 
   ifnot (This.is.me == "MASTER")
     ifnot (NULL == Opt.Arg.exists ("--idle", &This.has.argv;del_arg))
       App.detach ();
 `);
+
+sigprocmask (SIG_UNBLOCK, [SIGWINCH]);
+signal (SIGWINCH, This.on.sigwinch);
 
 (@__get_reference ("init_" + This.is.my.name));
 

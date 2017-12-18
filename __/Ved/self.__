@@ -747,6 +747,8 @@ beg
     else
       {
       s = Ved.get_cur_rline ();
+      if (NULL == s._lin || NULL == s._col)
+        return;
       Rline.prompt (s, s._lin, s._col);
       }
   end

@@ -76,8 +76,10 @@ subclass Srv
 
   var screen_size_changed = 0;
 
+  decl __sigwinch_handler__
   def __sigwinch_handler__ (sig) proc
     screen_size_changed = 1;
+    signal (SIGWINCH, &__sigwinch_handler__);
   end
 
   def __exit_rout__ (s, handl) proc

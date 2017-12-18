@@ -192,6 +192,5 @@ public define init_shell ()
 
   __draw_buf (OUT_VED);
 
-  signal (SIGWINCH, This.on.sigwinch);
   mainloop ();
 }

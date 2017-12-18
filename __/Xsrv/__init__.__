@@ -12,9 +12,10 @@ class Xsrv
     ? Sys.which ("xterm") : Sys.which ("urxvtc"));
   let SETXKBMAP_BIN = Sys.which ("setxkbmap");
   let LANG_LAYOUT = NULL;
-  let LANG_KEY = "grp:alt_space_toggle";
+  let! LANG_KEY = "grp:alt_space_toggle";
   let XMODMAPRC = NULL;
   let XMODMAP_BIN = Sys.which ("xmodmap");
+  let! STARTUP_COMMAND = [X_TERM_BIN, "-name", "__SHELL", "-e", Env->BIN_PATH + "/__shell"];
   let ERR = 0xc8;
 
   decl public __desktop_change, __rotate_desk, __follow_client
@@ -188,7 +189,8 @@ class Xsrv
 
     sleep (1);
 
-    Xspawn ([X_TERM_BIN, "-name", "__SHELL", "-e", Env->BIN_PATH + "/__shell"]);
+    ifnot (NULL == STARTUP_COMMAND)
+      Xspawn (STARTUP_COMMAND);
   end
 
   def Srv_set_keys () public proc

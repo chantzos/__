@@ -1151,7 +1151,7 @@ void Xspawn ()
 
       setsid ();
 
- //     sleep (0.5);
+/*      sleep (0.5); */
 
       execvp ((char*)command[0], (char**)command);
       }
