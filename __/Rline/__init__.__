@@ -2311,7 +2311,7 @@ class Rline
 
       if (any ([Input->rmap.windnext, Input->rmap.windprev] == s._chr))
         {
-        (@__get_reference (["__vnext_wind", "__vprev_wind"]
+        (@__get_reference (["__vwind_next", "__vwind_prev"]
           [any (Input->rmap.windprev == s._chr)])) (s);
         set (NULL, s);
         prompt (NULL, s, s._lin, s._col);

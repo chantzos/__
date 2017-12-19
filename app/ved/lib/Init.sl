@@ -609,6 +609,7 @@ private define ved_err_handler (t, _s_)
 public define __init_ved ()
 {
   This.err_handler = &ved_err_handler;
+  Ved.setbuf (SCRATCH);
 }
 
 public define init_ved ()

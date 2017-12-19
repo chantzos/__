@@ -970,7 +970,8 @@ class Ved
   end
 
   def wind_init (name, frames) public proc
-    if (any (name == assoc_get_keys (VED_WIND)) && 0 == qualifier_exists ("force"))
+    if (any (name == assoc_get_keys (VED_WIND))
+        && 0 == qualifier_exists ("force"))
       return;
 
     variable setframesize = __get_qualifier_as (Ref_Type, qualifier ("framesize_fun"),
@@ -1002,7 +1003,8 @@ class Ved
     variable name = _NARGS ? () : NULL;
     variable i;
     variable winds = assoc_get_keys (VED_WIND);
-    variable frames = __get_qualifier_as (Integer_Type, qualifier ("frames"), This.has.frames);
+    variable frames = __get_qualifier_as (Integer_Type,
+      qualifier ("frames"), This.has.frames);
 
     if (NULL == frames)
       frames = 1;
@@ -1252,7 +1254,7 @@ class Ved
     else
       fn = qualifier ("file");
 
-    variable s = Ved.init_ftype (get_ftype_name (NULL, fn)
+    variable s = Ved.init_ftype (get_ftype_name (NULL, fn;;__qualifiers)
       ;;__qualifiers);
 
     s.set (fn, w.frame_rows[0], NULL;_autochdir = 0);
@@ -1348,7 +1350,7 @@ class Ved
     Ved.writefile (s, NULL, s.ptr, NULL, NULL;send_msg);
   end
 
-  def __vslang_load (lines) proc
+  def __vslang_load (lines) public proc
     variable ns = qualifier ("ns", "Global");
 
     lines[0] = strtrim_beg (lines[0]);
@@ -2169,7 +2171,7 @@ class Ved
     if (1 == length (VED_WIND))
       {
       if (Rline_Type == typeof (s))
-        __new_wind__ (get_cur_buf (NULL));
+        __new_wind__ (NULL);
       else
         __new_wind__ (s);
 
@@ -2179,16 +2181,21 @@ class Ved
     wind_change (NULL, dir);
   end
 
-  def __vnext_wind (s) public proc
+  def __vwind_next (s) public proc
     __wind_rout__ (s, ".");
   end
 
-  def __vprev_wind (s) public proc
+  def __vwind_prev (s) public proc
     __wind_rout__ (s, "prev");
   end
 
   def __vwind_new () public proc
-    __new_wind__ (NULL;;__qualifiers);
+    ifnot (This.has.new_windows)
+      return;
+
+    new_wind (;;(0 == qualifier_exists ("no_callbacks")
+      ? struct {@__qualifiers, on_wind_new}
+      : __qualifiers));
   end
 
   beg
@@ -2197,8 +2204,8 @@ class Ved
     VED_PAGER[string (Input->F3)]      = &__child_rec__;
     VED_PAGER[string (Input->F4)]      = &__app_new__;
     VED_PAGER[string (Input->F5)]      = &__wind_menu__;
-    VED_PAGER[string (Input->F6)]      = &__vnext_wind;
-    VED_PAGER[string (Input->F8)]      = &__vprev_wind;
+    VED_PAGER[string (Input->F6)]      = &__vwind_next;
+    VED_PAGER[string (Input->F8)]      = &__vwind_prev;
     VED_PAGER[string (Input->F12)]     = &paste_xsel;
     VED_PAGER[string (Input->DETACH)]  = &__app_detach__;
     VED_PAGER[string (',')]            = &__vhandle_comma;

@@ -28,16 +28,16 @@ public define exit_me (x)
           () = remove (file);
           1;
           }
-       envend
+      envend
 
-       Dir.walk (This.is.my.tmpdir, &dir_callback, &file_callback;
+      Dir.walk (This.is.my.tmpdir, &dir_callback, &file_callback;
           dargs = {dirlist});
 
-       dirlist = (dirlist = list_to_array (dirlist, String_Type),
-       dirlist[array_sort (dirlist;dir = -1)]);
+      dirlist = (dirlist = list_to_array (dirlist, String_Type),
+      dirlist[array_sort (dirlist;dir = -1)]);
 
-       _for i (0, length (dirlist) - 1)
-         () = rmdir (dirlist[i]);
+      _for i (0, length (dirlist) - 1)
+        () = rmdir (dirlist[i]);
      `);
 
   variable f = __get_reference ("I->at_exit");
@@ -99,6 +99,7 @@ This.request.X = fexpr (`(nox)
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 This.request.devel = Opt.Arg.exists ("--devel", &This.has.argv;del_arg);
+
 This.is.my.basedir = Opt.Arg.getlong_val ("basedir", NULL, &This.has.argv;del_arg);
 This.is.my.datadir = Opt.Arg.getlong_val ("datadir", NULL, &This.has.argv;del_arg);
 This.is.my.tmpdir  = Opt.Arg.getlong_val ("tmpdir",  NULL, &This.has.argv;del_arg);
@@ -807,7 +808,7 @@ private define __builtins__ (a)
   a["global"].func = &__global;
   a["global"].type = "Func_Type";
   a["global"].args =
-    ["--action= string supported actions [delete|write] (required)",
+    ["--action= string supported actions [delete|write|eval|system] (required)",
      "--pat= pattern pcre pattern",
      "--whenNotMatch void perform action on lines that dont match pattern (negate)",
      "--range= int first linenr, last linenr, or % (for whole buffer) or . (for current line)"];
@@ -1188,8 +1189,19 @@ funcall (`
       if ("____" == rl.argv[-1])
         rl.argv[-1] = "__";
 
-    I->app_new (rl;no_menu, argv = argv,unhandled);
+    I->app_new (rl;no_menu, argv = argv);
     }
+
+  while (
+    f = Opt.Arg.getlong_val ("execute", NULL, &This.has.argv;del_arg),
+    f != NULL)
+      __vslang_load ([f]);
+
+  while (
+    f = Opt.Arg.getlong_val ("execute-from-file", NULL, &This.has.argv;del_arg),
+    f != NULL)
+      ifnot (access (f, R_OK|F_OK))
+        __vslang_load (File.readlines (f));
 
   ifnot (This.is.me == "MASTER")
     ifnot (NULL == Opt.Arg.exists ("--idle", &This.has.argv;del_arg))
