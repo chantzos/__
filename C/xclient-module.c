@@ -27,11 +27,11 @@ static Display *dpy;
 
 static void gen_key_intrin (char *mode, char *key)
 {
-  int len = 6;
+  int len = 6, i;
   KeySym keysym = NoSymbol, mod[len];
   KeyCode keycode = 0x0;
 
-  for (int i = 0; i < len; i++)
+  for (i = 0; i < len; i++)
     mod[i] = NoSymbol;
 
   while (*mode)
@@ -96,7 +96,7 @@ static void gen_key_intrin (char *mode, char *key)
   if ((keysym = XStringToKeysym (key)) == NoSymbol)
     return;
 
-	 for (int i = 0; i < len; i++)
+	 for (i = 0; i < len; i++)
 		  if (mod[i] != NoSymbol)
 			   XTestFakeKeyEvent (dpy, XKeysymToKeycode(dpy, mod[i]), 1, 0);
 
@@ -109,7 +109,7 @@ static void gen_key_intrin (char *mode, char *key)
   XTestFakeKeyEvent (dpy, keycode, True, 0);
   XTestFakeKeyEvent (dpy, keycode, False, 0);
 
-	 for (int i=0; i < len; i++)
+	 for (i = 0; i < len; i++)
 		  if (mod[i] != NoSymbol)
 			   XTestFakeKeyEvent (dpy, XKeysymToKeycode(dpy, mod[i]), 0, 0);
 

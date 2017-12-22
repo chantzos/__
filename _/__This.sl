@@ -133,6 +133,7 @@ static define __INIT__ (role)
           },
         err = struct
           {
+          orig_fd,
           fd,
           fn = __get_qualifier_as (
             String_Type, qualifier ("stderrFn"), NULL),

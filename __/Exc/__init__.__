@@ -8,11 +8,11 @@ class Exc
   def print (exc)
     if (0 == self.isnot (exc) ||
        (0 == (exc = __get_exception_info, self.isnot (exc))))
-     IO.tostderr (self.fmt (exc));
+     IO.tostderr (self.fmt (exc);;__qualifiers);
 
     while (self.isnot (exc) == 0 == self.isnot (exc.object))
       {
-      IO.tostderr (self.fmt (exc.object));
+      IO.tostderr (self.fmt (exc.object);;__qualifiers);
       exc = exc.object;
       }
   end

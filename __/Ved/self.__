@@ -742,14 +742,10 @@ beg
     cur.draw ();
     topline ("(" + This.is.my.name + ")");
 
-    if (This.is.my.name == "ved")
+    s = Ved.get_cur_rline ();
+    if (NULL == s._lin || NULL == s._col)
       Smg.setrcdr (cur.ptr[0], cur.ptr[1]);
     else
-      {
-      s = Ved.get_cur_rline ();
-      if (NULL == s._lin || NULL == s._col)
-        return;
       Rline.prompt (s, s._lin, s._col);
-      }
   end
 end

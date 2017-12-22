@@ -145,13 +145,23 @@ Error:       %d",
 
 private define Exc_print (self, exc)
 {
+  variable to = @(__get_reference ("Class"));
+  ifnot (NULL == to)
+    {
+    IO.tostderr ("");
+    to = (@to.__FUNCREF__) (NULL, "IO", "tostderr");
+    }
+
+  if (NULL == to)
+    to = &IO_tostderr;
+
   if (0 == Exc_isnot (NULL, exc) ||
      (0 == (exc = __get_exception_info, Exc_isnot (NULL, exc))))
-   IO_tostderr (NULL, Exc_fmt (NULL, exc));
+   (@to) (IO, Exc_fmt (NULL, exc));
 
   while (Exc_isnot (NULL, exc) == 0 == Exc_isnot (NULL, exc.object))
     {
-    IO_tostderr (NULL, Exc_fmt (NULL, exc.object));
+    (@to) (IO, Exc_fmt (NULL, exc.object));
     exc = exc.object;
     }
 }

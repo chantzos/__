@@ -66,10 +66,11 @@ This.is.at.session = getenv ("SESSION");
 if (NULL == This.is.child)
   This.is.also = [This.is.also, "PARENT"];
 
-This.is.me = fexpr (`(ischild)
+This.is.me = funcall (NULL != This.is.child, `
+    (ischild)
   [(NULL == This.is.at.session ? "MASTER" : "PARENT"),
    "CHILD"][ischild];
-`).call (NULL != This.is.child);
+`);
 
 Load.module ("socket");
 
@@ -92,9 +93,10 @@ This.at_exit = &__exit;
 
 Class.load ("I";force);
 
-This.request.X = fexpr (`(nox)
+This.request.X = funcall (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
+  `(nox)
   [0 == access (Env->STD_C_PATH + "/xsrv-module.so", F_OK), 0][nox];
-`).call (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg));
+`);
 
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
@@ -220,6 +222,7 @@ Class.load ("Com");
 
 VED_RLINE       = 0;
 VED_ISONLYPAGER = 1;
+Ved.init (;with_no_callbacks);
 
 try
   {
@@ -239,11 +242,17 @@ ifnot (NULL == This.has.atleast_rows)
   if (LINES < This.has.atleast_rows)
     This.err_handler (This.is.my.name + ": LINES [" + string (LINES) + "] are less than the requested");
 
+RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
+WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
+
 if (NULL == This.is.std.err.fn)
   This.is.std.err.fn = This.is.my.tmpdir + "/__STDERR__" + string (_time)[[5:]] + ".txt";
 
 if (NULL == This.is.std.out.fn)
   This.is.std.out.fn = This.is.my.tmpdir + "/__STDOUT__" + string (_time)[[5:]] + "." + This.is.std.out.type;
+
+This.is.std.out.fd = File.open (This.is.std.out.fn);
+This.is.std.err.fd = File.open (This.is.std.err.fn);
 
 ifnot (__is_initialized (&SCRATCH))
   {
@@ -263,13 +272,7 @@ ifnot (__is_initialized (&DIFFFILE))
     _autochdir = 0, show_tilda = 0, show_status_line = 0);
   }
 
-RDFIFO   = This.is.my.tmpdir + "/__SRV_FIFO__.fifo";
-WRFIFO   = This.is.my.tmpdir + "/__CLNT_FIFO__.fifo";
-
 SPECIAL = [SPECIAL, SCRATCH, This.is.std.err.fn, This.is.std.out.fn, DIFFFILE];
-
-This.is.std.out.fd = File.open (This.is.std.out.fn);
-This.is.std.err.fd = File.open (This.is.std.err.fn);
 
 OUT_VED     = Ved.init_ftype (This.is.std.out.type);
 ERR_VED     = Ved.init_ftype (NULL);
@@ -862,7 +865,7 @@ private define __builtins__ (a)
     a["__project_new"].args = ["--from-file= filename read from filename"];
     }
 
-  __ved_funs__ (a);
+  __ved_funcs (a);
 
   if (This.request.fm)
     {
@@ -1085,8 +1088,8 @@ private define __rehash__ ()
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
-Com.let ("COMMANDS_FOR_PAGER", fexpr (`()
-    strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`).call ());
+Com.let ("COMMANDS_FOR_PAGER", funcall (`
+    strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`));
 
 if (This.has.other_apps)
   App.build_table ();
@@ -1130,14 +1133,19 @@ This.on.sigwinch = fun (`
 public define sigint_handler ();
 public define sigint_handler (sig)
 {
+  variable rc = Smg.getrc ();
   Input.at_exit ();
   Input.init ();
   if ('q' == IO.ask (["q[uit " + This.is.my.name + "] | c[ontinue]"], ['q', 'c']))
     App.quit_me ();
 
   signal (sig, &sigint_handler);
+
   variable rl = Ved.get_cur_rline ();
-  Rline.prompt (rl, rl._lin, rl._col);
+  if (NULL != rl._lin && NULL != rl._col)
+    Rline.prompt (rl, rl._lin, rl._col);
+  else
+    Smg.setrcdr (rc[0], rc[1]);
 }
 
 if (This.has.sigint)
@@ -1210,6 +1218,16 @@ funcall (`
 
 sigprocmask (SIG_UNBLOCK, [SIGWINCH]);
 signal (SIGWINCH, This.on.sigwinch);
+
+This.is.std.err.orig_fd = dup_fd (fileno (stderr));
+
+if (-1 == dup2_fd (This.is.std.err.fd, 2))
+  {
+   This.at_exit ();
+   () = fprintf (stderr, "unable to dup stderr fd\n,%s\n",
+     errno_string (errno));
+  This.exit (1);
+  }
 
 (@__get_reference ("init_" + This.is.my.name));
 

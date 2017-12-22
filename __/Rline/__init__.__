@@ -438,10 +438,15 @@ class Rline
   end
 
   def delete_at (s) proc
-    variable i, arglen, len = 0;
+    variable
+      i,
+      arglen,
+      start_col = qualifier ("start_col", 0),
+      len = 0;
 
     ifnot (qualifier_exists ("is_delete"))
-      s._col--;
+      if (start_col < s._col)
+        s._col--;
 
     _for i (0, s._ind)
       {
@@ -449,7 +454,7 @@ class Rline
       len += arglen + strlen (s._pchar);
       }
 
-    len = s._col - (len - arglen);
+    len = s._col - (len - arglen) - start_col;
 
     if (0 > len)
       {
@@ -485,7 +490,7 @@ class Rline
       len += arglen + strlen (s._pchar);;
       }
 
-    len = s._col - (len - arglen);
+    len = s._col - (len - arglen) - qualifier ("start_col", 0);
 
     if (s._col == len)
       s.argv[i] += chr;
@@ -503,16 +508,16 @@ class Rline
   def routine (s)
     if (any ([Input->rmap.backspace] == s._chr))
       {
-      if (s._col > strlen (s._pchar))
-        delete_at (s);
+      if (s._col > strlen (s._pchar) + qualifier ("start_col", 0))
+        delete_at (s;;__qualifiers);
       return;
       }
 
     if (any (Input->rmap.delete == s._chr))
       {
-      if (s._col <= strlen (s._lin))
+      if (s._col <= strlen (s._lin) + qualifier ("start_col", 0))
         ifnot (s._col == strlen (strjoin (s.argv[[:s._ind]], " ")) + 1)
-          delete_at (s;is_delete);
+          delete_at (s;;struct {@__qualifiers, is_delete});
         else
           if (s._ind < length (s.argv) - 1)
             {
@@ -526,7 +531,7 @@ class Rline
 
     if (any (Input->rmap.left == s._chr))
       {
-      if (s._col > strlen (s._pchar))
+      if (s._col > strlen (s._pchar) + qualifier ("start_col", 0))
         {
         s._col--;
         Smg.setrcdr (s._row, s._col);
@@ -537,7 +542,7 @@ class Rline
 
     if (any (Input->rmap.right == s._chr))
       {
-      if (s._col < strlen (s._lin))
+      if (s._col < qualifier ("start_col", 0) + strlen (s._lin))
         {
         s._col++;
         Smg.setrcdr (s._row, s._col);
@@ -548,14 +553,14 @@ class Rline
 
     if (any (Input->rmap.home == s._chr))
       {
-      s._col = strlen (s._pchar);
+      s._col = strlen (s._pchar) + qualifier ("start_col", 0);
       Smg.setrcdr (s._row, s._col);
       return;
       }
 
     if (any (Input->rmap.end == s._chr))
       {
-      s._col = strlen (s._lin);
+      s._col = strlen (s._lin) + qualifier ("start_col", 0);
       Smg.setrcdr (s._row, s._col);
       return;
       }
@@ -564,7 +569,7 @@ class Rline
       {
       if (qualifier_exists ("insert_ws"))
         {
-        insert_at (s);
+        insert_at (s;;__qualifiers);
         return;
         }
 
@@ -573,7 +578,7 @@ class Rline
         if (1 == s._col)
           {
           if (qualifier_exists ("accept_ws"))
-            insert_at (s);
+            insert_at (s;;__qualifiers);
 
           return;
           }
@@ -600,14 +605,14 @@ class Rline
           (s.argv = [s.argv[[:s._ind]], "", s.argv[[s._ind + 1:]]],
           s._col++);
         else
-          insert_at (s);
+          insert_at (s;;__qualifiers);
 
         return;
         }
       }
 
     if (' ' < s._chr <= 126 || 902 <= s._chr <= 974)
-      insert_at (s);
+      insert_at (s;;__qualifiers);
   end
 
   def write_completion_routine (s, ar) proc
@@ -1651,7 +1656,7 @@ class Rline
     self.set (rl);
 
     col = NULL == col ? strlen (rl.argv[0]) + 1 : col;
-    rl._pclr = qualifier ("clr", 16);
+    rl._pclr = qualifier ("clr", 19);
     rl.argv = [str];
     rl._col = col;
     rl._prow = row;
@@ -1659,8 +1664,14 @@ class Rline
     rl._lin = rl.argv[0];
     rl._pchar = "";
 
-   Smg.atrcaddnstrdr (strlen (rl._lin) ? rl._lin : " ", rl._pclr, rl._prow,
-     col, rl._prow, rl._col - 1, strlen (rl._lin) ? strlen (rl._lin) : 1);
+    variable
+      len,
+      vs = Smg.__get_string_at__ (rl._prow, 0, COLUMNS),
+      poststr = substr (vs, 1, col - 1);
+
+    str = " " + rl._lin + " ";
+    Smg.atrcaddnstrdr (str, rl._pclr, rl._prow,
+      col - 1, rl._prow, rl._col, strlen (str));
 
     forever
       {
@@ -1668,10 +1679,17 @@ class Rline
       if (033 == rl._chr)
         return rl;
 
-      routine (NULL, rl;insert_ws);
+      routine (NULL, rl;insert_ws, start_col = col);
+
       rl._lin = rl.argv[0];
-      Smg.atrcaddnstrdr (rl._lin, rl._pclr, rl._prow, col, rl._prow,
-       rl._col - 1, strlen (rl._lin));
+
+      str = " " + rl._lin + " ";
+      len = strlen (str);
+      poststr = substr (vs, col + len + 1, -1);
+      Smg.atrcaddnstr (poststr, 0, rl._prow, col + len,
+        strlen (poststr));
+      Smg.atrcaddnstrdr (str, rl._pclr, rl._prow, col - 1, rl._prow,
+        rl._col, len);
       }
   end
 

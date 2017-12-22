@@ -2137,9 +2137,12 @@ class Ved
   end
 
   def __app_rec__ (s) proc
-    (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ()
-    ;;__qualifiers);
-
+    if (s._chr == Input->F1)
+      (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ()
+        ;;struct {@__qualifiers, previous});
+    else
+      (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ()
+        ;;__qualifiers);
   end
 
   def __child_rec__ (s) proc
@@ -2152,7 +2155,12 @@ class Ved
       ;;__qualifiers);
   end
 
-  def __ved_funs__ (a) public proc
+  def __app_menu__ (s) proc
+    (@__get_reference ("App->app_menu")) (Ved.get_cur_rline ()
+      ;;__qualifiers);
+  end
+
+  def __ved_funcs (a) public proc
     a["__diff"] = @Argvlist_Type;
     a["__diff"].func = function (`
         (argv)
@@ -2193,16 +2201,16 @@ class Ved
     ifnot (This.has.new_windows)
       return;
 
-    new_wind (;;(0 == qualifier_exists ("no_callbacks")
+    new_wind (;;(0 == qualifier_exists ("with_no_callbacks")
       ? struct {@__qualifiers, on_wind_new}
       : __qualifiers));
   end
 
-  beg
+  def init ()
     VED_PAGER[string (Input->F1)]      = &__app_rec__;
     VED_PAGER[string (Input->F2)]      = &__app_new__;
     VED_PAGER[string (Input->F3)]      = &__child_rec__;
-    VED_PAGER[string (Input->F4)]      = &__app_new__;
+    VED_PAGER[string (Input->F4)]      = &__app_menu__;
     VED_PAGER[string (Input->F5)]      = &__wind_menu__;
     VED_PAGER[string (Input->F6)]      = &__vwind_next;
     VED_PAGER[string (Input->F8)]      = &__vwind_prev;
@@ -2281,6 +2289,6 @@ class Ved
         ifnot (NULL == Sys->XCLIP_BIN)
           Load.file (Env->STD_LIB_PATH + "/X/seltoX", NULL);
 
-    new_wind ();
+    __vwind_new (;;__qualifiers);
   end
 end

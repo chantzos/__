@@ -585,6 +585,16 @@ private define ved_err_handler (t, _s_)
   IO.tostdout (Env->PID, ERR_STACK;fd = fd);
   IO.tostdout (t;fd = fd);
   IO.tostdout (Struct.to_string (_s_);fd = fd);
+
+  if (NULL == _s_.exc)
+    _s_.exc = __get_exception_info ();
+
+  ifnot (NULL == _s_.exc)
+    {
+    variable ref = Class.__FUNCREF__ ("Exc", "print");
+    (@ref) (Exc, _s_.exc);
+    }
+
   if (ERR_STACK > 4)
     {
     This.at_exit ();

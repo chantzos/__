@@ -169,6 +169,9 @@ class App
 
     if (length (searchhist))
       Rline.writehistory (list_to_array (searchhist), (@__get_reference ("SEARCH_HISTFILE")));
+
+    ifnot (NULL == This.is.std.err.orig_fd)
+      () = dup2_fd (This.is.std.err.orig_fd, 2);
   end
 
   def __draw_wind () public proc

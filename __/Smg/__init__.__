@@ -120,7 +120,7 @@ class Smg
     slsmg_refresh ();
   end
 
-  def getrc (row, col)
+  def getrc ()
       [slsmg_get_row (), slsmg_get_column ()];
   end
 
@@ -457,6 +457,21 @@ class Smg
 
   def __HLINE__ ()
     repeat (char (8212), COLUMNS);
+  end
+
+  % __level__ (no check for errors)
+  def __get_string_at__ (row, idx, end)
+    variable
+      len = end - idx,
+      line = Integer_Type[len];
+
+    _for idx (idx, len - 1)
+      {
+      slsmg_gotorc (row, idx);
+      line[idx] = slsmg_char_at ();
+      }
+
+    strjoin (array_map (String_Type, &char, line));
   end
 
   beg

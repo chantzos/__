@@ -14,7 +14,7 @@ subclass Visual
     c_mode, c_left, c_right,
     c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT, '!', '$'],
     bw_mode, bw_down, bw_up, bw_left, bw_right, bw_maxlen,
-    bw_keys = ['x', 'I', 'i', 'd', 'y', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
+    bw_keys = ['x', 'I', 'i', 'd', 'y', 't', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
     needsdraw, startrow, startlnr, startcol, startindex,
     vlins, lnrs, linlen, lines, sel, at_exit,
     };
@@ -980,7 +980,7 @@ subclass Visual
         break;
         }
 
-      if ('y' == chr)
+      if (any (['y', 't'] == chr))
         {
         sel = strjoin (vs.sel, "\n");
         Ved.Reg.set ("\"", sel;msg = "yanked and ");
