@@ -285,7 +285,7 @@ public define rlineinit ()
   rl;
 }
 
-private define __write_buffers ()
+private define __write_buffers__ ()
 {
   variable
     w = Ved.get_cur_wind (),
@@ -293,6 +293,7 @@ private define __write_buffers ()
     s,
     i,
     fn,
+    retval,
     abort = 0,
     hasnewmsg = 0,
     chr;
@@ -302,19 +303,17 @@ private define __write_buffers ()
     fn = w.bufnames[i];
     s = w.buffers[fn];
 
-    if (s._flags & VED_RDONLY)
-      ifnot (qualifier_exists ("force_rdonly"))
-        continue;
-      else
-        if (-1 == access (fn, W_OK))
-          {
-          IO.tostderr (fn + " is not writable by you " + Env->USER);
-          hasnewmsg = 1;
-          continue;
-          }
+    retval = Ved.check_buf_write (s;;struct {@__qualifiers, "write_err_msg"});
+    if (retval)
+      {
+      if (-1 == retval)
+        {
+        IO.tostderr (Ved.err ());
+        hasnewmsg = 1;
+        }
 
-    ifnot (s._flags & VED_MODIFIED)
       continue;
+      }
 
     if (0 == qualifier_exists ("force") ||
       (qualifier_exists ("force") && s._abspath != Ved.get_cur_bufname ()))
@@ -336,7 +335,7 @@ private define __write_buffers ()
       }
 
     bts = 0;
-    variable retval = __vwritetofile (s._abspath, s.lines, s._indent, &bts);
+    retval = __vwritetofile (s._abspath, s.lines, s._indent, &bts);
 
     ifnot (0 == retval)
       {
@@ -353,7 +352,11 @@ private define __write_buffers ()
         }
       }
     else
+      {
       IO.tostderr (s._abspath + ": " + string (bts) + " bytes written");
+      s._flags &= ~VED_MODIFIED;
+      s.st_ = stat_file (s._abspath);
+      }
     }
 
   if (hasnewmsg)
@@ -372,10 +375,10 @@ private define cl_quit ()
     force = 1;
 
   if (force)
-    retval = __write_buffers (;force);
+    retval = __write_buffers__ (;force);
   else
     ifnot ("q!" == com)
-      retval = __write_buffers ();
+      retval = __write_buffers__ ();
 
   ifnot (retval)
     exit_me (0);
@@ -385,7 +388,7 @@ private define write_quit ()
 {
   variable args = __pop_list (_NARGS);
   % needs to write the current buffer and ask for the rest
-  variable retval = __write_buffers (;force);
+  variable retval = __write_buffers__ (;force);
   ifnot (retval)
     exit_me (0);
 }

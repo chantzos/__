@@ -223,15 +223,88 @@ beg
     lnrs[[range[0]:range[1]]];
   end
 
+  def check_buf_write (s)
+    variable f = fun (`
+        (s, msg, write_err_msg)
+
+      Ved.err (msg);
+      if (write_err_msg)
+        Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
+      `);
+
+    variable
+      st,
+      msg,
+      retval,
+      write_err_msg = qualifier_exists ("write_err_msg"),
+      file = s._abspath;
+
+    ifnot (s._flags & VED_MODIFIED)
+      ifnot (qualifier ("force", 0))
+        {
+        msg = file + " has not been modified";
+        f.call (s, msg, write_err_msg);
+        return 1;
+        }
+
+    if (s._flags & VED_RDONLY)
+      ifnot (qualifier_exists ("force_rdonly"))
+        {
+        msg = file + " is READ ONLY, use \"force_rdonly\"" +
+          " qualifier to force a writing";
+        f.call (s, msg, write_err_msg);
+        return 1;
+        }
+      else if (0 == access (file, F_OK) && -1 == access (file, W_OK))
+        {
+        msg = file + " is not writable by you " + Env->USER;
+        f.call (s, msg, write_err_msg);
+        return -1;
+        }
+
+    st = stat_file (file);
+    if (NULL == st)
+      {
+      ifnot (NULL == s.st_.st_mtime)
+        {
+        if (-1 == access (file, F_OK))
+          {
+          retval = IO.ask (["Warning: " + file + " has been removed ",
+              "from the filesystem", "continue writing? y[es]/n[o]"], ['y', 'Y', 'N', 'n']);
+
+          return [0, 1][any (['n', 'N'] == retval)];
+          }
+        }
+      else
+        return 0;
+      }
+    else
+      ifnot (NULL == s.st_.st_mtime)
+        {
+        ifnot (s.st_.st_mtime == st.st_mtime)
+          {
+          retval = IO.ask (["Warning: " + file + " has been modified",
+            "continue writing? y[es]/n[o]"], ['y', 'Y', 'n', 'N']);
+
+          return [0, 1][any (['n', 'N'] == retval)];
+          }
+
+        return 0;
+        }
+      else
+        return 0;
+  end
+
   def writefile (s, overwrite, ptr, file, append)
-    variable bts = 0;
+    variable retval, bts = 0;
 
     ifnot (append)
       append = NULL;
 
     if (NULL == file)
       {
-      if (s._flags & VED_RDONLY)
+      if (check_buf_write (NULL, s;;struct {@__qualifiers,
+          force = overwrite, "write_err_msg"}))
         return;
 
       file = s._abspath;
@@ -243,19 +316,19 @@ beg
         ifnot (overwrite)
           if (NULL == append)
             {
-            Smg.send_msg_dr ("file exists, w! to overwrite", 1, ptr[0], ptr[1]);
+            Smg.send_msg_dr (file + ": exists, w! to overwrite", 1, ptr[0], ptr[1]);
             return;
             }
 
         if (-1 == access (file, W_OK))
           {
-          Smg.send_msg_dr ("file is not writable", 1, ptr[0], ptr[1]);
+          Smg.send_msg_dr (file + ": file is not writable", 1, ptr[0], ptr[1]);
           return;
           }
         }
       }
 
-    variable retval = __vwritetofile (file, qualifier ("lines", s.lines), s._indent, &bts;
+    retval = __vwritetofile (file, qualifier ("lines", s.lines), s._indent, &bts;
     append = append);
 
     if (retval)
@@ -264,15 +337,15 @@ beg
       return;
       }
 
-    variable msg = s._abspath + ": " + string (bts) + " bytes written";
-
     if (qualifier_exists ("send_msg"))
-      Smg.send_msg_dr (msg, 0, s.ptr[0], s.ptr[1]);
-
-    IO.tostderr (msg + "\n");
+      Smg.send_msg_dr (file + ": " + string (bts) + " bytes written",
+        0, s.ptr[0], s.ptr[1]);
 
     if (file == s._abspath)
+      {
       s._flags &= ~VED_MODIFIED;
+      s.st_ = stat_file (file);
+      }
   end
 
   def get_cur_wind ()

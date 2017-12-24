@@ -432,7 +432,7 @@ class Ved
       return errno;
 
     _for i (0, length (lines) - 1)
-      if (retval = __write_line (fp, lines[i] + "\n", indent), retval == -1)
+      if (-1 == (retval = __write_line (fp, lines[i] + "\n", indent), retval))
         return errno;
       else
         @bts += retval;

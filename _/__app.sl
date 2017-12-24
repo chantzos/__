@@ -627,7 +627,7 @@ private define __write__ (argv)
 
   if (any (["w", "w!", "W"]  == command))
     Ved.writefile (s, "w!" == command, [PROMPTROW, 1], file, append;
-      lines = s.lines[lnrs]);
+      lines = s.lines[lnrs], send_msg);
 }
 
 private define __edit__ (argv)
