@@ -58,10 +58,15 @@ class IO
     else if (1 == length (args) && typeof (args) == List_Type)
       {
       variable i;
+      variable types = (qualifier_exists ("typeof")
+        ? [Struct_Type, qualifier("typeof")]
+        : [Struct_Type]);
+
       str = "";
       _for i (0, length (args) - 1)
-        if (Struct_Type == typeof (args[i]))
-          str += Struct.to_string (args[i]) + (qualifier_exists ("n") ? "" : "\n");
+        if (any (types == typeof (args[i])))
+          str += Struct.to_string (args[i];;__qualifiers) +
+            (qualifier_exists ("n") ? "" : "\n");
         else if (Assoc_Type == typeof (args[i]))
           str += Assoc.to_string (args[i];;__qualifiers) + (qualifier_exists ("n") ? "" : "\n");
         else if (Array_Type == typeof (args[i]) &&

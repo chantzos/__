@@ -20,13 +20,16 @@ class Struct
     variable max_l = qualifier ("max_level", 3);
     variable buf = "";
     variable fields = get_struct_field_names (s);
+    variable types = (qualifier_exists ("typeof")
+        ? [Struct_Type, qualifier("typeof")]
+        : [Struct_Type]);
     variable i, f, v;
 
     _for i (0, length (fields) - 1)
       {
       v = get_struct_field (s, fields[i]);
       f = typeof (v);
-      if (Struct_Type == f && level <= max_l)
+      if (any (types == f) && level <= max_l)
         buf += "\n" + fields[i] + ":" + self.to_string (v);
       }
 
