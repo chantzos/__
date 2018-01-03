@@ -41,7 +41,8 @@ define main ()
   dir = NULL == dir ? getcwd () : dir;
 
   variable saveerrfd = dup_fd (fileno (stderr));
-  () = dup2_fd (This.is.std.err.fd, 2);
+  ifnot (NULL == This.is.std.err.fd)
+    () = dup2_fd (This.is.std.err.fd, 2);
 
   if (VERBOSE)
     {

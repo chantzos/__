@@ -19,7 +19,8 @@ private define grepit (lline, file)
   variable
     col,
     holdcol = 0,
-    orig = lline;
+    orig = lline,
+    len = strlen (orig);
 
   while (pcre_exec (PAT, lline, 0, PCRE_NO_UTF8_CHECK))
     {
@@ -30,10 +31,14 @@ private define grepit (lline, file)
     LLINES = [LLINES, strreplace (orig, "\n", "\\n")];
 
     holdcol = COLS[-1];
+    if (holdcol + 1 > len)
+      break;
 
-    ifnot (holdcol + 1 > strlen (orig))
-      lline = substr (orig, holdcol + 1, -1);
-    else
+    while (isblank (orig[holdcol - 1]) && holdcol + 1 <= len)
+      holdcol++;
+
+    lline = substr (orig, holdcol + 1, -1);
+    if (lline == orig)
       break;
     }
 }
@@ -65,10 +70,11 @@ private define exec (file)
     catch AnyError:
       {
       Exc.print (__get_exception_info);
-      IO.tostderr (sprintf ("caught an error in exec func in script: %s", __FILE__));
-      IO.tostderr (sprintf ("file that occured: %s", file));
-      IO.tostderr (sprintf ("linenr that occured: %d", i));
-      IO.tostderr (sprintf ("line that occured: %S", ar[i]));
+      IO.tostderr (
+        "caught an error in exec func in script: ", __FILE__,
+        "file that occured: ", file,
+        "linenr that occured: ", i,
+        "line that occured: ", ar[i]);
       }
 
     INDEX++;
@@ -268,7 +274,10 @@ define main ()
   ifnot (NULL == PAT)
     {
     ifnot (strlen (PAT))
+      {
+      IO.tostderr ("--pat is an empty string");
       exit_me (1);
+      }
 
     _for ia (1, strlen (PAT) - 1)
       if ('n' == PAT[ia] && '\\' == PAT[ia - 1])
@@ -296,7 +305,7 @@ define main ()
 
     ifnot (length (LINENRS))
       {
-      IO.tostdout ("Nothing found");
+      IO.tostderr ("Nothing found");
       exit_me (2);
       }
 

@@ -36,17 +36,20 @@ if (NULL == col)
 
 private define rm_head_ws__ (fn, ind)
 {
-  variable i, line, len, j, ar = File.readlines (fn);
+  variable i, line, j,
+    ar = File.readlines (fn),
+    len = strlen (ar);
+
+  len--;
 
   _for i (0, length (ar) - 1)
     {
     line = ar[i];
-    len = strlen (line) - 1;
-    ifnot (len + 1)
+    ifnot (len[i] + 1)
       continue;
 
     j = 1;
-    while (j <= ind && j <= len &&
+    while (j <= ind && j <= len[i] &&
         isblank (substr (line, j, 1)[0]))
       j++;
     ar[i] = substr (line, j, -1);
@@ -77,23 +80,16 @@ define getpage (page)
     p = initproc (0, 1, 0);
     p.stdout.file = fname;
 
-    status = p.execv ([gzip, "-dc", page], NULL);
-
-    p = initproc (0, 1, 1);
-    p.stdout.file = outfn;
-    p.stderr.file = errfn;
-
-    status = p.execv ([groff, "-Tutf8", "-m", "man", fname], NULL);
+    () = p.execv ([gzip, "-dc", page], NULL);
     }
   else
-    {
     fname = page;
-    p = initproc (0, 1, 1);
-    p.stdout.file = outfn;
-    p.stderr.file = errfn;
 
-    status = p.execv ([groff, "-Tutf8", "-m", "man", fname], NULL);
-    }
+  p = initproc (0, 1, 1);
+  p.stdout.file = outfn;
+  p.stderr.file = errfn;
+
+  status = p.execv ([groff, "-Tutf8", "-m", "man", fname], NULL);
 
   ar = File.readlines (errfn);
 
@@ -105,7 +101,7 @@ define getpage (page)
       if (NULL == match)
         continue;
 
-      match = match[[1:strlen (match) - 2]];
+      match = substr (match, 2, strlen (match) - 2);
       page = sprintf ("%s/%s", MANDIR, match);
       st = stat_file (page);
       if (NULL == st)
@@ -137,7 +133,7 @@ define getpage (page)
 
     p = initproc (0, 1, 1);
     p.stdout.file = outfn;
-    p.stdout.file = "/dev/null";
+    p.stderr.file = "/dev/null";
 
     status = p.execv ([groff, "-Tutf8", "-m", "man", "-I", MYMANDIR, fname], NULL);
 
