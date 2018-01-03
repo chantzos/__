@@ -34,7 +34,7 @@ static void sl_encrypt (void){
     SLang_verror(SL_UNDEFINED_NAME,"could not find cipher %s",ctype);
     return;
   }
- 
+
   if (SLang_pop_bstring(&iv) == -1 ||
       SLang_pop_bstring(&key) == -1 ||
       SLang_pop_bstring(&data) == -1 ){
@@ -48,7 +48,7 @@ static void sl_encrypt (void){
 
   EVP_CIPHER_CTX_init(&ctx);
   EVP_EncryptInit_ex(&ctx, cipher, NULL, ikey, iiv);
- 
+
   if (!EVP_EncryptUpdate(&ctx, outbuf, &outlen, idata, dlen)){
     return; /*emit an error here*/
   }
@@ -58,7 +58,7 @@ static void sl_encrypt (void){
   outlen+=tmplen;
 
   output = SLbstring_create (outbuf, outlen);
- 
+
   SLang_push_bstring(output);
   SLbstring_free(output);
   SLbstring_free(data);
@@ -88,7 +88,7 @@ static void sl_decrypt (void){
     (void) SLang_push_null ();
     return;
   }
- 
+
   if (SLang_pop_bstring(&iv) == -1 ||
       SLang_pop_bstring(&key) == -1 ||
       SLang_pop_bstring(&data) == -1 ){
@@ -102,7 +102,7 @@ static void sl_decrypt (void){
 
   EVP_CIPHER_CTX_init(&ctx);
   EVP_DecryptInit_ex(&ctx, cipher, NULL, ikey, iiv);
- 
+
   if (!EVP_DecryptUpdate(&ctx, outbuf, &outlen, idata, dlen)){
     (void) SLang_push_null ();
     SLbstring_free(data);
@@ -124,7 +124,7 @@ static void sl_decrypt (void){
   outlen+=tmplen;
 
   output = SLbstring_create (outbuf, outlen);
- 
+
   SLang_push_bstring(output);
   SLbstring_free(output);
   SLbstring_free(data);
@@ -148,7 +148,7 @@ static void sl_generate_key (void){
       SLang_pop_slstring(&dtype) == -1 ||
       SLang_pop_slstring(&ctype) == -1 ){
     return; }
- 
+
   cipher = EVP_get_cipherbyname(ctype);
   if (!cipher){
     SLang_verror(SL_UNDEFINED_NAME,"could not find cipher %s",ctype);
@@ -174,7 +174,7 @@ static void sl_generate_key (void){
   iv  = (char*)malloc(ivlen);
 
   salt = SLbstring_get_pointer(salta,&saltlen);
- 
+
   if (saltlen==0){
     salt=NULL;
   }
@@ -186,8 +186,8 @@ static void sl_generate_key (void){
     SLang_free_slstring(dtype);
     return;
   }
- 
- 
+
+
   EVP_BytesToKey(cipher,md,salt,pass,(int)strlen(pass),count,key,iv);
 
   outkey = SLbstring_create(key, keylen);
@@ -297,18 +297,18 @@ int init_crypto_module_ns (char *ns_name){
   SLang_NameSpace_Type *ns = SLns_create_namespace(ns_name);
   if (ns == NULL)
     return -1;
- 
+
   if (-1 == register_classes ())
     return -1;
- 
+
   if (
       (-1 == SLns_add_intrin_fun_table (ns, Module_Intrinsics, NULL)) ||
       (-1 == SLns_add_iconstant_table (ns, Module_IConstants, NULL))
       )
     return -1;
- 
+
   SSL_library_init();
   OpenSSL_add_all_algorithms();
- 
+
   return 0;
 }

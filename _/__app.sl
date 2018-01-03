@@ -535,30 +535,13 @@ private variable __TRACK__ = function (`
 
 private define __search__ (argv)
 {
-  Com.pre_com ();
-
-  variable header, issu, env, stdoutfile, stdoutflags;
-
-  variable p = Com.pre_exec (argv, &header, &issu, &env;;__qualifiers ());
-
-  if (NULL == p)
-    return;
-
-  argv = ();
-
-  stdoutfile = GREPFILE;
-  stdoutflags = ">|";
-
-  env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
-    "stderrfile=" + This.is.std.err.fn, "stderrflags=>>|"];
-
-  Com.Fork.tofg (p, argv, env);
+  Com.execute (argv;open_scratch = 0,
+    stdout_file = GREPFILE, stdout_flags = ">|", draw = 0);
 
   ifnot (EXITSTATUS)
     __editor (GREPFILE);
 
-  Com.post_header ();
-  __draw_buf (Ved.get_cur_buf ());
+  Ved.draw_wind ();
 }
 
 private variable __WHICH__ = function (`
@@ -630,9 +613,51 @@ private define __write__ (argv)
       lines = s.lines[lnrs], send_msg);
 }
 
+private define __left__ (argv)
+{
+  variable
+    s = Ved.get_cur_buf (),
+    ar = s.lins,
+    found = 0,
+    idx,
+    i,
+    len,
+    line,
+    img = @Smg->IMG;
+
+  _for i (0, length (ar) - 1)
+    {
+    len = strlen (ar[i]);
+    if (len <= COLUMNS)
+      continue;
+
+    line = strtrim_end (Smg->IMG[s.rows[i]][0]);
+    idx = is_substrbytes (ar[i], line);
+    if ((idx++, idx) + strlen (line) - 1 > len)
+      continue;
+
+    found = 1;
+    Smg->IMG[s.rows[i]][0] = substr (ar[i], idx, COLUMNS);
+    }
+
+  ifnot (found)
+    return;
+
+  Smg->__IMG = img;
+  Smg.restore (s.rows, s.ptr, 1);
+}
+
 private define __edit__ (argv)
 {
   variable s = Ved.get_cur_buf ();
+
+  ifnot (NULL == Smg->__IMG)
+    {
+    Smg->IMG = Smg->__IMG;
+      __draw_buf (s;_i = s._ii);
+    Smg->__IMG = NULL;
+    }
+
   Ved.preloop (s);
   topline ("(pager)");
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
@@ -849,15 +874,13 @@ private define __builtins__ (a)
   a["__which"] = @Argvlist_Type;
   a["__which"].func = __WHICH__.__funcref;
 
-  if (COM_OPTS.search)
-    {
-    a["!search"] = @Argvlist_Type;
-    a["!search"].func = &__search__;
-    a["!search"].dir = Env->STD_COM_PATH + "/search";
-    }
+  variable f = ["!", ""][This.is.shell] + "search";
+  a[f] = @Argvlist_Type;
+  a[f].func = &__search__;
+  a[f].dir = Env->STD_COM_PATH + "/search";
 
   variable pj = "PROJECT_" + strup (This.is.my.name);
-  variable f = __get_reference (pj);
+  f = __get_reference (pj);
   ifnot (NULL == f)
     {
     a["__project_new"] = @Argvlist_Type;
@@ -989,7 +1012,8 @@ public define init_commands ()
           }
     }
 
-  array_map (Void_Type, &assoc_delete_key, a, ["xstart", "!xstart"]);
+  array_map (Void_Type, &assoc_delete_key, a,
+    ["xstart", "!xstart", "search", "!search"]);
 
   c = listdir (Env->LOCAL_COM_PATH);
   _for i (0, length (c) - 1)
@@ -1073,6 +1097,7 @@ public define __initrline ()
     filterargs = &filterexargs,
     filtercommands = &filtercommands,
     on_right_arrow = &__edit__,
+    on_left_arrow = &__left__,
     on_lang = &toplinedr,
     on_lang_args   = {"(" + This.is.my.name + ")"},
     histfile = This.is.my.histfile,
