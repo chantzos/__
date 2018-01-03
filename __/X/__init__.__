@@ -60,7 +60,8 @@ class X
     ifnot (This.request.X)
       return;
 
-    a["!Xstart"] = @Argvlist_Type;
-    a["!Xstart"].func = &Xstart;
+    variable f = ["!", ""][This.is.shell] + "Xstart";
+    a[f] = @Argvlist_Type;
+    a[f].func = &Xstart;
   end
 end

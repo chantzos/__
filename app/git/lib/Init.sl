@@ -186,9 +186,10 @@ public define init_git ()
       {
       default = File.readlines (This.is.my.datadir + "/default.txt");
       if (length (default))
-        ifnot (access (This.is.my.datadir + "/config/opt::START_DEFAULT::Integer_Type::1", F_OK))
-          found_repo = setrepo (default[0]) + 1;
+        found_repo = setrepo (default[0]) + 1;
       }
+    else
+      found_repo = setrepo (Env->SRC_PATH) + 1;
     }
 
   if (0 == found_repo && COM_NO_SETREPO)

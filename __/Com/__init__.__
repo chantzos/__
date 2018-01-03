@@ -4,7 +4,6 @@ class Com
   {
   bg_jobs = 1,
   chdir   = 1,
-  search  = 1,
   rehash  = 1,
   eval    = 1,
   ved     = 1,
@@ -35,11 +34,14 @@ class Com
   end
 
   def post_exec (header)
-    if (qualifier_exists ("draw") && qualifier ("draw") == 0)
-      return;
+    ifnot (This.is.shell)
+      Smg.atrceraseeol (PROMPTROW, 0);
 
     if (header)
       self.post_header ();
+
+    ifnot (qualifier ("draw", 1))
+      return;
 
     if (VED_WIND_NEEDS_DRAW)
       {
@@ -336,9 +338,14 @@ class Com
   end
 
   def parse_argv (argv, isbg)
-    variable flags = ">>|";
-    variable file = @isbg ? STDOUTBG : This.is.shell ? Ved.get_cur_buf ()._abspath : SCRATCH;
-    variable lfile = file;
+    variable
+      flags = qualifier ("stdout_flags", ">>|"),
+      file = qualifier ("stdout_file", @isbg
+        ? STDOUTBG
+        : This.is.shell
+          ? Ved.get_cur_buf ()._abspath
+          : SCRATCH),
+      lfile = file;
 
     variable retval = self.parse_redir (argv[-1], &file, &flags);
 
@@ -389,7 +396,7 @@ class Com
     else
       {
       variable file, flags, retval;
-      (file, flags, retval) = self.parse_argv (argv, &isbg);
+      (file, flags, retval) = self.parse_argv (argv, &isbg;;__qualifiers);
 
       if (-1 == retval)
         {
@@ -428,7 +435,8 @@ class Com
       }
 
     env = [env, "stdoutfile=" + stdoutfile, "stdoutflags=" + stdoutflags,
-     "stderrfile=" + This.is.std.err.fn, "stderrflags=>>|"];
+      "stderrfile=" + qualifier ("stderr_file", This.is.std.err.fn),
+      qualifier ("stderr_flags", "stderrflags=>>|")];
 
     ifnot (isbg)
       if (This.has.sigint)
@@ -453,8 +461,9 @@ class Com
       if (EXITSTATUS)
         __messages;
       else
-        if (0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
-          App.scratch (Ved.get_cur_buf ());
+        if (qualifier ("open_scratch", 1))
+          if (0 < lseek (SCRATCH_VED._fd, 0, SEEK_END))
+            App.scratch (Ved.get_cur_buf ());
 
     ifnot (isbg)
       self.get_bgjobs ();

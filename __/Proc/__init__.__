@@ -220,7 +220,6 @@ class Proc
 
   def __exec_proc__ (s, argv, env) proc
     variable status = 0;
-
     s.pid = dopid (s;;__qualifiers);
 
     ifnot (s.pid) % allow for a function callback, call a default else

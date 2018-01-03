@@ -17,7 +17,6 @@ VED_OPTS.def_ftype = "txt";
 
 COM_OPTS.chdir     = 1;
 COM_OPTS.bg_jobs   = 1;
-COM_OPTS.search    = 1;
 COM_OPTS.rehash    = 1;
 COM_OPTS.eval      = 1;
 COM_OPTS.ved       = 1;

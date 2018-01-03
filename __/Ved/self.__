@@ -338,8 +338,8 @@ beg
       }
 
     if (qualifier_exists ("send_msg"))
-      Smg.send_msg_dr (file + ": " + string (bts) + " bytes written",
-        0, s.ptr[0], s.ptr[1]);
+      Smg.send_msg_dr (file + ": " + string (bts) + " bytes written" +
+        (append ? " (appended)" : ""), 0, s.ptr[0], s.ptr[1]);
 
     if (file == s._abspath)
       {
@@ -655,7 +655,7 @@ beg
     if (1 == length (VED_WIND))
       return;
 
-   variable winds = assoc_get_keys (VED_WIND);
+    variable winds = assoc_get_keys (VED_WIND);
 
     ifnot (any (name == winds))
       return;
@@ -752,7 +752,7 @@ beg
     VED_ROWS = [1:LINES - 3];
     Smg.cls ();
 
-    variable fnms, fnm, w, i, s, ii, cur;
+    variable fnms, fnm, w, i, s, ii, cur = NULL;
     variable winds = assoc_get_keys (VED_WIND);
 
     _for i (0, length (winds) - 1)
@@ -811,6 +811,9 @@ beg
       w.rline._columns = COLUMNS;
       w.rline._row = PROMPTROW;
       }
+
+    if (NULL == cur)
+      return;
 
     cur.draw ();
     topline ("(" + This.is.my.name + ")");

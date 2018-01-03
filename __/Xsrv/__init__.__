@@ -164,7 +164,8 @@ class Xsrv
 
   def X_startup () public proc
     ifnot (NULL == URXVTD_BIN)
-      () = system (URXVTD_BIN + " -q -f -o &");
+      ifnot (length (Sys.Proc.search (URXVTD_BIN).com))
+        () = system (URXVTD_BIN + " -q -f -o &");
 
     variable cookie = __xget_cookie ();
     if (NULL != cookie && NULL != XAUTH_BIN)

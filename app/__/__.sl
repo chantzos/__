@@ -8,7 +8,6 @@ VED_OPTS.del_frame = 0;
 
 COM_OPTS.chdir     = 1;
 COM_OPTS.bg_jobs   = 0;
-COM_OPTS.search    = 1;
 COM_OPTS.rehash    = 0;
 
 This.request.X = 0;

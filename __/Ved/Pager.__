@@ -26,7 +26,8 @@ subclass Pager
       col = s._index;
 
     variable fname = __vfind_Word (s, line, col, &start, &end);
-
+    fname = strtrim (fname, "\"_)({}.,|/\\");
+    fname = Dir.eval (fname);
     ifnot (strlen (fname))
       return;
 

@@ -8,6 +8,7 @@ class Smg
   var public MSGROW = LINES - 1;;
   var public PROMPTROW = MSGROW - 1;
   var static IMG = List_Type[LINES - 2];
+  var static __IMG = NULL;
 
   decl set_img
 

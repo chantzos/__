@@ -540,13 +540,22 @@ class Ved
     if ('!' == Ved.get_cur_rline ().argv[0][0] &&
         (@__get_reference ("SCRATCH")) == s._abspath)
       {
-      (@__get_reference ("__draw_buf")) (s);
+      (@__get_reference ("__draw_buf")) (s;_i = s._ii);
       return -1;
       }
 
     topline ("(pager)");
     s = get_cur_buf (NULL);
+
+    ifnot (NULL == Smg->__IMG)
+      {
+      Smg->IMG = Smg->__IMG;
+      (@__get_reference ("__draw_buf")) (s;_i = s._ii);
+      Smg->__IMG = NULL;
+      }
+
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
+
     0;
   end
 

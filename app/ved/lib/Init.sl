@@ -277,8 +277,9 @@ public define rlineinit ()
     @__qualifiers,
     historyaddforce = 1,
     tabhook = &tabhook,
+    on_right_arrow = fun (`loop (_NARGS) pop ();`).__funcref,
     parse_argtype = &__parse_argtypes__,
-    });
+     });
 
   (@__get_reference ("IARG")) = length (rl.history);
 
