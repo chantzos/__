@@ -277,7 +277,7 @@ public define rlineinit ()
     @__qualifiers,
     historyaddforce = 1,
     tabhook = &tabhook,
-    on_right_arrow = fun (`loop (_NARGS) pop ();`).__funcref,
+%    on_right_arrow = fun (`loop (_NARGS) pop ();`).__funcref,
     parse_argtype = &__parse_argtypes__,
      });
 
@@ -303,6 +303,9 @@ private define __write_buffers__ ()
     {
     fn = w.bufnames[i];
     s = w.buffers[fn];
+
+    if (any (fn == SPECIAL))
+      continue;
 
     retval = Ved.check_buf_write (s;;struct {@__qualifiers, "write_err_msg"});
     if (retval)
@@ -506,8 +509,7 @@ define __vmessages ()
   VED_ISONLYPAGER = 0;
 
   Ved.setbuf (keep._abspath);
-
-  Ved.draw_wind ();
+  Ved.draw_wind (;reread = 0);
 }
 
 public define __vhandle_comma (s)

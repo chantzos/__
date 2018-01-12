@@ -210,7 +210,7 @@ class App
 
     s.st_ = st;
 
-    ifnot (qualifier_exists ("dont_read"))
+    if (qualifier ("reread", 1))
       s.lines = Ved.getlines (s._abspath, s._indent, st);
 
     s._len = length (s.lines) - 1;
@@ -389,10 +389,10 @@ class App
 
   def __messages () public proc
     loop (_NARGS) pop ();
-    variable ved = @Ved.get_cur_buf ();
+    variable cbname = Ved.get_cur_buf ()._abspath;
     __viewfile  (ERR_VED, "MSG", NULL, NULL);
-    Ved.setbuf (ved._abspath);
-    Ved.draw_wind ();
+    Ved.setbuf (cbname);
+    Ved.draw_wind (;reread = 0);
   end
 
   def __system (lines) public proc

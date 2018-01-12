@@ -45,11 +45,11 @@ class Com
 
     if (VED_WIND_NEEDS_DRAW)
       {
-      Ved.draw_wind ();
+      Ved.draw_wind (;reread = This.is.shell);
       VED_WIND_NEEDS_DRAW = 0;
       }
     else
-      __draw_buf (Ved.get_cur_buf ());
+      __draw_buf (Ved.get_cur_buf ();reread = This.is.shell);
   end
 
   def pre_exec (argv, header, issu, env)
@@ -203,27 +203,35 @@ class Com
   end
 
   def list_bg_jobs (argv)
-    self.pre_header (argv);
-
-    variable ar = String_Type[0];
-    variable i;
-    variable pids = assoc_get_keys (BGPIDS);
+    variable
+      cb = qualifier ("buf", Ved.get_cur_buf ()),
+      q = struct { reread = This.is.shell, _i = cb._ii, pos = cb.ptr,
+        @__qualifiers},
+      ar = String_Type[0],
+      pids = assoc_get_keys (BGPIDS),
+      i;
 
     ifnot (length (pids))
-      {
-      self.post_header ();
-      __draw_buf (Ved.get_cur_buf ());
       return;
-      }
+
+    if (This.is.shell)
+      self.pre_header (argv);
 
     _for i (0, length (pids) - 1)
       Array.append (&ar, pids[i] + ": " + strjoin (BGPIDS[pids[i]].argv, " ") + "\n");
 
-    IO.tostdout (ar);
+    if (This.is.shell)
+      {
+      IO.tostdout (ar);
+      self.post_header ();
+      }
+    else
+      {
+      __toscratch (ar;clear);
+      __scratch (cb);
+      }
 
-    self.post_header ();
-
-    __draw_buf (Ved.get_cur_buf ());
+    __draw_buf (cb;;q);
   end
 
   def pre_builtin (argv)

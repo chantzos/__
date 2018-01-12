@@ -100,7 +100,7 @@ class File
   end
 
   def exists (file)
-    access (file, F_OK) ? 0 : 1;
+    [1, 0][access (file, F_OK)];
   end
 
   def readlines (file)

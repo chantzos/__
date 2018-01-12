@@ -310,7 +310,7 @@ private define __show_list (argv)
   MED_LIST_BUF.lines = array_map (String_Type, &sprintf, "  %s",
     array_map (String_Type, &path_basename_sans_extname, MED_CUR_PLAYLIST));
 
-  __viewfile (MED_LIST_BUF, "playlist", [1, 0], 0;dont_read);
+  __viewfile (MED_LIST_BUF, "playlist", [1, 0], 0;reread = 0);
 
   Ved.setbuf (cb._abspath);
 

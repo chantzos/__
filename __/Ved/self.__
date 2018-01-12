@@ -223,6 +223,19 @@ beg
     lnrs[[range[0]:range[1]]];
   end
 
+  def is_modified (s)
+    variable st = qualifier ("st", stat_file (s._abspath));
+    if (NULL == st)
+      return (NULL != s.st_.st_mtime
+        ? -1 == access (s._abspath, F_OK)
+        : 0);
+
+    ifnot (NULL == s.st_.st_mtime)
+      return s.st_.st_mtime != st.st_mtime;
+
+    return 1;
+  end
+
   def check_buf_write (s)
     variable f = fun (`
         (s, msg, write_err_msg)
@@ -283,8 +296,22 @@ beg
         {
         ifnot (s.st_.st_mtime == st.st_mtime)
           {
-          retval = IO.ask (["Warning: " + file + " has been modified",
-            "continue writing? y[es]/n[o]"], ['y', 'Y', 'n', 'N']);
+          retval = IO.ask (["Warning: " + file + " has been modified, since last read",
+            "continue writing? y|Y[es]/n|N[o]/d[iff]"], ['y', 'Y', 'n', 'N', 'd']);
+
+          if ('d' == retval)
+            {
+            variable d = Ved.unified_diff (s);
+            if (strlen (d))
+              {
+              (@__get_reference ("__viewfile")) (@__get_reference ("DIFF_VED"), "diff", [1, 0], 0);
+              Ved.setbuf (s._abspath);
+              Ved.draw_wind (;reread = 0);
+              }
+
+            retval = IO.ask (["Warning: " + file + " has been modified, since last read",
+              "continue writing? y|Y[es]/n|N[o]"], ['y', 'Y', 'n', 'N']);
+            }
 
           return [0, 1][any (['n', 'N'] == retval)];
           }
@@ -344,7 +371,10 @@ beg
     if (file == s._abspath)
       {
       s._flags &= ~VED_MODIFIED;
-      s.st_ = stat_file (file);
+      if (NULL == s._fd)
+        s._fd = open (s._abspath, O_RDWR);
+
+      s.st_ = fstat (s._fd);
       }
   end
 
@@ -376,6 +406,11 @@ beg
 
     if (s._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (s._dir);
+
+    ifnot (any (s._abspath == SPECIAL))
+      if (self.is_modified (s))
+        Smg.send_msg_dr (s._abspath + " has been modified since last read", 1,
+          s.ptr[0], s.ptr[1]);
   end
 
   def initbuf (s, fname, rows, lines, t)
@@ -403,6 +438,8 @@ beg
     s._linlen = s._maxlen - s._indent;
 
     s = __vaddbuf__ (s;;__qualifiers);
+
+    s._fd = open (s._abspath, O_RDWR);
 
     s.st_ = stat_file (s._abspath);
 
@@ -451,20 +488,34 @@ beg
 
     _for i (0, w.frames - 1)
       {
-      s = w.buffers[w.frame_names[i]];
       if (i == w.cur_frame)
         {
-        cur = s;
-        cur._i = cur._ii;
+        cur = w.frame_names[i];
         continue;
         }
 
+      s = w.buffers[w.frame_names[i]];
       s._i = s._ii;
       __vset_status_line_bg_clr (s, NULL);
       s.draw (;dont_draw, no_statusline_clr);
       }
 
-    cur.draw ();
+    cur = w.buffers[cur];
+    cur._i = cur._ii;
+
+    variable q = struct
+      {
+      _i = This.is.ved
+        ? cur._i
+        : NULL,
+      pos = This.is.ved
+        ? cur.ptr
+        : NULL,
+      @__qualifiers
+      };
+
+    (@__get_reference ("__draw_buf")) (cur;;q);
+
     topline ("(" + This.is.my.name + ")");
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
@@ -732,7 +783,8 @@ beg
       com[-1] = ftmp.file;
       }
     else
-      p.stdin.in = strjoin (buf.lines, "\n");
+      p.stdin.in = (buf = strjoin (buf.lines, "\n"), buf) +
+        ["\n", ""][0 == strlen (buf)];
 
     status = p.execv (com, NULL);
 

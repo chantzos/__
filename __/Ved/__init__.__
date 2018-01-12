@@ -376,7 +376,7 @@ class Ved
       ifnot (NULL == type.type._type)
         return @type.type;
       else
-        (dir = type.dir, type = type.type);
+        (dir = type.dir, type = @type.type);
       }
     else
       type = @Ftype_Type;
@@ -2173,12 +2173,18 @@ class Ved
     a["__diff"] = @Argvlist_Type;
     a["__diff"].func = function (`
         (argv)
-      variable ved = @Ved.get_cur_buf ();
-      () = Ved.unified_diff (ved);
+      variable
+        d,
+        ved = @Ved.get_cur_buf ();
+
+      if (NULL == (d = Ved.unified_diff (ved), d) ||
+          0 == strlen (d))
+        return;
+
       __viewfile  (DIFF_VED, "diff", [1, 0], 0);
       Ved.setbuf (ved._abspath);
-      Ved.draw_wind ();
-      `).__funcref;
+      Ved.draw_wind (;reread = 0);
+    `).__funcref;
   end
 
   def __wind_rout__ (s, dir) proc
