@@ -94,9 +94,9 @@ static define __INIT__ (role)
       {
       me,
       also = String_Type[0],
-      shell = __get_qualifier_as (Integer_Type, qualifier ("shell"), 1),
-      ved   = __get_qualifier_as (Integer_Type, qualifier ("ved"), 1),
-      os    = __get_qualifier_as (Integer_Type, qualifier ("os"), 0),
+      shell = qualifier ("shell", 1),
+      ved   = qualifier ("ved", 0),
+      os    = qualifier ("os", 0),
       tty   = &__is_tty,
       smg   = &__is_smg,
       master,

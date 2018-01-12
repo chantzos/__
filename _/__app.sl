@@ -541,7 +541,7 @@ private define __search__ (argv)
   ifnot (EXITSTATUS)
     __editor (GREPFILE);
 
-  Ved.draw_wind ();
+  Ved.draw_wind (;reread = 0);
 }
 
 private variable __WHICH__ = function (`
@@ -611,6 +611,41 @@ private define __write__ (argv)
   if (any (["w", "w!", "W"]  == command))
     Ved.writefile (s, "w!" == command, [PROMPTROW, 1], file, append;
       lines = s.lines[lnrs], send_msg);
+}
+
+private define __right__ (argv)
+{
+  variable
+    s = Ved.get_cur_buf (),
+    ar = s.lins,
+    found = 0,
+    idx,
+    i,
+    len,
+    line,
+    img = @Smg->IMG;
+
+  _for i (0, length (ar) - 1)
+    {
+    len = strlen (ar[i]);
+    if (len <= COLUMNS)
+      continue;
+
+    line = strtrim_end (Smg->IMG[s.rows[i]][0]);
+    idx = is_substrbytes (ar[i], line);
+
+    if (1 >= idx)
+      continue;
+
+    found = 1;
+    Smg->IMG[s.rows[i]][0] = substr (ar[i], idx - 1, COLUMNS);
+    }
+
+  ifnot (found)
+    return;
+
+  Smg->__IMG = img;
+  Smg.restore (s.rows, s.ptr, 1);
 }
 
 private define __left__ (argv)
@@ -1096,8 +1131,9 @@ public define __initrline ()
     parse_argtype = &__parse_argtype,
     filterargs = &filterexargs,
     filtercommands = &filtercommands,
-    on_right_arrow = &__edit__,
+    on_right_arrow = &__right__,
     on_left_arrow = &__left__,
+    on_down_arrow = &__edit__,
     on_lang = &toplinedr,
     on_lang_args   = {"(" + This.is.my.name + ")"},
     histfile = This.is.my.histfile,
@@ -1184,6 +1220,9 @@ This.err_handler = &__err_handler__;
 
 funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
 `       (path, app)
+  ifnot (access (path + "/__app__.slc", F_OK|R_OK))
+    Load.file (path + "/__app__.slc");
+
   ifnot (access (path + "/" + app + ".slc", F_OK|R_OK))
     Load.file   (path + "/" + app + ".slc");
   else

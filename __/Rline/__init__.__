@@ -28,6 +28,8 @@ class Rline
     filterargs,
     on_right_arrow,
     on_left_arrow,
+    on_down_arrow,
+    on_up_arrow,
     on_lang,
     on_lang_args,
     argvlist,
@@ -319,6 +321,8 @@ class Rline
     rl.on_lang_args = qualifier ("on_lang_args", {});
     rl.on_right_arrow = qualifier ("on_right_arrow", &_Null);
     rl.on_left_arrow  = qualifier ("on_left_arrow", &_Null);
+    rl.on_down_arrow  = qualifier ("on_down_arrow", &_Null);
+    rl.on_up_arrow    = qualifier ("on_up_arrow", &_Null);
     rl.histfile = qualifier ("histfile");
     rl.history = qualifier ("history", String_Type[0]);
     rl.historyaddforce = qualifier ("historyaddforce");
@@ -2302,9 +2306,7 @@ class Rline
   end
 
   def readline (s)
-    variable retval;
-    variable commands;
-    variable initdone = 0;
+    variable idx, len, retval, commands, initdone = 0;
 
     ifnot (NULL == holdedcommand)
       {
@@ -2318,11 +2320,11 @@ class Rline
       {
       s._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
 
-      ifnot (initdone)
-        {
-        Smg.send_msg_dr (" ", 0, s._prow, s._col);
-        initdone = 1;
-        }
+%      ifnot (initdone)
+%        {
+%        Smg.send_msg_dr (" ", 0, s._prow, s._col);
+%        initdone = 1;
+%        }
 
       if (any (Input->DETACH == s._chr))
         {
@@ -2374,17 +2376,26 @@ class Rline
           }
 
       if (s._ind == 0 == strlen (s.argv[0]))
-        if (any (['~', '!', '_', '`', Input->LEFT, Input->RIGHT] == s._chr))
+        if (any (['@', '~', '!', '_', '`', [Input->UP:Input->RIGHT]] == s._chr))
           if ('`' == s._chr)
             {
             s.wind_mang ();
             continue;
             }
-          else ifnot (any ([Input->RIGHT, Input->LEFT] == s._chr))
+          else
+            ifnot (any ([Input->UP:Input->RIGHT] == s._chr))
             {
-            commands = assoc_get_keys (s.argvlist);
-            commands = commands[wherenot (strncmp (commands,
-              ["~", "!", "_"][wherefirst (['~', '!', '_'] == s._chr)], 1))];
+            if ('@' == s._chr)
+              if (NULL == s.funclist)
+                commands = String_Type[0];
+              else
+                commands = assoc_get_keys (s.funclist);
+            else
+              {
+              commands = assoc_get_keys (s.argvlist);
+              commands = commands[wherenot (strncmp (commands,
+                ["~", "!", "_"][wherefirst (['~', '!', '_'] == s._chr)], 1))];
+              }
 
             loop (1)
               {
@@ -2398,14 +2409,29 @@ class Rline
                 }
 
               continue 2;
-             }
+              }
             }
           else
             {
             if (Input->LEFT == s._chr)
               s.on_left_arrow ();
             else
-              s.on_right_arrow ();
+              if (Input->RIGHT == s._chr)
+                s.on_right_arrow ();
+              else
+                ifnot (Input->UP == s._chr)
+                  s.on_down_arrow ();
+                else
+                  ifnot ("&_Null" == string (s.on_up_arrow))
+                    s.on_up_arrow ();
+                  else
+                    if (1 == historycompletion (s))
+                      {
+                      s.execline (;;__qualifiers ());
+                      return;
+                      }
+                    else
+                      continue;
 
             prompt (NULL, s, s._lin, s._col);
             continue;

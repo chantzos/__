@@ -21,9 +21,9 @@ that are provided by the distributions versions.
 To install S-Lang issue:
 
 ```bash
-git clone git://git.jedsoft.org/git/slang.git &&
-cd slang &&
-./configure && make && sudo make install
+git clone git://git.jedsoft.org/git/slang.git && \
+cd slang                                      && \
+./configure && make && sudo make install      && \
 sudo ldconfig -v
 ```
 
@@ -35,7 +35,6 @@ LD_LIBRARY_PATH).
 ##Introduction
 The two units, human and the computer, share (at least), that both ask and
 get, questions and data.
- 
 In this primitive level the implementation uses the screen and the keyboard.
 
 #### Screen
@@ -60,8 +59,7 @@ windows support with a total control over the focused window with the
 keyboard (for resize and move operations)
  
 #### Keyboard
-The tab completion system (which is almost everywhere or should be at some
-point) is based on the following zsh line
+The auto completion system is based on the following zsh line:
  
 ```bash
     zstyle ':completion:*' menu select=4 list-colors "=(#b) #([0-9]#)*=$color[cyan]=$color[red]"
@@ -103,15 +101,17 @@ To install this distribution issue
 
 ```bash
 ROOTDIR=$HOME/.__
-test -d $ROOTDIR || mkdir $ROOTDIR && \
-cd $ROOTDIR && \
+test -d $ROOTDIR || mkdir $ROOTDIR           && \
+cd $ROOTDIR                                  && \
 git clone https://github.com/chantzos/__.git && \
-cd __ && \
+cd __                                        && \
 slsh ___.sl --verbose
 ```
 
-Applications and symbolic links to commands will be installed in
+Applications and commands will be installed in
 $ROOTDIR/__/bin, all of them prefixed with two underscores.
+Those are actually symbolic links to references, which they
+load, based also in the name of the link, the necessary code.
 
 ## Usage
 
@@ -204,22 +204,49 @@ $ROOTDIR/bin/__shell --app=__ --app=git
 
 # You can cycle through applications using F3 or F1 for
 # a next/prev motion.
+
+# On an empty command line, keys can be defined to trigger
+# a call to a function reference. Though the interface is
+# not complete, practice stabilized some actions:
  
+# The "~" triggers auto completion for personal commands that
+# are located under: $ROOTDIR/__/local/com
+# those are accessible on all the applications and usually are
+# common used user scripts (hense the ~) 
+
+# The "__" and "@", which for now seems to overlap are usually
+# function calls.
+
+# The arrow keys.
+
+# up: triggers history completion - doesn't need to be the first
+# char on the command line, which in that case, uses the typed
+# text as a pattern to look up to the history entries)
+
+# right/left: can scroll the output text to both directions (this
+# helps with lines that are longer than screen columns, as
+# lines are never wrapped), without the need to edit the output.
+
+# down: edits the output as a normal buffer, by entering first
+# in Normal Mode.
+
+...
 ```
- 
-Briefly the ideal concept:
+
+Briefly the ideal concept in an ala list sentence:
   in a unix like operating system,
   self buildable and controlled,
   applications with a personalized and uniform interface,
   with a drawing that doesn't stress the eyes much,
   and gets as much screen space it deserves,
-  without distracted pop ups (unless its called by us)
+  without distracted pop ups (unless its called by us),
   total controlled with the keyboard,
   with share bindings,
   same workflow,
   and similar interface under X or a virtual console,
   with an implementation,
   which is written in a familiar pleasant language,
+    - compact but understandable (like S-Lang)
   with few dependencies (mostly in libraries),
   that can be carried (static build),
   that can load instantly,
@@ -236,8 +263,7 @@ Briefly the ideal concept:
   freedom (through knowledge and responsibility to get out of edges)
   with an evaluation console executing strings
 
-in a summury the absolute control over every bit (that is,
-ideally!!! dangerous waters)
+in a summury the absolute control over every bit (that is, ideally)
  
 This system has implemented most of the specification (with
 notable exceptions that it can not be yet the init executable,
@@ -257,27 +283,47 @@ bindings). The other difference is important (the role
 that every application carries at the invocation) and here
 is why:
 
-				At the invocation an application checks the environment
+At the invocation an application checks the environment
 and if it's not derived from another instance then becomes
 the process leader. Any application can play that role.
 This application by default, can have independed images
 (windows) of themselves (like tabs), unless the application
 forbids it (like the simple network manager which is activated
 with the --devel command line switch and is called as __netm,
-which it makes sense to disable new instances).
+which it makes sense to disable new instances). The F5 key
+can display a menu for window related actions.
 
-				This master process by default can start, manage and close
+This master process by default can start, manage and close
 unlimited new applications, unless again is forbidden (like
 a very specialized task that needs to reduce the risks). The
 first four Fn keys are dedicated to those taskes, like the F1
 for instance, which is binded to bring in the foreground the
-previusly focused application or if there isn't one to start
+previously focused application, or if there isn't one to start
 a default based on the settings.
 
-				The applications can also have children of other applications
+The applications can also have children of other applications
 but which they are tied only with them; those can be detached
 (using CTRL-j) and later can be re-attached, but only throw the
 caller application.
+
+### The drawing interface
+
+The first (top) line is reserved to print generic information
+and is refreshed at a every command invocation or (usually) when
+changing mode, or when changing focus.
+
+The window can be split in frames and every frame is associated
+with a buffer, which reserves the last line of the frame to print
+buffer related information. This last line can be hided, as it
+happens with applications other than ved, however when in insert
+mode the buffer status line should be visible.
+
+The last line of the window is reserved for displaying messages
+which they should be dissappear at the first keypress action.
+
+The previous line is reserved for the command line, but if the
+length from the entered text cannot fit, it grows to the top by
+borrowing upper lines.
 
 
 This system, it can't also built and maintain yet, that unix
@@ -315,19 +361,144 @@ codebase was written. It's really the first prototype (written
 in a time with no internet for long, faced with challenges that
 needed design decisions (of which some though workable are
 not wise (some are explained in the source code))), which it
-rather happened to work very early enough good.  Though there
-are obvious weekness, like the undo operation or when editing
-lines longer than the screen columns (but very seldom i lost work).
-Ved has a couple of interesting features, like the interactive
-search (not sure but such option became available also in vim
-recently), which it will be more usefull if it can be extended,
-with a menu with more than one match to select.
+rather happened to work very early enough good. But because of
+this, the machine is rather fragile and development is considering
+as carefull exercise. But, though there are obvious weekness, like
+the undo operation or when editing lines longer than the screen
+columns, very seldom i lost work. But when and if it happens the
+inevitable, then usually the error message is enough descriptfull,
+to guide you to fix the condition.
+Actually a self developed and maintainable system, was (even if it
+was hidden somehow, at least at the begining), one of the rationales
+that lead to this code. This might has to do with the complexity
+of the modern systems.
+For quite too many, a unix environment with a shell and an editor are
+all they need (to be fully productive). They appreciate the peacefull,
+expected, sensible, tested, standardized, builded through experience,
+consiense and logic system, that ends to be very pleasant. At the worst
+of the cases is always a settler and should be easilly accessible (as
+a gained standard) to any of the operating systems today. A C library,
+a compiler, the development tools, a posix shell ...
+
+The user has to feel that has the control, its our human being desire.
+
+But Ved is intented to be the underlying system and it is.
+However, the system that works with a text buffer, is based on filetypes,
+which contribute a lot of code, and that code can change significantly
+the behavior (usually the Normal Mode (the pager in other words, which
+in all the other applications other than ved, quits with q, like a pager
+does)).
+
+The editor didn't ever have the intention to be a vim clone, but rather
+use the admitable geniusly captured and implemented (in vim perfectly)
+model of modes (besides its intuitive interface which is based on finger
+mnemonic intuitive keys that are connected with actions, like c[Ww]
+(change [Ww]ord)); which in this application this model (of modes), has
+been already extended and will be even much more (if it (the project)
+will still happily live), in many more modes.
+
+Many operations (like the above mentioned) are depended on small menus,
+that work with uniformity, as far it conserns, the drawing style, the
+selection style (the space bar (for instance) (and very natural) accepts
+a match on all those menus, the arrow keys can be used to navigate to
+all the directions of the printed matches, the escape on menus aborts,
+the carriage return accepts and executes the command line), but also
+the underlying code.
+
+### Inner Syntax
+
+Libraries are written with an inner syntax (that needs pre-parsing
+and compiling to S-Lang), which is being used to create, either
+new or static instances, of either mini or more complex function
+environments (by adding a lot of boilerplate code). This is to
+create an abstraction level (a struct and an associated static
+namespace, with a group of functions and variables part of this
+same object), and an unaccessible private namespace with the
+implementation details. Instantanation is done with the first
+loading.
+Those structures allows code consistency and organization.
+But the main reason is that every method of those structures, is
+actually running through an interpreted function, which catches
+any error and calls the error handler. The default handler
+prints a detailed error and gives control then to the main 
+application loop.
+
+It also allows profiling, by just changing the interpreted
+function. Any application accepts a "--profile" command line
+switch, which turns on profiling. It can also be enabled at
+runtime by issuing in the evaluation console (which it can
+be started by calling the __eval function):
+
+_-> enable.profile (;set);
+
+For now, to see the results, is again possible through the eval
+console. By issuing Profile. (and hit tab) it will present a
+couple of options to select and see the results in the scratch
+buffer - the scratch buffer can be opened with the __scratch
+function, while the __messages function is opening the stderr
+buffer.
+
+This syntax is not compatible with S-Lang. Files with an "__"
+extension are such objects that needs parsing. Most of these
+files are precompiled and then bytecompiled (as all of the
+file units) during initial installation or later on runtime.
+But some of those objects are actually compiled at the runtime
+when there is a #if[not] directive, where depending of a condition
+can load specific version[s] of the same (by name but also with the
+signature) method[s] or of a subclass.
+
+#### Functional Code Interface
+Normally the following is not valid (because the if is a statement):
+  
+  variable cond = 1;
+  variable v = if (cond) 1; else 2;
  
+But by using the function interface, we can get the desired result:
+ 
+  variable v = funcall (cond, `(arg) if (arg) 1; else 0;`);
+
+The string inside the backquote characters is evaluated at runtime.
+It's like an unamed function syntax without the braces:
+
+ (arg)
+{
+  if (arg)
+    return 1;
+  else
+    return 2;
+}
+
+This function can be stored in a variable and can be used it as a normal
+function reference.
+
+Functions can have environment, delimited by the envbeg and envend keywords.
+This really makes the things interesting, because that way such a function
+can really control the environment. It can also create a closure:
+ 
+(the `fun' keyword semantics are available when applications are started with
+the --devel command line switch)
+
+		variable counter = fun (`envbeg variable _i = 0; envend _i++; _i;`);
+		counter.call (); -> 1
+		counter.call (); -> 2
+ 
+One such function can be the whole program if it wasn't for the backquotes.
+The multiline strings are perfect to write full compatible S-Lang code without
+further parsing, but the backquotes needs to be doubled, when either using
+a nested function inside such a function or on every time a multiline string
+delimited by backquotes is needed on the code, and so on ...
+
+### Principals.
+
+The caller always knows better.
+the user has the responsibility.
+...
+
 As it has beem said, still it can't built and maintain, that unix
 like environment. But this knowledge exists, developed by the 
-fellows at linuxfromscratch.org and it feels like at duty (though
-a welcomed and pleasant one) to re-initialize the code, but
-(right now):
+fellows at linuxfromscratch.org and it feels like as a duty (though
+a pleasant one) to re-initialize the code, but (right now):
+
 As I feel that I did the best I could, though I could do more and
 better, it looks that my mission is completed (at this point of time;
 anything that it will happen (even a single line of code) (declared
@@ -335,10 +506,13 @@ at 30 of December at 2017) it would be considered as a gift.
 
 As for the quality of the code, this is the result of a self educated
 (at 40's) human being with zero educational background, with four kids,
-gots, ... while he was building a home and pressed to obey the existing
+animals, ... while he was building a home and pressed to obey the existing
 practices that he doesn't finds too much logic on them.
 
-This system cannot be used for complex communications and specialized tasks. 
+# WARNING
+This system cannot be used for complex communications or specialized tasks,
+as hasn't been checked on (not so) corner cases. It is mainly serves
+(besides the author) as a prototype.
 
 ## THANKS
 Special thanks to John E. Davis who wrote S-Lang but and to all (uncountable)  
@@ -356,8 +530,7 @@ And for this I'm gratefull and I feel lucky.
 Regards
 αγαθοκλής
 
-p.s., ideal, i do not want to write any code to handle an exchangeable
+p.s., ideal, nobody really wants to write any code to handle an exchangeable
 bad file format that doesn't obey conformation with established standards,
-which gained through experience and consience (but the last one can do is
-to notify the sender/creator to get attention, as every body deserves that
-treatment and so do i).
+but the last one can do is to notify the sender/creator to get attention,
+as every body deserves that treatment and so do i.

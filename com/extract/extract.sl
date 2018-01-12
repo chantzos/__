@@ -47,7 +47,8 @@ define main ()
   if (VERBOSE)
     {
     variable saveoutfd = dup_fd (fileno (stdout));
-    () = dup2_fd (This.is.std.out.fd, 1);
+    ifnot (NULL == This.is.std.out.fd)
+      () = dup2_fd (This.is.std.out.fd, 1);
     }
 
   exit_code = array_map (Integer_Type, File.extract, File, files, VERBOSE, dir, strip);
