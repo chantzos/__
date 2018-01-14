@@ -10,7 +10,7 @@ It was developed under a unix like system (linux with no systemd)
 Void-Linux at void-linux.eu
 
 It was written in S-Lang, an excellent (with a C like syntax
-and an unparrarel array implementation) programming language.
+and an unparalleled array implementation) programming language.
  
 ### Install S-Lang
 
@@ -32,7 +32,7 @@ class with existing installations (if there are problems to load the right
 libraries, try to adjust and point to them by (at least in Linux) using
 LD_LIBRARY_PATH).
 
-##Introduction
+## Introduction
 The two units, human and the computer, share (at least), that both ask and
 get, questions and data.
 In this primitive level the implementation uses the screen and the keyboard.
@@ -49,9 +49,9 @@ though the simple code that introduced to handle the signal (as simplest
 can be written based also on the design), though it seems to handle both
 the underline code (buffer and window structures) and the drawing/pointer
 position, it can't offer warranty that will do the right thing, since the
-floating view is never used, it cannot revail the code mistakes.
+floating view is never used, it cannot reveal the code mistakes.
 
-This application offers such an X window managment (code derived from
+This application offers such an X window management (code derived from
 __dminiwm__ :  https://github.com/moetunes/dminiwm.git)
  
 Its a tiny (written as a S-Lang module) library, which also has floating
@@ -66,16 +66,26 @@ The auto completion system is based on the following zsh line:
 ```
 
 Its based on a readline implementation (code located at __/Rline/__init__.__),
-which its instance offers support (autocompletion) for commands, history,
+which its instance, offers support (autocompletion) for commands, history,
 arguments, filesystem access, ..., but also bindings to function references
-and even direct access to generic application logic; libraries are free to
-know some about their existing environment, and in some cases (for speed and
-efficiency) there is a direct communication and access by disregarding the
-abstraction level (without abusing it); this freedom comes because the inner
-code is notified when either a function interface or the environment is going
-to change.  S-Lang really helps on a stable interface, because of the function
-qualifiers, that permit to a function to develop logic without changing its
-signature (like the argument number).
+and even direct access to generic application logic.
+
+Libraries are free to know some about their existing environment, and
+in some cases (for speed and efficiency) there is a direct communication
+and access, by disregarding the abstraction level (without abusing the
+interface).  This freedom comes from the fact, either (usually) because
+at some point before, a break point (a try statement in this case) has
+already been set, or because the caller can handle all the conditions of the
+called function behavior, or simply because S-Lang really helps on a stable
+interface, because of the function qualifiers, that permit to a function
+to develop logic without changing signature (like the argument number).
+
+In any case its inner code, which anyway has some dependencies to other
+abstracted objects, but in many cases some direct calls are desired,
+especially from code, like readline that is good to know quickly, what
+will do with the input. Of course this can be easily get out of control,
+but as long there is a sync with the outer interface development (good
+named symbols (functions and variables) can help a bit), no harm enough.
 
 ## Installation
 
@@ -212,12 +222,12 @@ $ROOTDIR/bin/__shell --app=__ --app=git
 # The "~" triggers auto completion for personal commands that
 # are located under: $ROOTDIR/__/local/com
 # those are accessible on all the applications and usually are
-# common used user scripts (hense the ~) 
+# common used user scripts (hence the ~) 
 
 # The "__" and "@", which for now seems to overlap are usually
 # function calls.
 
-# The arrow keys.
+# The arrow keys on the command line
 
 # up: triggers history completion - doesn't need to be the first
 # char on the command line, which in that case, uses the typed
@@ -230,12 +240,15 @@ $ROOTDIR/bin/__shell --app=__ --app=git
 # down: edits the output as a normal buffer, by entering first
 # in Normal Mode.
 
+# With the page-[up|down] keys can scroll the output 2 lines
+# up|down from the command line.
+
 ...
 ```
 
 Briefly the ideal concept in an ala list sentence:
   in a unix like operating system,
-  self buildable and controlled,
+  self built-able and controlled,
   applications with a personalized and uniform interface,
   with a drawing that doesn't stress the eyes much,
   and gets as much screen space it deserves,
@@ -263,7 +276,7 @@ Briefly the ideal concept in an ala list sentence:
   freedom (through knowledge and responsibility to get out of edges)
   with an evaluation console executing strings
 
-in a summury the absolute control over every bit (that is, ideally)
+in a summary the absolute control over every bit (that is, ideally)
  
 This system has implemented most of the specification (with
 notable exceptions that it can not be yet the init executable,
@@ -286,7 +299,7 @@ is why:
 At the invocation an application checks the environment
 and if it's not derived from another instance then becomes
 the process leader. Any application can play that role.
-This application by default, can have independed images
+This application by default, can have independent images
 (windows) of themselves (like tabs), unless the application
 forbids it (like the simple network manager which is activated
 with the --devel command line switch and is called as __netm,
@@ -296,7 +309,7 @@ can display a menu for window related actions.
 This master process by default can start, manage and close
 unlimited new applications, unless again is forbidden (like
 a very specialized task that needs to reduce the risks). The
-first four Fn keys are dedicated to those taskes, like the F1
+first four Fn keys are dedicated to those tasks, like the F1
 for instance, which is binded to bring in the foreground the
 previously focused application, or if there isn't one to start
 a default based on the settings.
@@ -319,13 +332,13 @@ happens with applications other than ved, however when in insert
 mode the buffer status line should be visible.
 
 The last line of the window is reserved for displaying messages
-which they should be dissappear at the first keypress action.
+which they should be disappear at the first keypress action.
 
 The previous line is reserved for the command line, but if the
 length from the entered text cannot fit, it grows to the top by
 borrowing upper lines.
 
-
+#### Design and Interface
 This system, it can't also built and maintain yet, that unix
 like environment, but it comes with the most basic commands
 to administrate the system.
@@ -363,65 +376,90 @@ needed design decisions (of which some though workable are
 not wise (some are explained in the source code))), which it
 rather happened to work very early enough good. But because of
 this, the machine is rather fragile and development is considering
-as carefull exercise. But, though there are obvious weekness, like
+as careful exercise. But, though there are obvious weakness, like
 the undo operation or when editing lines longer than the screen
 columns, very seldom i lost work. But when and if it happens the
-inevitable, then usually the error message is enough descriptfull,
+inevitable, then usually the error message is enough descriptive,
 to guide you to fix the condition.
 Actually a self developed and maintainable system, was (even if it
-was hidden somehow, at least at the begining), one of the rationales
+was hidden somehow, at least at the beginning), one of the rationales
 that lead to this code. This might has to do with the complexity
 of the modern systems.
 For quite too many, a unix environment with a shell and an editor are
-all they need (to be fully productive). They appreciate the peacefull,
-expected, sensible, tested, standardized, builded through experience,
-consiense and logic system, that ends to be very pleasant. At the worst
-of the cases is always a settler and should be easilly accessible (as
+all they need (to be fully productive). They appreciate the peaceful,
+expected, sensible, tested, standardized, built-ed through experience,
+conscience and logic system, that ends to be very pleasant. At the worst
+of the cases is always a settler and should be easily accessible (as
 a gained standard) to any of the operating systems today. A C library,
-a compiler, the development tools, a posix shell ...
+a compiler, the development tools, a posix shell, some sanity ...
 
 The user has to feel that has the control, its our human being desire.
 
-But Ved is intented to be the underlying system and it is.
+But Ved is intended to be the underlying system and it is.
 However, the system that works with a text buffer, is based on filetypes,
 which contribute a lot of code, and that code can change significantly
 the behavior (usually the Normal Mode (the pager in other words, which
 in all the other applications other than ved, quits with q, like a pager
 does)).
+In Normal mode all the function references associated with keypresses,
+can execute three function calls.
+From the returned value of the first function call (which by default is a
+stub function that returns zero), depends, if control will return to
+the caller (when -1), or continue by executing the default associated
+action with the key (when 0), or execute the third function (which by
+default does nothing).
+As an example the right key in Normal Mode, sets the pointer one cell
+to the right (if there is enough text). However, the media application
+sets in its playlist buffer structure a callback function, that when
+the right arrow key is pressed, it draws a box with information about
+what's currently playing. Then it returns -1, which is interpreted as
+return immediately and do not try to call the other functions. If the
+the returned value was zero, the default action for right key (move one
+cell to right) would be executed.
+On any other value, the function calls the last function, which usually
+is being used to clean up states or for refinement after the default
+action. For instance, again in media and while navigating in the playlist
+frame (reached with "l"), the down arrow key, first goes down to the
+next line (default action), and then in the last call, checks if the
+current filename/song, has embedded tags and if it does, it display
+them. The returned value of the third function is ignored.
 
 The editor didn't ever have the intention to be a vim clone, but rather
-use the admitable geniusly captured and implemented (in vim perfectly)
-model of modes (besides its intuitive interface which is based on finger
-mnemonic intuitive keys that are connected with actions, like c[Ww]
-(change [Ww]ord)); which in this application this model (of modes), has
-been already extended and will be even much more (if it (the project)
-will still happily live), in many more modes.
+use the admitable geniously captured and implemented (in vim perfectly)
+model of modes - besides the intuitive interface which is based on
+mnemonic keys that are connected with actions and keywords, like
+[cd][i][Ww] for [cd](hange|delete) [[i]nner] [Ww]ord.
+
+In this application this model (of modes), has been already extended.
 
 Many operations (like the above mentioned) are depended on small menus,
-that work with uniformity, as far it conserns, the drawing style, the
-selection style (the space bar (for instance) (and very natural) accepts
-a match on all those menus, the arrow keys can be used to navigate to
-all the directions of the printed matches, the escape on menus aborts,
-the carriage return accepts and executes the command line), but also
-the underlying code.
+that work with uniformity, as far it concerns:
+  - the drawing style
+  - the selection style (the space bar (for instance) (and very natural)
+    accepts a match on all those menus, the arrow keys can be used to
+    navigate to all the directions of the printed matches, the escape
+    (in this case) aborts, the carriage return accepts and executes
+    the command line)
+  - but also the underlying code which is trying to be consistent
 
-### Inner Syntax
+### Inner Code
 
-Libraries are written with an inner syntax (that needs pre-parsing
-and compiling to S-Lang), which is being used to create, either
-new or static instances, of either mini or more complex function
+Most of the libraries are written with such (inner) syntax, that needs
+pre-parsing and compiling to S-Lang. This is being used to create,
+either new or static instances, of either mini or more complex function
 environments (by adding a lot of boilerplate code). This is to
-create an abstraction level (a struct and an associated static
-namespace, with a group of functions and variables part of this
-same object), and an unaccessible private namespace with the
-implementation details. Instantanation is done with the first
-loading.
-Those structures allows code consistency and organization.
+create an abstraction level, a structure and an associated static
+namespace (with a group of functions and variables part of this
+same object), and an inaccessible private namespace with the
+implementation details. instantiation is done with the first loading.
+
+Those structures allows for code consistency and organization.
 But the main reason is that every method of those structures, is
 actually running through an interpreted function, which catches
-any error and calls the error handler. The default handler
-prints a detailed error and gives control then to the main 
-application loop.
+any error and calls an error handler.
+
+The default error handler it prints a detailed error and then gives
+control to the main application loop.
 
 It also allows profiling, by just changing the interpreted
 function. Any application accepts a "--profile" command line
@@ -441,14 +479,15 @@ buffer.
 This syntax is not compatible with S-Lang. Files with an "__"
 extension are such objects that needs parsing. Most of these
 files are precompiled and then bytecompiled (as all of the
-file units) during initial installation or later on runtime.
-But some of those objects are actually compiled at the runtime
-when there is a #if[not] directive, where depending of a condition
-can load specific version[s] of the same (by name but also with the
-signature) method[s] or of a subclass.
+file units ought to do), during initial installation or later
+on runtime.
+But some of those objects are actually compiled at the runtime.
+Some of them can contain an #if[not] directive, where depending
+of a condition, can load a subclass or specific version[s], of
+the __same__ (by name but also with the signature) method[s].
 
 #### Functional Code Interface
-Normally the following is not valid (because the if is a statement):
+Normally the following is not valid (because "if" is a statement):
   
   variable cond = 1;
   variable v = if (cond) 1; else 2;
@@ -458,7 +497,7 @@ But by using the function interface, we can get the desired result:
   variable v = funcall (cond, `(arg) if (arg) 1; else 0;`);
 
 The string inside the backquote characters is evaluated at runtime.
-It's like an unamed function syntax without the braces:
+It's like an unnamed function syntax without the braces:
 
  (arg)
 {
@@ -469,24 +508,25 @@ It's like an unamed function syntax without the braces:
 }
 
 This function can be stored in a variable and can be used it as a normal
-function reference.
+function reference. The code inside the body of those strings, can be
+regular S-Lang code.
 
-Functions can have environment, delimited by the envbeg and envend keywords.
-This really makes the things interesting, because that way such a function
-can really control the environment. It can also create a closure:
+Functions can have environment, delimited by the "envbeg" and "envend"
+keywords.
+This fact alone, can make the things interesting, because that way such
+function can really control the environment. But, it can also create a
+closure:
  
-(the `fun' keyword semantics are available when applications are started with
-the --devel command line switch)
-
-		variable counter = fun (`envbeg variable _i = 0; envend _i++; _i;`);
+		variable counter = function (`envbeg variable _i = 0; envend _i++; _i;`);
 		counter.call (); -> 1
 		counter.call (); -> 2
  
-One such function can be the whole program if it wasn't for the backquotes.
-The multiline strings are perfect to write full compatible S-Lang code without
-further parsing, but the backquotes needs to be doubled, when either using
-a nested function inside such a function or on every time a multiline string
-delimited by backquotes is needed on the code, and so on ...
+One such function can be the whole program and could be (almost) perfect,
+if it wasn't for the backquotes. Such multiline strings allows to write
+full compatible S-Lang code without further parsing, but the backquotes
+needs to be doubled, everytime there is a need; like when using a nested
+function, or simply when real multiline strings are needed in the code.
+Such nested levels can end up, quickly, in unreadable code.
 
 ### Principals.
 
@@ -494,7 +534,8 @@ The caller always knows better.
 the user has the responsibility.
 ...
 
-As it has beem said, still it can't built and maintain, that unix
+## EPILOGUE
+As it has beef said, still it can't built and maintain, that unix
 like environment. But this knowledge exists, developed by the 
 fellows at linuxfromscratch.org and it feels like as a duty (though
 a pleasant one) to re-initialize the code, but (right now):
@@ -514,23 +555,19 @@ This system cannot be used for complex communications or specialized tasks,
 as hasn't been checked on (not so) corner cases. It is mainly serves
 (besides the author) as a prototype.
 
-## THANKS
-Special thanks to John E. Davis who wrote S-Lang but and to all (uncountable)  
-contributors around this enormous open source ecosystem (which this model is  
-the reason that produced this trementous amount of code and this super fast  
-evolution, unbelievable for that short time that happened).
-
-## EPILOGUE
 This programming project, as and because, it includes so many sub projects 
 which are more than enough to keep someone busy (for as long he can (or has the
 desire) to code), its natural to say that this is the project of my life's ... and 
 for my lifetime.  
-And for this I'm gratefull and I feel lucky.
-
-Regards
-αγαθοκλής
+And for this I'm grateful and I feel lucky.
 
 p.s., ideal, nobody really wants to write any code to handle an exchangeable
 bad file format that doesn't obey conformation with established standards,
 but the last one can do is to notify the sender/creator to get attention,
 as every body deserves that treatment and so do i.
+
+## THANKS
+Special thanks to John E. Davis who wrote S-Lang, but and to all (uncountable)  
+contributors around this enormous open source ecosystem (which this model
+is the reason that produced this tremendous amount of code and this super
+fast code evolution, unbelievable for that short time that happened).

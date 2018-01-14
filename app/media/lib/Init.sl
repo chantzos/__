@@ -14,6 +14,7 @@ variable MED_STDOUT = This.is.my.tmpdir + "/__MED_STDOUT";
 variable MED_LYRICS = This.is.my.datadir + "/lyrics";
 variable MED_CONF   = This.is.my.datadir + "/__MED_CONF";
 variable MED_EXEC   = Sys.which ("mplayer");
+variable USER_ARGS  = NULL;
 variable MED_ARGV = [
   "-utf8",
   "-slave",
@@ -87,10 +88,26 @@ if (NULL == MED_FD)
 
 public define Init_Process ()
 {
+  variable user_args = String_Type[0];
+  if (NULL == USER_ARGS)
+    {
+    variable arg, i = -1;
+    while (NULL != (arg = Opt.Arg.getlong_val ("arg", NULL,
+        &This.has.argv;del_arg), arg))
+      user_args = [user_args, arg];
+
+    if (length (user_args))
+      USER_ARGS = user_args;
+    }
+
   MED_PID = fork ();
+
   MED_STDOUT_FD = open (MED_STDOUT, O_RDWR|O_CREAT|O_TRUNC, S_IRWXU);
   if (NULL == MED_STDOUT_FD)
+    {
     This.err_handler ("cannot open " + MED_STDOUT, errno_string (errno));
+    return -1;
+    }
 
   if (0 == MED_PID)
     {
@@ -109,7 +126,7 @@ public define Init_Process ()
     if (-1 == dup2_fd (This.is.std.err.fd, _fileno (stderr)))
       return -1;
 
-    if (-1 == execve (MED_EXEC, [MED_EXEC, MED_ARGV], Env.defenv ()))
+    if (-1 == execve (MED_EXEC, [MED_EXEC, user_args, MED_ARGV], Env.defenv ()))
       _exit (1);
     }
 
