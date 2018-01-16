@@ -156,8 +156,16 @@ define getpage (page)
 
   status = p.execv ([col, "-b"], NULL);
 
-  () = remove (outfn);
-  () = remove (fname);
+  ar = MYMANDIR + "/" + listdir (MYMANDIR);
+
+  variable l;
+  _for i (0, length (MAN_HIER) - 1)
+    ifnot (NULL == (l = listdir (MAN_HIER[i]), l))
+      ar = [ar, MAN_HIER[i] + "/" + l];
+
+  _for i (0, length (ar) - 1)
+    ifnot (Dir.isdirectory (ar[i]))
+      () = remove (ar[i]);
 
   status.exit_status;
 }

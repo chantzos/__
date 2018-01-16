@@ -302,13 +302,17 @@ subclass Pager
   end
 
   def page_down (s)
-    if (s._i + s._avail_rows > s._len)
+    variable rows = qualifier ("rows");
+    if (NULL == rows || 1 > rows || rows > s._avail_rows)
+      rows = s._avail_rows;
+
+    if (s._i + rows > s._len)
       return;
 
     if (s._chr == Input->CTRL_f)
       Ved.Mark.backtick (s);
 
-    s._i += (s._avail_rows);
+    s._i += rows;
 
     s.ptr[1] = s._indent;
     s._index = s._indent;
@@ -321,11 +325,15 @@ subclass Pager
     ifnot (s.lnrs[0])
       return;
 
+    variable rows = qualifier ("rows");
+    if (NULL == rows || 1 > rows || rows > s._avail_rows)
+      rows = s._avail_rows;
+
     if (s._chr == Input->CTRL_b)
       Ved.Mark.backtick (s);
 
-    if (s.lnrs[0] >= s._avail_rows)
-      s._i = s.lnrs[0] - s._avail_rows;
+    if (s.lnrs[0] >= rows)
+      s._i = s.lnrs[0] - rows;
     else
       s._i = 0;
 

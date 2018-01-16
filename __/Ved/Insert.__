@@ -791,7 +791,7 @@ subclass Insert
     ifnot (@i)
       return "";
 
-    variable inv = [[0:32], [33:45], [58:64], [91:96]];
+    variable inv = [[0:32], [33:45], [58:64], [91:94], 96];
     variable fn = ""; variable c;
 
     do

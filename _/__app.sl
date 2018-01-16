@@ -613,7 +613,7 @@ private define __write__ (argv)
       lines = s.lines[lnrs], send_msg);
 }
 
-private define __right__ (argv)
+private define __right__ (rl)
 {
   variable
     s = Ved.get_cur_buf (),
@@ -648,7 +648,7 @@ private define __right__ (argv)
   Smg.restore (s.rows, s.ptr, 1);
 }
 
-private define __left__ (argv)
+private define __left__ (rl)
 {
   variable
     s = Ved.get_cur_buf (),
@@ -682,6 +682,20 @@ private define __left__ (argv)
   Smg.restore (s.rows, s.ptr, 1);
 }
 
+private define __down__ (rl)
+{
+  variable s = Ved.get_cur_buf ();
+  Ved.Pager.page_down (s;rows = [2, -1][rl._chr == ' ']);
+  __draw_buf (s;reread = 0);
+}
+
+private define __up__ (rl)
+{
+  variable s = Ved.get_cur_buf ();
+  Ved.Pager.page_up (s;rows = 3);
+  __draw_buf (s;reread = 0);
+}
+
 private define __edit__ (argv)
 {
   variable s = Ved.get_cur_buf ();
@@ -704,14 +718,29 @@ private define __ved__ (argv)
 {
   Com.pre_com ();
 
-  variable fname = 1 == length (argv) ? SCRATCH : argv[1];
+  variable
+    i,
+    len,
+    fnames = String_Type[0],
+    args = String_Type[0];
 
-  if ("-" == fname)
-    fname = This.is.std.out.fn;
+  _for i (1, length (argv) - 1)
+    ifnot (strncmp (argv[i], "--", 2))
+      args = [args, argv[i]];
+    else
+      fnames = [fnames, argv[i]];
 
-  Com.pre_header ("ved " + fname);
+  len = length (fnames);
+  ifnot (len)
+    fnames = [SCRATCH];
+  else
+    if (1 == len && "-" == fnames[0])
+      fnames = [This.is.std.out.fn];
 
-  __editor (fname;;__qualifiers ());
+  Com.pre_header ("ved " + (0 == length (args)
+    ? "" : strjoin (args, " ") + " ") + strjoin (fnames, " "));
+
+  __editor ([args, fnames];;__qualifiers ());
 
   Com.post_header ();
 
@@ -1134,6 +1163,9 @@ public define __initrline ()
     on_right_arrow = &__right__,
     on_left_arrow = &__left__,
     on_down_arrow = &__edit__,
+    on_page_up = &__up__,
+    on_page_down = &__down__,
+    on_space = &__down__,
     on_lang = &toplinedr,
     on_lang_args   = {"(" + This.is.my.name + ")"},
     histfile = This.is.my.histfile,

@@ -304,7 +304,14 @@ private define play_video (argv)
 
 private define __show_list (argv)
 {
+  if (NULL == MED_CUR_PLAYLIST)
+    {
+    Smg.send_msg_dr ("playlist hasn't been populated", 0, NULL, NULL);
+    return;
+    }
+
   MED_CUR_SONG_CHANGED = 0;
+
   variable cb = Ved.get_cur_buf ();
 
   MED_LIST_BUF.lines = array_map (String_Type, &sprintf, "  %s",

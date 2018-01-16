@@ -30,6 +30,9 @@ class Rline
     on_left_arrow,
     on_down_arrow,
     on_up_arrow,
+    on_space,
+    on_page_up,
+    on_page_down,
     on_lang,
     on_lang_args,
     argvlist,
@@ -323,6 +326,9 @@ class Rline
     rl.on_left_arrow  = qualifier ("on_left_arrow", &_Null);
     rl.on_down_arrow  = qualifier ("on_down_arrow", &_Null);
     rl.on_up_arrow    = qualifier ("on_up_arrow", &_Null);
+    rl.on_space       = qualifier ("on_space");
+    rl.on_page_down   = qualifier ("on_page_down", &_Null);
+    rl.on_page_up     = qualifier ("on_page_up", &_Null);
     rl.histfile = qualifier ("histfile");
     rl.history = qualifier ("history", String_Type[0]);
     rl.historyaddforce = qualifier ("historyaddforce");
@@ -2160,7 +2166,7 @@ class Rline
       return argcompletion (s;;__qualifiers ());
   end
 
-  def historycompletion (s) proc
+  def historycompletion (s)
     ifnot (length (s.history))
       return 0;
 
@@ -2376,12 +2382,21 @@ class Rline
           }
 
       if (s._ind == 0 == strlen (s.argv[0]))
-        if (any (['@', '~', '!', '_', '`', [Input->UP:Input->RIGHT]] == s._chr))
+        if (any (['@', '~', '!', '_', '`', ' ', [Input->UP:Input->NPAGE]] == s._chr))
           if ('`' == s._chr)
             {
             s.wind_mang ();
             continue;
             }
+          else if (' ' == s._chr)
+            {
+            ifnot (NULL == s.on_space)
+              s.on_space ();
+            }
+          else if (Input->PPAGE == s._chr)
+            s.on_page_up ();
+          else if (Input->NPAGE == s._chr)
+            s.on_page_down ();
           else
             ifnot (any ([Input->UP:Input->RIGHT] == s._chr))
             {
@@ -2425,7 +2440,7 @@ class Rline
                   ifnot ("&_Null" == string (s.on_up_arrow))
                     s.on_up_arrow ();
                   else
-                    if (1 == historycompletion (s))
+                    if (1 == historycompletion (self, s))
                       {
                       s.execline (;;__qualifiers ());
                       return;
@@ -2458,7 +2473,7 @@ class Rline
         }
 
       if (any (Input->rmap.histup == s._chr))
-        if (1 == historycompletion (s))
+        if (1 == historycompletion (self, s))
           {
           s.execline (;;__qualifiers ());
           return;
