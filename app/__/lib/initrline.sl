@@ -568,10 +568,14 @@ private define __module_compile__ (argv)
     IO.tostderr ("compiling " + mdl);
     mdlout = pabs ? path_basename_sans_extname (mdl) + ".so" : mdl + "-module.so";
 
+    variable install_to = Opt.Arg.getlong_val ("install_to", NULL, &argv;
+      del_arg, defval = This.is.my.tmpdir);
+
+
     largv = [Sys.which (Me->CC),
       pabs ? mdl : Env->SRC_C_PATH + "/" +  mdl + "-module.c",
       strtok (flags),
-      "-o", This.is.my.tmpdir + "/" + mdlout
+      "-o", install_to + "/" + mdlout
       ];
 
     status = p.execv (largv, NULL);
@@ -671,7 +675,8 @@ private define my_commands ()
   a["module_compile"].args = [
     "--debug void add debug flags when compiling",
     "--cflags= string append flags",
-    "--dont-install void do not install the module"];
+    "--dont-install void do not install the module",
+    "--install_to= directory install into this directory"];
 
   a["search_project"] = @Argvlist_Type;
   a["search_project"].func = &__search_project__;
