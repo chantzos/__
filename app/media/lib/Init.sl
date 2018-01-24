@@ -96,9 +96,10 @@ public define Init_Process ()
         &This.has.argv;del_arg), arg))
       user_args = [user_args, arg];
 
-    if (length (user_args))
-      USER_ARGS = user_args;
+    USER_ARGS = user_args;
     }
+  else
+    user_args = USER_ARGS;
 
   MED_PID = fork ();
 

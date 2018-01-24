@@ -25,11 +25,46 @@ subclass Pager
       line = __vline (s, '.'),
       col = s._index;
 
-    variable fname = __vfind_Word (s, line, col, &start, &end);
-    fname = strtrim (fname, "\"_)({}.,|/\\");
+    variable
+      i,
+      lnr = "",
+      foundstart = -1,
+      fname = "",
+      word = __vfind_Word (s, line, col, &start, &end),
+      len = strlen (word),
+      ws = ['\\', '"', ')', '(', '{', '}', ',', '|'];
+
+    _for i (0, len - 1)
+      {
+      if (any (word[i] == ws))
+        ifnot (-1 == foundstart)
+          break;
+        else
+          continue;
+
+      if (':' == word[i])
+        {
+        _for i (i + 1 , len - 1)
+          if ('0' <= word[i] <= '9')
+            lnr += char (word[i]);
+          else
+            break;
+
+        break;
+        }
+
+      if (-1 == foundstart)
+        foundstart = i;
+
+      fname += char (word[i]);
+      }
+
     fname = Dir.eval (fname);
     ifnot (strlen (fname))
       return;
+
+    ifnot (strlen (lnr))
+      lnr = "0";
 
     % let it open
     % if (-1 == access (fname, F_OK|R_OK))
@@ -38,7 +73,7 @@ subclass Pager
     if (Dir.isdirectory (fname))
       return;
 
-    (@__get_reference ("__editor")) (fname);
+    (@__get_reference ("__editor")) (fname, "+" + lnr);
   end
 
   def word_change_case (s, what)

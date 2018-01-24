@@ -222,7 +222,7 @@ class Ved
 
     Ved.write_prompt (" ", 0);
 
-    s.draw ();
+    s.draw (;;__qualifiers);
 
     Ved.preloop (s);
 
@@ -2050,7 +2050,10 @@ class Ved
       return;
 
     if ('p' == chr)
-      seltoX (get_cur_buf (NULL)._abspath);
+      {
+      seltoX (s._abspath);
+      Smg.send_msg_dr (s._abspath, 1, s.ptr[0], s.ptr[1]);
+      }
   end
 
   def __space__ (s) proc
