@@ -47,21 +47,17 @@ private define init_ftype (self, ftype)
     %fatal
     throw ClassError, "Fatal: " + ftype + "_settype (), missing function declaration";
 
-  f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/ved";
-
-  if (-1 == access (f + ".slc", F_OK|R_OK))
+  if (-1 == access (
+      (f = Env->USER_DATA_PATH + "/ftypes/" + ftype + "/ved", f) + ".slc", F_OK|R_OK))
     f = Env->STD_DATA_PATH + "/ftypes/" + ftype + "/ved";
 
-  if (-1 == access (f + ".slc", F_OK|R_OK))
-    type.ved = &__vdef_ved;
-  else
-    {
+  ifnot (access (f + ".slc", F_OK|R_OK))
     Load.file (f, NULL);
 
-    type.ved = __get_reference (ftype + "_ved");
-    if (NULL == type.ved)
-      type.ved = &__vdef_ved;
-    }
+  type.ved = __get_reference (ftype + "_ved");
+
+  if (NULL == type.ved)
+    type.ved = &__vdef_ved;
 
   self.set_ftype (type._type, dir, type);
   type;

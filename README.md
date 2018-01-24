@@ -28,7 +28,7 @@ sudo ldconfig -v
 ```
 
 This will install S-Lang into /usr/local namespace, so it won't (probably)
-class with existing installations (if there are problems to load the right
+clash with existing installations (if there are problems to load the right
 libraries, try to adjust and point to them by (at least in Linux) using
 LD_LIBRARY_PATH).
 

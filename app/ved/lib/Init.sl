@@ -527,7 +527,8 @@ public define __vhandle_comma (s)
   else if ('p' == chr)
     {
     refresh = 0;
-    seltoX (Ved.get_cur_buf ()._abspath);
+    seltoX (s._abspath);
+    Smg.send_msg_dr (s._abspath, 1, s.ptr[0], s.ptr[1]);
     }
 
   if (refresh)
@@ -597,7 +598,7 @@ private define ved_err_handler (t, _s_)
 
   ifnot (NULL == _s_.exc)
     {
-    variable ref = Class.__FUNCREF__ ("Exc", "print");
+    variable ref = Class.__funcref__ ("Exc", "print");
     (@ref) (Exc, _s_.exc);
     }
 
@@ -735,20 +736,17 @@ public define init_ved ()
     ftype = Ved.init_ftype (ftype);
 
     ifnot (NULL == lnr)
-      {
-      if (1 < strlen  (lnr))
-        {
-        lnr = substr (lnr, 2, -1);
-        if (__is_datatype_numeric (_slang_guess_type (lnr)))
-          ftype.ved (files[0];_i = atoi (lnr));
-        else
-          ftype.ved (files[0]);
-        }
+      if (__is_datatype_numeric (_slang_guess_type (lnr)))
+        lnr = atoi (substr (lnr, 2, -1));
       else
-        ftype.ved (files[0];_i = -1);
-      }
+        lnr = 0;
     else
-      ftype.ved (files[0]);
+      lnr = 0;
+
+    ifnot (0 == lnr)
+      lnr--;
+
+    ftype.ved (files[0];_i = lnr);
 
     This.exit (0);
     }

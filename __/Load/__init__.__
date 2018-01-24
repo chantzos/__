@@ -31,7 +31,7 @@ class Load
       else
         try
           {
-          (@Class.__FUNCREF__ ("Load", "file")) (Load, __file + ".__", ns;;
+          (@Class.__funcref__ ("Load", "file")) (Load, __file + ".__", ns;;
             struct {@__qualifiers, abort_endless_recursive_call});
           }
         catch OpenError:

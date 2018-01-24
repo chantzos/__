@@ -11,5 +11,5 @@ public define c_settype (s, fname, rows, lines)
   def.lexicalhl = &c_lexicalhl;
   def.comment_str = ["/*", "*", "*/"];
 
-  Ved.initbuf (s, fname, rows, lines, def);
+  Ved.initbuf (s, fname, rows, lines, def;;__qualifiers);
 }

@@ -130,8 +130,8 @@ static void XStoreStr_intrin (char *str, int *nth)
   size = (unsigned int) strlen (str);
 
   Atom sseln = XA_PRIMARY;
- // if (*nth == 1)
- //   sseln = XA_CLIPBOARD(dpy);
+  if (*nth == 1)
+    sseln = XA_CLIPBOARD(dpy);
 
   XSetSelectionOwner (dpy, sseln, None, CurrentTime);
   XStoreBytes (dpy, str, size);

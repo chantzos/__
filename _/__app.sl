@@ -226,7 +226,7 @@ Ved.init (;with_no_callbacks);
 
 try
   {
-  (@Class.__FUNCREF__ ("Load", "file"))
+  (@Class.__funcref__ ("Load", "file"))
     (Load, This.is.my.basedir + "/" + This.is.my.name, This.is.my.namespace);
   }
 catch OpenError:
@@ -367,7 +367,7 @@ private define __echo__ (argv)
 
   variable isshell = "shell" == This.is.my.name;
   variable tostd = isshell
-    ? Class.__FUNCREF__ ("IO", "tostdout")
+    ? Class.__funcref__ ("IO", "tostdout")
     : &__toscratch;
 
   variable args = [{}, {IO}][isshell];
@@ -966,7 +966,7 @@ private define __builtins__ (a)
         dir = getcwd ();
       else
         dir = argv[1];
-      variable fn = Class.__FUNCREF__ ("Fm", "init");
+      variable fn = Class.__funcref__ ("Fm", "init");
       variable fm = (@fn) ((@__get_reference ("Fm")));
       () = fm.exec (dir);
       `).__funcref;

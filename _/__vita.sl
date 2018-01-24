@@ -149,7 +149,7 @@ private define Exc_print (self, exc)
   ifnot (NULL == to)
     {
     IO.tostderr ("");
-    to = (@to.__FUNCREF__) (NULL, "IO", "tostderr");
+    to = (@to.__funcref__) (NULL, "IO", "tostderr");
     }
 
   if (NULL == to)

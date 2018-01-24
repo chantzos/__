@@ -1817,18 +1817,36 @@ private define _get_funcref_ (self, cname, fun)
 {
   try
     {
-    variable f = __get_qualifier_as (Assoc_Type, qualifier ("class"),
+    variable c = __get_qualifier_as (Assoc_Type, qualifier ("class"),
         __getclass__ (cname, 0));
-
-    ifnot (assoc_key_exists (f, "__FUN__"))
-      return NULL;
-
-    f = f["__FUN__"];
-
-    assoc_key_exists (f, fun) ? f[fun].funcref : NULL;
     }
   catch ClassError:
-    NULL;
+    return NULL;
+
+  variable subclass = qualifier ("subclass");
+
+  if (NULL == subclass)
+    {
+    ifnot (assoc_key_exists (c, "__FUN__"))
+      return NULL;
+
+    c = c["__FUN__"];
+
+    return (assoc_key_exists (c, fun) ? c[fun].funcref : NULL);
+    }
+
+  ifnot (any (c["__SUB__"] == subclass))
+    return NULL;
+
+  ifnot (any (get_struct_field_names (c["__SELF__"]) == subclass))
+    return NULL;
+
+  subclass = get_struct_field (c["__SELF__"], subclass);
+
+  ifnot (any (get_struct_field_names (subclass) == fun))
+    return NULL;
+
+  get_struct_field (subclass, fun);
 }
 
 public variable Class = struct
@@ -1836,7 +1854,7 @@ public variable Class = struct
   load = &_load_,
   subclass = &_subclass_,
   get = &_getclass_,
-  __FUNCREF__ = &_get_funcref_,
+  __funcref__ = &_get_funcref_,
   let = &vlet,
   fun = &addFun
   };

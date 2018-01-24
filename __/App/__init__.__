@@ -436,8 +436,8 @@ class App
   end
 
   def __editor () public proc
-    variable files = __pop_list (_NARGS);
-    App.Run.as.child (["__ved", __push_list (files)];;__qualifiers);
+    variable args = __pop_list (_NARGS);
+    App.Run.as.child (["__ved", __push_list (args)];;__qualifiers);
   end
 
   def app_menu (s) static proc
