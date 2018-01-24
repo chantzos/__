@@ -1,0 +1,55 @@
+class Spell
+  subclass Hunspell
+    __init__
+      new
+    end
+
+    import hunspell
+
+    def new ()
+      variable s = struct
+        {
+        hsp,
+        aff = qualifier ("aff"),
+        dict = qualifier ("dict"),
+        spell,
+        suggest,
+        add_word,
+        add_dict,
+        remove_word,
+        };
+
+      if (any (NULL == [s.aff, s.dict]))
+        return NULL;
+
+      s.hsp = hunspell_init (s.aff, s.dict);
+
+      s.spell = fun (`
+          (s, str)
+        hunspell_check (s.hsp, str);
+        `).__funcref;
+
+      s.suggest = fun (`
+          (s, str)
+        hunspell_suggest (s.hsp, str);
+        `).__funcref;
+
+      s.add_word = fun (`
+          (s, str)
+        hunspell_add_word (s.hsp, str);
+        `).__funcref;
+
+      s.remove_word = fun (`
+          (s, str)
+        hunspell_remove_word (s.hsp, str);
+        `).__funcref;
+
+      s.add_dict = fun (`
+         (s, str)
+        hunspell_add_dic (s.hsp, str);
+       `).__funcref;
+
+      s;
+    end
+  end
+end

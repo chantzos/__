@@ -1,0 +1,97 @@
+class Devel
+  var OBJDUMP_BIN = Sys.which ("objdump");
+  var DEF_LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
+
+  beg
+    if (Sys->MACHINE == "x86_64")
+      {
+      DEF_LIBRARY_PATH[-2] = "/lib64";
+      DEF_LIBRARY_PATH[-1] = "/usr/lib64";
+      }
+
+    DEF_LIBRARY_PATH = funcall (DEF_LIBRARY_PATH, `
+         (path)
+      path = Array.unique ([
+        strtok (Env->LD_LIBRARY_PATH, ":"),
+        path[wherenot (_isnull (path))]]);
+
+      variable i, st;
+      _for i (0, length (path) - 1)
+        if (NULL == (st = lstat_file (path[i]), st) ||
+            stat_is ("lnk", st.st_mode))
+          path[i] = NULL;
+
+      path[wherenot (_isnull (path))];
+    `);
+  end
+
+  def library_path ()
+    [DEF_LIBRARY_PATH, __get_qualifier_as ([Array_Type, String_Type],
+      qualifier ("libpath"), String_Type[0])];
+  end
+
+  def obj_depends (obj)
+    if (NULL == OBJDUMP_BIN)
+      {
+      self.err ("objdump cannot be found in: $PATH"$);
+      return NULL;
+      }
+
+    variable fp = popen (OBJDUMP_BIN + " --private-headers " + obj, "r");
+    if (NULL == fp)
+      {
+      self.err ("popen failed");
+      return NULL;
+      }
+
+    variable a = fgetslines (fp);
+    variable i;
+    variable pat = pcre_compile ("NEEDED", 0);
+
+    _for i (0, length (a) - 1)
+      ifnot (pcre_exec (pat, a[i]))
+        a[i] = NULL;
+      else
+        a[i] = strtok (a[i])[1];
+
+    variable f = `
+        (path, objs)
+      variable i, a = String_Type[0], b = Char_Type[length (objs)];
+      _for i (0, length (path) - 1)
+        a = [a, strtrim_end (path[i], "/") + "/" + listdir (path[i])];
+
+      variable pat, ii;
+      _for i (0, length (objs) - 1)
+        {
+        pat = pcre_compile (objs[i], 0);
+        _for ii (0, length (a) - 1)
+          if (pcre_exec (pat, a[ii]))
+            {
+            b[i] = 1;
+            objs[i] += " => " + a[ii];
+            break;
+            }
+          }
+
+    objs[wherenot (b)] += " => not found";
+   `;
+
+    a = a[wherenot (_isnull (a))];
+    ifnot (qualifier_exists ("recursive"))
+      return (funcall (library_path (NULL;;__qualifiers), a, f), a);
+  end
+
+  def is_obj_depends_on (obj, lib)
+    variable shared = obj_depends (NULL, obj);
+    if (NULL == shared)
+      return -1;
+
+    variable pat = pcre_compile ("^lib" + lib + "\\.so\\.\\d?", 0);
+    variable i;
+    _for i (0, length (shared) - 1)
+      if (pcre_exec (pat, shared[i]))
+        return 1;
+
+    0;
+  end
+end
