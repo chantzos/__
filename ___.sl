@@ -80,7 +80,7 @@ private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
   "iconv", "json", "taglib", "fd"];
 private variable FLAGS = [
-  "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
+  "-lm -lpam", "", "-lssl", "-lcurl -lnghttp2 -lssh2", "", "", "", "-lpcre", "", "", "",
   "-ltag_c", ""];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
