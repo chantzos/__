@@ -32,16 +32,17 @@ class Assoc
         if (len > 1)
           throw ClassError, "AssocNewInvalidParmError::keys and values are of different length";
 
-    variable v;
+    variable v, dtp;
 
     do
       {
       v = (any ([Array_Type, List_Type] == dtps[1])) ? values[len - 1] : values;
 
-      ifnot (typeof (v) == dtype)
+      dtp = typeof (v);
+      ifnot (dtp == dtype)
         ifnot (Any_Type == dtype)
-          throw ClassError, "InvalidParmError::expecting " + string (dtype) + ", got " +
-            string (typeof (v));
+          throw ClassError, "InvalidParmError::expecting " + string (dtype) +
+            ", got " +  string (dtp);
 
       if (any ([Array_Type, List_Type] == dtps[0]))
         a[keys[len - 1]] = v;

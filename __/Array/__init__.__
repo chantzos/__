@@ -102,6 +102,19 @@ class Array
     __init__
       len
       __len
+      unique
+    end
+
+    def unique (ar)
+      variable
+        idx,
+        a = Assoc_Type[Integer_Type];
+
+      _for idx (length (ar) - 1, 0, -1)
+        a[ar[idx]] = idx;
+
+      idx = assoc_get_values (a);
+      ar[idx[array_sort (idx)]];
     end
 
     def len (ar)
