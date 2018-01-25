@@ -321,7 +321,7 @@ update_config=1
     end
 
     def scan_interval (sec)
-      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+      if (any (_isnull ([Net->WP_CLNT_BIN, Net->WP_SERV_BIN])))
         self.err ("wpa_supplicant is not installed";;__return__ (-1));
 
       if (SERVER_PID == NULL)
@@ -340,7 +340,7 @@ update_config=1
     end
 
     def reconfigure ()
-      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+      if (any (_isnull ([Net->WP_CLNT_BIN, Net->WP_SERV_BIN])))
         self.err ("wpa_supplicant is not installed";;__return__ (-1));
 
       if (SERVER_PID == NULL)
@@ -358,7 +358,7 @@ update_config=1
     end
 
     def list_networks ()
-      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+      if (any (_isnull ([Net->WP_CLNT_BIN, Net->WP_SERV_BIN])))
         self.err ("wpa_supplicant is not installed";;__return__);
 
       if (SERVER_PID == NULL)
@@ -501,7 +501,7 @@ update_config=1
     end
 
     def scan ()
-      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+      if (any (_isnull ([Net->WP_CLNT_BIN, Net->WP_SERV_BIN])))
         self.err ("wpa_supplicant is not installed";;__return__);
 
       if (SERVER_PID == NULL)
@@ -568,7 +568,7 @@ update_config=1
     end
 
     def terminate ()
-      if (any (NULL == [Net->WP_CLNT_BIN, Net->WP_SERV_BIN]))
+      if (any (_isnull ([Net->WP_CLNT_BIN, Net->WP_SERV_BIN])))
         self.err ("wpa_supplicant is not installed";;__return__ (-1));
 
       if (NULL == SERVER_PID)

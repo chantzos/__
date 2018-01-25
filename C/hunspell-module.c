@@ -8,38 +8,6 @@ SLANG_MODULE(hunspell);
 static int Hunspell_Id = 0;
 Hunhandle *Handler;
 
-/* class code based on pcre-module.c from upstream */
-
-static void destroy_hunspell (SLtype type, VOID_STAR f)
-{
-  Hunhandle *pt;
-  (void) type;
-
-  pt = (Hunhandle *) f;
-  Hunspell_destroy (pt);
-}
-
-static int register_hunspell_type (void)
-{
-  SLang_Class_Type *cl;
-
-  if (Hunspell_Id)
-    return 0;
-
-  if (NULL == (cl = SLclass_allocate_class ("Hunspell_Type")))
-    return -1;
-
-  if (-1 == SLclass_set_destroy_function (cl, destroy_hunspell))
-    return -1;
-
-  if (-1 == SLclass_register_class (cl, SLANG_VOID_TYPE, sizeof (Hunhandle *), SLANG_CLASS_TYPE_MMT))
-    return -1;
-
-  Hunspell_Id = SLclass_get_class_id (cl);
-
-  return 0;
-}
-
 static int hunspell_spell_intrinsic ()
 {
   Hunhandle *ptr;
@@ -61,11 +29,6 @@ free_and_return:
   SLang_free_mmt (mmt);
   SLang_free_slstring (str);
   return retval;
-}
-
-static void free_hunspell_type (Hunhandle *ptr)
-{
-  SLfree ((char *) ptr);
 }
 
 static void hunspell_suggest_intrinsic (void)
@@ -212,14 +175,12 @@ static void hunspell_init_intrinsic (char *aff_dir, char *dic_dir)
 
   if (NULL == (mmt = SLang_create_mmt (Hunspell_Id, (VOID_STAR) pt)))
     {
-    free_hunspell_type (pt);
     (void) SLang_push_null ();
     return;
     }
 
   if (-1 == SLang_push_mmt (mmt))
     {
-    free_hunspell_type (pt);
     SLang_free_mmt (mmt);
     (void) SLang_push_null ();
     }
@@ -235,6 +196,44 @@ static SLang_Intrin_Fun_Type hunspell_Intrinsics [] =
   MAKE_INTRINSIC_0("hunspell_remove_word", hunspell_rm_word_intrinsic, SLANG_INT_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
+
+/* class code based on pcre-module.c from upstream */
+
+static void destroy_hunspell (SLtype type, VOID_STAR f)
+{
+  Hunhandle *pt;
+  (void) type;
+
+  pt = (Hunhandle *) f;
+  Hunspell_destroy (pt);
+}
+
+#define DUMMY_HUNSPELL_TYPE ((SLtype)-1)
+
+static int register_hunspell_type (void)
+{
+  SLang_Class_Type *cl;
+
+  if (Hunspell_Id)
+    return 0;
+
+  if (NULL == (cl = SLclass_allocate_class ("Hunspell_Type")))
+    return -1;
+
+  if (-1 == SLclass_set_destroy_function (cl, destroy_hunspell))
+    return -1;
+
+  if (-1 == SLclass_register_class (cl, SLANG_VOID_TYPE, sizeof (Hunhandle *), SLANG_CLASS_TYPE_MMT))
+    return -1;
+
+  Hunspell_Id = SLclass_get_class_id (cl);
+
+  if (-1 == SLclass_patch_intrin_fun_table1 (hunspell_Intrinsics, DUMMY_HUNSPELL_TYPE, Hunspell_Id))
+     return -1;
+
+  return 0;
+}
+
 
 int init_hunspell_module_ns (char *ns_name)
 {

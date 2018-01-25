@@ -6,23 +6,49 @@ class Spell
 
     import hunspell
 
+    var DATA_DIR = Env->USER_DATA_PATH + "/Spell";
+    var DEF_LANG = strtok (Env->LANG, ".")[0];
+
+    beg
+      if (-1 == access (Env->SRC_USER_DATA_PATH + "/Spell", F_OK))
+        () = mkdir (Env->SRC_USER_DATA_PATH + "/Spell");
+      if (-1 == access (DATA_DIR, F_OK))
+        () = mkdir (DATA_DIR);
+    end
+
     def new ()
       variable s = struct
         {
         hsp,
         aff = qualifier ("aff"),
-        dict = qualifier ("dict"),
+        dic = qualifier ("dic"),
         spell,
         suggest,
+        add_dic,
         add_word,
-        add_dict,
         remove_word,
         };
 
-      if (any (NULL == [s.aff, s.dict]))
-        return NULL;
+      if (any (_isnull ([s.aff, s.dic])))
+        {
+        variable lang = qualifier ("lang", DEF_LANG);
+        variable len, list = listdir (DATA_DIR);
 
-      s.hsp = hunspell_init (s.aff, s.dict);
+        if (NULL == list || 0 == (len = length (list), len))
+          return NULL;
+
+        variable aff_str = lang + ".aff", dic_str = lang + ".dic";
+        variable found_aff = any (list == aff_str);
+        variable found_dic = any (list == dic_str);
+
+        if (anynot ([found_aff, found_dic]))
+          return NULL;
+
+        s.aff = DATA_DIR + "/" + aff_str;
+        s.dic = DATA_DIR + "/" + dic_str;
+        }
+
+      s.hsp = hunspell_init (s.aff, s.dic);
 
       s.spell = fun (`
           (s, str)
@@ -44,7 +70,7 @@ class Spell
         hunspell_remove_word (s.hsp, str);
         `).__funcref;
 
-      s.add_dict = fun (`
+      s.add_dic = fun (`
          (s, str)
         hunspell_add_dic (s.hsp, str);
        `).__funcref;

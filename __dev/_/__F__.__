@@ -726,7 +726,7 @@ class (`
   method (``
     (t)
     variable name = qualifier ("from", current_namespace);
-    if (anynot ([strlen (name), NULL != name]))
+    if (NULL == name || 0 == strlen (name))
       name = "Global";
 
     ifnot (assoc_key_exists (__type__, name))
@@ -742,7 +742,7 @@ class (`
   method (``
     (t, members)
     variable name = qualifier ("to", current_namespace);
-    if (anynot ([strlen (name), NULL != name]))
+    if (NULL == name || 0 == strlen (name))
       name = "Global";
 
     ifnot (assoc_key_exists (__type__, name))

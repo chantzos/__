@@ -122,7 +122,7 @@ class Dir
       sta = stat_file (a),
       stb = stat_file (b);
 
-   if (any (NULL == [sta, stb]))
+   if (any (_isnull ([sta, stb])))
      return 0;
 
    if (anynot (array_map (Integer_Type, Dir.__isdirectory, Dir,

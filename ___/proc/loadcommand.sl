@@ -126,7 +126,7 @@ ifnot (access (This.is.std.err.fn, F_OK))
 else
   This.is.std.err.fd = open (This.is.std.err.fn, File->FLAGS[stderrflags], File->PERM["__PUBLIC"]);
 
-if (any (NULL == [This.is.std.out.fd, This.is.std.err.fd]))
+if (any (_isnull ([This.is.std.out.fd, This.is.std.err.fd])))
   (@_exit_me_) (1;msg = errno_string (errno));
 
 Class.load ("Smg";as = "__tty_init__");

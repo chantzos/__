@@ -78,10 +78,10 @@ private variable  OPT_EXECUTABLES = [
   "mount", "umount", "findmnt", "file"];
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
-  "iconv", "json", "taglib", "fd"];
+  "iconv", "json", "taglib", "fd", "hunspell"];
 private variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl -lnghttp2 -lssh2", "", "", "", "-lpcre", "", "", "",
-  "-ltag_c", ""];
+  "-ltag_c", "", "-lhunspell-1.6"];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable DEB_FLAGS =
@@ -89,7 +89,7 @@ private variable DEB_FLAGS =
  -Winline -Wmissing-prototypes -Wnested-externs -Wpointer-arith\
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
-private variable MODULES_THAT_DONT_EXIT_ON_ERR = ["taglib"];
+private variable MODULES_THAT_DONT_EXIT_ON_ERR = ["taglib", "hunspell"];
 private variable MODULES_THAT_FAILED = String_Type[0];
 private variable CLASSES = [
   "Input",  "Smg",   "Rand",   "Crypt", "Os",     "Opt",
@@ -100,7 +100,7 @@ private variable CLASSES = [
 if (X)
   {
   MODULES = [MODULES, "xsrv", "xclient"];
-  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst"];
+  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst -lXmu"];
   CLASSES = [CLASSES, "Xsrv", "Xclnt"];
   }
 
