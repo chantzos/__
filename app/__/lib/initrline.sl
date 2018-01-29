@@ -339,26 +339,35 @@ private define __diff__ (argv)
 {
   variable
     diff_exec = Sys.which ("diff"),
-    this_p = Env->SRC_PATH,
-    that_p = This.is.my.settings["BACKUP_DIR"];
-
-  if (length (argv) > 1)
-    that_p = argv[1];
+    that_tree = Opt.Arg.getlong_val ("that_tree", NULL, &argv;del_arg,
+        defval = Env->SRC_PATH),
+    that_p = Opt.Arg.getlong_val ("that_tree", NULL, &argv;del_arg,
+        defval = This.is.my.settings["BACKUP_DIR"]),
+    dir = Opt.Arg.getlong_val ("dir", NULL, &argv;del_arg),
+    include_c = [NULL, "C"][Opt.Arg.exists ("--include_c", &argv;
+      del_arg)];
 
   ifnot (strlen (that_p))
     return;
-
+  ifnot (0 == access (that_tree, F_OK|R_OK))
+    return;
   ifnot (0 == access (that_p, F_OK|R_OK))
     return;
-
   if (NULL == diff_exec)
     return;
+
+  variable dirs;
+  if (NULL == dir)
+    dirs = ["local", "usr", "com", "app", "___", "__", "_", include_c];
+  else
+    dirs = [dir, include_c];
+
+  dirs = dirs[wherenot (_isnull (dirs))];
 
   variable
     i,
     status,
     p = Proc.init (0, 1, 1),
-    dirs = ["local", "usr", "com", "app", "___", "__", "_"],
     files = ["___.sl", "README.md"],
     p_argv = [diff_exec, "-Naur"];
 
@@ -375,7 +384,7 @@ private define __diff__ (argv)
     {
     i--;
     status = p.execv ([p_argv,
-      this_p + "/" + dirs[i], that_p + "/" + dirs[i]], NULL);
+      that_tree + "/" + dirs[i], that_p + "/" + dirs[i]], NULL);
     }
 
   i = length (files);
@@ -384,7 +393,7 @@ private define __diff__ (argv)
     {
     i--;
     status = p.execv ([p_argv,
-      this_p + "/" + files[i], that_p + "/" + files[i]], NULL);
+      that_tree + "/" + files[i], that_p + "/" + files[i]], NULL);
     }
 
   variable ved = @Ved.get_cur_buf ();
@@ -420,9 +429,10 @@ private define __exclude (sync)
 
 private define __sync_gen__ (argv, type)
 {
-  variable no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg);
-  variable interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg);
-  variable toorfrom;
+  variable
+    no_interactive_remove = Opt.Arg.exists ("--no-remove-interactive", &argv;del_arg),
+    interactive_copy      = Opt.Arg.exists ("--copy-interactive", &argv;del_arg),
+    toorfrom;
 
   toorfrom = Opt.Arg.getlong_val (type, "from" == type ? "dir" : NULL, &argv;del_arg,
     exists_err = "no" + (type == "from" ? "source" : "destination") + " specified, the --" +
@@ -504,6 +514,9 @@ private define __module_compile__ (argv)
   variable debug = Opt.Arg.exists ("--debug", &argv;del_arg);
   variable dont_inst = Opt.Arg.exists ("--dont-install", &argv;del_arg);
   variable cflags = Opt.Arg.getlong_val ("cflags", NULL, &argv;del_arg);
+  variable install_to = Opt.Arg.getlong_val ("install_to", NULL, &argv;
+      del_arg, defval = This.is.my.tmpdir);
+
 
   ifnot (NULL == cflags)
     cflags = strjoin (strchop (cflags, ',', 0), " ");
@@ -536,7 +549,7 @@ private define __module_compile__ (argv)
 
       try
         {
-        flags = Me->FLAGS[ind];
+        flags = Me->FLAGS[ind] + (NULL == cflags ? "" : " " + cflags);
         }
       catch AnyError:
         {
@@ -565,22 +578,19 @@ private define __module_compile__ (argv)
     p.stdout.file = This.is.std.err.fn;
     p.stderr.file = This.is.std.err.fn;;
 
-    IO.tostderr ("compiling " + mdl);
     mdlout = pabs ? path_basename_sans_extname (mdl) + ".so" : mdl + "-module.so";
 
-    variable install_to = Opt.Arg.getlong_val ("install_to", NULL, &argv;
-      del_arg, defval = This.is.my.tmpdir);
-
-
     largv = [Sys.which (Me->CC),
-      pabs ? mdl : Env->SRC_C_PATH + "/" +  mdl + "-module.c",
+      (pabs
+        ? mdl
+        : Env->SRC_C_PATH + "/" +  mdl + "-module.c"),
       strtok (flags),
-      "-o", install_to + "/" + mdlout
+      "-o", path_concat (install_to, mdlout)
       ];
 
     status = p.execv (largv, NULL);
 
-    IO.tostderr ("command:", strjoin (largv, " "));
+    IO.tostderr ("compiling " + mdl + "\ncommand:\n" + strjoin (largv, " "));
 
     if (status.exit_status)
       err = 1;
@@ -594,8 +604,9 @@ private define __module_compile__ (argv)
       IO.tostderr (mdl + " was installed in " + Env->STD_C_PATH);
     else
       ifnot (err)
-        IO.tostderr (mdl + " was compiled at " + largv[-1]);
+        IO.tostderr (mdl + " was installed as " + largv[-1]);
     }
+
 
   Smg.send_msg_dr ("exit status: " + string (err), err, NULL, NULL);
 
@@ -605,6 +616,17 @@ private define __module_compile__ (argv)
 private define __search_project__ (argv)
 {
   variable pat = Opt.Arg.getlong_val ("pat", NULL, &argv;del_arg);
+  variable path = Opt.Arg.getlong_val ("path", NULL, &argv;
+    del_arg, defval = "");
+
+  if (strlen (path))
+    path = path_concat (Env->SRC_PATH, path);
+  else
+    path = Env->SRC_PATH;
+
+  if (-1 == access (path, F_OK))
+    return;
+
   if (NULL == pat)
     if (1 == length (argv))
       return;
@@ -620,7 +642,7 @@ private define __search_project__ (argv)
     excludedirs);
 
   variable _argv = ["!search", "--pat=" + pat, "--recursive",
-    excludedirs, "--excludedir=tmp", "--excludedir=C", Env->SRC_PATH];
+    excludedirs, "--excludedir=tmp", "--excludedir=C", path];
 
   ifnot (NULL == Opt.Arg.exists ("--include_c", &argv;del_arg))
     Array.delete_at (&_argv, -2);
@@ -682,7 +704,8 @@ private define my_commands ()
   a["search_project"].func = &__search_project__;
   a["search_project"].args = [
     "--pat= pattern pattern",
-    "--include_c void include in searching the C namespace"];
+    "--include_c void include in searching the C namespace",
+    "--path= directory limit the search to `path'"];
 
   a["remove_bytecompiled"] = @Argvlist_Type;
   a["remove_bytecompiled"].func = &rm_bytecompiled;
@@ -693,6 +716,11 @@ private define my_commands ()
 
   a["diff"] = @Argvlist_Type;
   a["diff"].func = &__diff__;
+  a["diff"].args = [
+    "--that_tree= directory default value source path",
+    "--that_tree= directory default value BACKUP_DIR",
+    "--include_c void include in searching the C namespace",
+    "--dir= directory if non empty, diff only on this `dir'"];
 
   a;
 }

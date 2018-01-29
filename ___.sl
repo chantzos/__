@@ -100,7 +100,7 @@ private variable CLASSES = [
 if (X)
   {
   MODULES = [MODULES, "xsrv", "xclient"];
-  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst -lXmu"];
+  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst"];
   CLASSES = [CLASSES, "Xsrv", "Xclnt"];
   }
 
