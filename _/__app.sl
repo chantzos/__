@@ -487,19 +487,27 @@ private variable __CHDIR__ = function (`
 `;__ns__ = "__CHDIR__");
 
 private variable __TRACK__ = function (`
-  envbeg
-    __SRC_TRACK_DIR__  = "";
-    __SRC_TRACK_FILE__ = "";
-  envend
+    (argv)
+  variable devdo = Opt.Arg.exists ("--devel", &argv;del_arg);
+  variable readme= Opt.Arg.exists ("--readme", &argv;del_arg);
+  variable track_files = String_Type[0];
+  variable tracked = 1;
 
-  (argv)
-  __SRC_TRACK_DIR__  = Me.get_src_path (This.is.my.basedir);
-  __SRC_TRACK_FILE__ = This.is.my.name + "_DevDo.md";
+  if (devdo)
+    track_files = [Env->SRC_PATH + "/__dev/DevDo.md"];
 
-  variable tracked = File.exists (__SRC_TRACK_DIR__ + "/" +
-    __SRC_TRACK_FILE__);
+  if (readme)
+    track_files = [track_files, Env->SRC_PATH + "/README.md"];
 
-  __editor (__SRC_TRACK_DIR__ + "/" + __SRC_TRACK_FILE__);
+
+  ifnot (length (track_files))
+    {
+    track_files  = [Me.get_src_path (This.is.my.basedir) + "/" +
+      This.is.my.name + "_DevDo.md"];
+    tracked = File.exists (track_files[0]);
+    }
+
+  __editor ([track_files, argv[[1:]]]);
 
   loop (1)
   ifnot (tracked)
@@ -512,8 +520,7 @@ private variable __TRACK__ = function (`
     if (-1 == chdir (Env->SRC_PATH))
       break;
 
-    variable path = strreplace (__SRC_TRACK_DIR__ + "/" +
-      __SRC_TRACK_FILE__, Env->SRC_PATH + "/", "");
+    variable path = strreplace (track_files[0], Env->SRC_PATH + "/", "");
 
     variable p = Proc.init (0, 1, 1);
 
@@ -934,6 +941,9 @@ private define __builtins__ (a)
 
   a["__track"] = @Argvlist_Type;
   a["__track"].func = __TRACK__.__funcref;
+  a["__track"].args = [
+    "--devel void edit the main develpment file of the distribution",
+    "--readme void edit README"];
 
   a["__which"] = @Argvlist_Type;
   a["__which"].func = __WHICH__.__funcref;

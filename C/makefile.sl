@@ -6,7 +6,7 @@ static variable MODULES = [
 
 static variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl -lnghttp2 -lssh2", "", "", "", "-lpcre", "", "", "",
-  "-lX11", "-lX11 -lXtst -lXmu", "-ltag_c", "", "-lhunspell-1.6"];
+  "-lX11", "-lX11 -lXtst", "-ltag_c", "", "-lhunspell-1.6"];
 
 static variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
