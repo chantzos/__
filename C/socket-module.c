@@ -24,7 +24,7 @@
 
 /*{{{ Include Files */
 
-#define _BSD_SOURCE 1		       /* to get struct ip_mreq */
+#define _DEFAULT_SOURCE 1     /* to get struct ip_mreq */
 #define HAVE_SOCKET 1
 #define HAVE_SOCKETPAIR 1
 #define HAVE_SYS_SOCKET_H 1

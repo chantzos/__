@@ -339,6 +339,7 @@ length from the entered text cannot fit, it grows to the top by
 borrowing upper lines.
 
 #### Design and Interface
+
 This system, it can't also built and maintain yet, that unix
 like environment, but it comes with the most basic commands
 to administrate the system.

@@ -21,7 +21,7 @@ if (any ("--help" == __argv or  "-h" == __argv))
      "NOTE:",
      "This application targets S-Lang development tree and uses its latest features",
      "  git://git.jedsoft.org/git/slang.git",
-     "because of that, there are very few chances to work with S-Lang that is installed by the distributions"
+     "because of that, there few chances to work with formal S-Lang releases"
     ]);
 
   exit (0);
@@ -80,7 +80,7 @@ private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
   "iconv", "json", "taglib", "fd", "hunspell"];
 private variable FLAGS = [
-  "-lm -lpam", "", "-lssl", "-lcurl -lnghttp2 -lssh2", "", "", "", "-lpcre", "", "", "",
+  "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
   "-ltag_c", "", "-lhunspell-1.6"];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
@@ -161,6 +161,138 @@ public define __use_namespace (ns)
     eval (`sleep (0.0001);`, ns);
     use_namespace (ns);
     }
+}
+
+define is_type (st, type)
+{
+  NULL == st ? 0 : stat_is (type, st.st_mode);
+}
+
+define isdirectory (dir)
+{
+  if (-1 == access (dir, F_OK))
+    return 0;
+
+  is_type (stat_file (dir), "dir");
+}
+
+define which (exec)
+{
+  variable
+    ar,
+    path = getenv ("PATH");
+
+  if (NULL == path)
+    return NULL;
+
+  path = strchop (path, path_get_delimiter, 0);
+  path = array_map (String_Type, &path_concat, path, exec);
+  path = path[wherenot (array_map (Integer_Type, &isdirectory, path))];
+  ar = wherenot (array_map (Integer_Type, &access, path, X_OK));
+
+  length (ar) ? path[ar][0] : NULL;
+}
+
+variable MACHINE = uname.machine;
+variable OBJDUMP_BIN = which ("objdump");
+variable LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
+
+if (MACHINE == "x86_64")
+  {
+  LIBRARY_PATH[-2] = "/lib64";
+  LIBRARY_PATH[-1] = "/usr/lib64";
+  }
+
+LIBRARY_PATH[wherenot (_isnull (LIBRARY_PATH))];
+
+define __lib_path__ ()
+{
+  variable i, st;
+  _for i (0, length (LIBRARY_PATH) - 1)
+    if (NULL == (st = lstat_file (LIBRARY_PATH[i]), st) ||
+        stat_is ("lnk", st.st_mode))
+      LIBRARY_PATH[i] = NULL;
+
+  LIBRARY_PATH[wherenot (_isnull (LIBRARY_PATH))];
+}
+
+define obj_depends (obj)
+{
+  if (NULL == OBJDUMP_BIN)
+    return NULL;
+
+  variable fp = popen (OBJDUMP_BIN + " --private-headers " + obj, "r");
+  if (NULL == fp)
+    return NULL;
+
+  variable objs = fgetslines (fp);
+  variable i;
+  variable pat = "NEEDED";
+
+  _for i (0, length (objs) - 1)
+    ifnot (string_match (objs[i], pat))
+      objs[i] = NULL;
+    else
+      objs[i] = strtok (objs[i])[1];
+
+  objs = objs[wherenot (_isnull (objs))];
+
+  variable
+    ar = String_Type[0],
+    b = Char_Type[length (objs)];
+
+   _for i (0, length (LIBRARY_PATH) - 1)
+     ar = [ar, strtrim_end (LIBRARY_PATH[i], "/") + "/" +
+       listdir (LIBRARY_PATH[i])];
+
+  variable ii;
+  _for i (0, length (objs) - 1)
+     {
+     pat = objs[i];
+     _for ii (0, length (ar) - 1)
+       if (string_match (ar[ii], pat))
+         {
+         b[i] = 1;
+         objs[i] += " => " + ar[ii];
+         break;
+         }
+       }
+
+  objs[wherenot (b)] += " => not found";
+  objs;
+}
+
+define is_obj_depends_on (obj, lib)
+{
+  variable shared = qualifier ("libs", obj_depends (obj));
+  if (NULL == shared)
+    return -1;
+
+  variable pat = "^lib" + lib + "\\.so\\.\\d?";
+  variable i;
+  _for i (0, length (shared) - 1)
+    if (string_match (shared[i], pat))
+     return 1;
+
+  0;
+}
+
+define find_lib (lib)
+{
+  variable
+    i,
+    ar = String_Type[0],
+    pat = "/lib" + lib + "\\.so\\.\\d?";
+
+  _for i (0, length (LIBRARY_PATH) - 1)
+    ar = [ar, strtrim_end (LIBRARY_PATH[i], "/") + "/" +
+      listdir (LIBRARY_PATH[i])];
+
+  _for i (0, length (ar) - 1)
+    if (string_match (ar[i], pat))
+      return ar[i];
+
+  NULL;
 }
 
 __use_namespace ("io");
@@ -339,11 +471,32 @@ private define __build_module__ (i)
       {
       MODULES_THAT_FAILED = [MODULES_THAT_FAILED, MODULES[i]];
       io.tostderr ("failed to compile " + MODULES[i] +
-        " module, but which is not mandatory");
+        " module, but which is not a requirenment");
       }
 }
 
 __build_module__ (0);
+
+% some libraries, like libcurl can be linked against a dozen of libraries,
+% like nghttp2 and ssh2 in this case - 
+% try to catch those
+
+define __init_flags__ ()
+{
+  variable curl_l = find_lib ("curl");
+  if (NULL == curl_l)
+    This.exit ("libcurl is not installed");
+
+  variable idx = wherefirst (MODULES == "curl");
+  variable curl_libs = obj_depends (curl_l);
+  variable libs = ["nghttp2", "ssh2"];
+  variable i;
+  _for i (0, length (libs) - 1)
+    if (is_obj_depends_on (curl_l, libs[i];libs = curl_libs))
+      FLAGS[idx] += " -l" + libs[i];
+}
+
+__init_flags__;
 
 ifnot (DONT_COMPILE_MODULES)
   {
@@ -1026,17 +1179,17 @@ private define __main__ ()
       "The programm will refuse to work\n"];
 
   _for i (0, length (REQ_EXECUTABLES) - 1)
-    if (NULL == Sys.which (REQ_EXECUTABLES[i]))
+    if (NULL == which (REQ_EXECUTABLES[i]))
       warnings = [warnings, REQ_EXECUTABLES[i] + " is not installed, " +
         "The programm will refuse to work\n"];
 
   _for i (0, length (IMP_EXECUTABLES) - 1)
-    if (NULL == Sys.which (IMP_EXECUTABLES[i]))
+    if (NULL == which (IMP_EXECUTABLES[i]))
       warnings = [warnings, IMP_EXECUTABLES[i] + " is not installed, " +
         "some critical functions won't be available"];
 
   _for i (0, length (OPT_EXECUTABLES) - 1)
-    if (NULL == Sys.which (OPT_EXECUTABLES[i]))
+    if (NULL == which (OPT_EXECUTABLES[i]))
       warnings = [warnings, OPT_EXECUTABLES[i] + " is not installed, " +
         "some functions won't be available"];
 

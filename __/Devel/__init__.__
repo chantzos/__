@@ -11,7 +11,7 @@ class Devel
 
     DEF_LIBRARY_PATH = funcall (DEF_LIBRARY_PATH, `
          (path)
-      path = Array.unique ([
+      path = Array.String.unique ([
         strtok (Env->LD_LIBRARY_PATH, ":"),
         path[wherenot (_isnull (path))]]);
 
@@ -93,5 +93,22 @@ class Devel
         return 1;
 
     0;
+  end
+
+  def find_lib (lib)
+    variable
+      i,
+      ar = String_Type[0],
+      pat = "/lib" + lib + "\\.so\\.\\d?";
+
+    _for i (0, length (LIBRARY_PATH) - 1)
+      ar = [ar, strtrim_end (LIBRARY_PATH[i], "/") + "/" +
+        listdir (LIBRARY_PATH[i])];
+
+    _for i (0, length (ar) - 1)
+      if (string_match (ar[i], pat))
+        return ar[i];
+
+    NULL;
   end
 end

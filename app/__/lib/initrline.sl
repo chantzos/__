@@ -344,7 +344,7 @@ private define __diff__ (argv)
     that_p = Opt.Arg.getlong_val ("that_tree", NULL, &argv;del_arg,
         defval = This.is.my.settings["BACKUP_DIR"]),
     dir = Opt.Arg.getlong_val ("dir", NULL, &argv;del_arg),
-    include_c = [NULL, "C"][Opt.Arg.exists ("--include_c", &argv;
+    include_c = [NULL, "C"][NULL != Opt.Arg.exists ("--include_c", &argv;
       del_arg)];
 
   ifnot (strlen (that_p))

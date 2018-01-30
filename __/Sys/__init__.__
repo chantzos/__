@@ -59,7 +59,7 @@ class Sys
 
     path = strchop (path, path_get_delimiter, 0);
     path = array_map (String_Type, &path_concat, path, exec);
-    path = path [wherenot (array_map (Integer_Type, Dir.isdirectory, NULL, path))];
+    path = path[wherenot (array_map (Integer_Type, Dir.isdirectory, NULL, path))];
     ar = wherenot (array_map (Integer_Type, &access, path, X_OK));
 
     length (ar) ? path[ar][0] : NULL;
@@ -67,7 +67,7 @@ class Sys
     % prefix every file name with all the components in $PATH
     % started from beginning, and check non directory files
     % for the executable bit and return the first found -
-    % so it doesn't check if the process image can be loaded by exec*
+    % it doesn't check if the process image can be loaded by exec*() family
   end
 
   def getgrname (gid)
