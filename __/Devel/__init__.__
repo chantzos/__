@@ -1,15 +1,15 @@
 class Devel
   var OBJDUMP_BIN = Sys.which ("objdump");
-  var DEF_LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
+  var LD_LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
 
   beg
     if (Sys->MACHINE == "x86_64")
       {
-      DEF_LIBRARY_PATH[-2] = "/lib64";
-      DEF_LIBRARY_PATH[-1] = "/usr/lib64";
+      LD_LIBRARY_PATH[-2] = "/lib64";
+      LD_LIBRARY_PATH[-1] = "/usr/lib64";
       }
 
-    DEF_LIBRARY_PATH = funcall (DEF_LIBRARY_PATH, `
+    LD_LIBRARY_PATH = funcall (LD_LIBRARY_PATH, `
          (path)
       path = Array.String.unique ([
         strtok (Env->LD_LIBRARY_PATH, ":"),
@@ -25,12 +25,12 @@ class Devel
     `);
   end
 
-  def library_path ()
-    [DEF_LIBRARY_PATH, __get_qualifier_as ([Array_Type, String_Type],
+  def ld_library_path ()
+    [LD_LIBRARY_PATH, __get_qualifier_as ([Array_Type, String_Type],
       qualifier ("libpath"), String_Type[0])];
   end
 
-  def obj_depends (obj)
+  def ldd (obj)
     if (NULL == OBJDUMP_BIN)
       {
       self.err ("objdump cannot be found in: $PATH"$);
@@ -78,11 +78,11 @@ class Devel
 
     a = a[wherenot (_isnull (a))];
     ifnot (qualifier_exists ("recursive"))
-      return (funcall (library_path (NULL;;__qualifiers), a, f), a);
+      return (funcall (ld_library_path (NULL;;__qualifiers), a, f), a);
   end
 
   def is_obj_depends_on (obj, lib)
-    variable shared = obj_depends (NULL, obj);
+    variable shared = qualifier ("libs", ldd (NULL, obj));
     if (NULL == shared)
       return -1;
 
@@ -101,9 +101,9 @@ class Devel
       ar = String_Type[0],
       pat = "/lib" + lib + "\\.so\\.\\d?";
 
-    _for i (0, length (LIBRARY_PATH) - 1)
-      ar = [ar, strtrim_end (LIBRARY_PATH[i], "/") + "/" +
-        listdir (LIBRARY_PATH[i])];
+    _for i (0, length (LD_LIBRARY_PATH) - 1)
+      ar = [ar, strtrim_end (LD_LIBRARY_PATH[i], "/") + "/" +
+        listdir (LD_LIBRARY_PATH[i])];
 
     _for i (0, length (ar) - 1)
       if (string_match (ar[i], pat))

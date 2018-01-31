@@ -966,7 +966,9 @@ private define __builtins__ (a)
 
   if (This.request.fm)
     {
-    Class.load ("Fm");
+    if (NULL == __get_reference ("Fm"))
+      Class.load ("Fm");
+
     a["__fm"] = @Argvlist_Type;
     a["__fm"].func = function (`
         (argv)

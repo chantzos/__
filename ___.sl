@@ -195,25 +195,25 @@ define which (exec)
 
 variable MACHINE = uname.machine;
 variable OBJDUMP_BIN = which ("objdump");
-variable LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
+variable LD_LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
 
 if (MACHINE == "x86_64")
   {
-  LIBRARY_PATH[-2] = "/lib64";
-  LIBRARY_PATH[-1] = "/usr/lib64";
+  LD_LIBRARY_PATH[-2] = "/lib64";
+  LD_LIBRARY_PATH[-1] = "/usr/lib64";
   }
 
-LIBRARY_PATH[wherenot (_isnull (LIBRARY_PATH))];
+LD_LIBRARY_PATH = LD_LIBRARY_PATH[wherenot (_isnull (LD_LIBRARY_PATH))];
 
-define __lib_path__ ()
+define __init_lib_path__ ()
 {
   variable i, st;
-  _for i (0, length (LIBRARY_PATH) - 1)
-    if (NULL == (st = lstat_file (LIBRARY_PATH[i]), st) ||
+  _for i (0, length (LD_LIBRARY_PATH) - 1)
+    if (NULL == (st = lstat_file (LD_LIBRARY_PATH[i]), st) ||
         stat_is ("lnk", st.st_mode))
-      LIBRARY_PATH[i] = NULL;
+      LD_LIBRARY_PATH[i] = NULL;
 
-  LIBRARY_PATH[wherenot (_isnull (LIBRARY_PATH))];
+  LD_LIBRARY_PATH = LD_LIBRARY_PATH[wherenot (_isnull (LD_LIBRARY_PATH))];
 }
 
 define obj_depends (obj)
@@ -241,9 +241,9 @@ define obj_depends (obj)
     ar = String_Type[0],
     b = Char_Type[length (objs)];
 
-   _for i (0, length (LIBRARY_PATH) - 1)
-     ar = [ar, strtrim_end (LIBRARY_PATH[i], "/") + "/" +
-       listdir (LIBRARY_PATH[i])];
+   _for i (0, length (LD_LIBRARY_PATH) - 1)
+     ar = [ar, strtrim_end (LD_LIBRARY_PATH[i], "/") + "/" +
+       listdir (LD_LIBRARY_PATH[i])];
 
   variable ii;
   _for i (0, length (objs) - 1)
@@ -284,9 +284,9 @@ define find_lib (lib)
     ar = String_Type[0],
     pat = "/lib" + lib + "\\.so\\.\\d?";
 
-  _for i (0, length (LIBRARY_PATH) - 1)
-    ar = [ar, strtrim_end (LIBRARY_PATH[i], "/") + "/" +
-      listdir (LIBRARY_PATH[i])];
+  _for i (0, length (LD_LIBRARY_PATH) - 1)
+    ar = [ar, strtrim_end (LD_LIBRARY_PATH[i], "/") + "/" +
+      listdir (LD_LIBRARY_PATH[i])];
 
   _for i (0, length (ar) - 1)
     if (string_match (ar[i], pat))
@@ -294,6 +294,8 @@ define find_lib (lib)
 
   NULL;
 }
+
+__init_lib_path__;
 
 __use_namespace ("io");
 
@@ -489,8 +491,9 @@ define __init_flags__ ()
 
   variable idx = wherefirst (MODULES == "curl");
   variable curl_libs = obj_depends (curl_l);
-  variable libs = ["nghttp2", "ssh2"];
+  variable libs = ["nghttp2", "ssh2", "ssl"];
   variable i;
+
   _for i (0, length (libs) - 1)
     if (is_obj_depends_on (curl_l, libs[i];libs = curl_libs))
       FLAGS[idx] += " -l" + libs[i];
