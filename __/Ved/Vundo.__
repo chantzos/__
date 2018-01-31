@@ -102,8 +102,23 @@ subclass Vundo
       }
     else
       {
-      Redo.data = v.lines[Rec[Level].inds];
-      v.lines[Rec[Level].inds] = Rec[Level].data;
+      % try to hide the error in the code path
+      try
+        {
+        variable inds = NULL;
+        inds = Rec[Level].inds;
+        Redo.data = v.lines[Rec[Level].inds];
+        v.lines[Rec[Level].inds] = Rec[Level].data;
+        }
+      catch AnyError:
+        {
+        % but send a message to notice
+        IO.tostderr ("caught the undo error", "Level:", Level, "inds", inds,
+          length (v.lines));
+        Smg.send_msg_dr ("caught the undo error, see at the error buffer",
+          1, v.ptr[0], v.ptr[1]);
+        return;
+        }
       }
 
     Ved.restorePos (v, Rec[Level].pos);

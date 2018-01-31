@@ -1,5 +1,6 @@
 This.is.my.settings["ON_RECONNECT_REQ_DEF_APPS"] = "git";
 Class.load ("Sync");
+Class.load ("Devel");
 
 public define __vdel_frame (s){}
 public define __vnew_frame (s){}

@@ -517,7 +517,6 @@ private define __module_compile__ (argv)
   variable install_to = Opt.Arg.getlong_val ("install_to", NULL, &argv;
       del_arg, defval = This.is.my.tmpdir);
 
-
   ifnot (NULL == cflags)
     cflags = strjoin (strchop (cflags, ',', 0), " ");
 
@@ -535,6 +534,8 @@ private define __module_compile__ (argv)
   _for i (0, length (modules) - 1)
     {
     mdl = modules[i];
+
+    Me->__init_flags_for.call (mdl);
 
     ifnot (path_is_absolute (mdl))
       {
@@ -650,6 +651,26 @@ private define __search_project__ (argv)
   __runcom  (_argv, NULL);
 }
 
+private define tabhook (s)
+{
+  ifnot (s._ind)
+    return -1;
+
+  ifnot (any (["module_compile"] == s.argv[0]))
+    return -1;
+
+  if (strlen (s.argv[s._ind]))
+    return -1;
+
+  variable mdls = String_Type[length (Me->MODULES)];
+  variable i;
+  _for i (0, length (Me->MODULES) - 1)
+    mdls[i] = Me->MODULES[i] + " void compile " + Me->MODULES[i] +
+      " module";
+
+  return Rline.argroutine (s;args = mdls, accept_ws);
+}
+
 private define my_commands ()
 {
   variable a = init_commands ();
@@ -727,7 +748,12 @@ private define my_commands ()
 
 public define rlineinit ()
 {
-  variable rl = Rline.init (&my_commands;;__qualifiers ());
+  variable rl = Rline.init (&my_commands;;struct
+    {
+    @__qualifiers (),
+    tabhook = &tabhook,
+    });
+
   IARG = length (rl.history);
   rl;
 }
