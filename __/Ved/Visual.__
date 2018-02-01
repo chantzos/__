@@ -437,8 +437,8 @@ subclass Visual
 
         s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
         set_modified (s);
-        Ved.Vundo.set (s, vs.lines, vs.lnrs;
-          msg = "visual lines deleted and ");
+        Ved.Vundo.set (s, vs.lines, vs.lnrs;deleted);
+        seltoX (vs.lines);
         s.draw ();
         return;
         }
@@ -658,8 +658,7 @@ subclass Visual
       if ('y' == chr)
         {
         sel = strjoin (vs.sel, "\n");
-        Ved.Reg.set (reg, sel;
-          msg = "visual lines yanked and ");
+        Ved.Reg.set (reg, sel;msg = "visual lines yanked and ");
         seltoX (sel);
         break;
         }
@@ -701,8 +700,7 @@ subclass Visual
         set_modified (s);
 
         waddline (s, __vgetlinestr (s, s.lines[vs.startlnr], 1), 0, s.ptr[0]);
-        Ved.Vundo.set (s, [s.lines[vs.startlnr]], [vs.startlnr];
-          msg = "visual lines deleted and ");
+        Ved.Vundo.set (s, [s.lines[vs.startlnr]], [vs.startlnr]);
         __vdraw_tail (s);
         return;
         }

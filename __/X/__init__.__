@@ -64,4 +64,21 @@ class X
     a[f] = @Argvlist_Type;
     a[f].func = &Xstart;
   end
+
+  def seltoX (sel) public proc
+    ifnot (This.is.at.X)
+      return;
+
+    if (Array_Type == typeof (sel))
+      sel = strjoin (sel, "\n");
+
+    XStoreStr (sel, qualifier_exists ("append"));
+  end
+
+  def getXsel () public proc
+    ifnot (This.is.at.X)
+      return;
+
+    XFetchStr ();
+  end
 end

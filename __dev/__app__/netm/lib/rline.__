@@ -105,6 +105,7 @@ public variable NetCommands = fun (`
   a["bring_up"] = @Argvlist_Type;
   a["bring_up"].func = fun (``
     envbeg variable retval, msg; envend
+    (argv)
     retval = Net.wifi.bring_up (;passwd = Os.__getpasswd ());
 
     if (-1 == retval)
@@ -119,6 +120,7 @@ public variable NetCommands = fun (`
   a["bring_down"] = @Argvlist_Type;
   a["bring_down"].func = fun (``
     envbeg variable retval, msg; envend
+    (argv)
     retval = Net.wifi.bring_down (;passwd = Os.__getpasswd ());
 
     if (-1 == retval)
@@ -133,6 +135,7 @@ public variable NetCommands = fun (`
   a["start_wpa"] = @Argvlist_Type;
   a["start_wpa"].func = fun (``
     envbeg variable retval = 0, msg; envend
+    (argv)
     ifnot (NULL == MY.pidfile)
       {
       IO.tostdout ("wpa_supplicant is already running");
@@ -171,16 +174,19 @@ public variable NetCommands = fun (`
   ``).__funcref;
 
   a["connect"] = @Argvlist_Type;
+  a["connect"].args = ["--restart void restart dhcpcd if running (testing)"];
   a["connect"].func = fun (``
+    (argv)
     NetRl.exec (["start_wpa"]);
     Smg.send_msg_dr ("getting ip with dhcpcd", 0, NULL, NULL);
-    NetRl.exec (["get_ip"]);
+    NetRl.exec (["get_ip", argv[[1:]]]);
     NetRl.exec (["ping"]);
   ``).__funcref;
 
   a["scan"] = @Argvlist_Type;
   a["scan"].func = fun (``
     envbeg variable retval, msg; envend
+    (argv)
     retval = Net.wifi.scan ();
     if (NULL == retval)
       msg = "ERROR: " + Net.wifi.err ();
@@ -194,6 +200,7 @@ public variable NetCommands = fun (`
   a["parse_wpa_scan"] = @Argvlist_Type;
   a["parse_wpa_scan"].func = fun (``
     envbeg variable retval, msg; envend
+    (argv)
     retval = Net.wifi.scan ();
     if (NULL == retval)
       msg = "ERROR: " + Net.wifi.err ();
@@ -243,6 +250,7 @@ public variable NetCommands = fun (`
   a["terminate"] = @Argvlist_Type;
   a["terminate"].func = fun (``
     envbeg variable retval, msg; envend
+    (argv)
     if (NULL == MY.pidfile)
       return;
 
@@ -330,8 +338,19 @@ public variable NetCommands = fun (`
   ``).__funcref;
 
   a["get_ip"] = @Argvlist_Type;
+  a["get_ip"].args = ["--restart void restart dhcpcd if running (testing)"];
   a["get_ip"].func = fun (``
     envbeg variable retval, msg; envend
+      (argv)
+    variable p = Sys.Proc.search (" ((/usr)?/bin/)?dhcpcd .*");
+    if (length (p.pid))
+      if (NULL == Opt.Arg.exists ("--restart", &argv;del_arg))
+        return;
+      else
+        if (-1 == Sys.Signal.send (p.pid[0], SIGKILL;
+            passwd = Os.__getpasswd ()))
+          return;
+
     retval = Net.wifi.get_ip (;timeout = 10, passwd = Os.__getpasswd ());
 
     if (-1 == retval)
@@ -346,6 +365,7 @@ public variable NetCommands = fun (`
   a["info"] = @Argvlist_Type;
   a["info"].func = fun (``
     envbeg variable msg; envend
+    (argv)
       msg = Net.wifi.info ();
       __toscratch (Struct.to_string (msg));
       __scratch (NULL);
@@ -354,6 +374,7 @@ public variable NetCommands = fun (`
   a["ping"] = @Argvlist_Type;
   a["ping"].func = fun (``
     envbeg variable msg; envend
+    (argv)
     msg = Net.ping ();
     if (NULL == msg)
       msg = Net.err ();

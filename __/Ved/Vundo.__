@@ -103,6 +103,12 @@ subclass Vundo
     else
       {
       % try to hide the error in the code path
+      % (edit) already caught one - thanks ·
+      % but as a general comment, that's how the system [wi]s developed,
+      % as the whole thing runs under a try (usually - unless after
+      % time that work with no mistakes, we release them (functions) for
+      % speed and eficiency), so no magic, sorry.
+
       try
         {
         variable inds = NULL;
