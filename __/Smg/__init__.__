@@ -363,7 +363,7 @@ class Smg
   def askprintstr (str, charar, cmp_lnrs)
     variable header = " ";
     variable headclr = headerclr;
-    variable chr = NULL;
+    variable chr = -1;
     variable row = qualifier ("row", PROMPTROW - 1);
     variable type = typeof (str);
     variable ar = (any ([String_Type, BString_Type] == type))
@@ -389,14 +389,42 @@ class Smg
     ar = printstrar (self, ar, PROMPTROW - 1, &len, cmp_lnrs;;
       struct {headerclr = headclr, @__qualifiers, header = header});
 
-    ifnot (NULL == charar)
+    if (qualifier_exists ("get_int"))
       {
-      while (chr = Input.getch (), 0 == any (chr == charar));
+      variable retval = "";
+      while (chr = Input.getch (), all (0 == (['\r', 033] == chr)))
+        {
+        if  ('0' <= chr <= '9')
+          {
+          retval += char (chr);
+          continue;
+          }
+
+        if (any ([0x110, 0x8, 0x07F] == chr))
+          {
+          if (strlen (retval))
+            retval = retval[[:-2]];
+          }
+        else
+          if (qualifier_exists ("return_on_no_number"))
+            break;
+        }
+
+      if (0 == strlen (retval) || 033 == chr)
+        retval = "-1";
 
       restore (self, @cmp_lnrs, NULL, 1);
+      return atoi (retval);
+      }
 
+   ifnot (NULL == charar)
+      {
+      while (chr = Input.getch (), 0 == any (chr == charar));
+      restore (self, @cmp_lnrs, NULL, 1);
       chr;
       }
+    else
+      -1;
   end
 
   def _pop_up_ (self, ar, row, col, ifocus) proc

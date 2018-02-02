@@ -7,9 +7,37 @@ private define ask_tty (self, questar, ar)
   loop (len)
     () = fprintf (stderr, "\b");
 
-  variable chr;
+  variable chr = -1;
 
-  while (chr = Input.getch (), 0 == any (ar == chr));
+  if (qualifier_exists ("get_int"))
+    {
+    variable retval = "";
+    while (chr = Input.getch (), all (0 == (['\r', 033] == chr)))
+      {
+      if  ('0' <= chr <= '9')
+        {
+        retval += char (chr);
+        continue;
+        }
+
+      if (any ([0x110, 0x8, 0x07F] == chr))
+        {
+        if (strlen (retval))
+          retval = retval[[:-2]];
+        }
+      else
+        if (qualifier_exists ("return_on_no_number"))
+          break;
+      }
+
+    if (0 == strlen (retval) || 033 == chr)
+      retval = "-1";
+
+    return atoi (retval);
+    }
+
+   ifnot (NULL == ar)
+     while (chr = Input.getch (), 0 == any (ar == chr));
 
   Input.at_exit ();
 

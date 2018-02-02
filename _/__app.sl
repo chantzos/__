@@ -74,6 +74,7 @@ This.is.me = funcall (NULL != This.is.child, `
 
 Load.module ("socket");
 
+Class.load ("Devel");
 Class.load ("Smg");
 Class.load ("Input");
 Class.load ("Rand");
