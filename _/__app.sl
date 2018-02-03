@@ -75,6 +75,9 @@ This.is.me = funcall (NULL != This.is.child, `
 Load.module ("socket");
 
 Class.load ("Devel");
+
+This.system."supports?"["hunspell"] = (NULL != Devel.find_lib ("hunspell-1.6"));
+
 Class.load ("Smg");
 Class.load ("Input");
 Class.load ("Rand");
@@ -997,6 +1000,12 @@ private define __builtins__ (a)
       __system ([Env->SRC_PATH + "/__dev/__app__/netm.__ " +
         Env->ROOT_PATH + args];return_on_completion);
       `).__funcref;
+    }
+
+  if (This.system."supports?"["hunspell"])
+    {
+    a["__spell"] = @Argvlist_Type;
+    a["__spell"].func = &__spell;
     }
 
   variable lbuiltin = Env->LOCAL_LIB_PATH + "/__builtin__/__funs.__";

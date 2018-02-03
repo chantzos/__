@@ -9,7 +9,7 @@ subclass Visual
     _i, cur, ptr, mode,
     clr = Smg->COLOR.visual,
     l_mode, l_down, l_up, l_page_up, l_page_down,
-    l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', Input->DOWN, Input->UP,
+    l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', 'h', Input->DOWN, Input->UP,
       Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b, Input->HOME, '!', '$'],
     c_mode, c_left, c_right,
     c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT, '!', '$'],
@@ -374,6 +374,22 @@ subclass Visual
       if ('$' == chr)
         {
         __vslang_load (vs.lines);
+        break;
+        }
+
+      if ('h' == chr)
+        {
+        variable lines = Ved.Spell.spell (vs.lines);
+        ifnot (anynot (lines == vs.lines))
+          break;
+
+        s.lines[vs.lnrs] = lines;
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+
+        ifnot (size == s.st_.st_size)
+          set_modified (s);
+
+        Ved.Vundo.set (s, vs.lines, vs.lnrs);
         break;
         }
 

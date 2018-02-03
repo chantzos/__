@@ -67,6 +67,10 @@ static define __INIT__ (role)
       profile,
       debug,
       },
+    system = struct
+      {
+      "supports?" = Assoc_Type[Char_Type],
+      },
     has = struct
       {
       frames      = 1, % how many frames should draw at initialization

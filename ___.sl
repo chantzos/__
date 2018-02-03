@@ -94,8 +94,9 @@ private variable MODULES_THAT_FAILED = String_Type[0];
 private variable CLASSES = [
   "Input",  "Smg",   "Rand",   "Crypt", "Os",     "Opt",
   "String", "Rline", "Proc",   "Sock",  "Subst",  "Sync",
-  "Ved",    "Api",   "Curl",   "Json",  "Time",   "Scm",
-  "App",    "Com",   "Hw",     "Net",   "I"];
+  "Devel",  "Spell", "Ved",    "Api",   "Curl",   "Json",
+  "Time",   "Scm",   "App",    "Com",   "Hw",     "Net",
+  "I"];
 
 if (X)
   {
@@ -930,8 +931,21 @@ ROOTPATH = realpath (ROOTPATH + "/..");
   () = chdir (SRC_PATH);
 }
 
+private define __filter_classes__ ()
+{
+  This.system."supports?"["hunspell"] = (NULL != find_lib ("hunspell-1.6"));
+
+  ifnot (This.system."supports?"["hunspell"])
+    {
+    CLASSES[wherefirst ("Spell" == CLASSES)] = NULL;
+    CLASSES = CLASSES[wherenot (_isnull (CLASSES))];
+    }
+}
+
 private define __bytecompile_classes__ ()
 {
+  __filter_classes__;
+
   variable i;
   variable c;
 

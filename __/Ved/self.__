@@ -391,7 +391,7 @@ beg
   end
 
   def setbuf (bufname)
-    variable w = get_cur_wind (self);
+    variable w = get_cur_wind (NULL);
 
     ifnot (any (bufname == w.bufnames))
       return;
@@ -481,7 +481,7 @@ beg
   end
 
   def draw_wind ()
-    variable w = get_cur_wind (self);
+    variable w = get_cur_wind (NULL);
     variable i;
     variable s;
     variable cur;

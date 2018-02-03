@@ -22,37 +22,61 @@ class Spell
         hsp,
         aff = qualifier ("aff"),
         dic = qualifier ("dic"),
+        lang = qualifier ("lang", DEF_LANG),
+        user_dic,
+        src_user_dic,
+        user_dic_fd,
+        src_user_dic_fd,
         spell,
         suggest,
         add_dic,
         add_word,
         remove_word,
+        close,
         };
+
+      s.user_dic = DATA_DIR + "/self_" + s.lang + ".dic";
+      s.src_user_dic = Me.get_src_path (s.user_dic);
 
       if (any (_isnull ([s.aff, s.dic])))
         {
-        variable lang = qualifier ("lang", DEF_LANG);
         variable len, list = listdir (DATA_DIR);
 
         if (NULL == list || 0 == (len = length (list), len))
           return NULL;
 
-        variable aff_str = lang + ".aff", dic_str = lang + ".dic";
-        variable found_aff = any (list == aff_str);
-        variable found_dic = any (list == dic_str);
+        variable
+          aff_str = s.lang + ".aff",
+          dic_str = s.lang + ".dic",
+          found_aff = any (list == aff_str),
+          found_dic = any (list == dic_str);
 
-        if (anynot ([found_aff, found_dic]))
-          return NULL;
+        if (NULL == s.aff)
+          ifnot (found_aff)
+            return NULL;
+          else
+            s.aff = DATA_DIR + "/" + aff_str;
 
-        s.aff = DATA_DIR + "/" + aff_str;
-        s.dic = DATA_DIR + "/" + dic_str;
+        if (NULL == s.dic)
+          ifnot (found_dic)
+            return NULL;
+          else
+            s.dic = DATA_DIR + "/" + dic_str;
         }
+
+      s.user_dic_fd = open (s.user_dic, O_RDWR|O_CREAT, File->PERM["_PRIVATE"]);
+      s.src_user_dic_fd = open (s.src_user_dic, O_RDWR|O_CREAT, File->PERM["_PRIVATE"]);
 
       s.hsp = hunspell_init (s.aff, s.dic);
 
       s.spell = fun (`
           (s, str)
         hunspell_check (s.hsp, str);
+        `).__funcref;
+
+      s.close = fun (`
+          (s, str)
+        hunspell_close (s.hsp);
         `).__funcref;
 
       s.suggest = fun (`
@@ -74,6 +98,8 @@ class Spell
          (s, str)
         hunspell_add_dic (s.hsp, str);
        `).__funcref;
+
+      s.add_dic (s.user_dic);
 
       s;
     end

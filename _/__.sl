@@ -1774,7 +1774,15 @@ private define __LoadClass__ (cname)
       install = is_install, __PATHS = __PATHS});
 
   ifnot (qualifier_exists ("dont_eval"))
-    () = evalfile (classpath + "/" + as, cname);
+    ifnot (qualifier_exists ("return_on_error"))
+      () = evalfile (classpath + "/" + as, cname);
+    else
+      try
+        {
+        () = evalfile (classpath + "/" + as, cname);
+        }
+      catch AnyError:
+        return;
 }
 
 () = __classnew__ ("Class", "Class", NULL, 0, String_Type[0]);

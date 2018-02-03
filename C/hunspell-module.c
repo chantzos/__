@@ -86,15 +86,15 @@ free_0:
   SLang_free_slstring (str);
 }
 
-static int hunspell_add_dic_intrinsic (void)
+static void hunspell_add_dic_intrinsic (void)
 {
-  int retval = -1;
+  int retval;
   char *str;
   Hunhandle *ptr;
   SLang_MMT_Type *mmt;
 
   if (-1 == SLang_pop_slstring (&str))
-    return -1;
+    return;
 
   if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
     goto free_return;
@@ -106,10 +106,10 @@ static int hunspell_add_dic_intrinsic (void)
 free_return:
   SLang_free_mmt (mmt);
   SLang_free_slstring (str);
-  return retval;
+  return;
 }
 
-static int hunspell_rm_word_intrinsic (void)
+static void hunspell_rm_word_intrinsic (void)
 {
   int retval = -1;
   char *str;
@@ -117,7 +117,7 @@ static int hunspell_rm_word_intrinsic (void)
   SLang_MMT_Type *mmt;
 
   if (-1 == SLang_pop_slstring (&str))
-    return -1;
+    return;
 
   if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
     goto free_return;
@@ -130,10 +130,10 @@ free_return:
   SLang_free_mmt (mmt);
   SLang_free_slstring (str);
 
-  return retval;
+  return;
 }
 
-static int hunspell_add_word_intrinsic (void)
+static void hunspell_add_word_intrinsic (void)
 {
   int retval = -1;
   char *str;
@@ -141,7 +141,7 @@ static int hunspell_add_word_intrinsic (void)
   SLang_MMT_Type *mmt;
 
   if (-1 == SLang_pop_slstring (&str))
-    return -1;
+    return;
 
   if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
     goto free_return;
@@ -154,26 +154,39 @@ free_return:
   SLang_free_mmt (mmt);
   SLang_free_slstring (str);
 
-  return retval;
+  return;
+}
+
+static void hunspell_close_intrinsic (void)
+{
+  Hunhandle *ptr;
+  SLang_MMT_Type *mmt;
+
+  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
+    return;
+
+  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
+  Hunspell_destroy (ptr);
+  SLang_free_mmt (mmt);
 }
 
 static void hunspell_init_intrinsic (char *aff_dir, char *dic_dir)
 {
-  Hunhandle *pt;
+  Hunhandle *ptr;
   SLang_MMT_Type *mmt;
 
-  pt = (Hunhandle *) SLmalloc (sizeof (Hunhandle *));
-  if (pt == NULL)
+  ptr = (Hunhandle *) SLmalloc (sizeof (Hunhandle *));
+  if (ptr == NULL)
     {
     (void) SLang_push_null ();
     return;
     }
 
-  memset ((char *) pt, 0, sizeof (Hunhandle *));
+  memset ((char *) ptr, 0, sizeof (Hunhandle *));
 
-  pt = Hunspell_create (aff_dir, dic_dir);
+  ptr = Hunspell_create (aff_dir, dic_dir);
 
-  if (NULL == (mmt = SLang_create_mmt (Hunspell_Id, (VOID_STAR) pt)))
+  if (NULL == (mmt = SLang_create_mmt (Hunspell_Id, (VOID_STAR) ptr)))
     {
     (void) SLang_push_null ();
     return;
@@ -189,11 +202,12 @@ static void hunspell_init_intrinsic (char *aff_dir, char *dic_dir)
 static SLang_Intrin_Fun_Type hunspell_Intrinsics [] =
 {
   MAKE_INTRINSIC_SS("hunspell_init", hunspell_init_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_add_dic", hunspell_add_dic_intrinsic, SLANG_INT_TYPE),
+  MAKE_INTRINSIC_0("hunspell_close", hunspell_close_intrinsic, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("hunspell_add_dic", hunspell_add_dic_intrinsic, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("hunspell_check", hunspell_spell_intrinsic, SLANG_INT_TYPE),
   MAKE_INTRINSIC_0("hunspell_suggest", hunspell_suggest_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_add_word", hunspell_add_word_intrinsic, SLANG_INT_TYPE),
-  MAKE_INTRINSIC_0("hunspell_remove_word", hunspell_rm_word_intrinsic, SLANG_INT_TYPE),
+  MAKE_INTRINSIC_0("hunspell_add_word", hunspell_add_word_intrinsic, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_0("hunspell_remove_word", hunspell_rm_word_intrinsic, SLANG_VOID_TYPE),
   SLANG_END_INTRIN_FUN_TABLE
 };
 
