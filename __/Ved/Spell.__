@@ -1,0 +1,182 @@
+subclass Spell
+  __init__
+    spell
+  end
+
+  var ACCEPTED = String_Type[0];
+  var __S = NULL;
+
+  beg
+    variable __get_word = fun (`
+      envbeg
+        variable i, lstart, chars = [[0:'A' - 1], ['Z' + 1:'a' - 1], ['z' + 1:160]];
+      envend
+          (idx, buf, len, start)
+        i = 0;
+        while (i < len && any (buf[i] == chars))
+          i++;
+
+        if (i == len)
+          {
+          @idx += i;
+          @start += i + 1;
+          return "";
+          }
+
+        lstart = i + 1;
+
+        while (i++, i < len &&
+          all (0 == (chars == substr (buf, i + 1, 1)[0])));
+
+        @idx += i - (i + 1 == len && any (chars == substr (buf, i + 1, 1)[0])
+          ? 1
+          : 0);
+
+        @start += lstart;
+        substr (buf, lstart, i - lstart + 1);
+     `);
+
+    variable __put_word = fun (`
+        (line, beg, len, word)
+      ifnot (beg)
+        substr (line, beg + 1, len - beg - 1) + word;
+      else
+        substr (line, beg, len - beg) + word;
+    `);
+  end
+
+  def spell (lines)
+    variable lang = qualifier ("lang");
+
+    if (NULL == __S)
+      {
+      if (NULL == (__S = Spell.Hunspell.new (;;__qualifiers), __S))
+        return String_Type[0];
+      }
+    else
+      ifnot (NULL == lang)
+        ifnot (__S.lang == lang)
+          if (NULL == (__S = Spell.Hunspell.new (;;__qualifiers), __S))
+            return String_Type[0];
+
+    variable tp = typeof (lines);
+    if (String_Type == tp)
+      lines = strtok (lines, "\n");
+
+    variable ar = @lines;
+    variable i, idx, line, len, wlen, word, beg, end;
+    variable sugs, suglen, is_correct, askar, retval;
+
+    _for i (0, length (lines) - 1)
+      {
+      line = lines[i];
+      len = strlen (line);
+      ar[i] = "";
+      if (0 == len || len < 4)
+        {
+        ar[i] = line;
+        continue;
+        }
+
+      for (idx = 0; idx < len; idx++)
+        {
+        beg = idx;
+        end = idx;
+        word = __get_word.call (&idx, substr (line, idx + 1, -1),
+          len - idx, &end);
+
+        if (0 == strlen (word))
+          {
+          ar[i] += __put_word.call (line, beg + 1, end, word);
+          continue;
+          }
+
+        if (4 > strlen (word) || any (word == ACCEPTED))
+          {
+          ar[i] += __put_word.call (line, beg, end, word);
+          continue;
+          }
+
+        is_correct = __S.spell (word);
+        if (is_correct)
+          {
+          ar[i] += __put_word.call (line, beg, end, word);
+          continue;
+          }
+
+        sugs = __S.suggest (word);
+        suglen = length (sugs);
+
+        ifnot (suglen)
+          {
+          ar[i] += __put_word.call (line, beg, end, word);
+          continue;
+          }
+
+        if (suglen > 8)
+          {
+          sugs = sugs[[0:8]];
+          suglen = 9;
+          }
+
+        askar = [
+          "-- suggestions for [" + word + "] --",
+          "a[ccept] : accept word and add it to the dictionary",
+          "A[ccept] : accept word but just for this session",
+          "c[ansel] : cansel operation and discard corrections",
+          "i[nput]  : correct word by getting user input",
+          "q[uit]   : quit",
+          array_map (String_Type, &sprintf, "%d: %s", [1:suglen], sugs)];
+
+        retval = IO.ask (askar, ['c', 'a', 'A', 'q', ' ', 'i',
+          [1 + '0':suglen + '0']]);
+
+        if ('c' == retval)
+          return String_Type[0];
+
+        if (any (['a', 'A'] == retval))
+          {
+          ar[i] += __put_word.call (line, beg, end, word);
+          __S.add_word (word);
+
+          ACCEPTED = [ACCEPTED, word];
+          if ('a' == retval)
+            {
+            () = write (__S.src_user_dic_fd, word + "\n");
+            () = write (__S.user_dic_fd, word + "\n");
+            }
+          continue;
+          }
+
+        if ('i' == retval)
+          {
+          Smg.send_msg_dr ("mispelled word [" + word + "]", 0, NULL, NULL);
+          word = Rline.getline (;char = "word: ");
+          ar[i] += __put_word.call (line, beg, end, word);
+          continue;
+          }
+
+        if ('q' == retval)
+          {
+          ar[i] += __put_word.call (line, beg, len, "");
+          break 2;
+          }
+
+        retval -= '0';
+
+        if (retval > suglen)
+          {
+          ar[i] += __put_word.call (line, beg, end, word);
+          continue;
+          }
+
+        retval--;
+
+        word = sugs[retval];
+        ar[i] += __put_word.call (line, beg, end, word);
+        }
+      }
+
+    ar;
+  end
+end
