@@ -1093,7 +1093,7 @@ subclass Visual
       if (s.ptr[1] > len)
         s.ptr[1] = len - 1;
 
-      if (row > s._len)
+      if (s.rows[0] - row > s._len)
         s.ptr[0] = s._len;
 
       if (row != s.ptr[0] || col != s.ptr[1])

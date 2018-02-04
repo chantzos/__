@@ -52,7 +52,7 @@ position, it can't offer warranty that will do the right thing, since the
 floating view is never used, it cannot reveal the code mistakes.
 
 This application offers such an X window management (code derived from
-__dminiwm__ :  https://github.com/moetunes/dminiwm.git)
+__dminiwm__ :  https://github.com/moetunes/dminiwm)
  
 Its a tiny (written as a S-Lang module) library, which also has floating
 windows support with a total control over the focused window with the
@@ -65,7 +65,7 @@ The auto completion system is based on the following zsh line:
     zstyle ':completion:*' menu select=4 list-colors "=(#b) #([0-9]#)*=$color[cyan]=$color[red]"
 ```
 
-Its based on a readline implementation (code located at __/Rline/__init__.__),
+Its based on a readline implementation (code located at \_\_/Rline/__init__.\_\_),
 which its instance, offers support (autocompletion) for commands, history,
 arguments, filesystem access, ..., but also bindings to function references
 and even direct access to generic application logic.
@@ -99,8 +99,8 @@ Some common programs (most of them come by default on most
 distributions)
 
 required: sudo, git
-important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,
-umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,
+important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
+umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,  
 dhcpcd, ping
 
 optional: mplayer, amixer, xclip, xinit, xauth, setxkbmap, xmodmap,
@@ -119,7 +119,7 @@ slsh ___.sl --verbose
 ```
 
 Applications and commands will be installed in
-$ROOTDIR/__/bin, all of them prefixed with two underscores.
+$ROOTDIR/bin, all of them prefixed with two underscores.
 Those are actually symbolic links to references, which they
 load, based also in the name of the link, the necessary code.
 
@@ -246,35 +246,35 @@ $ROOTDIR/bin/__shell --app=__ --app=git
 ...
 ```
 
-Briefly the ideal concept in an ala list sentence:
-  in a unix like operating system,
-  self built-able and controlled,
-  applications with a personalized and uniform interface,
-  with a drawing that doesn't stress the eyes much,
-  and gets as much screen space it deserves,
-  without distracted pop ups (unless its called by us),
-  total controlled with the keyboard,
-  with share bindings,
-  same workflow,
-  and similar interface under X or a virtual console,
-  with an implementation,
-  which is written in a familiar pleasant language,
-    - compact but understandable (like S-Lang)
-  with few dependencies (mostly in libraries),
-  that can be carried (static build),
-  that can load instantly,
-  even at very early boot process as process id 0,
-  fast,
-  with an efficient memory usage,
-  with organized code,
-  easy to understand,
-  compact (shareable code),
-  with enough information when the bug occurs,
-  without bringing down the system,
-  that can be healed at runtime (without restarting)
-  and ...
-  freedom (through knowledge and responsibility to get out of edges)
-  with an evaluation console executing strings
+But, briefly the ideal concept in an ala list sentence:  
+  in a unix like operating system,  
+  self built-able and controlled,  
+  applications with a personalized and uniform interface,  
+  with a drawing that doesn't stress the eyes much,  
+  and gets as much screen space it deserves,  
+  without distracted pop ups (unless its called by us),  
+  total controlled with the keyboard,  
+  with share bindings,  
+  same workflow,  
+  and similar interface under X or a virtual console,  
+  with an implementation,  
+  which is written in a familiar pleasant language,  
+    - compact but understandable (like S-Lang)  
+  with few dependencies (mostly in libraries),  
+  that can be carried (static build),  
+  that can load instantly,  
+  even at very early boot process as process id 1,  
+  fast,  
+  with an efficient memory usage,  
+  with organized code,  
+  easy to understand,  
+  compact (shareable code),  
+  with enough information when the bug occurs,  
+  without bringing down the system,  
+  that can be healed at runtime (without restarting)  
+  and ...  
+  freedom (through knowledge and responsibility to get out of edges)  
+  with an evaluation console executing strings  
 
 in a summary the absolute control over every bit (that is, ideally)
  
@@ -429,7 +429,7 @@ The editor didn't ever have the intention to be a vim clone, but rather
 use the admitable geniously captured and implemented (in vim perfectly)
 model of modes - besides the intuitive interface which is based on
 mnemonic keys that are connected with actions and keywords, like
-[cd][i][Ww] for [cd](hange|delete) [[i]nner] [Ww]ord.
+[cd][i][Ww] for [cd]\(hange|delete\) [[i]nner] [Ww]ord.
 
 In this application this model (of modes), has been already extended.
 
@@ -489,17 +489,19 @@ the __same__ (by name but also with the signature) method[s].
 
 #### Functional Code Interface
 Normally the following is not valid (because "if" is a statement):
-  
+```c 
   variable cond = 1;
   variable v = if (cond) 1; else 2;
+```
  
 But by using the function interface, we can get the desired result:
- 
+```c
   variable v = funcall (cond, `(arg) if (arg) 1; else 0;`);
-
+```
 The string inside the backquote characters is evaluated at runtime.
 It's like an unnamed function syntax without the braces:
 
+```c
  (arg)
 {
   if (arg)
@@ -507,7 +509,7 @@ It's like an unnamed function syntax without the braces:
   else
     return 2;
 }
-
+```
 This function can be stored in a variable and can be used it as a normal
 function reference. The code inside the body of those strings, can be
 regular S-Lang code.
@@ -517,11 +519,11 @@ keywords.
 This fact alone, can make the things interesting, because that way such
 function can really control the environment. But, it can also create a
 closure:
- 
+```c 
 		variable counter = function (`envbeg variable _i = 0; envend _i++; _i;`);
 		counter.call (); -> 1
 		counter.call (); -> 2
- 
+``` 
 One such function can be the whole program and could be (almost) perfect,
 if it wasn't for the backquotes. Such multiline strings allows to write
 full compatible S-Lang code without further parsing, but the backquotes

@@ -77,6 +77,7 @@ class Spell
       s.close = fun (`
           (s, str)
         hunspell_close (s.hsp);
+        s.hsp = NULL;
         `).__funcref;
 
       s.suggest = fun (`

@@ -383,15 +383,15 @@ beg
   end
 
   def get_cur_frame ()
-    get_cur_wind (self).cur_frame;
+    get_cur_wind (NULL).cur_frame;
   end
 
   def get_cur_rline ()
-    get_cur_wind (self).rline;
+    get_cur_wind (NULL).rline;
   end
 
   def setbuf (bufname)
-    variable w = get_cur_wind (NULL);
+    variable w = qualifier ("wind", get_cur_wind (NULL));
 
     ifnot (any (bufname == w.bufnames))
       return;
@@ -530,7 +530,7 @@ beg
   def get_buf (bufname)
     ifnot (qualifier_exists ("on_all_windows"))
       {
-      variable w = get_cur_wind (self);
+      variable w = get_cur_wind (NULL);
 
       ifnot (any (bufname == w.bufnames))
         return NULL;
@@ -565,7 +565,7 @@ beg
   end
 
   def get_frame_buf (frame)
-    variable w = get_cur_wind (self);
+    variable w = get_cur_wind (NULL);
     if (frame >= w.frames)
       return NULL;
 
@@ -573,7 +573,7 @@ beg
   end
 
   def change_frame ()
-    variable w = get_cur_wind (self);
+    variable w = get_cur_wind (NULL);
     variable s = w.buffers[w.frame_names[w.cur_frame]];
     variable dir = qualifier ("dir", "next");
 
@@ -587,14 +587,14 @@ beg
     else
       w.cur_frame = 0 == w.cur_frame ? w.frames - 1 : w.cur_frame - 1;
 
-    s = get_cur_buf (self);
+    s = get_cur_buf (NULL);
 
     ifnot (s.opt_show_status_line)
       __vunset_status_line_clr (s, 1);
     else
       __vset_status_line_fg_clr (s, 1);
 
-    setbuf (self, s._abspath);
+    setbuf (self, s._abspath;wind = w);
 
     Smg.setrcdr (s.ptr[0], s.ptr[1]);
 
