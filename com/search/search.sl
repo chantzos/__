@@ -8,6 +8,7 @@ private variable
   HIDDENDIRS = 0,
   HIDDENFILES = 0,
   EXCLUDEDIRS = {},
+  ORIG_DIRS,
   LINENRS = Integer_Type[0],
   COLS = Integer_Type[0],
   FNAMES = String_Type[0],
@@ -87,7 +88,7 @@ private define dir_callback_a (dir, st)
     if ('.' == path_basename (dir)[0])
       return 0;
 
-  if (any (path_basename (dir) == EXCLUDEDIRS))
+  if (any (dir == EXCLUDEDIRS))
     return 0;
 
   if (length (strtok (dir, "/")) > MAXDEPTH)
@@ -123,6 +124,11 @@ private define file_callback (file, st)
 private define recursivefunc (dir, depth)
 {
   MAXDEPTH = length (strtok (dir, "/")) + depth;
+  variable i;
+  _for i (0, length (EXCLUDEDIRS) - 1)
+    ifnot (path_is_absolute (ORIG_DIRS[i]))
+      EXCLUDEDIRS[i] = path_concat (dir, ORIG_DIRS[i]);
+
   Dir.walk (dir, &dir_callback_a, &file_callback);
   0;
 }
@@ -295,6 +301,7 @@ define main ()
     }
 
   EXCLUDEDIRS = list_to_array (EXCLUDEDIRS, String_Type);
+  ORIG_DIRS = array_map (String_Type, &strtrim_end, EXCLUDEDIRS, "/");
 
   if (danglinglinks == NULL == findfiles)
     {

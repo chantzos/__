@@ -634,20 +634,38 @@ private define __search_project__ (argv)
     else
       pat = argv[1];
 
-  variable excludedirs = String_Type[0];
+  variable
+    includedirs = String_Type[0],
+    includedir,
+    excludedirs = ["tmp", "C", "usr/data"],
+    excludedir;
 
   ifnot (access (This.is.my.datadir + "/search_excludes.txt", F_OK))
-     excludedirs = File.readlines (This.is.my.datadir + "/search_excludes.txt");
+     excludedirs = [excludedirs, File.readlines (This.is.my.datadir +
+        "/search_excludes.txt")];
+
+  while (NULL != (excludedir = Opt.Arg.getlong_val ("exclude-dir",
+      NULL, &argv;del_arg), excludedir))
+    excludedirs = [excludedirs, excludedir];
+
+  while (NULL != (includedir = Opt.Arg.getlong_val ("include-dir",
+      NULL, &argv;del_arg), includedir))
+    includedirs = [includedirs, includedir];
+
+  variable idx;
+  _for includedir (0, length (includedirs) - 1)
+    ifnot (NULL == (idx = wherefirst (includedirs[includedir] == excludedirs), idx))
+      excludedirs[idx] = NULL;
+
+  excludedirs = excludedirs[wherenot (_isnull (excludedirs))];
 
   excludedirs = array_map (String_Type, &sprintf, "--excludedir=%s",
     excludedirs);
 
   variable _argv = ["!search", "--pat=" + pat, "--recursive",
-    excludedirs, "--excludedir=tmp", "--excludedir=C", path];
+    excludedirs, path];
 
-  ifnot (NULL == Opt.Arg.exists ("--include_c", &argv;del_arg))
-    Array.delete_at (&_argv, -2);
-
+IO.tostderr (_argv);
   __runcom  (_argv, NULL);
 }
 
@@ -725,8 +743,9 @@ private define my_commands ()
   a["search_project"].func = &__search_project__;
   a["search_project"].args = [
     "--pat= pattern pattern",
-    "--include_c void include in searching the C namespace",
-    "--path= directory limit the search to `path'"];
+    "--path= directory limit the search to `path'",
+    "--include-dir= directory include that directory (tmp/, C, usr/data)",
+    "--exclude-dir= directory exclude this directory"];
 
   a["remove_bytecompiled"] = @Argvlist_Type;
   a["remove_bytecompiled"].func = &rm_bytecompiled;
