@@ -1,11 +1,28 @@
+variable ThisPath = path_dirname (__FILE__);
+
+__new_exception ("SuperClass", AnyError, "SUPPER CLASS");
+__new_exception ("SuperClassError", SuperClass, "SUPPER CLASS ERROR");
+__new_exception ("EvalError", SuperClassError, "EVALUATION ERROR");
+__new_exception ("PrintError", SuperClassError, "PRINTING ERROR");
+
+try
+{
+__eval (`
+
+public define __main__ (ref)
+{
+  (@ref) (;;__qualifiers);
+}
+
+public define Type ();
+
 % This is an evaluation "on the fly", that means that the private scope
 % cannot access (or the oposite) nothing from the private environment,
-% that is declared on the compilation unit (file)
+% that is defined on a compilation unit
 
-__eval (`
-__use_namespace ("__F");
+__use_namespace ("__F__");
 
-static variable __FUNCREF__;
+static variable __DATA__;
 private variable __f__;
 private variable __fun__;
 private variable __env__;
@@ -13,9 +30,15 @@ private variable __i__;
 private variable __len__;
 private variable __as__;
 private variable __scope__;
-private variable __fid__ = -1;
-private variable __FUNCDEPTH__    = 0;
-private variable __INSTANCES__   = {};
+private variable __func_name__ = "__dev_fun_";
+private variable __anon_name__ = "__FUNCTION__";
+private variable __slots__ = [0:511];
+private variable __FUNS__ = Assoc_Type[Struct_Type];
+private variable __fid__;
+private variable __DEPTH__ = 0;
+private variable __INSTANCES__ = {};
+private variable __CLASSES__   = {};
+private variable __CLASSPATH__ = String_Type[0];
 private variable __ENV_BEG_TOKEN__ = "envbeg";
 private variable __ENV_END_TOKEN__ = "envend";
 private variable __ENV_BEG_TOKEN_LEN__ = strlen (__ENV_BEG_TOKEN__);
@@ -23,21 +46,35 @@ private variable __ENV_END_TOKEN_LEN__ = strlen (__ENV_END_TOKEN__);
 
 private define __my_err_handler__ (e)
 {
-  if (String_Type == typeof (e))
-    throw qualifier ("error", AnyError), e;
+  ifnot (Exc.isnot (e))
+    {
+    Exc.print (e);
+    throw e.error, e.message;
+    }
   else
-    throw qualifier ("error", AnyError), e.message, e;
+    {
+    if (String_Type == typeof (e))
+      IO.tostderr (e);
+
+    throw qualifier ("error", AnyError), e;
+    }
+}
+
+private define __clear__ ()
+{
+  array_map (&__uninitialize,
+    [&__i__, &__len__, &__fun__, &__env__, &__as__, &__scope__]);
+
+  __DEPTH__ = 0;
+  __INSTANCES__ = {};
+  __CLASSES__ = {};
 }
 
 private define __ferror__ (e)
 {
   loop (_stkdepth) pop;
 
-  array_map (&__uninitialize,
-    [&__i__, &__len__, &__fun__, &__env__, &__as__, &__scope__]);
-
-  __FUNCDEPTH__ = 0;
-  __INSTANCES__ = {};
+  __clear__;
 
   if (qualifier_exists ("unhandled"))
     {
@@ -64,55 +101,76 @@ private define declare__ ()
   __i__   = 0;
   __len__ = strlen (__fun__);
 
-  variable buf = __scope__ + " define " + __as__;
+  variable buf = __scope__ + " define " +  __as__;
+  variable args = qualifier ("args", String_Type[0]);
 
   ifnot (__len__)
-    return buf + " ();";
+    return buf + " (" + strjoin (args, ", ") + ");";
 
   ifnot ('(' == __fun__[0])
-    return buf + " ()\n{\n";
+    return buf + " (" + strjoin (args, ", ") + ")\n{\n" +
+      qualifier ("fun", "") + "  ";
 
   if (__len__ > 4)
     if (any (0 == array_map (Integer_Type, &strncmp, __fun__,
        ["() =", "()="], [4, 3])))
-        return buf + " ()\n{\n";
+        return buf + " (" + strjoin (args, ", ") + ")\n{\n" +
+          qualifier ("fun", "") + "  ";
 
   buf += " (";
+  args =  strjoin (args, ", ") + ", ";
 
-  _for __i__ (1, __len__ - 1)
-    ifnot (')' == __fun__[__i__])
-      buf += char (__fun__[__i__]);
-    else
-      {
-      __i__++;
-      return buf + ")\n{\n";
-      }
+  loop (1)
+    {
+    _for __i__ (1, __len__ - 1)
+      ifnot (')' == __fun__[__i__])
+        args += char (__fun__[__i__]);
+      else
+        {
+        __i__++;
+        break 2;
+        }
 
-  __ferror__ ("function declaration failed, syntax error, " +
-     "expected \")\""; error = SyntaxError);
+    __ferror__ ("function declaration failed, syntax error, " +
+       "expected \")\""; error = SyntaxError);
+   }
+
+  buf + strjoin (strtok (args, ","), ", ") + ")\n{\n" +
+    qualifier ("fun", "") + "  ";
 }
 
 private define __compile__ ()
 {
-  __fun__ = declare__ + (__tmp (__len__)
+  __fun__ = declare__ (;;__qualifiers) + (__tmp (__len__)
     ? substr (__fun__, __tmp (__i__) + 1, -1) + "\n}\n"
     : "");
 }
 
-private define __eval__ ()
+private define __eval_class__ ()
 {
-  try
-    {
-    __eval (__tmp (__fun__) + "__F->__FUNCREF__ = &" + __tmp (__as__) + ";",
-      __f__.__ns);
-    }
-  catch ClassError:
-    __ferror__ (__get_exception_info);
-
-  __f__.__funcref = __tmp (__FUNCREF__);
+  variable e;
+  try (e)
+    __eval (__f__.__env, __f__.__class.ns);
+  catch EvalError:
+    __ferror__ (e);
 }
 
-private define __call ()
+private define __eval_fun__ ()
+{
+  variable e;
+  try (e)
+    {
+    __eval (__tmp (__fun__) +
+        "__F__->__DATA__ = &" + __tmp (__as__) + ";",
+      __f__.__ns;;__qualifiers);
+    }
+  catch EvalError:
+    __ferror__ (e);
+
+  __f__.__funcref = __tmp (__DATA__);
+}
+
+static define __call ()
 {
   variable args = __pop_list (_NARGS - 1);
   variable f = ();
@@ -125,23 +183,32 @@ private define __call ()
     __ferror__ (__get_exception_info;;__qualifiers);
 }
 
+static define __call_unhandled ()
+{
+  variable args = __pop_list (_NARGS - 1);
+  variable f = ();
+
+  (@f.__funcref) (__push_list (args);;__qualifiers);
+}
+
 private variable __F_Type = struct
   {
-  __ns  = "__F",
-  call  = &__call,
+  call     = &__call,
+  __ns     = "__F__",
+  __fun,
+  __env,
   __funcref,
+  __class = struct
+    {
+    super,
+    methods,
+    subclasses,
+    name,
+    ns,
+    members,
+    init,
+    },
   };
-
-public define fexpr ()
-{
-  __fun__   = strtrim (());
-  __f__     = @__F_Type;
-  __as__    = "__FUNCTION__";
-  __scope__ = "private";
-  __compile__;
-  __eval__;
-  __tmp (__f__);
-}
 
 private define __save_instance__ ()
 {
@@ -174,9 +241,9 @@ private define __find_env__ ()
   variable i, idx, env;
   variable len = length (env_beg);
   ifnot (len == length (env_end))
-    __ferror__ (sprintf ("%d %d  %s\nunmatched %s %s delimiters",
-        len, length (env_end), __fun__, __ENV_BEG_TOKEN__, __ENV_END_TOKEN__)
-      ;error = SyntaxError);
+    __ferror__ (sprintf ("%d %d  %s\nunmatched envbeg envend delimiters",
+    len, length (env_end), __fun__)
+    ;error = SyntaxError);
 
   if (1 == len)
     {
@@ -216,49 +283,601 @@ private define __find_env__ ()
       env_end[-1] + __ENV_END_TOKEN_LEN__, -1));
 }
 
-public define function ()
+private define __free_slot__ ()
 {
-  if (__FUNCDEPTH__)
+  ifnot (NULL == (__fid__ = wherefirst (__slots__), __fid__))
+    return (__slots__[__fid__] = 0, __fid__);
+
+  __fid__ = length (__slots__);
+  __slots__ = Integer_Type[__fid__ + (__fid__ / 2)];
+  __slots__[[0:__fid__]] = 0;
+  __fid__;
+}
+
+private define __destroy__ (f)
+{
+  __fid__      = string (f.__funcref);
+  variable key = f.__ns + "->" + __fid__;
+  eval (__FUNS__[key].scope + " define " + __fid__[[1:]] + " ();", f.__ns);
+
+  ifnot (NULL == __FUNS__[key].slot)
+    __slots__[   __FUNS__[key].slot] = 1;
+
+  assoc_delete_key (__FUNS__, key);
+  set_struct_fields (f, NULL, NULL, NULL, NULL);
+}
+
+private define __function__ ()
+{
+  if (__DEPTH__)
     __save_instance__;
 
   __fun__ = strtrim (());
 
-  __FUNCDEPTH__++;
+  __DEPTH__++;
 
-  __env__ = "_auto_declare = 1;\n";
+  __env__ = qualifier ("env", "") + "\n";
 
   if (strlen (__fun__) > __ENV_BEG_TOKEN_LEN__)
     if (__fun__[[:__ENV_BEG_TOKEN_LEN__ - 1]] == __ENV_BEG_TOKEN__)
        __find_env__;
 
-  __as__   = qualifier ("name", sprintf ("fun_%d", (__fid__++, __fid__)));
-  __f__    = @__F_Type;
-  __f__.__ns  = qualifier ("ns", __as__);
-  __scope__   = qualifier ("scope", "private");
+  __fid__ = NULL;
 
-  __compile__;
-  __fun__ = __env__ + __fun__;
-  __eval__;
+  __as__        = qualifier ("as", __func_name__ + string (__free_slot__));
+  __f__         = @__F_Type;
+  __f__.__ns    = qualifier ("ns", __as__);
+  __scope__     = qualifier ("scope", "private");
+
+  if (qualifier_exists ("unhandled"))
+    __f__.call = &__call_unhandled;
+
+  __compile__ (;;__qualifiers);
+  __fun__ = __tmp (__env__) + __fun__;
+
+  __eval_fun__ (;;__qualifiers);
+
+  ifnot (qualifier_exists ("discard"))
+    struct
+      {
+      __funcref = __f__.__funcref,
+      call      = __f__.call,
+      __ns      = __f__.__ns,
+      __destroy = &__destroy__,
+      };
+
+  __FUNS__[__f__.__ns + "->" + string (__f__.__funcref)] = struct
+    {
+    slot   =  __fid__,
+    scope  =  __scope__,
+    };
+
+  __uninitialize (&__f__);
+
+   __DEPTH__--;
+
+  if (__DEPTH__)
+    __restore_instance__;
+}
+
+private define __class__ ()
+{
+  if (__DEPTH__)
+    __save_instance__;
+
+  __fun__ = strtrim (());
+
+  __DEPTH__++;
+
+  __as__        = qualifier ("as");
+  __f__         = @__F_Type;
+  __f__.__ns    = qualifier ("ns");
+  __scope__     = qualifier ("scope", "public");
+
+  __f__.__class.name = __as__;
+  __f__.__class.ns = __f__.__ns;
+  __f__.__class.super = qualifier ("super", __as__);
+  __f__.__class.methods = {};
+  __f__.__class.subclasses = {};
+  __f__.__class.members = ["is_initialized", "parent"];
+  __f__.__class.init = "";
+
+  __env__ = ``
+    private variable __this__;
+    private variable __NS__ = current_namespace ();
+
+     method (````
+       0;
+     ````;as = "init");
+
+   `` + (qualifier_exists ("disable_copy")
+       ?
+   ``
+     method (````
+       NULL;
+       ````;as = "new");
+   ``
+       : ``
+     method (````
+       variable s = @eval (self.__name);
+       variable ns = qualifier ("ns");
+       variable name = qualifier ("name");
+
+       ifnot (NULL == ns)
+         s.__ns = ns;
+
+       ifnot (NULL == name)
+         s.__name = name + "_" + self.__name;
+
+       s.this.parent = self;
+       s.this = self.get ("this");
+       s.this.is_initialized = 0;
+       s.init (;;__qualifiers); pop;
+       s;````;as = "new");
+    ``) +
+    __fun__;
+
+  list_insert (__CLASSES__, @__f__.__class);
+
+  __f__.__env = __env__;
+  __f__.__fun = "";
+
+  __eval_class__ (;;__qualifiers);
+
+  variable class = list_pop (__CLASSES__);
+
+  variable i, me;
+
+  __fun__ = "";
+  __env__ = "";
+
+  ifnot (any (["Var", "Type"] == class.name))
+    {
+    __fun__ += "\nprivate variable " + class.name + "_Var_Copy = " +
+      "Var.new (;ns = \"" + class.ns + "\", name = \"" + class.name +
+      "\");\n";
+
+    __env__ += "get = " + class.name + "_Var_Copy.get, set = " + class.name +
+      "_Var_Copy.set, ";
+     }
+
+  __fun__ +=
+    "__this__ = struct {" + strjoin (class.members, ",") + "};\n" +
+    "__this__.parent = __NS__;\n" +
+    (any (["Type", "Var"] == class.name)
+      ? ""
+      : "Var.set (\"this\", __this__;to = \"" + class.name + "\");\n");
+
+  _for i (0, length (class.methods) - 1)
+    {
+    me = class.methods[i];
+
+    __fun__ +=
+      "\nprivate define " + class.super + "_" + me + " ()\n{\n " +
+       "__main__ (&" + class.name + "_" + me + "_method;;" +
+       "__qualifiers);\n}";
+
+    __env__ += me + `` = &`` + class.super + "_" + me + ",";
+    }
+
+  _for i (0, length (class.subclasses) - 1)
+    {
+    me = class.subclasses[i];
+
+    ifnot (strncmp (me, ":NEW:", 5))
+      {
+      me = substr (me, 6, -1);
+      __fun__ += "\nprivate variable " + me + "_copy = " +
+        me + ".new (;ns = \"" + class.ns + "\", name = \"" +
+        class.name + "\");\n";
+      __env__ += me + " = " + me + "_copy,";
+      }
+    else
+      __env__ += me + " = " + me + " (),";
+    }
+
+  __DATA__ = @__f__;
+  __DATA__.__env += "\n" + __fun__;
+
+  if (strlen (__env__))
+    __DATA__.__fun += "\n" + __scope__ + " define " +
+      class.name + " ()\n{\n  struct\n    {\n    " +
+      strjoin (strtok (__tmp (__env__), ","), ",\n   ") +
+      ",\n    __name = \"" + class.name +
+      "\",\n  __ns   = \"" + class.ns +
+      "\",\n    this = __this__\n    };\n}";
+
+  __fun__ += __DATA__.__fun;
+
+  if (qualifier_exists ("keep_copy"))
+    __fun__ += ``
+     static variable __env = __F__->__DATA__.__env,
+                     __fun = __F__->__DATA__.__fun;
+    ``;
+
+  __fun__ += class.init;
+
+  if (strlen (__fun__))
+    __eval (__tmp (__fun__), __f__.__ns;print_err);
+
+  __uninitialize (&__DATA__);
 
   ifnot (qualifier_exists ("discard"))
     __tmp (__f__);
   else
     __uninitialize (&__f__);
 
-   __FUNCDEPTH__--;
+   __DEPTH__--;
 
-   if (__FUNCDEPTH__)
-     __restore_instance__;
+  if (__DEPTH__)
+    __restore_instance__;
 }
 
 public define fun ()
 {
-  function ();
+  variable e;
+  try (e)
+    {
+    __function__ (;;struct
+      {
+      @__qualifiers,
+      print_err,
+      });
+    }
+  catch AnyError:
+    Exc.print (e);
 }
 
 public define funcall ()
 {
-  (@fexpr ().__funcref) ();
+  variable e, f;
+  try (e)
+    {
+    f = __function__ (;as = __anon_name__, print_err);
+    (@f.__funcref) (;;__qualifiers);
+    eval ("private define " + __anon_name__ + " ();", __anon_name__);
+    }
+  catch AnyError:
+    Exc.print (e);
 }
 
-`, "__F");
+public define subclass (name)
+{
+  ifnot (2 == is_defined (name))
+    __ferror__ ("subclass " + name + " is not defined";
+        error = SyntaxError);
+
+  variable class = qualifier ("class");
+  if (NULL == class)
+    ifnot (length (__CLASSES__))
+      __ferror__ ("subclass declaration without a class";
+        error = SyntaxError);
+    else
+      class = __CLASSES__[-1];
+
+  list_insert (class.subclasses,
+    ["", ":NEW:"][qualifier_exists ("new")] + name);
+}
+
+public define members (s)
+{
+  variable class = qualifier ("class");
+  if (NULL == class)
+    if (0 == length (__CLASSES__))
+      __ferror__ ("method declaration without a class";
+        error = SyntaxError);
+    else
+      class = __CLASSES__[-1];
+
+  class.members = [class.members, strtok (s, ",")];
+}
+
+public define __init__ ()
+{
+  variable class = qualifier ("class");
+  if (NULL == class)
+    if (0 == length (__CLASSES__))
+      __ferror__ ("calling __init__ without a class";
+        error = SyntaxError);
+    else
+      class = __CLASSES__[0];
+
+  class.init += ();
+}
+
+public define method ()
+{
+  variable class = qualifier ("class");
+  if (NULL == class)
+    if (0 == length (__CLASSES__))
+      __ferror__ ("method declaration without a class";
+        error = SyntaxError);
+    else
+      class = __CLASSES__[0];
+
+  variable me = qualifier ("as", "NULL");
+
+  ifnot (any (list_to_array (class.methods, String_Type) == me))
+    list_append (class.methods, qualifier ("as", "NULL"));
+  else
+    ifnot (any (["new", "init", "set", "get"] == me))
+      ifnot (qualifier_exists ("override"))
+        __ferror__ (me + ": method already exists, use the \"override\" qualifier to " +
+          "redefine it";error = RunTimeError);
+
+  variable e;
+  try (e)
+    {
+    __function__ (;;struct
+      {
+      @__qualifiers,
+      class = class,
+      as = class.name + "_" + me + "_method",
+      ns = class.ns,
+      args = ["self"],
+      env = "private variable this;\n",
+      fun = "  this = self.this;\n",
+      discard,
+      print_err,
+      });
+    }
+  catch AnyError:
+    Exc.print (e);
+}
+
+public define set_class_path (p)
+{
+  __CLASSPATH__ = [p, __CLASSPATH__];
+}
+
+public define class ()
+{
+  variable
+    issubclass = length (__CLASSES__),
+    ns,
+    super,
+    as = qualifier ("as"),
+    from = qualifier ("from");
+
+  if (NULL == as)
+    __ferror__ ((issubclass ? "sub" : "") +
+        "class name is missing, qualifier \"as\"";
+      error = SyntaxError);
+
+  ifnot (NULL == from)
+    {
+    if (-1 == access (from, F_OK|R_OK))
+      ifnot (path_is_absolute (from))
+        from = ThisPath + "/" + from;
+
+    if (-1 == access (from, F_OK|R_OK))
+      __ferror__ ("cannot find class " + as + " file";
+        error = SyntaxError);
+
+    if (_NARGS)
+      pop ();
+
+    variable fp = fopen (from, "r");
+    strjoin (fgetslines (fp));
+    }
+
+  super = issubclass ? __CLASSES__[-1].name : as;
+
+  if (issubclass)
+    list_insert (__CLASSES__[-1].subclasses, as);
+
+  if (2 == is_defined ("as"))
+    __ferror__ (as + ": " + (issubclass ? "sub" : "") +
+      "class is already defined"; error = SyntaxError);
+
+  if (NULL == (ns = qualifier ("ns"), ns))
+    if (issubclass)
+      ns = __CLASSES__[-1].ns;
+    else
+      ns = as;
+
+  variable qual = struct
+    {
+    @__qualifiers,
+    ns = ns,
+    as = as,
+    scope = ["public", "private"][issubclass],
+    super = super,
+    issubclass = issubclass,
+    discard,
+    };
+
+  variable e;
+  try (e)
+    {
+    __class__ (;;qual);
+    }
+  catch AnyError:
+    Exc.print (e);
+}
+
+`, "__F__";print_err);
+  }
+catch AnyError:
+  {
+  Exc.print (NULL);
+  throw AnyError;
+  }
+
+__eval (`
+private define __err_handler__ (e)
+{
+  ifnot (Exc.isnot (e))
+    {
+    Exc.print (e);
+    throw e.error, e.message;
+    }
+  else
+    {
+    if (String_Type == typeof (e))
+      IO.tostderr (e);
+
+    throw qualifier ("error", AnyError), e;
+    }
+}
+
+private define __error__ (e)
+{
+  if (qualifier_exists ("unhandled"))
+    {
+    variable retval = qualifier_exists ("return_on_err");
+    ifnot (retval)
+      return;
+
+    return qualifier ("return_on_err");
+    }
+
+  variable handler;
+
+  if (NULL == (handler = qualifier ("err_handler"), handler))
+    if (NULL == (handler = __get_reference ("Error_Handler"), handler))
+      handler = &__err_handler__;
+
+  if (Ref_Type == typeof (handler))
+    if (__is_callable (handler))
+      (@handler) (e;;__qualifiers);
+}
+
+public define __main__ (ref)
+{
+  try
+    {
+    (@ref) (;;__qualifiers);
+    }
+  catch AnyError:
+    __error__ (__get_exception_info;;__qualifiers);
+}
+`, "Imain");
+
+class (`
+  private variable __type__ = Assoc_Type[Assoc_Type];
+  __type__["Type"] = Assoc_Type[Struct_Type];
+
+  method (``
+    (t)
+    variable name = qualifier ("from", current_namespace);
+    if (NULL == name || 0 == strlen (name))
+      name = "Global";
+
+    ifnot (assoc_key_exists (__type__, name))
+      NULL;
+    else
+      ifnot (assoc_key_exists (__type__[name], (t += "_Type", t)))
+        NULL;
+      else
+        @__type__[name][t];
+
+  ``;as = "get");
+
+  method (``
+    (t, members)
+    variable name = qualifier ("to", current_namespace);
+    if (NULL == name || 0 == strlen (name))
+      name = "Global";
+
+    ifnot (assoc_key_exists (__type__, name))
+      __type__[name] = Assoc_Type[Struct_Type];
+
+    if (assoc_key_exists (__type__[name], (t += "_Type", t)))
+      ifnot (NULL == __type__[name][t])
+        return;
+
+    variable type = typeof (members);
+
+    __type__[name][t] = String_Type == type
+      ? __eval ("struct {" + members + "}", name)
+      : Struct_Type == type
+        ? @members
+        : NULL;
+
+  ``;as = "set");
+
+`;as = "Type", disable_copy);
+
+class (`
+  Type.set ("Var", ``val, type, state``);
+
+  private variable __var__ =  Assoc_Type[Assoc_Type];
+
+  method (``
+    (v)
+    ifnot (assoc_key_exists (__var__[self.__name], v))
+      return NULL;
+
+    variable va = __var__[self.__name][v];
+
+    if (va.state == "immutable")
+      if (is_struct_type (va.val))
+        return @va.val;
+      else
+      ifnot (Assoc_Type == va.type)
+        return va.val;
+      else
+        {
+        variable ks, vs, len, type, i, a;
+        ks = assoc_get_keys (va.val);
+        vs = assoc_get_values (va.val);
+        len = length (va.val);
+        a = Assoc_Type[_typeof (vs)];
+        _for i (0, len - 1)
+          a[ks[i]] = vs[i];
+
+        return a;
+        }
+
+    va.val;
+  ``;as = "get");
+
+  method (``
+    (k, v)
+    variable name = __var__[qualifier ("to", self.__name)];
+
+    ifnot (assoc_key_exists (name, k))
+      name[k] = Type.get ("Var";from = "Var");
+
+    variable val = name[k].val;
+    variable type = typeof (v);
+
+    ifnot (NULL == val)
+      if (name[k].state == "immutable" || type != name[k].type)
+        return;
+
+    name[k].val = v;
+    name[k].type = type;
+
+    if (NULL == name[k].state)
+      ifnot (Assoc_Type == type)
+        name[k].state = ["im", ""][qualifier_exists ("mutable")] +
+          "mutable";
+      else
+        name[k].state = ["", "im"][qualifier_exists ("immutable")] +
+          "mutable";
+    else
+      if (qualifier_exists ("final"))
+        name[k].state = "immutable";
+  ``;as = "set");
+
+  method (``
+    ifnot (this.is_initialized)
+      {
+      this.is_initialized = 1;
+      variable name = substr (self.__name, 1, string_match (self.__name, "_Var$") - 1);
+      if (assoc_key_exists (__var__, name))
+        return;
+
+      __var__[name] = Assoc_Type[Struct_Type];
+      }
+    0;
+  ``;as = "init");
+
+  __init__ (``
+    Var.init (); pop;
+    Var.set ("this", __this__);
+  ``);
+
+`;as = "Var");

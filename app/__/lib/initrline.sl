@@ -39,7 +39,7 @@ private define rm_bytecompiled (argv)
 
 private define __bytecompile__ (argv)
 {
-  variable dont_move = Opt.Arg.exists ("--dont-move", &argv;del_arg);
+  variable dont_install = Opt.Arg.exists ("--dont-install", &argv;del_arg);
 
   if (1 == length (argv))
     {
@@ -80,7 +80,9 @@ private define __bytecompile__ (argv)
       continue;
       }
 
-    ifnot (NULL == dont_move)
+    __toscratch  ("bytecompiled: " + slib + "\n");
+
+    ifnot (NULL == dont_install)
       continue;
 
     if (strncmp (slib, Env->SRC_PATH, splen))
@@ -124,7 +126,7 @@ private define __bytecompile__ (argv)
       continue;
       }
 
-    __toscratch  ("bytecompiled: " + slib + "\n");
+    __toscratch  ("installed as:" + lib + "c\n");
     }
 
   if (ern)
@@ -135,7 +137,7 @@ private define __bytecompile__ (argv)
 
 private define __classcompile__ (argv)
 {
-  variable dont_move = Opt.Arg.exists ("--dont-move", &argv;del_arg);
+  variable dont_install = Opt.Arg.exists ("--dont-install", &argv;del_arg);
   variable dont_remove = Opt.Arg.exists ("--dont-remove", &argv;del_arg);
 
   if (1 == length (argv))
@@ -206,7 +208,9 @@ private define __classcompile__ (argv)
      continue;
      }
 
-    ifnot (NULL == dont_move)
+    __toscratch  ("class compiled: " + orig + "\n");
+
+    ifnot (NULL == dont_install)
       continue;
 
     if (strncmp (class, Env->SRC_PATH, splen))
@@ -253,7 +257,7 @@ private define __classcompile__ (argv)
         ern = 1;
         }
 
-    __toscratch  ("class compiled: " + orig + "\ninstalled as  : " + class + ".slc\n");
+    __toscratch  ("installed as  : " + class + ".slc\n");
     }
 
   if (ern)
@@ -696,12 +700,12 @@ private define my_commands ()
   a["bytecompile"] = @Argvlist_Type;
   a["bytecompile"].func = &__bytecompile__;
   a["bytecompile"].args = [
-    "--dont-move void do not try to put bytecompiled file on the application hierarchy"];
+    "--dont-install void do not install bytecompiled file on the application hierarchy"];
 
   a["classcompile"] = @Argvlist_Type;
   a["classcompile"].func = &__classcompile__;
   a["classcompile"].args = [
-    "--dont-move void do not try to put bytecompiled class on the application hierarchy",
+    "--dont-install void do not install bytecompiled class on the application hierarchy",
     "--dont-remove void do not remove parsed class from filesystem"];
 
   a["loadlib"] = @Argvlist_Type;

@@ -1657,7 +1657,7 @@ class Ved
       return (lnrs[*] = 1, lnrs);
 
     variable lnr, line, len, i;
-    variable __pcre_exec = fexpr (`(pat, line)
+    variable __pcre_exec = fun (`(pat, line)
     try
       {
       pcre_exec (pat, line, 0);
@@ -2213,7 +2213,7 @@ class Ved
 
   def __ved_funcs (a) public proc
     a["__diff"] = @Argvlist_Type;
-    a["__diff"].func = function (`
+    a["__diff"].func = fun (`
         (argv)
       variable
         d,

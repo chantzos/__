@@ -104,7 +104,7 @@ subclass Search
 
     i = s_lnr;
 
-    variable __pcre_exec = fexpr (`(pat, line)
+    variable __pcre_exec = fun (`(pat, line)
         try
           {
           pcre_exec (pat, line);
@@ -182,7 +182,7 @@ subclass Search
 
     i = s_lnr;
 
-    variable __pcre_exec = fexpr (`(pat, line)
+    variable __pcre_exec = fun (`(pat, line)
       try
         {
         pcre_exec (pat, line);

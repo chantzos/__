@@ -1,19 +1,26 @@
 class Devel
   var OBJDUMP_BIN = Sys.which ("objdump");
   var LD_LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
+  var C_INCLUDE_PATH = getenv ("C_INCLUDE_PATH");
 
   beg
+    ifnot (NULL == C_INCLUDE_PATH)
+      C_INCLUDE_PATH = [
+        Env->SRC_C_PATH + "/include", strtok (C_INCLUDE_PATH, ":")];
+    else
+      C_INCLUDE_PATH = [Env->SRC_C_PATH + "/inc"];
+
     if (Sys->MACHINE == "x86_64")
       {
       LD_LIBRARY_PATH[-2] = "/lib64";
       LD_LIBRARY_PATH[-1] = "/usr/lib64";
       }
 
-    LD_LIBRARY_PATH = funcall (LD_LIBRARY_PATH, `
-         (path)
+    variable f = fun (`
+        (path, bpath)
       path = Array.String.unique ([
-        strtok (Env->LD_LIBRARY_PATH, ":"),
-        path[wherenot (_isnull (path))]]);
+      strtok (bpath, ":"),
+      path[wherenot (_isnull (path))]]);
 
       variable i, st;
       _for i (0, length (path) - 1)
@@ -23,11 +30,20 @@ class Devel
 
       path[wherenot (_isnull (path))];
     `);
+
+    LD_LIBRARY_PATH = f.call (LD_LIBRARY_PATH, Env->LD_LIBRARY_PATH);
+    C_INCLUDE_PATH  = f.call (C_INCLUDE_PATH, "");
+    if (This.request.devel)
+      f.__destroy ();
   end
 
-  def ld_library_path ()
+  def get_library_path ()
     [LD_LIBRARY_PATH, __get_qualifier_as ([Array_Type, String_Type],
       qualifier ("libpath"), String_Type[0])];
+  end
+
+  def get_include_path ()
+    C_INCLUDE_PATH;
   end
 
   def ldd (obj)
@@ -78,7 +94,7 @@ class Devel
 
     a = a[wherenot (_isnull (a))];
     ifnot (qualifier_exists ("recursive"))
-      return (funcall (ld_library_path (NULL;;__qualifiers), a, f), a);
+      return (funcall (get_library_path (NULL;;__qualifiers), a, f), a);
   end
 
   def is_obj_depends_on (obj, lib)

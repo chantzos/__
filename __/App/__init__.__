@@ -401,7 +401,7 @@ class App
       return;
 
     variable sigint_handl;
-    sigint_handl = function (`
+    sigint_handl = fun (`
       envbeg private define my_sigint_handler (); envend
         (sig)
       IO.tostderr ("Process Interrupted by the user");

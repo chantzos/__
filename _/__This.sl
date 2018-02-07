@@ -81,7 +81,7 @@ static define __INIT__ (role)
       atleast_rows= 6, % requires at least `rows'
       screenactive,
       argv = qualifier ("setargv")
-        ? fexpr (`__argv;__set_argc_argv (String_Type[0]);`).call ()
+        ? funcall (`__argv;__set_argc_argv (String_Type[0]);`)
         : __argv,
       },
     on = struct

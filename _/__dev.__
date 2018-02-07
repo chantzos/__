@@ -1,11 +1,11 @@
 private variable  DEV_OPTS = Assoc_Type[Integer_Type];
 
 DEV_OPTS["slang"] = 1;
-DEV_OPTS["F"]     = 1;
+DEV_OPTS["F"]     = 0;
 
 ifnot (access (Env->LOCAL_LIB_PATH + "/__devel__/__devel_opts__.__", F_OK|R_OK))
-  fexpr (File.read (Env->LOCAL_LIB_PATH +
-    "/__devel__/__devel_opts__.__")).call (DEV_OPTS);
+  funcall (DEV_OPTS, File.read (Env->LOCAL_LIB_PATH +
+    "/__devel__/__devel_opts__.__"));
 
 public define __init_devel ()
 {

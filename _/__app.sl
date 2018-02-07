@@ -194,13 +194,13 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
 
 static variable enable = struct
   {
-  devel = function (`
+  devel = fun (`
     envbeg public define __init_devel (); envend
     (self)
     Load.file (Env->SRC_PROTO_PATH + "/__dev.__");
     __init_devel ();
     `).__funcref,
-  profile = function (`
+  profile = fun (`
     (self)
     if (NULL == This.request.profile)
       ifnot (qualifier_exists ("set"))
@@ -214,7 +214,7 @@ static variable enable = struct
       ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
         Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
   `).__funcref,
-  debug = function (`
+  debug = fun (`
     (self)
     This.request.debug = 1;
     `).__funcref,
@@ -449,11 +449,12 @@ private define __echo__ (argv)
     __scratch (NULL);
 }
 
-private variable __CHDIR__ = function (`
+private variable __CHDIR__ = fun (`
   envbeg
-    __CWD__    = "";
-    __DIR__    = "";
-    __PDIR__   = NULL;
+    variable
+      __CWD__    = "",
+      __DIR__    = "",
+      __PDIR__   = NULL;
   envend
 
   (argv)
@@ -488,9 +489,9 @@ private variable __CHDIR__ = function (`
      }
 
   Com.post_builtin ();
-`;__ns__ = "__CHDIR__");
+`;ns = "__CHDIR__");
 
-private variable __TRACK__ = function (`
+private variable __TRACK__ = fun (`
     (argv)
   variable devdo = Opt.Arg.exists ("--devel", &argv;del_arg);
   variable readme= Opt.Arg.exists ("--readme", &argv;del_arg);
@@ -555,9 +556,9 @@ private define __search__ (argv)
   Ved.draw_wind (;reread = 0);
 }
 
-private variable __WHICH__ = function (`
+private variable __WHICH__ = fun (`
   envbeg
-    __PATH__ = NULL, __MSG__ = NULL;
+    variable __PATH__ = NULL, __MSG__ = NULL;
   envend
       (argv)
   Com.pre_builtin (argv);
@@ -989,7 +990,7 @@ private define __builtins__ (a)
       Class.load ("Fm");
 
     a["__fm"] = @Argvlist_Type;
-    a["__fm"].func = function (`
+    a["__fm"].func = fun (`
         (argv)
       variable dir;
 
@@ -1006,7 +1007,7 @@ private define __builtins__ (a)
   if (This.request.net) % development
     {
     a["__net"] = @Argvlist_Type;
-    a["__net"].func = function (`
+    a["__net"].func = fun (`
         (argv)
       variable args = (1 < length (argv)
         ? " " + strjoin (argv, " ")
@@ -1025,7 +1026,7 @@ private define __builtins__ (a)
 
   variable lbuiltin = Env->LOCAL_LIB_PATH + "/__builtin__/__funs.__";
   ifnot (access (lbuiltin, F_OK|R_OK))
-    fexpr (File.read (lbuiltin)).call (a);
+    funcall (a, File.read (lbuiltin));
 }
 
 public define __filtercommands (s, ar, chars)
@@ -1092,7 +1093,7 @@ public define init_commands ()
 {
   variable i, c, ii,
     a = Assoc_Type[Argvlist_Type, @Argvlist_Type],
-    ref = function (`(argv) Com.execute (argv;;__qualifiers);`).__funcref,
+    ref = fun (`(argv) Com.execute (argv;;__qualifiers);`).__funcref,
     ex = qualifier_exists ("ex"),
     d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 

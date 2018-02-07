@@ -40,3 +40,4 @@ typedef struct
   null
   } AInteger_Type;
 
+public variable IO, Exc;
