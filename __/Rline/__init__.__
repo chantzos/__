@@ -749,18 +749,43 @@ class Rline
     ifnot (items)
       return;
 
-    variable i = 0;
+    variable len = length (ar), line, ii, num, idxs, i = 0;
 
-    while (i < length (ar))
+    while (i < len)
       {
-      if (i + items < length (ar))
-        @bar = [@bar, strjoin (array_map (
-          String_Type, &sprintf, fmt, ar[[i:i + items - 1]]))];
-      else
-        @bar = [@bar, strjoin (array_map (String_Type, &sprintf, fmt, ar[[i:]]))];
+      line = "";
+      num = i + items - 1;
+      if (num >= len)
+        num = len - 1;
+
+      idxs = [i:num];
+
+      _for ii (0, num - i)
+        % workaround - though useful sometines
+        line += (qualifier_exists ("literal")
+          ? ar[idxs[ii]]
+          : sprintf (fmt, ar[idxs[ii]]));
+
+      @bar = [@bar, line];
 
       i += items;
       }
+      % the digraph case produced a wrong alignment, probably by
+      % a width calculation or strjoin ()
+      % so previus code doesn't seems to work
+
+      %   @bar = [@bar, strjoin (array_map (
+      %     String_Type, &sprintf, fmt, ar[[i:i + items - 1]]))];
+      %   }
+      % else
+      %   @bar = [@bar, strjoin (array_map (String_Type, &sprintf, fmt, ar[[i:]]))];
+      %           
+      % i += items;
+
+      % (reedit) this comes from sprintf at slstrops.c:2197
+      % test case to reproduce
+      % sprintf ("|%3c|%3c|%3c|\n", 'a', 'α', 8311);
+
   end
 
   def hlitem (s, ar, base, acol, item)
@@ -799,7 +824,7 @@ class Rline
       else
         items = 1;
 
-      formar (items, fmt, ar, &bar);
+      formar (items, fmt, ar, &bar;;__qualifiers);
       }
     else
       bar = @ar;
@@ -848,7 +873,7 @@ class Rline
         ifnot (len)
           {
           ifnot (qualifier_exists ("dont_format"))
-            formar (items, fmt, ar, &bar);
+            formar (items, fmt, ar, &bar;;__qualifiers);
           else
             bar = @ar;
 
@@ -996,7 +1021,7 @@ class Rline
             page = 0;
 
           ifnot (qualifier_exists ("dont_format"))
-            formar (items, fmt, ar, &car);
+            formar (items, fmt, ar, &car;;__qualifiers);
           else
             car = @ar;
 
@@ -1022,7 +1047,7 @@ class Rline
           {
           page--;
           ifnot (qualifier_exists ("dont_format"))
-            formar (items, fmt, ar, &car);
+            formar (items, fmt, ar, &car;;__qualifiers);
           else
             car = @ar;
 
@@ -1403,13 +1428,17 @@ class Rline
       chr,
       tmp,
       help,
-      indices = array_sort (commands),
+      indices,
+      dont_filter = qualifier_exists ("already_filtered"),
       orighelp = qualifier ("help");
 
-    commands = commands[indices];
-
-    ifnot (NULL == orighelp)
-      orighelp = orighelp[indices];
+    ifnot (qualifier_exists ("dont_sort"))
+      {
+      indices = array_sort (commands);
+      commands = commands[indices];
+      ifnot (NULL == orighelp)
+        orighelp = orighelp[indices];
+      }
 
     forever
       {
@@ -1419,7 +1448,7 @@ class Rline
 
       ar = commands[[indices]];
 
-      ifnot (qualifier_exists ("already_filtered"))
+      ifnot (dont_filter)
         ifnot (NULL == s.filtercommands)
           ar = (@s.filtercommands) (s, ar);
 
@@ -1439,9 +1468,6 @@ class Rline
         return 0;
         }
 
-      ifnot (NULL == orighelp)
-        help = orighelp[[indices]];
-
       str = "";
       firstindices (&str, ar, s.argv[0]);
 
@@ -1457,12 +1483,15 @@ class Rline
 
       ifnot (NULL == orighelp)
         {
-        fmt = sprintf ("%%-%ds  %%s", max (strlen (bar)));
+        help = orighelp[[indices]];
+        fmt = sprintf ("%%-%ds  %%%ds",
+          max (strlen (bar)),
+          max (strlen (help)));
         bar = array_map (String_Type, &sprintf, fmt, bar, help);
         }
 
       tmp = "";
-      chr = hlitem (NULL, s, bar, s.argv[0], s._col, &tmp);
+      chr = hlitem (NULL, s, bar, s.argv[0], s._col, &tmp;;__qualifiers);
 
       if (' ' == chr)
         {

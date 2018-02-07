@@ -619,9 +619,24 @@ private define __write__ (argv)
   ifnot (NULL == file)
     file = Dir.eval (file);
 
+  % set a small trap here in case something goes wrong
+  % and send a notice
+  try
+    {
+    lines = s.lines[lnrs];
+    }
+  catch AnyError:
+    {
+    Exc.print (NULL);
+    IO.tostderr ("=== bu[fg] structure ===\n== line numbers [length :",
+      length (lnrs), "] ==");
+    IO.tostderr (lnrs);
+    IO.tostderr ("\ns._len:", s._len, "\ns.lines.length():", length (s.lines));
+    }
+
   if (any (["w", "w!", "W"]  == command))
     Ved.writefile (s, "w!" == command, [PROMPTROW, 1], file, append;
-      lines = s.lines[lnrs], send_msg);
+      lines = lines, send_msg);
 }
 
 private define __right__ (rl)

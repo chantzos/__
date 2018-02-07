@@ -382,10 +382,12 @@ the undo operation or when editing lines longer than the screen
 columns, very seldom i lost work. But when and if it happens the
 inevitable, then usually the error message is enough descriptive,
 to guide you to fix the condition.
+
 Actually a self developed and maintainable system, was (even if it
 was hidden somehow, at least at the beginning), one of the rationales
 that lead to this code. This might has to do with the complexity
 of the modern systems.
+
 For quite too many, a unix environment with a shell and an editor are
 all they need (to be fully productive). They appreciate the peaceful,
 expected, sensible, tested, standardized, built-ed through experience,
@@ -433,15 +435,97 @@ mnemonic keys that are connected with actions and keywords, like
 
 In this application this model (of modes), has been already extended.
 
-Many operations (like the above mentioned) are depended on small menus,
+The truth is however, that this editor is not and is never going to  
+handle satisfactory external data (at least not any kind of external  
+data), but rather to handle later the product that creates itself and  
+to this is very good now. That means it handles the usual workflow from  
+his author and when the author needs something, then it gives the tools  
+to do so.  
+
+Like in this case, in this warm February day, ved code introduces digraphs,  
+accessible (through a usual menu) with CTRL-k in insert mode. Here is a  
+note:  ♪  
+now: this is a first workable draft with more than enough digraphs to  
+use. But this can evolve later to handle other conditions and perhaps  
+to end up as a library, which is very natural path in development.  
+If nothing change in this regard, this code will still work forever.  
+
+But, this is a selfish!!! Exactly. This is all about. The interaction  
+with the computer is unique and the code should be prioritize that,  
+and give the user happiness.  
+ 
+But, can such applications share code with other unique/tailored  
+made applications? Absolutely!!! That is all about.  
+
+For instance: This application (which it should be called this, with  
+so many this), is trying (and when it doesn't succeed its a bug), to  
+load all the requested libraries/applications/commands based on priority  
+rules.  For now, the namespaces have this priority:  
+```C
+$ROOTDIR/local
+$ROOTDIR/std
+$ROOTDIR/usr
+```
+so without changing the standard way to do things, someone can modify
+the code to bring the desired behavior without touching mainline code at
+all. Of course this needs basic programming but basic programming with
+intensive care on the concepts, as everybody knows, can be fast.
+
+But, what i'm trying to say is this: for instance, operations on C strings.
+
+Needless to say, that when famous coders disagree about a couple of lines of  
+code, do not wait from people who are self-educating in C at their fifties+,  
+just to use C, as a glue to expose C libraries in slang, to even be sure about  
+best practices on str*() functions and how to use them with safety.  
+
+I've seen, however, uncountable String.* implementations or safe versions  
+of malloc, in fact almost every codebase has its own malloc, which  
+is nearly identical, it just makes sure to allocate at least one byte, or  
+do some error handling. which is fine but isn't this a diversity? when supposedly    
+this is all about portability or rules like:   
+C must been written this way to be understandable by the readers. But which   
+is more understandable? the personal way or the standard way? and if such  
+interface will be created, and the compilers knows about it, wouldn't produce  
+faster code that will negligible the usage of the interface.  
+
+Its pity to loose a powerful gun like C, because of the lack of expressionism.  
+Even tiny defines like say slang's ifnot, which beautifies the code and helps  
+the mind,  are unacceptable in the C world and ignored as a blasphemy.  
+It's still C, people.  
+
+So, this higher interface is already invented by zillion codebases, yet such a  
+interface is not standardized.  If standards (like the respectful POSIX), represents  
+conscience (like the general consensus about C strings) then they should do  
+something about it. But speaking of POSIX:  
+ 
+I really understand and I respect the intentions. I believe standards and not  
+policy is the way to go. But a standard without an actual implementation leaves  
+room for criticism. It would also be beneficial, for people like me, to copy a  
+function with a very specified task to use it in my code, directly from the POSIX  
+document, so i will know that this function has been implemented by the world wide  
+programming community, and the best earth programmers, so they can not be  
+wrong. But even if they are wrong, we will all be wrong together and this is at  
+least relaxing.
+
+So, yes, I expect if C wants to stay, maps, lists and arrays, something like:  
+https://github.com/stevedonovan/llib
+
+C might not be like rust, which it looks like joy, but is beautiful for what  
+it is, and its straight connection with the machine and is here to stay forever.  
+(i don't know more than basic C and i usually consult other sources even for very  
+common operations, but i realized this warm feeling you get when you using it and  
+that time you just don't want anything else. But we are humans and humans have  
+a need for expressionism.  
+
+Many operations (like the above mentioned) are depended on small menus,  
 that work with uniformity, as far it concerns:
-  - the drawing style
-  - the selection style (the space bar (for instance) (and very natural)
-    accepts a match on all those menus, the arrow keys can be used to
-    navigate to all the directions of the printed matches, the escape
-    (in this case) aborts, the carriage return accepts and executes
-    the command line)
-  - but also the underlying code which is trying to be consistent
+  - the drawing style  
+  - the selection style (the space bar (for instance) (and very natural)  
+    accepts a match on all those menus, the arrow keys can be used to  
+    navigate to all the directions of the printed matches, the escape  
+    (in this case) aborts, the carriage return accepts and executes  
+    the command line)  
+  - but also the underlying code which is trying to be consistent  
 
 ### Inner Code
 
@@ -468,7 +552,9 @@ switch, which turns on profiling. It can also be enabled at
 runtime by issuing in the evaluation console (which it can
 be started by calling the __eval function):
 
+```C
 _-> enable.profile (;set);
+```
 
 For now, to see the results, is again possible through the eval
 console. By issuing Profile. (and hit tab) it will present a
@@ -489,19 +575,19 @@ the __same__ (by name but also with the signature) method[s].
 
 #### Functional Code Interface
 Normally the following is not valid (because "if" is a statement):
-```c 
+```C 
   variable cond = 1;
   variable v = if (cond) 1; else 2;
 ```
  
 But by using the function interface, we can get the desired result:
-```c
+```C
   variable v = funcall (cond, `(arg) if (arg) 1; else 0;`);
 ```
 The string inside the backquote characters is evaluated at runtime.
 It's like an unnamed function syntax without the braces:
 
-```c
+```C
  (arg)
 {
   if (arg)
@@ -519,10 +605,10 @@ keywords.
 This fact alone, can make the things interesting, because that way such
 function can really control the environment. But, it can also create a
 closure:
-```c 
-		variable counter = function (`envbeg variable _i = 0; envend _i++; _i;`);
-		counter.call (); -> 1
-		counter.call (); -> 2
+```C 
+variable counter = function (`envbeg variable _i = 0; envend _i++; _i;`);
+counter.call (); -> 1
+counter.call (); -> 2
 ``` 
 One such function can be the whole program and could be (almost) perfect,
 if it wasn't for the backquotes. Such multiline strings allows to write

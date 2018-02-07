@@ -206,13 +206,26 @@ class Ved
   end
 
   def __vdebug (s, msg) public proc
-    if (NULL == s)
-      Smg.send_msg_dr (msg, 1, NULL, NULL);
-    else
-      Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
+    ifnot (qualifier_exists ("dont_write_to_stderr"))
+      IO.tostderr (msg);
+
+    ifnot (qualifier_exists ("dont_send_message"))
+      if (NULL == s)
+        Smg.send_msg_dr (msg, 1, NULL, NULL);
+      else
+        Smg.send_msg_dr (msg, 1, s.ptr[0], s.ptr[1]);
 
     if (qualifier_exists ("hold"))
       () = Input.getch ();
+
+    ifnot (qualifier_exists ("handler"))
+      return;
+
+    variable f = qualifier ("handler");
+    if (NULL == f || 0 == (typeof (f) == Ref_Type) || 0 == __is_callable (f))
+      return;
+
+    (@f) (s, msg;;__qualifiers);
   end
 
   def __vdef_ved (s, fname) public proc

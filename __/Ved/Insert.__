@@ -83,6 +83,57 @@ subclass Insert
     __vdraw_tail (s;chr = String.decode (substr (@line, s._index + 1, 1))[0]);
   end
 
+  def ins_digraph (is, s, line) proc
+    variable DIGRAPHS = [
+      167,   % paragraph §
+      8220,
+      8304,
+      [8308:8319],
+      10003, % correct ✓
+      176,
+      171,
+      185,
+      187,
+      178,
+      179,
+      215,
+      247,
+      185,   % power of one ¹
+      178,   % power of two ²
+      179,   % power of three ³
+      [188:190],
+      [8531:8542],  % one third ⅓ etc ...
+      183,   % multiplication dot ·
+      8771,  % short of... ≃
+      [9833:9835], % music notes
+      [9837:9839], % likewise
+      169,
+      174,
+      8364,
+      ];
+
+    variable
+      charar = array_map (String_Type, &string, DIGRAPHS),
+      help = array_map (String_Type, &sprintf, ": %2c  |", DIGRAPHS);
+
+    variable rl = Rline.init (NULL;pchar = "");
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
+
+    () = Rline.commandcmp (rl, charar;already_filtered,
+      help = help, dont_sort, literal);
+
+    ifnot (strlen (rl.argv[0]))
+      return;
+
+    variable idx = wherefirst (rl.argv[0] == charar);
+    if (NULL == idx)
+      return;
+
+    is.chr = DIGRAPHS[idx];
+    ins_char (is, s, line);
+  end
+
   def ins_del_prev (is, s, line) proc
     variable
       lline,
@@ -1109,6 +1160,12 @@ subclass Insert
       if (any (Input->rmap.delete == is.chr))
         {
         ins_del_next (is, s, line);
+        continue;
+        }
+
+      if (any (Input->CTRL_k == is.chr))
+        {
+        ins_digraph (is, s, line);
         continue;
         }
 
