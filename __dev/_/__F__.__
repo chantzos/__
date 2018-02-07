@@ -32,7 +32,9 @@ private variable __as__;
 private variable __scope__;
 private variable __func_name__ = "__dev_fun_";
 private variable __anon_name__ = "__FUNCTION__";
-private variable __fid__ = -1;
+private variable __slots__ = [0:511];
+private variable __FUNS__ = Assoc_Type[Struct_Type];
+private variable __fid__;
 private variable __DEPTH__ = 0;
 private variable __INSTANCES__ = {};
 private variable __CLASSES__   = {};
@@ -281,6 +283,30 @@ private define __find_env__ ()
       env_end[-1] + __ENV_END_TOKEN_LEN__, -1));
 }
 
+private define __free_slot__ ()
+{
+  ifnot (NULL == (__fid__ = wherefirst (__slots__), __fid__))
+    return (__slots__[__fid__] = 0, __fid__);
+
+  __fid__ = length (__slots__);
+  __slots__ = Integer_Type[__fid__ + (__fid__ / 2)];
+  __slots__[[0:__fid__]] = 0;
+  __fid__;
+}
+
+private define __destroy__ (f)
+{
+  __fid__      = string (f.__funcref);
+  variable key = f.__ns + "->" + __fid__;
+  eval (__FUNS__[key].scope + " define " + __fid__[[1:]] + " ();", f.__ns);
+
+  ifnot (NULL == __FUNS__[key].slot)
+    __slots__[   __FUNS__[key].slot] = 1;
+
+  assoc_delete_key (__FUNS__, key);
+  set_struct_fields (f, NULL, NULL, NULL, NULL);
+}
+
 private define __function__ ()
 {
   if (__DEPTH__)
@@ -296,7 +322,9 @@ private define __function__ ()
     if (__fun__[[:__ENV_BEG_TOKEN_LEN__ - 1]] == __ENV_BEG_TOKEN__)
        __find_env__;
 
-  __as__        = qualifier ("as", __func_name__ + string ((__fid__++, __fid__)));
+  __fid__ = NULL;
+
+  __as__        = qualifier ("as", __func_name__ + string (__free_slot__));
   __f__         = @__F_Type;
   __f__.__ns    = qualifier ("ns", __as__);
   __scope__     = qualifier ("scope", "private");
@@ -315,7 +343,14 @@ private define __function__ ()
       __funcref = __f__.__funcref,
       call      = __f__.call,
       __ns      = __f__.__ns,
+      __destroy = &__destroy__,
       };
+
+  __FUNS__[__f__.__ns + "->" + string (__f__.__funcref)] = struct
+    {
+    slot   =  __fid__,
+    scope  =  __scope__,
+    };
 
   __uninitialize (&__f__);
 
