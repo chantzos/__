@@ -89,17 +89,20 @@ class App
   end
 
   def detach ()
-    ifnot (This.is.me == "MASTER")
+    if (This.is.me == "MASTER")
+      return;
+
+%    ifnot (This.is.me == "MASTER")
       Api.reset_app ();
 
     variable retval = (@__get_reference ("I->app_idle")) ();
 
     ifnot (retval)
-      {
-      ifnot (This.is.me == "MASTER")
+%      {
+%      ifnot (This.is.me == "MASTER")
         Api.restore_app ();
-      return;
-      }
+    return;
+%      }
 
     exit_me (0);
   end
