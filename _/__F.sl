@@ -181,6 +181,9 @@ static define __call ()
     }
   catch AnyError:
     __ferror__ (__get_exception_info;;__qualifiers);
+
+  if (qualifier_exists ("destroy"))
+    f.__destroy ();
 }
 
 static define __call_unhandled ()
@@ -189,6 +192,9 @@ static define __call_unhandled ()
   variable f = ();
 
   (@f.__funcref) (__push_list (args);;__qualifiers);
+
+  if (qualifier_exists ("destroy"))
+    f.__destroy ();
 }
 
 private variable __F_Type = struct
@@ -523,6 +529,21 @@ public define fun ()
       @__qualifiers,
       print_err,
       });
+    }
+  catch AnyError:
+    Exc.print (e);
+}
+
+public define funref ()
+{
+  variable e;
+  try (e)
+    {
+    __function__ (;;struct
+      {
+      @__qualifiers,
+      print_err,
+      }).__funcref;
     }
   catch AnyError:
     Exc.print (e);
