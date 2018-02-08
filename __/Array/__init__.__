@@ -98,6 +98,17 @@ class Array
       @ar = [(@ar)[[:at-1]], __push_list (elems), (@ar)[[at:]]];
   end
 
+  subclass Int
+    __init__
+      unique
+    end
+
+    def unique (ar)
+      ar = array_map (String_Type, &string, ar);
+      array_map (Integer_Type, &atoi, Self.String.unique (ar));
+    end
+  end
+
   subclass String
     __init__
       len

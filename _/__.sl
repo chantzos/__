@@ -1348,9 +1348,10 @@ private define parse_subclass (
     sub_cname     = cname + as,
     sub_classpath = NULL == from ? classpath : path_dirname (from);
 
-  sub_buf += "$8 = current_namespace;\n" +
-      "__use_namespace  (\"" + sub_cname + "\");\n" +
-      "static variable THIS;\n";
+  sub_buf += "  % BEG SUBCLASS\n" +
+      "  $8 = current_namespace;\n" +
+      "  __use_namespace  (\"" + sub_cname + "\");\n\n" +
+      "private variable Self;\n\n";
 
   parse_class (sub_cname, sub_classpath, &sub_buf, my_funs, sub_funs, fp;;
     struct {@__qualifiers, add_meth_decl, cname = as + "_", forbid_subclass});
@@ -1378,12 +1379,13 @@ private define parse_subclass (
       continue;
 
     sub_buf += "\nprivate define " + cname + "_" + as + "_" + ms[i] + " (self)\n{\n" +
-      "struct {" +
-      "__name = \"" + cname + "_" + as + "_" + ms[i] + "\",\n" +
-      "err = &__->ERR,\n";
+      "  struct \n  {" +
+      "    __name = \"" + cname + "_" + as + "_" + ms[i] + "\",\n" +
+      "    err = &__->ERR,\n";
 
     _for j (0, length (m) - 1)
-      sub_buf += m[j] + "= &" + cname + "_" + as + "_" + ms[i] + "_" + m[j] + ",\n";
+      sub_buf += "    " + m[j] + "= &" + cname + "_" +
+        as + "_" + ms[i] + "_" + m[j] + ",\n";
 
     _for j (0, length (ms) - 1)
       if (ms[j] == ms[i])
@@ -1392,53 +1394,58 @@ private define parse_subclass (
         {
         m = methods[ms[j]];
         ifnot (length (m))
-          sub_buf += ms[j] + "= &" + cname + "_" + as + "_" + ms[j] +  ",\n";
+          sub_buf += "    " + ms[j] + "= &" + cname + "_" + as + "_" + ms[j] +  ",\n";
         else
           {
-          sub_buf += ms[j] + " = struct {" +
-          "__name = \"" + cname + "_" + as + "_" + ms[j] + "\",\n" +
-          "err = &__->ERR,\n";
+          sub_buf += ms[j] + " = struct\n  {" +
+          "  __name = \"" + cname + "_" + as + "_" + ms[j] + "\",\n" +
+          "  err = &__->ERR,\n";
+
           _for k (0, length (m) - 1)
-            sub_buf += m[k] + "= &" + cname + "_" + as + "_" + ms[j] + "_" + m[k] + ",\n";
-          sub_buf += "},\n";
+            sub_buf += "  " +  m[k] + "= &" + cname + "_" + as + "_" +
+              ms[j] + "_" + m[k] + ",\n";
+          sub_buf += "\n  },\n";
           }
         }
 
-    sub_buf += "};\n}\n";
+    sub_buf += "  };\n}\n";
     }
 
   sub_buf += "\nprivate define " + as + " (self)\n{\n" +
-    "struct {\n__name = \"" + sub_cname + "\",\n" +
-    "err = &__->ERR,\n";
+    "  struct\n    {\n    __name = \"" + sub_cname + "\",\n" +
+    "    err = &__->ERR,\n";
 
   _for i (0, length (ms) - 1)
     {
     m = methods[ms[i]];
     ifnot (length (m))
-      sub_buf += ms[i] + " = &" + cname + "_" + as + "_" + ms[i] + ",\n";
+      sub_buf += "    " + ms[i] + " = &" + cname + "_" + as + "_" + ms[i] + ",\n";
     else
-      sub_buf += ms[i] + " = " + cname + "_" + as + "_" + ms[i] + " (self),\n";
+      sub_buf += "    " + ms[i] + " = " + cname + "_" + as + "_" + ms[i] + " (self),\n";
     }
 
-  sub_buf += "};\n}\n" +
+  sub_buf += "    };\n}\n" +
    `__->__ ("` + cname + `", "` + as +
     `", &` + as + `, ` + string (0) + `, ` + string (1) +
     `, "Class::setfun::__initfun__";submethod = ` + string (1) + ");\n\n";
 
-  sub_buf += "\n" + `set_struct_field (__->__ ("` + cname + `", "Class::getself"), ` +
+  sub_buf += `set_struct_field (__->__ ("` + cname + `", "Class::getself"), ` +
    `"` + as + `", ` + as + `("` + cname + `"));`;
 
-  sub_buf += "\nTHIS = __->__(\"" + cname + `", "Class::getself");`;
+  sub_buf += "\n\n  Self = __->__(\"" + cname + `", "Class::getself");`;
 
-  sub_buf += "\n  __use_namespace ((strlen ($8) ? $8 : " + "\"" + cname + "\"));\n" +
-    "__uninitialize (&$8);\n";
+  sub_buf += "\n\n  % END\n\n" +
+    "  __use_namespace ((strlen ($8) ? $8 : " + "\"" + cname + "\"));\n" +
+    "  __uninitialize (&$8);\n";
 
-  @eval_buf = "" + sub_cname + " = __->__ (\"" + sub_cname + "\", \"" + cname + "\", \"" +
-    sub_classpath + "\", 1, [\"" + strjoin (__fmethods, "\",\n \"") +
-      "\"], \"Class::classnew::subclass_from_" + cname + "_as_" + as +
-        "\"" + (qualifier_exists ("force") ? ";force" : "") + ");\n\n" + @eval_buf;
+  @eval_buf = "\n  " + sub_cname + " = __->__ (\"" +  sub_cname +
+     "\", \"" +  cname + "\",\n    \""                                  +
+    sub_classpath + "\", 1, [\"" + strjoin (__fmethods, "\",\n     \"") +
+    "\"],\n     \"Class::classnew::subclass_from_" + cname + "_as_"     +
+    as + "\"" + (qualifier_exists ("force") ? ";force" : "") + ");\n\n" +
+    @eval_buf;
 
-  @eval_buf += "\n" + sub_buf + "\n";
+  @eval_buf += "\n" + sub_buf;
 }
 
 private define parse_class (cname, classpath, eval_buf, funs, sub_funs, fp)
@@ -1666,9 +1673,11 @@ private define __Class_From_Init__ (classpath)
   if (isclass)
     {
     eval_buf = "" + cname + " = __->__ (\"" + cname + "\", \"" + super + "\", \"" +
-    @classpath + "\", 1, [\"" + strjoin (__funs__, "\",\n \"") +
-    "\"], \"Class::classnew::" + cname + "\"" +
-      (qualifier_exists ("force") ? ";force" : "") + ");\n\n" + eval_buf;
+    @classpath + "\", 1, [\n  \"" + strjoin (__funs__, "\",\n  \"") +
+    "\"],\n  \"Class::classnew::" + cname + "\"" +
+      (qualifier_exists ("force") ? ";force" : "") + ");\n\n" +
+      eval_buf;
+
     eval_buf += "\n" + __assignself__ (cname;return_buf) + "\n\n";
     eval_buf += cname + ".let = Class.let;\n";
     eval_buf += cname + ".fun = Class.fun;\n";
