@@ -33,8 +33,7 @@ class Devel
 
     LD_LIBRARY_PATH = f.call (LD_LIBRARY_PATH, Env->LD_LIBRARY_PATH);
     C_INCLUDE_PATH  = f.call (C_INCLUDE_PATH, "");
-    if (This.request.devel)
-      f.__destroy ();
+    f.__destroy ();
   end
 
   def get_library_path ()

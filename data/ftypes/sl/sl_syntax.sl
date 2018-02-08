@@ -22,6 +22,7 @@ private variable regexps = [
 |(?<=\s|\[|\()([tT]his(?=\.))\
 |(?<=^|\s)(class(?=\s))\
 |(?<=\s)(import(?=\s))\
+|(?<=\s)(fun(ref|call)?(?=\s))\
 |(?<=&|\s|\[|\()(unless(?=\s|,))\
 |(?<=&|\s|\[|\()(which(?=\s|,))\
 |(?<=&|\s|\[|\()(getch(?=\s|,))\

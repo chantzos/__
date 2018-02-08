@@ -58,7 +58,8 @@ subclass Insert
   end
 
   def ins_char (is, s, line) proc
-    @line = substr (@line, 1, s._index) + char (is.chr) + substr (@line, s._index + 1, - 1);
+    @line = substr (@line, 1, s._index) + char (is.chr) +
+            substr (@line, s._index + 1, - 1);
 
     s._index++;
 
@@ -86,31 +87,28 @@ subclass Insert
   def ins_digraph (is, s, line) proc
     variable DIGRAPHS = [
       167,   % paragraph §
-      8220,
-      8304,
-      729,
-      [8308:8319],
+      8220,  % “
+      8304,  % ⁰
+      729,   % ˙ 
+      [8308:8319], % ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ
       10003, % correct ✓
-      176,
-      171,
-      185,
-      187,
-      178,
-      179,
-      215,
-      247,
+      176,   % °
+      171,   % « 
+      187,   % »
+      215,   % ×
+      247,   % ÷
       185,   % power of one ¹
       178,   % power of two ²
       179,   % power of three ³
-      [188:190],
+      [188:190], % ¼ ½ ¾
       [8531:8542],  % one third ⅓ etc ...
       183,   % multiplication dot ·
       8771,  % short of... ≃
       [9833:9835], % music notes
       [9837:9839], % likewise
-      169,
-      174,
-      8364,
+      169,  % ©
+      174,  % ®
+      8364, % €
       ];
 
     variable
@@ -121,15 +119,19 @@ subclass Insert
     Rline.set (rl);
     Rline.prompt (rl, rl._lin, rl._col);
 
-    () = Rline.commandcmp (rl, charar;already_filtered,
-      help = help, dont_sort, literal);
+    variable idx;
+    variable retval = Rline.commandcmp (rl, charar;already_filtered,
+      help = help, dont_sort, literal, accept_space_as_return);
 
-    ifnot (strlen (rl.argv[0]))
-      return;
+    Smg.atrceraseeol (PROMPTROW, 0);
 
-    variable idx = wherefirst (rl.argv[0] == charar);
-    if (NULL == idx)
+    if (0 == strlen (rl.argv[0]) || NULL ==
+        (idx = wherefirst (rl.argv[0] == charar), idx))
+      {
+      waddline (s, __vgetlinestr (s, @line, 1), 0, s.ptr[0]);
+      Smg.setrcdr (s.ptr[0], s.ptr[1]);
       return;
+      }
 
     is.chr = DIGRAPHS[idx];
     ins_char (is, s, line);
@@ -428,6 +430,11 @@ subclass Insert
 
     s.lins[s.ptr[0] - s.rows[0]] = @line;
     s.lines[is.lnr] = @line;
+
+    % There is a bug when on a new entered line, perfoming up|down
+    % motion, the line is not displayed
+    % check the idxs, and store the line, and see if that helps
+    % Smg.set_img ([is.lnr], [@line], [0], [s.cols[is.lnr]]);
 
     is.lnr++;
 

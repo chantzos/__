@@ -806,7 +806,9 @@ class Rline
       colr = 5,
       index = 0,
       header = qualifier ("header"),
-      max_len = length (ar) ? max (strlen (ar)) + 2 : 0,
+      max_len = length (ar)
+        ? max (strlen (ar)) + ([2, 0][qualifier_exists ("literal")])
+        : 0,
       fmt = sprintf ("%%-%ds", max_len),
       lines;
 
@@ -1514,6 +1516,7 @@ class Rline
         delete_at (s);
         parse_args (NULL, s);
         restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
+        prompt (NULL, s, s._lin, s._col);
         return 0;
         }
 
@@ -1526,6 +1529,7 @@ class Rline
         return '\r' == chr || qualifier_exists ("accept_space_as_return");
         }
 
+      restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
       s.argv[0] += char (chr);
 
       s._col = strlen (s.argv[0]) + 1;

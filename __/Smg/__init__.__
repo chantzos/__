@@ -7,8 +7,13 @@ class Smg
 
   var public MSGROW = LINES - 1;;
   var public PROMPTROW = MSGROW - 1;
+
   var static IMG = List_Type[LINES - 2];
   var static __IMG = NULL;
+  var static MSG_SEND = 0;
+
+  var SMGINITED = 0;
+  var SUSPENDSTATE = 0;
 
   decl set_img
 
@@ -39,10 +44,6 @@ class Smg
   visual = "blackonbrown",
   comment = "brown",
   };
-
-  var static MSG_SEND = 0;
-  var SMGINITED = 0;
-  var SUSPENDSTATE = 0;
 
   def set_basic_color (field, color) proc
     variable colors =
@@ -122,7 +123,7 @@ class Smg
   end
 
   def getrc ()
-      [slsmg_get_row (), slsmg_get_column ()];
+    [slsmg_get_row (), slsmg_get_column ()];
   end
 
   def char_at ()
@@ -130,7 +131,7 @@ class Smg
   end
 
   def hlregion (clr, r, c, dr, dc)
-      slsmg_set_color_in_region (clr, r, c, dr, dc);
+    slsmg_set_color_in_region (clr, r, c, dr, dc);
   end
 
   def hlregiondr (clr, r, c, dr, dc)
@@ -204,16 +205,10 @@ class Smg
       }
 
     if (NULL == clrs)
-      {
       clrs = Integer_Type[len];
-      clrs[*] = 0;
-      }
 
     if (NULL == cols)
-      {
       cols = Integer_Type[len];
-      cols[*] = 0;
-      }
 
     if (NULL == ar)
       {
@@ -221,18 +216,22 @@ class Smg
       ar[*] = " ";
       }
 
-    _for i (0, length (lines) -1)
+    _for i (0, length (lines) - 1)
       IMG[lines[i]] = {ar[i], clrs[i], lines[i], cols[i]};
   end
 
   def restore (r, ptr, redraw)
     variable
-      ar   = String_Type[0],
-      rows = Integer_Type[0],
-      clrs = Integer_Type[0],
-      cols = Integer_Type[0],
+      imglen = length (IMG),
+      rows = Integer_Type[imglen],
+      clrs = Integer_Type[imglen],
+      cols = Integer_Type[imglen],
       columns = qualifier ("columns", COLUMNS),
-      imglen = length (IMG);
+      ar = String_Type[imglen];
+
+    rows[*] = -1,
+    clrs[*] = -1,
+    cols[*] = -1;
 
     variable i;
     _for i (0, length (r) - 1)
@@ -240,11 +239,16 @@ class Smg
       ifnot (r[i] < imglen)
         continue;
 
-      ar   = [ar,   IMG[r[i]][0]];
-      clrs = [clrs, IMG[r[i]][1]];
-      rows = [rows, IMG[r[i]][2]];
-      cols = [cols, IMG[r[i]][3]];
+      ar[i]   = IMG[r[i]][0];
+      clrs[i] = IMG[r[i]][1];
+      rows[i] = IMG[r[i]][2];
+      cols[i] = IMG[r[i]][3];
       }
+
+    ar   =   ar[wherenot (_isnull (ar))];
+    clrs = clrs[wherenot (-1 == clrs)];
+    rows = rows[wherenot (-1 == rows)];
+    cols = cols[wherenot (-1 == cols)];
 
     aratrcaddnstr (self, ar, clrs, rows, cols, columns);
 
@@ -505,14 +509,18 @@ class Smg
 
   beg
     array_map (Void_Type, &set_basic_color,
-      ["normal", "error", "success", "warn", "prompt",
-       "border", "focus", "hlchar",   "hlregion", "topline",
-       "infofg", "infobg", "diffpl", "diffmn", "visual", "comment"
-      ],
-      [__COLOR__.normal, __COLOR__.error, __COLOR__.success, __COLOR__.warn,
-       __COLOR__.prompt, __COLOR__.border, __COLOR__.focus, __COLOR__.hlchar,
-       __COLOR__.hlregion, __COLOR__.topline, __COLOR__.infofg, __COLOR__.infobg,
-       __COLOR__.diffpl, __COLOR__.diffmn, __COLOR__.visual, __COLOR__.comment]);
+      ["normal",  "error",  "success",
+       "warn",    "prompt", "border",
+       "focus",   "hlchar", "hlregion",
+       "topline", "infofg", "infobg",
+       "diffpl",  "diffmn", "visual",
+       "comment"],
+      [__COLOR__.normal,  __COLOR__.error,  __COLOR__.success,
+       __COLOR__.warn,    __COLOR__.prompt, __COLOR__.border,
+       __COLOR__.focus,   __COLOR__.hlchar, __COLOR__.hlregion,
+       __COLOR__.topline, __COLOR__.infofg, __COLOR__.infobg,
+       __COLOR__.diffpl,  __COLOR__.diffmn, __COLOR__.visual,
+       __COLOR__.comment]);
 
     SLsmg_Tab_Width = 1;
     array_map (Void_Type, &slsmg_define_color, [0:14:1],

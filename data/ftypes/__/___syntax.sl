@@ -68,7 +68,7 @@ private variable regexps = [
   pcre_compile ("(\
 (?<=\s|\[|\()([tT]his(?=\.))\
 |(?<=\s)(var(?=\s))\
-|(?<=\s)(fun(?=\s))\
+|(?<=\s)(fun(ref|call)?(?=\s))\
 |(?<=\s)(proc(?=$))\
 |(?<=\s)(from(?=\s))\
 |(?<=\s)(decl(?=\s))\
