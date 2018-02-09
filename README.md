@@ -617,6 +617,37 @@ needs to be doubled, everytime there is a need; like when using a nested
 function, or simply when real multiline strings are needed in the code.
 Such nested levels can end up, quickly, in unreadable code.
 
+### Invocation
+Every application can have its own command line switches, but there are
+share also some:
+  --profile    turn on profiler
+  --devel      turn on development features
+  --debug      turn on debuging
+  --basedir=   sets the base directory of the application
+  --datadir=   sets the data directory of the application
+  --tmpdir=    sets the temp directory of the application
+  --histfile=  sets the  history file  of the application
+  --command=   executes a command prior to main loop
+  --execute=   executes a string  prior to main loop
+  --execute-from-file=  executes a file prior to main loop
+
+       
+The development features are functions that either are new or  
+hasn't been developed enough, but which should be functional,  
+like the __netm and __fm functions.
+
+The first one offers the minimum code, for wifi managment  
+(uses wpa-supplicant, dhcpcd, iw, ip).  
+
+fm (for file manager) its a couple of hours work, and is being  
+used mainly to collect (tag) files (with space) for removal from  
+a messy directory (like mutt executing the tagged files with ;)  
+
+But it can also display pdfs (using apvlv), images (using feh),  
+edit files (using ved) and extract archives.  
+It can even play video and music and it understands for navigation  
+~ or / or right-left arrows (i think the navigation way is pretty fast)  
+
 ### Principals.
 
 The caller always knows better.

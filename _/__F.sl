@@ -661,24 +661,32 @@ public define class ()
     from = qualifier ("from");
 
   if (NULL == as)
-    __ferror__ ((issubclass ? "sub" : "") +
-        "class name is missing, qualifier \"as\"";
-      error = SyntaxError);
+    if (NULL == from)
+      __ferror__ ((issubclass ? "sub" : "") +
+        "class name is missing, qualifier \"as\""; error = UsageError);
+    else
+      as = path_basename (from);
 
   ifnot (NULL == from)
     {
-    if (-1 == access (from, F_OK|R_OK))
-      ifnot (path_is_absolute (from))
-        from = ThisPath + "/" + from;
+    ifnot (path_is_absolute (from))
+      from = qualifier ("classpath", ThisPath) + "/" + from;
 
-    if (-1 == access (from, F_OK|R_OK))
-      __ferror__ ("cannot find class " + as + " file";
-        error = SyntaxError);
+    variable orig_from = from;
 
-    if (_NARGS)
-      pop ();
+    ifnot (access (from, F_OK|R_OK))
+     if (stat_is ("dir", stat_file (from).st_mode))
+      if (-1 == access ((from = orig_from + "/" + as + ".__", from), F_OK|R_OK))
+       if (-1 == access ((from = orig_from + "/__" + as + "__.__", from), F_OK|R_OK))
+        if (-1 == access ((from = orig_from + "/__init__.__", from), F_OK|R_OK))
+    __ferror__ ("cannot find class " + as + " file"; error = UsageError);
+
+    loop (_NARGS) pop;
 
     variable fp = fopen (from, "r");
+    if (NULL == fp)
+      __ferror__ ("fopen error: " + errno_string (errno);error = IOError);
+
     strjoin (fgetslines (fp));
     }
 
