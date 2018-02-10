@@ -625,6 +625,55 @@ private define __module_compile__ (argv)
   __messages;
 }
 
+private define __get_header__ (argv)
+{
+  variable pat = Opt.Arg.getlong_val ("pat", NULL, &argv;del_arg);
+  variable context = Opt.Arg.getlong_val ("context", "int", &argv;
+    del_arg, defval = 3);
+
+  if (1 == length (argv))
+    return;
+
+  variable file  = Devel.find_header (argv[1]);
+  if (NULL == file)
+    return;
+
+  variable ar = File.readlines (file);
+  ifnot (NULL == pat)
+    {
+    pat = pcre_compile (pat, 0);
+
+    variable i, ii;
+    variable len = length (ar);
+    variable bar = Integer_Type[len];
+    bar[*] = -1;
+
+    _for i (0, len - 1)
+      if (-1 == bar[i])
+      if (pcre_exec (pat, ar[i], 0))
+        {
+        ii = i - context - 1;
+        if (ii < -1)
+          ii = -1;
+
+        variable beg = ii;
+        while (ii++, (ii + context) < (i + context + 2) && (ii + context < len))
+          bar[ii] = ii;
+       }
+
+    bar = Array.Int.unique (bar[wherenot (bar == -1)]);
+
+    ar = ar[bar];
+    }
+
+  ifnot (length (ar))
+    return;
+
+  file = This.is.my.tmpdir + "/" + path_basename (file);
+  ifnot (File.write (file, ar))
+    __editor (file);
+}
+
 private define __search_project__ (argv)
 {
   variable pat = Opt.Arg.getlong_val ("pat", NULL, &argv;del_arg);
@@ -749,6 +798,12 @@ private define my_commands ()
     "--cflags= string append flags",
     "--dont-install void do not install the module",
     "--install_to= directory install into this directory"];
+
+  a["find_header"] = @Argvlist_Type;
+  a["find_header"].func = &__get_header__;
+  a["find_header"].args = [
+    "--pat= pattern pattern",
+    "--context= int context around the match"];
 
   a["search_project"] = @Argvlist_Type;
   a["search_project"].func = &__search_project__;
