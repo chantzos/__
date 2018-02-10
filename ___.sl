@@ -100,8 +100,8 @@ private variable CLASSES = [
 
 if (X)
   {
-  MODULES = [MODULES, "xsrv", "xclient"];
-  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst"];
+  MODULES = [MODULES, "xsrv", "xclient", "xsel"];
+  FLAGS = [FLAGS, "-lX11", "-lX11 -lXtst", "-lX11"];
   CLASSES = [CLASSES, "Xsrv", "Xclnt"];
   }
 
@@ -281,17 +281,18 @@ define is_obj_depends_on (obj, lib)
 define find_lib (lib)
 {
   variable
-    i,
-    ar = String_Type[0],
+    i, ii, ar, path,
     pat = "/lib" + lib + "\\.so\\.\\d?";
 
   _for i (0, length (LD_LIBRARY_PATH) - 1)
-    ar = [ar, strtrim_end (LD_LIBRARY_PATH[i], "/") + "/" +
-      listdir (LD_LIBRARY_PATH[i])];
+    {
+    path = strtrim_end (LD_LIBRARY_PATH[i], "/") + "/";
+    ar = path + listdir (path);
 
-  _for i (0, length (ar) - 1)
-    if (string_match (ar[i], pat))
-      return ar[i];
+    _for ii (0, length (ar) - 1)
+      if (string_match (ar[ii], pat))
+        return ar[ii];
+    }
 
   NULL;
 }

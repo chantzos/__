@@ -6,9 +6,11 @@ class Devel
   beg
     ifnot (NULL == C_INCLUDE_PATH)
       C_INCLUDE_PATH = [
-        Env->SRC_C_PATH + "/inc", strtok (C_INCLUDE_PATH, ":")];
+        Env->SRC_C_PATH + "/inc", strtok (C_INCLUDE_PATH, ":"),
+        "/usr/include", "/usr/local/include"];
     else
-      C_INCLUDE_PATH = [Env->SRC_C_PATH + "/inc"];
+      C_INCLUDE_PATH = [Env->SRC_C_PATH + "/inc",
+        "/usr/include", "/usr/local/include"];
 
     if (Sys->MACHINE == "x86_64")
       {
@@ -112,17 +114,45 @@ class Devel
 
   def find_lib (lib)
     variable
-      i,
-      ar = String_Type[0],
+      i, ii, ar, path,
       pat = "/lib" + lib + "\\.so\\.\\d?";
 
     _for i (0, length (LD_LIBRARY_PATH) - 1)
-      ar = [ar, strtrim_end (LD_LIBRARY_PATH[i], "/") + "/" +
-        listdir (LD_LIBRARY_PATH[i])];
+      {
+      path = strtrim_end (LD_LIBRARY_PATH[i], "/") + "/";
+      ar = path + listdir (path);
 
-    _for i (0, length (ar) - 1)
-      if (string_match (ar[i], pat))
-        return ar[i];
+      _for ii (0, length (ar) - 1)
+        if (string_match (ar[ii], pat))
+          return ar[ii];
+      }
+
+    NULL;
+  end
+
+  def find_header (inc)
+    variable
+      i, ii, iii, ar, bar, path, bpath, pat = inc + ".h";
+
+    _for i (0, length (C_INCLUDE_PATH) - 1)
+      {
+      path = strtrim_end (C_INCLUDE_PATH[i], "/") + "/";
+      ar = path + listdir (path);
+
+      _for ii (0, length (ar) - 1)
+        if (string_match (ar[ii], pat))
+          return ar[ii];
+        else
+          if (path + inc == ar[ii])
+          {
+          bpath = path + inc + "/";
+          bar = bpath + listdir (bpath);
+
+          _for iii (0, length (bar) - 1)
+            if (string_match (bar[iii], pat))
+              return bar[iii];
+          }
+       }
 
     NULL;
   end
