@@ -175,13 +175,10 @@ rl.histfile = HIST_EVAL;
         }
 
       if (any (Input->rmap.histup == rl._chr))
-        {
-        IO.tostderr ("pre", rl.argv);
         if (1 == Rline.historycompletion (rl))
-        ifnot (realtime_evaluation mod 2)
-          () = _evalstr_ (rl.argv[0];send_msg);
-        IO.tostderr ("post", rl.argv);
-        }
+          ifnot (realtime_evaluation mod 2)
+            () = _evalstr_ (rl.argv[0];send_msg);
+
 %      if (any (Input->rmap.histup == rl._chr))
 %        {
 %        ifnot (length (history))

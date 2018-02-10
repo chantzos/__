@@ -9,12 +9,15 @@ subclass Visual
     _i, cur, ptr, mode,
     clr = Smg->COLOR.visual,
     l_mode, l_down, l_up, l_page_up, l_page_down,
-    l_keys = ['w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', 'h', Input->DOWN, Input->UP,
-      Input->PPAGE, Input->NPAGE, Input->CTRL_f, Input->CTRL_b, Input->HOME, '!', '$'],
+    l_keys = ['c', 'w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', 'h',
+      Input->DOWN, Input->UP, Input->PPAGE, Input->NPAGE, Input->CTRL_f,
+      Input->CTRL_b, Input->HOME, '!', '$'],
     c_mode, c_left, c_right,
-    c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT, '!', '$'],
+    c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT,
+      '!', '$'],
     bw_mode, bw_down, bw_up, bw_left, bw_right, bw_maxlen,
-    bw_keys = ['x', 'I', 'i', 'd', 'y', 't', 'r', 'c', Input->DOWN, Input->UP, Input->RIGHT, Input->LEFT],
+    bw_keys = ['x', 'I', 'i', 'd', 'y', 't', 'r', 'c', Input->DOWN,
+      Input->UP, Input->RIGHT, Input->LEFT],
     needsdraw, startrow, startlnr, startcol, startindex,
     vlins, lnrs, linlen, lines, sel, at_exit,
     };
@@ -279,7 +282,7 @@ subclass Visual
   end
 
   def v_l_loop (vs, s) proc
-    variable chr, i, size = s.st_.st_size, reg = "\"", reginit = 0;
+    variable chr, lines, i, size = s.st_.st_size, reg = "\"", reginit = 0;
 
     while (chr = Input.getch (), any ([vs.l_keys, 't', ['0':'9'], '"']
         == chr))
@@ -365,6 +368,30 @@ subclass Visual
         break;
         }
 
+      if ('c' == chr)
+        {
+        lines = s.comment_out_ref (vs.lines);
+        variable llen = length (lines);
+        variable vlen = length (vs.lines);
+
+        % array can only be larger
+        if (llen > vlen)
+          {
+          s.lines = [s.lines[[:vs.lnrs[0]-1]], lines, s.lines[[vs.lnrs[-1]+1:]]];
+          s._len = length (s.lines) - 1;
+          }
+        else
+          s.lines[vs.lnrs] = lines;
+
+        s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+
+        ifnot (size == s.st_.st_size)
+          set_modified (s);
+
+        Ved.Vundo.set (s, vs.lines, vs.lnrs);
+        break;
+        }
+
       if ('!' == chr)
         {
         __vsystem (vs.lines);
@@ -379,7 +406,7 @@ subclass Visual
 
       if ('h' == chr)
         {
-        variable lines = Ved.Spell.spell (vs.lines);
+        lines = Ved.Spell.spell (vs.lines);
         ifnot (anynot (lines == vs.lines))
           break;
 

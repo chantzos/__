@@ -4,7 +4,7 @@ class Ved
     _linlen,_avail_rows,_findex,_index,_shiftwidth,_expandtab,
     _autoindent, _dir, _autochdir,
     ptr, rows, cols, clrs, lins, lnrs, vlins, lines,
-    st_, comment_str,
+    st_, comment_str, comment_out_ref,
     vedloop, vedloopcallback,
     ved, set,
     draw, lexicalhl, autoindent, pairs,
@@ -366,6 +366,8 @@ class Ved
         ftype = "mail";
       else if ("h" == ftype)
         ftype = "c";
+      else if ("sl" == ftype)
+        ftype = "__";
       else
         ftype = VED_OPTS.def_ftype;
 
