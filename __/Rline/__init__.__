@@ -1790,8 +1790,11 @@ class Rline
     variable
       ar = File.readlines (Env->STD_DATA_PATH + "/pcre/pcresyntax.txt"),
       len = length (ar),
-      lines = s._lines - (strlen (s._lin) / s._columns) - 3,
-      prow = s._prow - (strlen (s._lin) / s._columns) - (len > lines ? lines : len) - 1;
+      lines = s._lines - (strlen (s._lin) / s._columns) - 4,
+      prow = s._prow - (strlen (s._lin) / s._columns) -
+        (len > lines
+          ? lines
+          : len) - 1;
 
     () = printout (rl, ar, strlen (rl.argv[0]), &len;lines = lines, _prow = s._prow,
        _lin = s._lin, header = strlen (@pat) ? @pat : " ", headerclr = 7);
@@ -1931,7 +1934,8 @@ class Rline
         parse_args (NULL, s);
         }
 
-      s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
+      % might be a bug somewhere in the set_img|restore ()
+      % s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
       restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
       prompt (NULL, s, s._lin, s._col);
 

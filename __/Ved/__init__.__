@@ -118,7 +118,6 @@ class Ved
   end
 
   beg
-    Sys.let ("XCLIP_BIN", Sys.which ("xclip"));
     build_ftype_table ();
 
     if (-1 == Dir.make_parents (VED_DIR, File->PERM["PRIVATE"]))
@@ -2340,11 +2339,6 @@ class Ved
     VED_PAGER[string (Input->rmap.backspace[0])] = &__del_trail_ws__;
     VED_PAGER[string (Input->rmap.backspace[1])] = &__del_trail_c__;
     VED_PAGER[string (Input->rmap.backspace[2])] = &__del_trail_c__;
-
-    ifnot (NULL == Env->DISPLAY)
-      ifnot (NULL == Env->XAUTHORITY)
-        ifnot (NULL == Sys->XCLIP_BIN)
-          Load.file (Env->STD_LIB_PATH + "/X/seltoX", NULL);
 
     __vwind_new (;;__qualifiers);
   end

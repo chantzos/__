@@ -542,6 +542,7 @@ private define __module_compile__ (argv)
     Me->__init_flags_for.call (mdl);
 
     ifnot (path_is_absolute (mdl))
+      if (-1 == access (getcwd + mdl, F_OK|R_OK))
       {
       pabs = 0;
       ind = wherefirst (Me->MODULES == mdl);
@@ -562,6 +563,12 @@ private define __module_compile__ (argv)
         err = 1;
         continue;
         }
+      }
+      else
+      {
+      mdl = getcwd + mdl;
+      pabs = 1;
+      flags = NULL == cflags ? " " : cflags;
       }
     else
       {

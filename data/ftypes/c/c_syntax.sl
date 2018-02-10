@@ -29,6 +29,7 @@ private variable regexps = [
 |((?<!\w)switch(?=\s))\
 |((?<!\w)goto(?=\s))\
 |((?<!\w)case(?=\s))\
+|((?<!\w)default:)\
 |((?<=\w|\])--(?=;|\)|,))\
 |((?<=\w|\])\+\+(?=;|\)|,))\
 |((?<=\s)[\&\|]+=? ~?)\
@@ -60,6 +61,8 @@ private variable regexps = [
 |(?<=\s)(malloc(?=\s))\
 |(VOID_STAR)\
 |(^typedef)\
+|(SLANG_[A-Z]*_[A-Z]*)\
+|(SLang_\w*(?=\s))\
 |((?<!\w)struct(?=[\s]*))\
 |^\s*(return(?=[\s;]))\
 |^\s*(break(?=;))\

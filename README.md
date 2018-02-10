@@ -103,7 +103,7 @@ important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,
 umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,  
 dhcpcd, ping
 
-optional: mplayer, amixer, xclip, xinit, xauth, setxkbmap, xmodmap,
+optional: mplayer, amixer, xinit, xauth, setxkbmap, xmodmap,
 mcookie, rxvt-unicode
 
 To install this distribution issue
@@ -646,7 +646,10 @@ a messy directory (like mutt executing the tagged files with ;)
 But it can also display pdfs (using apvlv), images (using feh),  
 edit files (using ved) and extract archives.  
 It can even play video and music and it understands for navigation  
-~ or / or right-left arrows (i think the navigation way is pretty fast)  
+~ or // (double slash, as / searchs the buffer), or right-left arrows  
+(i think the navigation within the filesystem is pretty fast), but
+the principal applies. If something is not being used, it can not
+revail code !correctness.  
 
 ### Principals.
 

@@ -239,6 +239,13 @@ class Smg
       ifnot (r[i] < imglen)
         continue;
 
+      % leave it here for a while
+      if (r[i] < 0)
+        {
+        IO.tostderr ("caught unnaceptable condition, row cannot be < 0", r[i]);
+        continue;
+        }
+
       ar[i]   = IMG[r[i]][0];
       clrs[i] = IMG[r[i]][1];
       rows[i] = IMG[r[i]][2];

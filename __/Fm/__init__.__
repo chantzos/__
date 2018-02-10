@@ -306,7 +306,7 @@ class Fm
 
   def __on_bslash__ (s) proc
     variable state = Ved.Search.state ("get");
-    IO.tostderr (state.code);
+
     ifnot (-2 == state.code)
       return -1;
 
@@ -463,7 +463,7 @@ class Fm
       }
 
     topline ("(" + This.is.my.name + ")");
-    Ved.draw_wind ();
+    Ved.draw_wind (;reread = 0);
   end
 
   def __exec__ (self, dir) proc

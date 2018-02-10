@@ -70,7 +70,7 @@ private variable
   CC = "gcc";
 
 private variable REQ_EXECUTABLES = ["sudo"];
-private variable IMP_EXECUTABLES = ["xclip", "diff", "git", "patch"];
+private variable IMP_EXECUTABLES = ["diff", "git", "patch"];
 private variable  OPT_EXECUTABLES = [
   "mplayer", "tar", "unzip", "xz", "bzip2", "gzip", "ps", "ip", "iw",
   "wpa_supplicant", "dhcpcd", "ping", "xinit", "xauth", "urxvtd",
