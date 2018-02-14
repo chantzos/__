@@ -248,7 +248,6 @@ static int register_hunspell_type (void)
   return 0;
 }
 
-
 int init_hunspell_module_ns (char *ns_name)
 {
   SLang_NameSpace_Type *ns;

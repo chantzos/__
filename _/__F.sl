@@ -556,7 +556,8 @@ public define funcall ()
     {
     f = __function__ (;as = __anon_name__, print_err);
     (@f.__funcref) (;;__qualifiers);
-    eval ("private define " + __anon_name__ + " ();", __anon_name__);
+    f.__destroy ();
+%    eval ("private define " + __anon_name__ + " ();", __anon_name__);
     }
   catch AnyError:
     Exc.print (e);

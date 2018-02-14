@@ -75,7 +75,7 @@ class Spell
         `).__funcref;
 
       s.close = fun (`
-          (s, str)
+          (s)
         hunspell_close (s.hsp);
         s.hsp = NULL;
         `).__funcref;

@@ -629,8 +629,8 @@ static SLang_Intrin_Fun_Type Intrinsics [] =
 
 void __init (void)
 {
+  //__wnsize ();
   return;
-  __wnsize ();
 }
 
 int main (int argc, char **argv)

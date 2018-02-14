@@ -985,7 +985,7 @@ class Ved
 
     on_wind_change (w);
 
-    Ved.draw_wind ();
+    Ved.draw_wind (;;__qualifiers);
   end
 
   def on_wind_new (w) public proc
@@ -2244,15 +2244,15 @@ class Ved
       return;
       }
 
-    wind_change (NULL, dir);
+    wind_change (NULL, dir;;__qualifiers);
   end
 
   def __vwind_next (s) public proc
-    __wind_rout__ (s, ".");
+    __wind_rout__ (s, "."; reread = (0 == This.is.ved));
   end
 
   def __vwind_prev (s) public proc
-    __wind_rout__ (s, "prev");
+    __wind_rout__ (s, "prev";reread = (0 == This.is.ved));
   end
 
   def __vwind_new () public proc
