@@ -154,6 +154,8 @@ class Subst
 
             }
 
+          found = 1;
+
           if (s.askwhensubst)
             {
             variable
@@ -163,34 +165,39 @@ class Subst
               lreplace = strreplace (replace, "\n", "\\n");
 
             retval = s.askonsubst (fname, s.lnronfile, lfpart, lcontext, llpart, lreplace);
+            switch (retval)
+              {
+              case 'n': found = 0;
+              }
 
-             switch (retval)
+              {
+              case 'a': s.askwhensubst = 0;
+              }
 
-               {
-               case 'n': break;
-               }
+              {
+              case 'q':
+                if (s.numchanges)
+                  return ar, 0;
+                else
+                  return 1;
+              }
 
-               {
-               case 'a': s.askwhensubst = 0;
-               }
-
-               {
-               case 'q':
-                 if (s.numchanges)
-                   return ar, 0;
-                 else
-                   return 1;
-               }
-
-               {
-               case 'c':
-                 return "Operation was canselled", -1;
-               }
+              {
+              case 'c':
+                return "Operation was canselled", -1;
+              }
             }
 
-          finished += sprintf ("%s%s", fpart, replace);
-          s.numchanges++;
+          if (found)
+            {
+            finished += sprintf ("%s%s", fpart, replace);
+            s.numchanges++;
+            }
+          else
+            finished += sprintf ("%s%s", fpart, context);
+
           str = lpart;
+
           ifnot (strlen (str))
             break;
           }
