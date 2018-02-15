@@ -6,63 +6,63 @@
 SLANG_MODULE(hunspell);
 
 static int Hunspell_Id = 0;
-Hunhandle *Handler;
 
-static int hunspell_spell_intrinsic ()
+typedef struct
+  {
+  Hunhandle *handler;
+  } Hunspell_Type;
+
+static void free_hunspell_type (Hunspell_Type *hsp)
 {
-  Hunhandle *ptr;
-  SLang_MMT_Type *mmt;
-  char *str;
-  int retval = -1;
+  if (NULL == hsp)
+    return;
 
-  if (-1 == SLang_pop_slstring (&str))
-    return -1;
+  if (NULL != hsp->handler)
+    Hunspell_destroy (hsp->handler);
 
-  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
-    goto free_and_return;
-
-  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
-
-  retval = Hunspell_spell (ptr, str);
-
-free_and_return:
-  SLang_free_mmt (mmt);
-  SLang_free_slstring (str);
-  return retval;
+  SLfree ((char *) hsp);
 }
 
-static void hunspell_suggest_intrinsic (void)
+static SLang_MMT_Type *allocate_hunspell_type (Hunhandle *handler)
+{
+  SLang_MMT_Type *mmt;
+  Hunspell_Type *hsp;
+
+  if (NULL == (hsp = (Hunspell_Type *) SLmalloc (sizeof (Hunspell_Type))))
+    return NULL;
+
+  memset ((char *) hsp, 0, sizeof (Hunspell_Type));
+
+  hsp->handler = handler;
+
+  if (NULL == (mmt = SLang_create_mmt (Hunspell_Id, (VOID_STAR) hsp)))
+    {
+    free_hunspell_type (hsp);
+    return NULL;
+    }
+
+  return mmt;
+}
+
+static int hunspell_spell_intrinsic (Hunspell_Type *hsp, char *str)
+{
+  return Hunspell_spell (hsp->handler, str);
+}
+
+static void hunspell_suggest_intrinsic (Hunspell_Type *hsp, char *str)
 {
  	int i;
- 	char **lst;
+ 	char **lst = NULL;
   SLindex_Type idx;
-  char *str;
   SLang_Array_Type *suggestions;
 
-  Hunhandle *ptr;
-  SLang_MMT_Type *mmt;
-
-  if (-1 == SLang_pop_slstring (&str))
-    {
-    (void) SLang_push_null ();
-    return;
-    }
-
-  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
-    {
-    (void) SLang_push_null ();
-    goto free_0;
-    }
-
-  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
-	 idx = Hunspell_suggest (ptr, &lst, str);
+	 idx = Hunspell_suggest (hsp->handler, &lst, str);
 
   suggestions = SLang_create_array (SLANG_STRING_TYPE, 0, NULL, &idx, 1);
   if (suggestions == NULL)
     {
-    (void) SLang_push_null ();
-    goto free_1;
-    return;
+    SLang_push_null ();
+    goto end;
     }
 
 	 if (idx > 0)
@@ -71,158 +71,96 @@ static void hunspell_suggest_intrinsic (void)
       if (-1 == SLang_set_array_element (suggestions, &i, &lst[i]))
         {
         SLang_free_array (suggestions);
-        (void) SLang_push_null ();
-        goto free_1;
-        return;
+        SLang_push_null ();
+        goto end;
         }
     }
 
-  (void) SLang_push_array (suggestions, 1);
+  SLang_push_array (suggestions, 1);
 
-free_1:
-  Hunspell_free_list (ptr, &lst, idx);
-  SLang_free_mmt (mmt);
-free_0:
-  SLang_free_slstring (str);
+end:
+  if (NULL != lst)
+    Hunspell_free_list (hsp->handler, &lst, idx);
 }
 
-static void hunspell_add_dic_intrinsic (void)
+static void hunspell_add_dic_intrinsic (Hunspell_Type *hsp, char *str)
 {
-  int retval;
-  char *str;
-  Hunhandle *ptr;
-  SLang_MMT_Type *mmt;
-
-  if (-1 == SLang_pop_slstring (&str))
-    return;
-
-  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
-    goto free_return;
-
-  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
-
-  retval = Hunspell_add_dic (ptr, str);
-
-free_return:
-  SLang_free_mmt (mmt);
-  SLang_free_slstring (str);
-  return;
+  Hunspell_add_dic (hsp->handler, str);
 }
 
-static void hunspell_rm_word_intrinsic (void)
+static void hunspell_rm_word_intrinsic (Hunspell_Type *hsp, char *str)
 {
-  int retval = -1;
-  char *str;
-  Hunhandle *ptr;
-  SLang_MMT_Type *mmt;
-
-  if (-1 == SLang_pop_slstring (&str))
-    return;
-
-  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
-    goto free_return;
-
-  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
-
-  retval = Hunspell_remove (ptr, str);
-
-free_return:
-  SLang_free_mmt (mmt);
-  SLang_free_slstring (str);
-
-  return;
+  Hunspell_remove (hsp->handler, str);
 }
 
-static void hunspell_add_word_intrinsic (void)
+static void hunspell_add_word_intrinsic (Hunspell_Type *hsp, char *str)
 {
-  int retval = -1;
-  char *str;
-  Hunhandle *ptr;
-  SLang_MMT_Type *mmt;
-
-  if (-1 == SLang_pop_slstring (&str))
+  if (NULL == hsp->handler)
     return;
 
-  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
-    goto free_return;
-
-  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
-
-  retval = Hunspell_add (ptr, str);
-
-free_return:
-  SLang_free_mmt (mmt);
-  SLang_free_slstring (str);
-
-  return;
+  Hunspell_add (hsp->handler, str);
 }
 
-static void hunspell_close_intrinsic (void)
+static void hunspell_close_intrinsic (Hunspell_Type *hsp)
 {
-  Hunhandle *ptr;
-  SLang_MMT_Type *mmt;
-
-  if (NULL == (mmt = SLang_pop_mmt (Hunspell_Id)))
+  if (NULL == hsp->handler)
     return;
 
-  ptr = (Hunhandle *) SLang_object_from_mmt (mmt);
-  Hunspell_destroy (ptr);
-  SLang_free_mmt (mmt);
+  Hunspell_destroy (hsp->handler);
+  hsp->handler = NULL;
 }
 
 static void hunspell_init_intrinsic (char *aff_dir, char *dic_dir)
 {
-  Hunhandle *ptr;
+  Hunhandle *handler;
   SLang_MMT_Type *mmt;
 
-  ptr = (Hunhandle *) SLmalloc (sizeof (Hunhandle *));
-  if (ptr == NULL)
+  handler = Hunspell_create (aff_dir, dic_dir);
+  if (NULL == handler)
     {
-    (void) SLang_push_null ();
+    SLang_push_null ();
     return;
     }
 
-  memset ((char *) ptr, 0, sizeof (Hunhandle *));
-
-  ptr = Hunspell_create (aff_dir, dic_dir);
-
-  if (NULL == (mmt = SLang_create_mmt (Hunspell_Id, (VOID_STAR) ptr)))
+  if (NULL == (mmt = allocate_hunspell_type (handler)))
     {
-    (void) SLang_push_null ();
+    SLang_push_null ();
     return;
     }
 
   if (-1 == SLang_push_mmt (mmt))
     {
     SLang_free_mmt (mmt);
-    (void) SLang_push_null ();
+    SLang_push_null ();
     }
 }
 
+#define DUMMY_HUNSPELL_TYPE ((SLtype)-1)
+#define P DUMMY_HUNSPELL_TYPE
+#define I SLANG_INT_TYPE
+#define V SLANG_VOID_TYPE
+#define S SLANG_STRING_TYPE
+
 static SLang_Intrin_Fun_Type hunspell_Intrinsics [] =
 {
-  MAKE_INTRINSIC_SS("hunspell_init", hunspell_init_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_close", hunspell_close_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_add_dic", hunspell_add_dic_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_check", hunspell_spell_intrinsic, SLANG_INT_TYPE),
-  MAKE_INTRINSIC_0("hunspell_suggest", hunspell_suggest_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_add_word", hunspell_add_word_intrinsic, SLANG_VOID_TYPE),
-  MAKE_INTRINSIC_0("hunspell_remove_word", hunspell_rm_word_intrinsic, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_SS("hunspell_init", hunspell_init_intrinsic, V),
+  MAKE_INTRINSIC_1("hunspell_close", hunspell_close_intrinsic, V, P),
+  MAKE_INTRINSIC_2("hunspell_add_dic", hunspell_add_dic_intrinsic, V, P, S),
+  MAKE_INTRINSIC_2("hunspell_check", hunspell_spell_intrinsic, I, P, S),
+  MAKE_INTRINSIC_2("hunspell_suggest", hunspell_suggest_intrinsic, V, P, S),
+  MAKE_INTRINSIC_2("hunspell_add_word", hunspell_add_word_intrinsic, V, P, S),
+  MAKE_INTRINSIC_2("hunspell_remove_word", hunspell_rm_word_intrinsic, V, P, S),
   SLANG_END_INTRIN_FUN_TABLE
 };
 
-/* class code based on pcre-module.c from upstream */
-
 static void destroy_hunspell (SLtype type, VOID_STAR f)
 {
-  Hunhandle *pt;
+  Hunspell_Type *hsp;
   (void) type;
 
-  pt = (Hunhandle *) f;
-  Hunspell_destroy (pt);
+  hsp = (Hunspell_Type *) f;
+  free_hunspell_type (hsp);
 }
-
-#define DUMMY_HUNSPELL_TYPE ((SLtype)-1)
 
 static int register_hunspell_type (void)
 {
@@ -237,7 +175,7 @@ static int register_hunspell_type (void)
   if (-1 == SLclass_set_destroy_function (cl, destroy_hunspell))
     return -1;
 
-  if (-1 == SLclass_register_class (cl, SLANG_VOID_TYPE, sizeof (Hunhandle *), SLANG_CLASS_TYPE_MMT))
+  if (-1 == SLclass_register_class (cl, SLANG_VOID_TYPE, sizeof (Hunspell_Type), SLANG_CLASS_TYPE_MMT))
     return -1;
 
   Hunspell_Id = SLclass_get_class_id (cl);
