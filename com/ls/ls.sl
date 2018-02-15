@@ -260,8 +260,8 @@ define print_to_screen (files, opts)
 
   files = files[wherenot ("." == files)];
 
- ifnot (length (files))
-   return;
+  ifnot (length (files))
+    return;
 
   %Arrays of structures are very expensive in memory; with a list
   % of 240.000 files took 300 MB of memory, some of the 12 fields from the
@@ -471,6 +471,8 @@ define print_to_screen (files, opts)
     long_format (files, st);
 }
 
+private variable top_level = 0;
+
 define file_callback (file, st, filelist, opts)
 {
   if (length (strtok (file, "/")) > MAXDEPTH)
@@ -486,9 +488,10 @@ define file_callback (file, st, filelist, opts)
       if (opts.match)
         return 1;
 
-  if (NULL == opts.keep_hidden)
+  if (0 == top_level && NULL == opts.keep_hidden)
     if ('.' == file[0])
-      if ("../" == file[[0:2]] || ("./" == file[[0:1]] && file[2] != '.'))
+      if ("../" == substr (file, 1, 3) || ("./" == substr (file, 1, 2) &&
+          (strlen (file) > 2 && file[2] != '.')))
         list_append (filelist, file);
       else
         return 1;
@@ -507,10 +510,11 @@ define dir_callback (dir, st, filelist, opts)
   if (length (strtok (dir, "/")) > MAXDEPTH)
     return 0;
 
-  if (NULL == opts.keep_hidden)
+  if (0 == top_level && NULL == opts.keep_hidden)
     {
     if ('.' == dir[0])
-      if ("." == dir || "../" == dir[[0:2]] || ("./" == dir[[0:1]] && dir[2] != '.'))
+      if ("." == dir || "../" == substr (dir, 1, 3) ||
+          ("./" == substr (dir, 1, 2) && (strlen (dir) > 2 && dir[2] != '.')))
         list_append (filelist, dir);
       else
         return 0;
@@ -621,6 +625,7 @@ define main ()
     if (Dir.isdirectory (dir[i]))
       {
       MAXDEPTH = length (strtok (dir[i], "/")) + maxdepth;
+      top_level = ('.' == dir[i][0] && dir[i] != ".");
 
       Dir.walk (dir[i], &dir_callback, &file_callback;
         dargs = {filelist, opts},
@@ -643,13 +648,7 @@ define main ()
           if (opts.match)
             continue;
 
-      if (NULL == opts.keep_hidden)
-        {
-        ifnot ('.' == dir[i][0])
-          list_append (filelist, dir[i]);
-        }
-      else
-        list_append (filelist, dir[i]);
+      list_append (filelist, dir[i]);
       }
     }
 
