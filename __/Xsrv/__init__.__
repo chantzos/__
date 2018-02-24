@@ -95,6 +95,8 @@ class Xsrv
     Assoc.new (Struct_Type, NULL, NULL),
     ]);
 
+  let! FLOAT_MODES = [length (DESKTOP_CLASSES.class) - 1];
+
   include! __init__ from Xlocalxsrv as Xsrv
 
   let DESKLEN = length (DESKTOP_CLASSES.class);
@@ -224,7 +226,7 @@ class Xsrv
   def Srv_set_modes () public proc
     variable ar = Integer_Type[DESKLEN];
     ar++;
-    ar[DESKLEN-1]++;
+    ar[FLOAT_MODES]++;
     ar;
   end
 

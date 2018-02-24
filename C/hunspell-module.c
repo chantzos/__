@@ -123,16 +123,19 @@ static void hunspell_init_intrinsic (char *aff_dir, char *dic_dir)
     }
 
   if (NULL == (mmt = allocate_hunspell_type (handler)))
-    {
-    SLang_push_null ();
-    return;
-    }
+    goto error;
 
   if (-1 == SLang_push_mmt (mmt))
     {
     SLang_free_mmt (mmt);
-    SLang_push_null ();
+    goto error;
     }
+
+ return;
+
+error:
+  Hunspell_destroy (handler);
+  SLang_push_null ();
 }
 
 #define DUMMY_HUNSPELL_TYPE ((SLtype)-1)

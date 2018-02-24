@@ -7,7 +7,7 @@ class Devel
     ifnot (NULL == C_INCLUDE_PATH)
       C_INCLUDE_PATH = [
         Env->SRC_C_PATH + "/inc", strtok (C_INCLUDE_PATH, ":"),
-        "/usr/include", "/usr/local/include"];
+        "/usr/local/include", "/usr/include"];
     else
       C_INCLUDE_PATH = [Env->SRC_C_PATH + "/inc",
         "/usr/include", "/usr/local/include"];

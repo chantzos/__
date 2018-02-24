@@ -784,6 +784,20 @@ class Ved
     (@[Smg.setrcdr, Smg.setrc][qualifier_exists ("dont_draw")]) (Smg, s.ptr[0], s.ptr[1]);
   end
 
+  def __vgetstatus (s) proc
+    s.st_ = stat_file (s._abspath);
+
+    if (NULL == s.st_)
+      s.st_ = struct
+        {
+        st_atime,
+        st_mtime,
+        st_uid = getuid (),
+        st_gid = getgid (),
+        st_size = 0
+        };
+  end
+
   include self from Ved as Ved
 
   def __vfpart_of_word (s, line, col, start) proc
@@ -1235,6 +1249,8 @@ class Ved
     s.ptr[1] = 0;
 
     s._i = s._ii;
+
+    __vgetstatus (s);
 
     s.draw ();
   end
