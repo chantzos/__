@@ -1,3 +1,28 @@
+### Welcome
+This is an unnamed project - a published personal development environment-  
+produced by the will to control the way i'm interacting with a computer  
+  
+The primary intention is not ever to be a public project with the common 
+sense˙ eventually the code will be extracted to outer repositories in an   
+abstracted way that can be used as standalone, as now its closed integrated  
+to this system.
+ 
+Moreover, I can't get the responsibility to expose others to operations that 
+are considered dangerous, as I do not have the required knowledge to cover the   
+possibilities and the corner cases  
+ 
+However, I believe the code can be adopted as it is, especially from slang coders  
+
+But as this can be seen as a specification for a development environment, for 
+people who like Unix and appreciate the power of a command line like interface 
+it has its value and that is the main reason for being public  
+
+I would welcome ideas specific to the specification, though code contribution 
+of course is more than welcomed, but its not the intention, which is primary 
+to stabilize the concepts in my mind too, through writing this README, which 
+is a way to expose the logic in a much more compact way. This is a personal 
+weakness as the thoughts are too many to reduce them and avoid the verbosity 
+
 ## SYNOPSIS
 This application is an implementation of a concept of ideas
 of an ideal computer environment, that is, the user interface,
@@ -6,7 +31,7 @@ itself.
  
 As this can also be seen as a specification, it's also a prototype.
 
-It was developed under a unix like system (linux with no systemd)
+It was developed under a unix like system (linux with no systemd
 Void-Linux at void-linux.eu
 
 It was written in S-Lang, an excellent (with a C like syntax
@@ -80,12 +105,12 @@ called function behavior, or simply because S-Lang really helps on a stable
 interface, because of the function qualifiers, that permit to a function
 to develop logic without changing signature (like the argument number).
 
-In any case its inner code, which anyway has some dependencies to other
-abstracted objects, but in many cases some direct calls are desired,
-especially from code, like readline that is good to know quickly, what
-will do with the input. Of course this can be easily get out of control,
-but as long there is a sync with the outer interface development (good
-named symbols (functions and variables) can help a bit), no harm enough.
+In any case the inner code, which anyway has some dependencies to other
+objects, can do in cases some direct calls, which are desired, especially  
+from code, like readline, that is good to know quickly, what will do with  
+the input. Of course this can be easily get out of control, but as long there  
+is a sync with the outer interface (good named symbols (functions and variables)  
+can help a bit), there is no harm enough to avoid them.
 
 ## Installation
 
@@ -231,7 +256,7 @@ $ROOTDIR/bin/__shell --app=__ --app=git
 
 # up: triggers history completion - doesn't need to be the first
 # char on the command line, which in that case, uses the typed
-# text as a pattern to look up to the history entries)
+# text as a pattern to look up to the history entries
 
 # right/left: can scroll the output text to both directions (this
 # helps with lines that are longer than screen columns, as
@@ -316,7 +341,7 @@ a default based on the settings.
 
 The applications can also have children of other applications
 but which they are tied only with them; those can be detached
-(using CTRL-j) and later can be re-attached, but only throw the
+(using CTRL-j) and later can be re-attached, but only through the
 caller application.
 
 ### The drawing interface
@@ -474,8 +499,8 @@ intensive care on the concepts, as everybody knows, can be fast.
 But, what i'm trying to say is this: for instance, operations on C strings.
 
 Needless to say, that when famous coders disagree about a couple of lines of  
-code, do not wait from people who are self-educating in C at their fifties+,  
-just to use C, as a glue to expose C libraries in slang, to even be sure about  
+code, do not wait from people who are self-educating in C at their fifties+ and    
+just use C as a glue to expose C libraries in slang, to even be sure about  
 best practices on str*() functions and how to use them with safety.  
 
 I've seen, however, uncountable String.* implementations or safe versions  
@@ -490,7 +515,7 @@ faster code that will negligible the usage of the interface.
 
 Its pity to loose a powerful gun like C, because of the lack of expressionism.  
 Even tiny defines like say slang's ifnot, which beautifies the code and helps  
-the mind,  are unacceptable in the C world and ignored as a blasphemy.  
+the mind, are unacceptable in the C world and ignored as a blasphemy.  
 It's still C, people.  
 
 So, this higher interface is already invented by zillion codebases, yet such a  
@@ -649,16 +674,55 @@ It can even play video and music and it understands for navigation
 ~ or // (double slash, as / searchs the buffer), or right-left arrows  
 (i think the navigation within the filesystem is pretty fast), but
 the principal applies. If something is not being used, it can not
-revail code !correctness.  
+reveal code !correctness.  
+
+### X Window Manager
+
+As it has been written, this application offers an X Window management  
+It can be started from a virtual console with the command :Xstart
+or through a Linux console with startx.
+In the latter case the following line should be placed in ~/.xinitrc
+
+```bash
+# replace the ROOTDIR to the actual path
+		exec $ROOTDIR/bin/__xstart
+# and the following change to /usr/bin/startx
+
+enable_xauth0
+
+# i cannot find a way (i think there is not) to disable this 
+# with the invocation, as we do the xauth stuff in the code ourselves  
+```
+
+### As an Interpreter
+This code can execute (almost from everywhere :-) shell code and slang
+code. At this time of writing is ready to execute dynamically C code, so 
+it can safely be considered as the first editor that can do this. This 
+because of the tinycc C compiler, see:
+
+	 http://bellard.org/tcc/
+and upstream's repository at  
+  http://repo.or.cz/tinycc.git
+
+I will integrate soon the code that is already written.
+
+### As a spelling tool using hunspell
+
+Simply in Visual linewise mode press h (h for hunspell)
+or by using :__spell
+
+### Many other operations ...
+... that lefts to be documented and documentation is much harder 
+than the code itself.
 
 ### Principals.
 
 The caller always knows better.
-the user has the responsibility.
+The user has the responsibility.
 ...
 
 ## EPILOGUE
-As it has beef said, still it can't built and maintain, that unix
+As it has been said, still it can't built and maintain, that unix
 like environment. But this knowledge exists, developed by the 
 fellows at linuxfromscratch.org and it feels like as a duty (though
 a pleasant one) to re-initialize the code, but (right now):

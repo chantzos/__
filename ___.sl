@@ -78,10 +78,10 @@ private variable  OPT_EXECUTABLES = [
   "mount", "umount", "findmnt", "file"];
 private variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre", "rand",
-  "iconv", "json", "taglib", "fd", "hunspell"];
+  "iconv", "json", "taglib", "fd", "hunspell", "tcc"];
 private variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
-  "-ltag_c", "", "-lhunspell-1.6"];
+  "-ltag_c", "", "-lhunspell-1.6", "-ltcc"];
 private variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable DEB_FLAGS =
@@ -89,7 +89,7 @@ private variable DEB_FLAGS =
  -Winline -Wmissing-prototypes -Wnested-externs -Wpointer-arith\
  -Wcast-align -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat\
  -Wlogical-op";
-private variable MODULES_THAT_DONT_EXIT_ON_ERR = ["taglib", "hunspell"];
+private variable MODULES_THAT_DONT_EXIT_ON_ERR = ["taglib", "hunspell", "tcc"];
 private variable MODULES_THAT_FAILED = String_Type[0];
 private variable CLASSES = [
   "Input",  "Smg",   "Rand",   "Crypt", "Os",     "Opt",

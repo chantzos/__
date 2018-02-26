@@ -3,11 +3,11 @@ static variable CC = "gcc";
 static variable MODULES = [
   "__", "getkey", "crypto", "curl", "slsmg", "socket", "fork", "pcre",
   "rand", "iconv", "json", "xsrv", "xclient", "xsel", "taglib", "fd",
-  "hunspell"];
+  "hunspell", "tcc"];
 
 static variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
-  "-lX11", "-lX11 -lXtst", "-lX11", "-ltag_c", "", "-lhunspell-1.6"];
+  "-lX11", "-lX11 -lXtst", "-lX11", "-ltag_c", "", "-lhunspell-1.6", "-ltcc"];
 
 static variable DEF_FLAGS =
   "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
