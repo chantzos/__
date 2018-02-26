@@ -1,0 +1,346 @@
+class Tcc
+
+  import tcc
+
+  def tcc_error_handler (msg) public proc
+    IO.tostderr ("caught tcc error", msg);
+  end
+
+  var static SLapi_Types = Assoc_Type[Integer_Type, -1];
+
+  beg
+    SLapi_Types["Undefined_Type"] =  __class_id (Void_Type);
+    SLapi_Types["String_Type"]    =  __class_id (String_Type);
+    SLapi_Types["Integer_Type"]   =  __class_id (Integer_Type);
+    SLapi_Types["Array_Type"]     =  __class_id (Array_Type);
+  end
+
+  def init ()
+    variable s = struct
+      {
+      tcc,
+      new,
+      link_against_library,
+      add_library_path,
+      add_include,
+      add_include_sys_path,
+      add_tcc_path,
+      set_output_type,
+      set_output_file,
+      set_opt,
+      relocate,
+      define,
+      undefine,
+      delete,
+      compile_file,
+      compile_string,
+      run,
+      execute_string,
+      execute_file,
+      sladd_intrinsic_function,
+      sladd_intrinsic_variable,
+      sys_include_path = Devel.get_include_path (),
+      sys_lib_path = Devel.get_library_path (),
+      lib_path = String_Type[0],
+      include_path = String_Type[0],
+      output_type = TCC_OUTPUT_MEMORY,
+      iscompiled = 0,
+      itwasrun = 0,
+      output_file,
+      };
+
+    s.new = funref (`
+        (s)
+      ifnot (NULL == s.tcc)
+        ifnot (qualifier_exists ("delete"))
+          return -1;
+        else
+          s.delete ();
+
+      s.tcc = tcc_new ();
+      if (NULL == s.tcc)
+        return -1;
+
+      s.add_tcc_path ("/usr/local/lib/tcc");
+
+      variable i;
+      _for i (0, length (s.sys_include_path) - 1)
+        if (-1 == s.add_include_sys_path (s.sys_include_path[i]))
+          return -1;
+
+      _for i (0, length (s.sys_lib_path) - 1)
+        if (-1 == s.add_library_path (s.sys_lib_path[i]))
+          return -1;
+
+      if (-1 == s.link_against_library ("slang"))
+        return -1;
+
+      0;`);
+
+    s.link_against_library = funref (`
+          (s, lib)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      tcc_set_path (s.tcc, lib, TCC_ADD_LIB);`);
+
+    s.add_library_path = funref (`
+          (s, path)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      tcc_set_path (s.tcc, path, TCC_ADD_LPATH);`);
+
+    s.add_include = funref (`
+          (s, path)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      tcc_set_path (s.tcc, path, TCC_ADD_INC_PATH);`);
+
+    s.add_include_sys_path = funref (`
+          (s, path)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      tcc_set_path (s.tcc, path, TCC_ADD_SYS_INC_PATH);`);
+
+    s.add_tcc_path = funref (`
+          (s, path)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return;
+
+      () = tcc_set_path (s.tcc, path, TCC_CONFIG_TCC_DIR);`);
+
+    s.set_output_type = funref (`
+          (s, type)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      ifnot (tcc_set_output_type (s.tcc, type))
+        s.output_type = type;
+      else
+        return -1;
+
+      0;`);
+
+    s.set_output_file = funref (`
+          (s, file)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      if (NULL == file)
+        return -1;
+
+      variable tmp, p;
+      ifnot (path_is_absolute (file))
+        {
+        p = qualifier ("output_dir", getcwd);
+
+        if (NULL == (p = realpath (p), p))
+          return -1;
+
+        file = path_concat (p, file);
+        }
+      else
+        if (NULL == (p = realpath (file), p))
+          if (NULL == (p = realpath (path_dirname (file)), p))
+            return -1;
+          else
+            file = path_concat (p, path_basename (file));
+        else
+          file = p;
+
+      ifnot (access (file, F_OK))
+        ifnot (qualifier_exists ("overwrite"))
+          return -1;
+
+      ifnot (tcc_set_output_file (s.tcc, file))
+        s.output_file = file;
+      else
+        return -1;
+
+      0;`);
+
+    s.set_opt = funref (`
+          (s, opt)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return;
+
+      tcc_set_opt (s.tcc, opt);`);
+
+    s.delete = funref (`
+          (s)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return;
+
+      tcc_delete (s.tcc);
+      s.tcc = NULL;`);
+
+    s.compile_string = funref (`
+          (s, cbuf)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      variable isexe = qualifier_exists ("create_exe");
+
+      if (isexe)
+        if (-1 == s.set_output_type (TCC_OUTPUT_EXE))
+          return -1;
+        else {}
+      else
+        if (-1 == s.set_output_type (TCC_OUTPUT_MEMORY))
+          return -1;
+
+      ifnot (0 == tcc_compile_string (s.tcc, cbuf))
+        return -1;
+
+      if (isexe)
+        {
+        s.set_opt ("-xn");
+
+        if (-1 == s.set_output_file (qualifier ("output_file");;
+            __qualifiers))
+          return -1;
+        }
+
+      s.iscompiled = (0 == isexe);
+      0;`);
+
+    s.compile_file = funref (`
+          (s, file)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      if (-1 == access (file, F_OK|R_OK))
+        return -1;
+
+      variable isexe = qualifier_exists ("create_exe");
+
+      if (isexe)
+        if (-1 == s.set_output_type (TCC_OUTPUT_EXE))
+          return -1;
+        else {}
+      else
+        if (-1 == s.set_output_type (TCC_OUTPUT_MEMORY))
+          return -1;
+
+      if (-1 == tcc_compile_file (s.tcc, file))
+        return -1;
+
+      if (isexe)
+        {
+        % this is to set s.tcc->filetype to AFF_TYPE_NONE
+        % otherwise elf_output_file() -> tcc_add_runtime() tries to compile  
+        % /usr/local/lib/tcc/libtcc1.a
+        % when it calls tcc_add_support(s1, TCC_LIBTCC1);
+        s.set_opt ("-xn");
+
+        if (-1 == s.set_output_file (qualifier ("output_file");;
+             __qualifiers))
+          return -1;
+        }
+
+      s.iscompiled = (0 == isexe);
+      0;`);
+
+    s.run = funref (`
+          (s, argv)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      if (s.itwasrun)
+        return -1;
+
+      ifnot (s.iscompiled)
+        return -1;
+
+      tcc_run (s.tcc, argv);
+      s.itwasrun = 1;
+      `);
+
+    s.execute_string = funref (`
+          (s, cbuf, argv)
+      if (-1 == s.compile_string (cbuf))
+        return -1;
+
+      s.itwasrun = 0;
+      s.run (argv);`);
+
+    s.execute_file = funref (`
+          (s, file, argv)
+      if (-1 == s.compile_file (file))
+        return -1;
+
+      s.itwasrun = 0;
+      s.run (argv);`);
+
+    s.relocate = funref (`
+          (s)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return -1;
+
+      tcc_relocate (s.tcc);`);
+
+    s.define = funref (`
+          (s, sym, value)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return;
+
+      tcc_define_symbol (s.tcc, sym, value);`);
+
+    s.undefine = funref (`
+          (s, sym)
+      if (NULL == s.tcc || typeof (s.tcc) != TCC_Type)
+        return;
+
+      tcc_undefine_symbol (s.tcc, sym);`);
+
+    s.sladd_intrinsic_variable = funref (`
+          (s, vname, sym, rettype, cbuf)
+      ifnot (0 == is_defined (vname))
+        return -1;
+
+      rettype = SLapi_Types[string (rettype)];
+      if (-1 == rettype)
+        return -1;
+
+      if (-1 == s.compile_string (cbuf))
+        return -1;
+
+      if (-1 == sladd_variable (s.tcc, vname, sym, rettype;;__qualifiers))
+        return -1;
+
+      is_defined (vname) == -1 ? 0 : -1;
+      `;ns = "Tcc");
+
+    s.sladd_intrinsic_function = funref (`
+          (s, funm, nargs, sym, rettype, argtypes, cbuf)
+      ifnot (0 == is_defined (funm))
+        return -1;
+
+      variable arg_types = Integer_Type[length (argtypes)];
+      variable i;
+       _for i (0, length (argtypes) - 1)
+         arg_types[i] = SLapi_Types[string (argtypes[i])];
+
+      rettype = SLapi_Types[string (rettype)];
+      if (-1 == rettype)
+        return -1;
+
+      if (-1 == s.compile_string (cbuf))
+        return -1;
+
+      if (-1 == sladd_function (arg_types, s.tcc, funm, sym, rettype, nargs))
+        return -1;
+
+      is_defined (funm) == 1 ? 0 : -1;
+      `;ns = "Tcc");
+
+    ifnot (qualifier_exists ("no_init"))
+      if (-1 == s.new ())
+        return NULL;
+
+    s;
+  end
+end
