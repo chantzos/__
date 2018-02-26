@@ -15,13 +15,14 @@ However, I believe the code can be adopted as it is, especially from slang coder
 
 But as this can be seen as a specification for a development environment, for 
 people who like Unix and appreciate the power of a command line like interface 
-it has its value and that is the main reason for being public  
+it has its value and that is the main reason for being public.  
 
 I would welcome ideas specific to the specification, though code contribution 
 of course is more than welcomed, but its not the intention, which is primary 
 to stabilize the concepts in my mind too, through writing this README, which 
-is a way to expose the logic in a much more compact way. This is a personal 
-weakness as the thoughts are too many to reduce them and avoid the verbosity 
+is a way to formalize the logic and finally produce a much more compact document.   
+This is a personal weakness as the thoughts are too many to reduce them and avoid  
+the verbosity. 
 
 ## SYNOPSIS
 This application is an implementation of a concept of ideas
