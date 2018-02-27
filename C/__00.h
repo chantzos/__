@@ -5,3 +5,5 @@
   for (;;) {            \
     __VA_ARGS__         \
 }
+
+#define EVALSTRING(...) #__VA_ARGS__

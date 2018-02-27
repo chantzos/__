@@ -1593,7 +1593,34 @@ class Ved
         {new = fun (`loop (_NARGS) pop; NULL;`).__funcref}};
   end
 
-  subclass Spell from Ved
+  subclass Lingual from Ved
+
+  def __vhandle_word__ (s) proc
+    variable rl = Rline.init (NULL;pchar = "");
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
+
+    variable names = ["translate"];
+
+    () = Rline.commandcmp (rl, names;already_filtered,
+      help = [
+        "translate current word"
+        ]);
+
+    ifnot (strlen (rl.argv[0]))
+      {
+      s.draw ();
+      return;
+      }
+
+    switch (rl.argv[0])
+      {
+      case "translate":
+        Ved.Lingual.translate (s);
+
+      s.draw ();
+      }
+  end
 
   def init_search_hist () proc
     variable ar = NULL;
@@ -2315,6 +2342,7 @@ class Ved
     VED_PAGER[string ('*')]            = &__search_word__;
     VED_PAGER[string ('n')]            = &__search_last__;
     VED_PAGER[string ('N')]            = &__search_last__;
+    VED_PAGER[string ('W')]            = &__vhandle_word__;
     VED_PAGER[string ('\t')]           = &pag_completion;
     VED_PAGER[string ('\r')]           = &__pg_on_carriage_return;
     VED_PAGER[string ('`')]            = &__gotomark__;

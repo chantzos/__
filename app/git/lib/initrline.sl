@@ -1,7 +1,5 @@
-private define __status_header__ ()
-{
+private variable __status_header__ =
   "                      [STATUS]\n";
-}
 
 private define __write_std__ ()
 {

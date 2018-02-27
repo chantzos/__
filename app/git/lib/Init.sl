@@ -167,20 +167,23 @@ public define init_git ()
   __init_me__ ();
 
   variable default, found_repo = 0;
-  (default, ) = Opt.Arg.compare ("--repo=", &This.has.argv;ret_arg, del_arg);
+  default = Opt.Arg.getlong_val ("repo", "dir", &This.has.argv;ret_arg, del_arg);
 
   loop (1)
     {
     ifnot (NULL == default)
-      {
-      default = strchop (default, '=', 0);
-      if (length (default) == 2)
-        ifnot (setrepo (default[1]))
-          {
-          found_repo = 1;
-          break;
-          }
-      }
+      ifnot (setrepo (default))
+        {
+        found_repo = 1;
+        break;
+        }
+
+    if (length (This.has.argv) > 1)
+      ifnot (setrepo (This.has.argv[1]))
+        {
+        found_repo = 1;
+        break;
+        }
 
     ifnot (access (This.is.my.datadir + "/default.txt", F_OK|R_OK))
       {

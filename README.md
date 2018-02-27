@@ -1,17 +1,17 @@
 ### Welcome
-This is an unnamed project - a published personal development environment-  
-produced by the will to control the way i'm interacting with a computer  
+This is an unnamed project - a published personal development environment -  
+produced by the will to control the way i'm interacting with a computer.  
   
-The primary intention is not ever to be a public project with the common 
+The primary intention is not ever to be a public project with the common  
 sense˙ eventually the code will be extracted to outer repositories in an   
 abstracted way that can be used as standalone, as now its closed integrated  
 to this system.
  
-Moreover, I can't get the responsibility to expose others to operations that 
+Moreover, I can't get the responsibility to expose others to operations that  
 are considered dangerous, as I do not have the required knowledge to cover the   
-possibilities and the corner cases  
+possibilities and the corner cases.  
  
-However, I believe the code can be adopted as it is, especially from slang coders  
+However, I believe the code can be adopted as it is, especially from slang coders.  
 
 But as this can be seen as a specification for a development environment, for 
 people who like Unix and appreciate the power of a command line like interface 
@@ -106,7 +106,7 @@ called function behavior, or simply because S-Lang really helps on a stable
 interface, because of the function qualifiers, that permit to a function
 to develop logic without changing signature (like the argument number).
 
-In any case the inner code, which anyway has some dependencies to other
+In any case the inner code, which anyway has some dependencies to other  
 objects, can do in cases some direct calls, which are desired, especially  
 from code, like readline, that is good to know quickly, what will do with  
 the input. Of course this can be easily get out of control, but as long there  
@@ -679,9 +679,9 @@ reveal code !correctness.
 
 ### X Window Manager
 
-As it has been written, this application offers an X Window management  
-It can be started from a virtual console with the command :Xstart
-or through a Linux console with startx.
+As it has been written, this application offers an X Window management.  
+It can be started from a virtual console with the command :Xstart  
+or through a Linux console with startx.  
 In the latter case the following line should be placed in ~/.xinitrc
 
 ```bash
@@ -691,8 +691,8 @@ In the latter case the following line should be placed in ~/.xinitrc
 
 enable_xauth0
 
-# i cannot find a way (i think there is not) to disable this 
-# with the invocation, as we do the xauth stuff in the code ourselves  
+# i cannot find a way (i think there is not) to disable this with the invocation,  
+as we do the xauth stuff in the code ourselves.  
 ```
 
 ### As an Interpreter
@@ -703,6 +703,7 @@ because of the tinycc C compiler, see:
 
 	 http://bellard.org/tcc/
 and upstream's repository at  
+
   http://repo.or.cz/tinycc.git
 
 I will integrate soon the code that is already written.

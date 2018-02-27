@@ -1,6 +1,7 @@
-subclass Spell
+subclass Lingual
   __init__
     spell
+    translate
   end
 
   var ACCEPTED = String_Type[0];
@@ -178,5 +179,40 @@ subclass Spell
       }
 
     ar;
+  end
+
+  def translate (s)
+    variable lang = qualifier ("lang", "");
+    variable dict = qualifier ("dict",
+        Env->USER_DATA_PATH + "/dict/" + (strlen (lang)
+          ? lang + "_"
+          : "")
+      + "dict.txt");
+
+    if (-1 == access (dict, F_OK|R_OK))
+      return;
+
+    variable
+      pat,
+      start,
+      end,
+      col = s._index,
+      line = __vline (s, '.'),
+      word = __vfind_word (s, line, col, &start, &end);
+
+    if (NULL == (pat = Re.compile (word), pat))
+      return;
+
+    variable ar = File.readlines (dict);
+    if (NULL == ar)
+      return;
+
+    ar = ar[where (array_map (Integer_Type, &pcre_exec, pat, ar))];
+
+    ifnot (length (ar))
+      return;
+
+    () = File.write (@__get_reference ("SCRATCH"), ar);
+    (@__get_reference ("__scratch"))   (Ved.get_cur_buf ());
   end
 end

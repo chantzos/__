@@ -406,7 +406,7 @@ subclass Visual
 
       if ('h' == chr)
         {
-        lines = Ved.Spell.spell (vs.lines);
+        lines = Ved.Lingual.spell (vs.lines);
         ifnot (anynot (lines == vs.lines))
           break;
 
