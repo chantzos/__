@@ -557,7 +557,7 @@ public define funref ()
     Exc.print (e);
 }
 
-public define funcall ()
+public define frun ()
 {
   variable e, f;
   try (e)
@@ -577,10 +577,10 @@ public define funcall ()
     Exc.print (e);
 }
 
-% unsafe interface - there is no any kind of check
-% evaluation buffer < filename
+% unsafe interface - there is no any kind of check,
+% input (for the evaluation buffer) comes from filename
+
 % first an unsafe readfile
-%
 private variable readfile = funref (``
   envbeg private variable fd, buf, str; envend
     fd = open ((), O_RDONLY);
@@ -599,7 +599,7 @@ public define unfun ()
       struct {@__qualifiers, unhandled});
 }
 
-public define unrun ()
+public define unfrun ()
 {
   variable f = __function__ ((@readfile) ();;
       struct {@__qualifiers, as = __anon_name__, unhandled});
@@ -608,7 +608,7 @@ public define unrun ()
   f.__destroy ();
 }
 
-public define unref ()
+public define unfref ()
 {
   __function__ ((@readfile) ();;
       struct {@__qualifiers, unhandled}).__funcref;

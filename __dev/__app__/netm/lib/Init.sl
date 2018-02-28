@@ -3,7 +3,7 @@ public variable MY;
 Type.set ("My",`
   Rline,
   runpath = This.is.my.tmpdir + "/../run",
-  conf = "$HOME/__/usr/data/netm/"$ + Env->USER,
+  conf = This.is.my.datadir + "/" + Env->USER,
   pidfile,
   passwd_timeout = 7200,
   scan_interval = 10,

@@ -609,7 +609,7 @@ Normally the following is not valid (because "if" is a statement):
  
 But by using the function interface, we can get the desired result:
 ```C
-  variable v = funcall (cond, `(arg) if (arg) 1; else 0;`);
+  variable v = frun (cond, `(arg) if (arg) 1; else 0;`);
 ```
 The string inside the backquote characters is evaluated at runtime.
 It's like an unnamed function syntax without the braces:

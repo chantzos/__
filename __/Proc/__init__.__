@@ -424,7 +424,7 @@ class Proc
   end
 
   beg
-    funcall (&get_max_pipe_capacity, `
+    frun (&get_max_pipe_capacity, `
        (fun)
       variable fda, fdb;
       (fda, fdb) = pipe ();

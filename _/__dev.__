@@ -4,7 +4,7 @@ DEV_OPTS["slang"] = 1;
 DEV_OPTS["F"]     = 0;
 
 ifnot (access (Env->LOCAL_LIB_PATH + "/__devel__/__devel_opts__.__", F_OK|R_OK))
-  funcall (DEV_OPTS, File.read (Env->LOCAL_LIB_PATH +
+  frun (DEV_OPTS, File.read (Env->LOCAL_LIB_PATH +
     "/__devel__/__devel_opts__.__"));
 
 public define __init_devel ()

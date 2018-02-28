@@ -95,7 +95,7 @@ class Devel
 
     a = a[wherenot (_isnull (a))];
     ifnot (qualifier_exists ("recursive"))
-      return (funcall (get_library_path (NULL;;__qualifiers), a, f), a);
+      return (frun (get_library_path (NULL;;__qualifiers), a, f), a);
   end
 
   def is_obj_depends_on (obj, lib)

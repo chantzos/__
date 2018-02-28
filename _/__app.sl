@@ -13,7 +13,7 @@ public define exit_me (x)
     This.at_exit ();
 
   if (This.on.exit.clean_tmp && __is_initialized (&Dir))
-    funcall (`
+    frun  (`
       envbeg
         variable w, i, dirlist = {}, filelist = {};
 
@@ -66,7 +66,7 @@ This.is.at.session = getenv ("SESSION");
 if (NULL == This.is.child)
   This.is.also = [This.is.also, "PARENT"];
 
-This.is.me = funcall (NULL != This.is.child, `
+This.is.me = frun (NULL != This.is.child, `
     (ischild)
   [(NULL == This.is.at.session ? "MASTER" : "PARENT"),
    "CHILD"][ischild];
@@ -97,7 +97,7 @@ This.at_exit = &__exit;
 
 Class.load ("I";force);
 
-This.request.X = funcall (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
+This.request.X = frun (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
   `(nox)
   [0 == access (Env->STD_C_PATH + "/xsrv-module.so", F_OK), 0][nox];
 `);
@@ -142,7 +142,7 @@ if (NULL == This.is.my.histfile)
   This.is.my.histfile = Env->USER_DATA_PATH + "/.__" + Env->USER +
     "_" + This.is.my.name + "history";
 
-funcall (String_Type[0], NULL, NULL,
+frun (String_Type[0], NULL, NULL,
 `       (ar, tok, i)
   ar = File.readlines (Env->STD_DATA_PATH + "/genconf/conf");
 
@@ -166,7 +166,7 @@ funcall (String_Type[0], NULL, NULL,
     }
 `);
 
-funcall (`
+frun (`
   ifnot (assoc_key_exists (This.is.my.settings, "PASSWD_TIMEOUT"))
     return;
 
@@ -194,13 +194,13 @@ if (-1 == Dir.make_parents (strreplace (This.is.my.datadir + "/config",
 
 static variable enable = struct
   {
-  devel = fun (`
+  devel = funref (`
     envbeg public define __init_devel (); envend
     (self)
     Load.file (Env->SRC_PROTO_PATH + "/__dev.__");
     __init_devel ();
-    `).__funcref,
-  profile = fun (`
+    `),
+  profile = funref (`
     (self)
     if (NULL == This.request.profile)
       ifnot (qualifier_exists ("set"))
@@ -213,11 +213,11 @@ static variable enable = struct
     else
       ifnot (access (Env->STD_CLASS_PATH + "/__profile.sl", F_OK|R_OK))
         Load.file (Env->STD_CLASS_PATH + "/__profile.sl", "__");
-  `).__funcref,
-  debug = fun (`
+  `),
+  debug = funref (`
     (self)
     This.request.debug = 1;
-    `).__funcref,
+    `),
   };
 
 _ -> enable.profile ();
@@ -990,7 +990,7 @@ private define __builtins__ (a)
       Class.load ("Fm");
 
     a["__fm"] = @Argvlist_Type;
-    a["__fm"].func = fun (`
+    a["__fm"].func = funref (`
         (argv)
       variable dir;
 
@@ -1001,13 +1001,13 @@ private define __builtins__ (a)
       variable fn = Class.__funcref__ ("Fm", "init");
       variable fm = (@fn) ((@__get_reference ("Fm")));
       () = fm.exec (dir);
-      `).__funcref;
+      `);
     }
 
   if (This.request.net) % development
     {
     a["__net"] = @Argvlist_Type;
-    a["__net"].func = fun (`
+    a["__net"].func = funref (`
         (argv)
       variable args = (1 < length (argv)
         ? " " + strjoin (argv, " ")
@@ -1015,7 +1015,7 @@ private define __builtins__ (a)
 
       __system ([Env->SRC_PATH + "/__dev/__app__/netm.__ " +
         Env->ROOT_PATH + args];return_on_completion);
-      `).__funcref;
+      `);
     }
 
   if (This.system."supports?"["hunspell"])
@@ -1026,7 +1026,7 @@ private define __builtins__ (a)
 
   variable lbuiltin = Env->LOCAL_LIB_PATH + "/__builtin__/__funs.__";
   ifnot (access (lbuiltin, F_OK|R_OK))
-    funcall (a, File.read (lbuiltin));
+    unfrun (a, lbuiltin);
 }
 
 public define __filtercommands (s, ar, chars)
@@ -1093,7 +1093,7 @@ public define init_commands ()
 {
   variable i, c, ii,
     a = Assoc_Type[Argvlist_Type, @Argvlist_Type],
-    ref = fun (`(argv) Com.execute (argv;;__qualifiers);`).__funcref,
+    ref = funref (`(argv) Com.execute (argv;;__qualifiers);`),
     ex = qualifier_exists ("ex"),
     d = [Env->STD_COM_PATH, Env->USER_COM_PATH];
 
@@ -1129,6 +1129,10 @@ public define init_commands ()
   X.comlist (a);
 
   __builtins__ (a);
+
+  c = Env->LOCAL_LIB_PATH + "/__app__/rline/" + This.is.my.name + ".__";
+  ifnot (access (c, F_OK|R_OK))
+    unfrun (a, c);
 
   a;
 }
@@ -1219,7 +1223,7 @@ private define __rehash__ ()
 
 UNDELETABLE = [UNDELETABLE, SPECIAL];
 
-Com.let ("COMMANDS_FOR_PAGER", funcall (`
+Com.let ("COMMANDS_FOR_PAGER", frun (`
     strtok (This.is.my.settings["COMMANDS_FOR_PAGER"], ",");`));
 
 if (This.has.other_apps)
@@ -1231,7 +1235,7 @@ Smg.init ();
 
 Input.init ();
 
-This.on.sigwinch = fun (`
+This.on.sigwinch = funref (`
     (sig)
   signal (sig, This.on.sigwinch);
 
@@ -1259,7 +1263,7 @@ This.on.sigwinch = fun (`
   Input.init ();
 
   Ved.handle_sigwinch ();
-  `).__funcref;
+  `);
 
 public define sigint_handler ();
 public define sigint_handler (sig)
@@ -1288,7 +1292,7 @@ if (This.has.sigint)
 
 This.err_handler = &__err_handler__;
 
-funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
+frun (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
 `       (path, app)
   ifnot (access (path + "/__app__.slc", F_OK|R_OK))
     Load.file (path + "/__app__.slc");
@@ -1302,7 +1306,7 @@ funcall (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
 
 (@__get_reference ("__init_" + This.is.my.name));
 
-funcall (`
+frun (`
   variable f;
   while (
     f = Opt.Arg.getlong_val ("command", NULL, &This.has.argv;del_arg),

@@ -528,7 +528,7 @@ public define fun ()
     Exc.print (e);
 }
 
-public define funcall ()
+public define frun ()
 {
   variable e, f;
   try (e)

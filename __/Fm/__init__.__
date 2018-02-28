@@ -366,7 +366,7 @@ class Fm
       return list;
 
     variable
-      type = funcall (sort,
+      type = frun (sort,
         `  (sort)
           switch (sort)
             {case "name": return Null_Type;}
@@ -467,7 +467,7 @@ class Fm
   end
 
   def __exec__ (self, dir) proc
-    dir = funcall (dir,
+    dir = frun (dir,
       `  (dir)
         if (any ([".", "./"] == dir))
           getcwd;
