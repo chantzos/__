@@ -22,6 +22,8 @@ public define Type ();
 
 __use_namespace ("__F__");
 
+% the state should reset at any invocation on success or on error
+% or else is a bug
 static variable __DATA__;
 private variable __f__;
 private variable __fun__;
@@ -88,7 +90,7 @@ private define __ferror__ (e)
   variable handler;
 
   if (NULL == (handler = qualifier ("err_handler"), handler))
-    if (NULL == (handler = __get_reference ("__FError_Handler"), handler))
+    if (NULL == (handler = __get_reference ("F_ERROR_HANDLER"), handler))
       handler = &__my_err_handler__;
 
   if (Ref_Type == typeof (handler))
@@ -104,6 +106,7 @@ private define declare__ ()
   variable buf = __scope__ + " define " +  __as__;
   variable args = qualifier ("args", String_Type[0]);
 
+  % can be used for declarations
   ifnot (__len__)
     return buf + " (" + strjoin (args, ", ") + ");";
 
@@ -112,6 +115,7 @@ private define declare__ ()
       qualifier ("fun", "") + "  ";
 
   if (__len__ > 4)
+    % there are more to catch - this is weakness
     if (any (0 == array_map (Integer_Type, &strncmp, __fun__,
        ["() =", "()="], [4, 3])))
         return buf + " (" + strjoin (args, ", ") + ")\n{\n" +
@@ -172,6 +176,9 @@ private define __eval_fun__ ()
 
 static define __call ()
 {
+  % todo: make a pop that returns the popped
+  %       see if _NARGS is equalinvment to stkdepth
+  %       stack[last]
   variable args = __pop_list (_NARGS - 1);
   variable f = ();
 
@@ -291,6 +298,7 @@ private define __find_env__ ()
 
 private define __free_slot__ ()
 {
+  % this code can be easily done in C?
   ifnot (NULL == (__fid__ = wherefirst (__slots__), __fid__))
     return (__slots__[__fid__] = 0, __fid__);
 
@@ -554,13 +562,56 @@ public define funcall ()
   variable e, f;
   try (e)
     {
-    f = __function__ (;as = __anon_name__, print_err);
+    f = __function__ (;; struct
+        {
+        @__qualifiers,
+        as = __anon_name__,
+        print_err
+        });
+
     (@f.__funcref) (;;__qualifiers);
     f.__destroy ();
 %    eval ("private define " + __anon_name__ + " ();", __anon_name__);
     }
   catch AnyError:
     Exc.print (e);
+}
+
+% unsafe interface - there is no any kind of check
+% evaluation buffer < filename
+% first an unsafe readfile
+%
+private variable readfile = funref (``
+  envbeg private variable fd, buf, str; envend
+    fd = open ((), O_RDONLY);
+    str = "";
+
+    while (read (fd, &buf, 4096) > 0)
+      str += buf;
+
+    fd = NULL;
+    buf = NULL;
+    __tmp (str);``;unhandled);
+
+public define unfun ()
+{
+  __function__ ((@readfile) ();;
+      struct {@__qualifiers, unhandled});
+}
+
+public define unrun ()
+{
+  variable f = __function__ ((@readfile) ();;
+      struct {@__qualifiers, as = __anon_name__, unhandled});
+
+  (@f.__funcref) (;;__qualifiers);
+  f.__destroy ();
+}
+
+public define unref ()
+{
+  __function__ ((@readfile) ();;
+      struct {@__qualifiers, unhandled}).__funcref;
 }
 
 public define subclass (name)

@@ -1,9 +1,10 @@
 ### Welcome
 This is an unnamed project - a published personal development environment -  
-produced by the will to control the way i'm interacting with a computer.  
+produced by an uncontrollable will to control the way a human being interacts  
+with a computer.  
   
 The primary intention is not ever to be a public project with the common  
-sense˙ eventually the code will be extracted to outer repositories in an   
+sense; eventually the code will be extracted to outer repositories in an   
 abstracted way that can be used as standalone, as now its closed integrated  
 to this system.
  
@@ -14,8 +15,8 @@ possibilities and the corner cases.
 However, I believe the code can be adopted as it is, especially from slang coders.  
 
 But as this can be seen as a specification for a development environment, for 
-people who like Unix and appreciate the power of a command line like interface 
-it has its value and that is the main reason for being public.  
+people who like Unix and appreciate the power of a command line like interface, 
+I believe has a value and that is the main reason for being public.  
 
 I would welcome ideas specific to the specification, though code contribution 
 of course is more than welcomed, but its not the intention, which is primary 
@@ -32,7 +33,7 @@ itself.
  
 As this can also be seen as a specification, it's also a prototype.
 
-It was developed under a unix like system (linux with no systemd
+It was developed under a unix like system (linux with no systemd)  
 Void-Linux at void-linux.eu
 
 It was written in S-Lang, an excellent (with a C like syntax
@@ -697,9 +698,9 @@ as we do the xauth stuff in the code ourselves.
 
 ### As an Interpreter
 This code can execute (almost from everywhere :-) shell code and slang
-code. At this time of writing is ready to execute dynamically C code, so 
-it can safely be considered as the first editor that can do this. This 
-because of the tinycc C compiler, see:
+code. But, at the time of writing is ready to execute dynamically C code, so 
+it can safely be considered as the first editor that I know of that can do  
+this :-). This because of the tinycc C compiler, see:
 
 	 http://bellard.org/tcc/
 and upstream's repository at  
