@@ -512,6 +512,7 @@ beg
       pos = This.is.ved
         ? cur.ptr
         : NULL,
+      reread = (0 == This.is.ved),
       @__qualifiers
       };
 

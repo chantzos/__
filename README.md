@@ -664,11 +664,11 @@ hasn't been developed enough, but which should be functional,
 like the __netm and __fm functions.
 
 The first one offers the minimum code, for wifi managment  
-(uses wpa-supplicant, dhcpcd, iw, ip).  
+(uses wpa-supplicant, dhcpcd, iw, ip). It works for me.
 
 fm (for file manager) its a couple of hours work, and is being  
 used mainly to collect (tag) files (with space) for removal from  
-a messy directory (like mutt executing the tagged files with ;)  
+a messy directory (like mutt, execute the tagged files with ";")  
 
 But it can also display pdfs (using apvlv), images (using feh),  
 edit files (using ved) and extract archives.  
@@ -715,13 +715,23 @@ Simply in Visual linewise mode press h (h for hunspell)
 or by using :__spell
 
 ### Many other operations ...
-... that lefts to be documented and documentation is much harder 
-than the code itself.
+... that left to be documented and documentation is much harder 
+than the code itself. Its hard, hard, hard. (I would pay for it (<:),  
+who said that? A guy that doesn't own one! penny to buy a meat-ball¹.
+how sad, sad, sad, to be mad, mad, mad..., but we'r gonna have those
+balls (and they don't have to be meat), no need for pennies) and we'll  
+be glad, glad, glad...  
 
 ### Principals.
 
 The caller always knows better.
+
 The user has the responsibility.
+
+Be brave (stolen from the git logs of the edbrowse² repository - a brave  
+man indeed - when he wrote blindly (i think they call it css :) something  
+that usually is written in js if IRC anyway), that thing in C).
+He is one of our today's super heroes and I bow my hat kindly.
 ...
 
 ## EPILOGUE
@@ -761,3 +771,7 @@ Special thanks to John E. Davis who wrote S-Lang, but and to all (uncountable)
 contributors around this enormous open source ecosystem (which this model
 is the reason that produced this tremendous amount of code and this super
 fast code evolution, unbelievable for that short time that happened).
+
+### FOOTNOTES
+¹. Josh White - one meat ball
+². git://github.com/CMB/edbrowse.git

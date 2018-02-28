@@ -387,7 +387,8 @@ class App
     App.scratch (ved;;__qualifiers);
 
     VED_WIND_NEEDS_DRAW = 0;
-    Ved.draw_wind ();
+    Ved.draw_wind (;;struct {
+      reread = 0, @__qualifiers});
   end
 
   def __messages () public proc
@@ -395,7 +396,8 @@ class App
     variable cbname = Ved.get_cur_buf ()._abspath;
     __viewfile  (ERR_VED, "MSG", NULL, NULL);
     Ved.setbuf (cbname);
-    Ved.draw_wind (;reread = 0);
+    Ved.draw_wind (;;struct {
+      reread = 0, @__qualifiers});
   end
 
   def __system (lines) public proc
