@@ -11,10 +11,10 @@ subclass Visual
     l_mode, l_down, l_up, l_page_up, l_page_down,
     l_keys = ['c', 'w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', 'h',
       Input->DOWN, Input->UP, Input->PPAGE, Input->NPAGE, Input->CTRL_f,
-      Input->CTRL_b, Input->HOME, '!', '$'],
+      Input->CTRL_b, Input->HOME, '!', '$', 'X'],
     c_mode, c_left, c_right,
     c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT,
-      '!', '$'],
+      '!', '$', 'X'],
     bw_mode, bw_down, bw_up, bw_left, bw_right, bw_maxlen,
     bw_keys = ['x', 'I', 'i', 'd', 'y', 't', 'r', 'c', Input->DOWN,
       Input->UP, Input->RIGHT, Input->LEFT],
@@ -486,6 +486,12 @@ subclass Visual
         return;
         }
 
+      if ('X' == chr)
+        {
+        seltoXClipboard (vs.lines);
+        break;
+        }
+
       if ('s' == chr)
         {
         variable rl = Ved.get_cur_rline ();
@@ -703,6 +709,12 @@ subclass Visual
         sel = strjoin (vs.sel, "\n");
         Ved.Reg.set (reg, sel;msg = "visual lines yanked and ");
         seltoX (sel);
+        break;
+        }
+
+      if ('X' == chr)
+        {
+        seltoXClipboard (vs.sel);
         break;
         }
 

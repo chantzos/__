@@ -65,6 +65,20 @@ class X
     a[f].func = &Xstart;
   end
 
+  def seltoXClipboard (sel) public proc
+    ifnot (This.is.at.X)
+      return;
+
+    if (Array_Type == typeof (sel))
+      sel = strjoin (sel, "\n");
+
+    ifnot (strlen (sel))
+      return;
+
+    () = system (Sys->SLSH_BIN + " " + Env->STD_LIB_PATH +
+        "/X/seltoXclipboard.slc \"" + sel + "\"");
+  end
+
   def seltoX (sel) public proc
     ifnot (This.is.at.X)
       return;

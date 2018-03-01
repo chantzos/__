@@ -410,7 +410,6 @@ static void become_daemon (void)
       exit_err ("error duplicating logfile %s on stderr", logfile);
 
   set_daemon_timeout ();
-  print_debug (D_TRACE, "forking");
 }
 
 /*
@@ -1518,7 +1517,7 @@ static void set_selection (Atom selection, unsigned char *sel)
 
   if (False == own_selection (selection))
     return;
-int ii = 0;
+
   for (;;)
     {
     /* Flush before unblocking signals so we send replies before exiting */
@@ -1527,29 +1526,23 @@ int ii = 0;
     XNextEvent (dpy, &event);
     block_exit_sigs ();
 
-print_debug (D_TRACE, "catching events at %d", ii++);
     switch (event.type)
       {
       case SelectionClear:
-print_debug (D_TRACE, "clear  at %d", ii++);
         if (event.xselectionclear.selection == selection)
           return;
-print_debug (D_TRACE, "aget clear  at %d", ii++);
         break;
 
       case SelectionRequest:
-print_debug (D_TRACE, "request  at %d", ii++);
         if (event.xselectionrequest.selection != selection)
           break;
 
         if (!handle_selection_request (event, sel))
           return;
 
-print_debug (D_TRACE, "aget reqyuest  at %d", ii++);
         break;
 
       case PropertyNotify:
-print_debug (D_TRACE, "notifu  at %d", ii++);
         if (event.xproperty.state != PropertyDelete)
           break;
 
@@ -1561,7 +1554,6 @@ print_debug (D_TRACE, "notifu  at %d", ii++);
         break;
 
       default:
-print_debug (D_TRACE, "break  at %d", ii++);
         break;
       }
     }
@@ -1586,7 +1578,6 @@ set_selection_daemon (Atom selection, unsigned char *sel)
     }
 
   become_daemon ();
-  print_debug (D_TRACE, "continue age forking");
   set_selection (selection, sel);
 }
 

@@ -129,9 +129,7 @@ class Ved
     "";
   end
 
-  def seltoX (sel) public proc
-  end
-
+  decl public seltoX, seltoXClipboard
   decl public  __console, __vline, __vfind_word
   decl get_cur_buf
 
@@ -1600,13 +1598,14 @@ class Ved
     Rline.set (rl);
     Rline.prompt (rl, rl._lin, rl._col);
 
-    variable names = ["translate", "clipboard"];
+    variable names = ["translate", "clipboard", "xa_clipboard"];
 
     () = Rline.commandcmp (rl, names;already_filtered, dont_sort,
       no_prompt, ptr = s.ptr, refresh,
       help = [
         "translate current word",
-        "send word to clipboard",
+        "send word to xa_primary",
+        "send word to xa_clipboard",
         ]);
 
     ifnot (strlen (rl.argv[0]))
@@ -1624,7 +1623,7 @@ class Ved
       }
 
       {
-      case "clipboard":
+      case "clipboard" || case "xa_clipboard":
         variable
           start,
           end,
@@ -1635,7 +1634,10 @@ class Ved
         ifnot (strlen (word))
           return;
 
-        seltoX (word);
+        if ("clipboard" == rl.argv[0])
+          seltoX (word);
+        else
+          seltoXClipboard (word);
       }
   end
 
