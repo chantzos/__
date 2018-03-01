@@ -292,7 +292,7 @@ class App
   end
 
   def wind_mang (s) public proc
-    variable ref = __get_reference ("__vhandle_w");
+    variable ref = __get_reference ("__vhandle_CTRL_w");
 
     ifnot ('`' == s._chr)
       {

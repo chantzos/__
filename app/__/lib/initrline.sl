@@ -688,12 +688,6 @@ private define __search_project__ (argv)
   if (-1 == access (path, F_OK))
     return;
 
-  if (NULL == pat)
-    if (1 == length (argv))
-      return;
-    else
-      pat = argv[1];
-
   variable
     includedirs = String_Type[0],
     includedir,
@@ -722,10 +716,15 @@ private define __search_project__ (argv)
   excludedirs = array_map (String_Type, &sprintf, "--excludedir=%s",
     excludedirs);
 
+  if (NULL == pat)
+    if (1 == length (argv))
+      return;
+    else
+      pat = argv[1];
+
   variable _argv = ["!search", "--pat=" + pat, "--recursive",
     excludedirs, path];
 
-IO.tostderr (_argv);
   __runcom  (_argv, NULL);
 }
 

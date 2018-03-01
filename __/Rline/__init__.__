@@ -1497,14 +1497,17 @@ class Rline
 
       if (' ' == chr)
         {
-        restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
+        restore (NULL, s.cmp_lnrs, qualifier ("ptr"),
+          qualifier_exists ("refresh"), s._columns);
 
         s.argv[s._ind] = qualifier_exists ("accept_ws")
           ? tmp
           : strchop (tmp, ' ', 0)[0];
         s._col = strlen (s.argv[0]) + 1;
         parse_args (NULL, s);
-        prompt (NULL, s, s._lin, s._col);
+
+        ifnot (qualifier_exists ("no_prompt"))
+          prompt (NULL, s, s._lin, s._col);
 
         return length (s.argv) > 1
           ? 0

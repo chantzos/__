@@ -1330,7 +1330,7 @@ class Ved
     s = get_cur_buf (NULL);
   end
 
-  def __vhandle_w (s) public proc
+  def __vhandle_CTRL_w (s) public proc
     variable chr = qualifier ("input_char", Input.getch ());
     variable keys = [
       'w', 's', 'd', 'k', 'n', ',', '.',
@@ -1600,11 +1600,13 @@ class Ved
     Rline.set (rl);
     Rline.prompt (rl, rl._lin, rl._col);
 
-    variable names = ["translate"];
+    variable names = ["translate", "clipboard"];
 
-    () = Rline.commandcmp (rl, names;already_filtered,
+    () = Rline.commandcmp (rl, names;already_filtered, dont_sort,
+      no_prompt, ptr = s.ptr, refresh,
       help = [
-        "translate current word"
+        "translate current word",
+        "send word to clipboard",
         ]);
 
     ifnot (strlen (rl.argv[0]))
@@ -1619,6 +1621,21 @@ class Ved
         Ved.Lingual.translate (s);
 
       s.draw ();
+      }
+
+      {
+      case "clipboard":
+        variable
+          start,
+          end,
+          col = s._index,
+          line = __vline (s, '.'),
+          word = __vfind_Word (s, line, col, &start, &end);
+
+        ifnot (strlen (word))
+          return;
+
+        seltoX (word);
       }
   end
 
@@ -2333,7 +2350,7 @@ class Ved
     VED_PAGER[string (Input->RIGHT)]   = &__right__;
     VED_PAGER[string (Input->LEFT)]    = &__left__;
     VED_PAGER[string (Input->END)]     = &__eol__;
-    VED_PAGER[string (Input->CTRL_w)]  = &__vhandle_w;
+    VED_PAGER[string (Input->CTRL_w)]  = &__vhandle_CTRL_w;
     VED_PAGER[string (Input->CTRL_r)]  = &__redo__;
     VED_PAGER[string (Input->CTRL_v)]  = &__visual__;
     VED_PAGER[string (Input->BSLASH)]  = &__search__;

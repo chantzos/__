@@ -72,6 +72,9 @@ class X
     if (Array_Type == typeof (sel))
       sel = strjoin (sel, "\n");
 
+    ifnot (strlen (sel))
+      return;
+
     XStoreStr (sel, qualifier_exists ("append"));
   end
 
