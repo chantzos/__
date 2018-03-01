@@ -25,16 +25,13 @@ subclass Client
 
   def appnew (s)
     variable apps = assoc_get_keys (App->APPS);
-
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
-
+    variable app;
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_new];
-    () = Rline.commandcmp (s, apps;already_filtered);
+    app = Rline.get_selection (apps, NULL, NULL);
     Input->rmap.right = saved;
 
-    ifnot (any (apps == s.argv[0]))
+    ifnot (any (apps == app))
       return;
 
     Api.reset_app ();
@@ -53,7 +50,7 @@ subclass Client
 
     Sock.send_int (SESSION_WRFIFO_FD, Api->APP_CON_NEW);
     () = Sock.get_int (SESSION_RDFIFO_FD);
-    Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+    Sock.send_str (SESSION_WRFIFO_FD, app);
     () = Sock.get_int (SESSION_RDFIFO_FD);
     Sock.send_int (SESSION_WRFIFO_FD, is_su);
 
@@ -88,18 +85,16 @@ subclass Client
     apps[where (me == apps)] = NULL;
     apps = apps[wherenot (_isnull (apps))];
 
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
-
+    variable app;
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_prev, Input->rmap.app_rec];
-    () = Rline.commandcmp (s, apps;already_filtered);
+    app = Rline.get_selection (apps, NULL, NULL);
     Input->rmap.right = saved;
 
-    ifnot (any (apps == s.argv[0]))
+    ifnot (any (apps == app))
       return;
 
-    if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
+    if (app == This.is.my.name + "::" + string (Env->PID))
       return;
     }
 
@@ -119,7 +114,7 @@ subclass Client
     if (request == Api->APP_RECON_OTH)
       {
       () = Sock.get_int (SESSION_RDFIFO_FD);
-      Sock.send_str (SESSION_WRFIFO_FD, s.argv[0]);
+      Sock.send_str (SESSION_WRFIFO_FD, app);
       }
 
     variable retval = Sock.get_int (SESSION_RDFIFO_FD);

@@ -1329,7 +1329,10 @@ class Ved
   end
 
   def __vhandle_CTRL_w (s) public proc
-    variable chr = qualifier ("input_char", Input.getch ());
+    variable chr = qualifier ("input_char");
+    if (NULL == chr)
+      chr = Input.getch ();
+
     variable keys = [
       'w', 's', 'd', 'k', 'n', ',', '.',
       Input->UP, Input->CTRL_w, Input->DOWN, ['0':'9']];
@@ -1417,35 +1420,28 @@ class Ved
   end
 
   def __on_escape__ (s) proc
-    variable rl = Rline.init (NULL;pchar = "");
-    Rline.set (rl);
-    Rline.prompt (rl, rl._lin, rl._col);
-
-    variable names = ["escape", "write", "substitute",
+    variable names = ["commandline", "write", "substitute",
       "eval", "system"];
-
-    () = Rline.commandcmp (rl, names;already_filtered,
-      help = [
+    variable help = [
         "to command line",
         "write current buffer",
         "make substitutions (for current line)",
         "evaluate current line",
-        "send current line to system ()"]);
+        "send current line to system ()"];
 
-    ifnot (strlen (rl.argv[0]))
-      {
-      s.draw ();
+    variable action = Rline.get_selection (names, help, s.ptr);
+
+    ifnot (strlen (action))
       return;
-      }
 
-    switch (rl.argv[0])
+    switch (action)
       {
       case "write":
         __write_on_esc__ (s);
       }
 
       {
-      case "escape":
+      case "commandline":
         () = __cline__ (s);
       }
 
@@ -1461,7 +1457,7 @@ class Ved
 
       {
       case "substitute":
-        rl = Ved.get_cur_rline ();
+        variable rl = Ved.get_cur_rline ();
         variable argv = ["substitute", "--dont-ask-when-subst",
           "--global", "--range=.", "--pat="];
 
@@ -1594,32 +1590,22 @@ class Ved
   subclass Lingual from Ved
 
   def __vhandle_word__ (s) proc
-    variable rl = Rline.init (NULL;pchar = "");
-    Rline.set (rl);
-    Rline.prompt (rl, rl._lin, rl._col);
-
     variable names = ["translate", "clipboard", "xa_clipboard"];
-
-    () = Rline.commandcmp (rl, names;already_filtered, dont_sort,
-      no_prompt, ptr = s.ptr, refresh,
-      help = [
+    variable help =  [
         "translate current word",
         "send word to xa_primary",
-        "send word to xa_clipboard",
-        ]);
+        "send word to xa_clipboard"];
+    variable action = Rline.get_selection (names, help, s.ptr);
 
-    ifnot (strlen (rl.argv[0]))
-      {
-      s.draw ();
+    ifnot (strlen (action))
       return;
-      }
 
-    switch (rl.argv[0])
+    switch (action)
       {
       case "translate":
         Ved.Lingual.translate (s);
 
-      s.draw ();
+        s.draw ();
       }
 
       {
@@ -1634,7 +1620,7 @@ class Ved
         ifnot (strlen (word))
           return;
 
-        if ("clipboard" == rl.argv[0])
+        if ("clipboard" == action)
           seltoX (word);
         else
           seltoXClipboard (word);

@@ -120,21 +120,20 @@ subclass Srv
     ifnot (This.has.other_apps)
       return;
 
-    variable retval, issu;
+    variable retval, issu, app;
     variable apps = assoc_get_keys (App->APPS);
 
     ifnot (qualifier_exists ("no_menu"))
       {
-      Rline.set (s);
-      Rline.prompt (s, s._lin, s._col);
-
       variable saved = Input->rmap.right;
       Input->rmap.right = [saved, Input->rmap.app_new];
-      () = Rline.commandcmp (s, apps;already_filtered);
+      app = Rline.get_selection (apps, NULL, NULL;accept_space_as_return);
       Input->rmap.right = saved;
       }
+    else
+      app = s.argv[0];
 
-    ifnot (any (apps == s.argv[0]))
+    ifnot (any (apps == app))
       return;
 
     if (This.has.sigint)
@@ -148,7 +147,7 @@ subclass Srv
 
     loop (1)
     {
-    self.connect_to_app (s.argv[0];;__qualifiers);
+    self.connect_to_app (app;;__qualifiers);
 
     if (APP_ERR)
       break;
@@ -193,32 +192,29 @@ subclass Srv
       return;
 
     loop (1) {
-    variable apps;
+    variable apps, app;
     if (qualifier_exists ("previous"))
       ifnot (NULL == PREV_APP)
         ifnot (CUR_APP == PREV_APP)
           {
           apps = [PREV_APP];
-          s.argv[0] = PREV_APP;
+          app = PREV_APP;
           break;
           }
 
     apps = get_connected_apps ()[[1:]];
 
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
-
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_prev, Input->rmap.app_rec];
-    () = Rline.commandcmp (s, apps;already_filtered);
+    app = Rline.get_selection (apps, NULL, NULL;accept_space_as_return);
     Input->rmap.right = saved;
 
     variable handl;
     }
 
-    if (any (apps == s.argv[0]))
+    if (any (apps == app))
       {
-      if (s.argv[0] == This.is.my.name + "::" + string (Env->PID))
+      if (app == This.is.my.name + "::" + string (Env->PID))
         return;
 
       Api.reset_app ();
@@ -229,7 +225,7 @@ subclass Srv
       screen_size_changed = 0;
       signal (SIGWINCH, &__sigwinch_handler__);
 
-      variable retval = self.reconnect_to_app (s.argv[0]);
+      variable retval = self.reconnect_to_app (app);
       if (1 == retval)
         {
         __exit_rout__ (s, handl;;__qualifiers);
@@ -244,7 +240,8 @@ subclass Srv
 
       defapp = strtok (defapp, ",");
 
-      variable j, app = NULL;
+      app = NULL;
+      variable j;
       _for j (0, length (defapp) - 1)
         ifnot (defapp[j] == This.is.my.name)
           {

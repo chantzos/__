@@ -1789,9 +1789,11 @@ static void put_intrinsic (int *sel, char *buf, int *do_append)
     strcat (new_sel, buf);
     }
   else
-    new_sel = copy_sel (buf);
+    {
+    new_sel = xs_malloc (strlen (buf) + 1);
+    strcpy (new_sel, buf);
+    }
 
-//  new_sel = reread (new_sel);
   set_selection_daemon (selection, new_sel);
 }
 

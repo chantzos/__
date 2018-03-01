@@ -267,8 +267,27 @@ private define tabhook (s)
     return -1;
 
   variable bufnames = _filter_bufs_ (qualifier ("ved"));
-  variable args = array_map (String_Type, &sprintf, "%s void ", bufnames);
-  return Rline.argroutine (s;args = args, accept_ws);
+  variable len = length (bufnames);
+  ifnot (len)
+    return 0;
+
+  if (1 == len)
+    {
+    s.argv[1] = bufnames[0];
+    s._col += strlen (bufnames[0]);
+    Rline.parse_args (s);
+    Rline.prompt (s, s._lin, s._col);
+    return 0;
+    }
+
+  variable names = array_map (String_Type, &path_basename, bufnames);
+  variable buf = Rline.get_selection (names, NULL, NULL);
+
+  if (0 == strlen (buf) || NULL == (buf = wherefirst (buf == names), buf))
+    return 0;
+
+  s.argv[1] = bufnames[buf];
+  1;
 }
 
 public define rlineinit ()

@@ -805,6 +805,7 @@ class Rline
       icol = 0,
       colr = 5,
       index = 0,
+      format = qualifier ("format", 1),
       header = qualifier ("header"),
       max_len = length (ar)
         ? max (strlen (ar)) + ([2, 0][qualifier_exists ("literal")])
@@ -815,7 +816,7 @@ class Rline
     ifnot (length (ar))
       return Input.getch (;disable_langchange);
 
-    ifnot (qualifier_exists ("dont_format"))
+    if (format)
       {
       if (max_len < s._columns)
         {
@@ -874,7 +875,7 @@ class Rline
         restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
         ifnot (len)
           {
-          ifnot (qualifier_exists ("dont_format"))
+          if (format)
             formar (items, fmt, ar, &bar;;__qualifiers);
           else
             bar = @ar;
@@ -1022,7 +1023,7 @@ class Rline
           if (length (car) > lines)
             page = 0;
 
-          ifnot (qualifier_exists ("dont_format"))
+          if (format)
             formar (items, fmt, ar, &car;;__qualifiers);
           else
             car = @ar;
@@ -1048,7 +1049,7 @@ class Rline
         else
           {
           page--;
-          ifnot (qualifier_exists ("dont_format"))
+          if (format)
             formar (items, fmt, ar, &car;;__qualifiers);
           else
             car = @ar;
@@ -1462,11 +1463,15 @@ class Rline
 
       if (1 == length (ar) && 0 == qualifier_exists ("accept_one_len"))
         {
-        restore (NULL, s.cmp_lnrs, NULL, NULL, s._columns);
+        restore (NULL, s.cmp_lnrs, qualifier ("ptr"),
+          qualifier_exists ("refresh"), s._columns);
         s.argv[0] = ar[0];
         s._col = strlen (ar[0]) + 1;
         parse_args (NULL, s);
-        prompt (NULL, s, s._lin, s._col);
+
+        ifnot (qualifier_exists ("no_prompt"))
+          prompt (NULL, s, s._lin, s._col);
+
         return 0;
         }
 
@@ -1528,7 +1533,9 @@ class Rline
 
       if (any ([' ', '\r'] == chr) || 0 == ('!' <= chr <= 'z'))
         {
-        restore (NULL, s.cmp_lnrs, '\r' == chr ? s.ptr : [s._row, s._col], 1, s._columns);
+        restore (NULL, s.cmp_lnrs,
+          qualifier ("ptr", '\r' == chr ? s.ptr : [s._row, s._col]),
+           1, s._columns);
         return '\r' == chr || qualifier_exists ("accept_space_as_return");
         }
 
@@ -2123,7 +2130,7 @@ class Rline
       ar = array_map (String_Type, &sprintf, "%-17s %s", args[ar], desc[ar]);
 
       tmp = "";
-      chr = hlitem (NULL, s, ar, arg, s._col, &tmp;dont_format);
+      chr = hlitem (NULL, s, ar, arg, s._col, &tmp;format = 0);
 
       if (033 == chr)
         {
@@ -2311,6 +2318,21 @@ class Rline
     prompt (NULL, s, s._lin, s._col);
   end
 
+  def get_selection (ar, help, ptr)
+    variable rl = init (NULL, NULL;pchar = "");
+    Rline.set (rl);
+    Rline.prompt (rl, rl._lin, rl._col);
+
+    () = Rline.commandcmp (rl, ar;;struct {
+      already_filtered, dont_sort,
+      no_prompt, ptr = ptr, refresh, format = (qualifier ("one_column", 1) == 0),
+      help = help,
+      @__qualifiers,
+      });
+
+    rl.argv[0];
+  end
+
   def getline ()
     variable s = @Rline_Type;
 
@@ -2352,7 +2374,7 @@ class Rline
   end
 
   def readline (s)
-    variable idx, len, retval, commands, initdone = 0;
+    variable idx, len, retval, commands;
 
     ifnot (NULL == holdedcommand)
       {
@@ -2365,12 +2387,6 @@ class Rline
     forever
       {
       s._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
-
-%      ifnot (initdone)
-%        {
-%        Smg.send_msg_dr (" ", 0, s._prow, s._col);
-%        initdone = 1;
-%        }
 
       if (any (Input->DETACH == s._chr))
         {

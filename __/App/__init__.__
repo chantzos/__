@@ -129,14 +129,13 @@ class App
     _for i (0, length (chs) - 1)
       ar[i] = chs[i] + "::" + strjoin (CHILDREN[chs[i]].argv, " ");
 
-    Rline.set (s);
-    Rline.prompt (s, s._lin, s._col);
+    variable buf = Ved.get_cur_buf ();
+    variable action = Rline.get_selection (ar, NULL,
+        This.is.ved ? buf.ptr : NULL;
+      accept_space_as_return, accept_one_len, accept_ws);
 
-    if (Rline.commandcmp (s, ar;accept_one_len, accept_space_as_return,
-        accept_ws, already_filtered) == 1)
-
-      if (NULL != s.argv && length (s.argv) && strlen (s.argv[0]) &&
-        (i = wherefirst (ar == s.argv[0]), NULL != i))
+    if (strlen (action))
+      if ((i = wherefirst (ar == action), NULL != i))
           App.Connect.to.child (chs[i]);
 
     Rline.set (s);
@@ -293,42 +292,37 @@ class App
 
   def wind_mang (s) public proc
     variable ref = __get_reference ("__vhandle_CTRL_w");
+    variable buf = Ved.get_cur_buf ();
 
     ifnot ('`' == s._chr)
       {
       loop (1) {
-      variable rl = Rline.init (NULL);
-      Rline.set (rl);
-      Rline.prompt (rl, rl._lin, rl._col);
-
       variable saved = Input->rmap.right;
       Input->rmap.right = [saved, Input->rmap.windmenu];
       variable commands = [
         "frame_new", "frame_next", "frame_prev", "frame_del",
         "wind_new",  "wind_del", "wind_next", "wind_prev",
         "wind_goto"];
-
-      () = Rline.commandcmp (rl, commands; accept_space_as_return, already_filtered);
+      variable action = Rline.get_selection (commands, NULL,
+        This.is.ved ? buf.ptr : NULL;accept_space_as_return);
       Input->rmap.right = saved;
 
-      ifnot (strlen (rl.argv[0]))
+      ifnot (strlen (action))
         break;
 
-      variable idx = where (commands == rl.argv[0]);
+      variable idx = where (commands == action);
 
       ifnot (length (idx))
         break;
 
-      variable buf = Ved.get_cur_buf ();
-
-      if (rl.argv[0] == "wind_goto")
+      if (action == "wind_goto")
         (@ref) (buf);
       else
         (@ref) (buf;input_char =
           ['s', 'w', Input->UP, 'd', 'n', 'k', '.', ','][idx[0]]); }
       }
     else
-      (@ref) (Ved.get_cur_buf ());
+      (@ref) (buf);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -446,34 +440,32 @@ class App
   end
 
   def app_menu (s) static proc
-    variable rl = Rline.init (NULL);
-    Rline.set (rl);
-    Rline.prompt (rl, rl._lin, rl._col);
+    variable buf = Ved.get_cur_buf ();
     variable commands = [
         "app_new", "app_new_as_super_user",
         "app_reconnect", "child_reconnect",
         ];
-
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_menu];
-    () = Rline.commandcmp (rl, commands;accept_space_as_return, already_filtered);
+    variable action = Rline.get_selection (commands, NULL,
+        This.is.ved ? buf.ptr : NULL;accept_space_as_return);
     Input->rmap.right = saved;
 
-    ifnot (strlen (rl.argv[0]))
+    ifnot (strlen (action))
       return;
 
-    variable idx = where (commands == rl.argv[0]);
+    variable idx = where (commands == action);
 
     ifnot (length (idx))
       return;
 
-    switch (rl.argv[0])
+    switch (action)
 
       {
       case "app_new" or case "app_new_as_super_user":
         if (NULL == s.app_new)
           return;
-        s.app_new (;issu = (rl.argv[0] == "app_new_as_super_user"));
+        s.app_new (;issu = (action == "app_new_as_super_user"));
       }
 
       {

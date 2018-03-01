@@ -1063,14 +1063,11 @@ public define __parse_argtype (s, arg, type, baselen)
     ? Ved.get_cur_wind ().bufnames
     : ["write", "delete", "eval", "system"];
 
-  variable rl = Rline.init (NULL);
-  Rline.set (rl);
-  Rline.prompt (rl, rl._lin, rl._col);
+  variable action = Rline.get_selection (names, NULL, NULL);
 
-  () = Rline.commandcmp (rl, names;already_filtered);
-  if (strlen (rl.argv[0]))
+  if (strlen (action))
     {
-    s.argv[s._ind] += rl.argv[0];
+    s.argv[s._index] += action;
     s._col = baselen + strlen (s.argv[s._ind]) + 1;
     Rline.parse_args (s);
     Rline.prompt (s, s._lin, s._col);
