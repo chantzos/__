@@ -176,7 +176,7 @@ subclass Ed
   end
 
   def Put (s)
-    variable reg = Ved.Reg.get (qualifier ("reg", "\""));
+    variable reg = qualifier ("buf", Ved.Reg.get (qualifier ("reg", "\"")));
     variable lnr = __vlnr (s, '.');
     variable isP = 'P' == qualifier ("_chr", s._chr);
     variable line = qualifier ("line");

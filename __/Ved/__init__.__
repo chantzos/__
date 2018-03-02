@@ -50,6 +50,32 @@ class Ved
   let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':', '>'];
   let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';', '<'];
 
+  var public DIGRAPHS = [
+    167,   % paragraph §
+    8220,  % “
+    8304,  % ⁰
+    8230,  % …
+    729,   % ˙ 
+    [8308:8319], % ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁺ ⁻ ⁼ ⁽ ⁾ ⁿ
+    10003, % correct ✓
+    176,   % °
+    171,   % « 
+    187,   % »
+    215,   % ×
+    247,   % ÷
+    185,   % power of one ¹
+    178,   % power of two ²
+    179,   % power of three ³
+    [188:190], % ¼ ½ ¾
+    [8531:8542],  % one third ⅓ etc ...
+    183,   % multiplication dot ·
+    8771,  % short of... ≃
+    [9833:9835], % music notes
+    [9837:9839], % likewise
+    169,  % ©
+    174,  % ®
+    8364, % €
+    ];
   var public MARKS        = Assoc_Type[Struct_Type];
   var public VED_WIND     = Assoc_Type[Wind_Type];
   var public FTYPES       = Assoc_Type[Struct_Type];
@@ -1856,6 +1882,45 @@ class Ved
       (buf, llnrs);
   end
 
+  def get_digraph ()
+    variable
+      charar = array_map (String_Type, &string, DIGRAPHS),
+      len = length (charar),
+      help = array_map (String_Type, &sprintf, ": %2c  |", DIGRAPHS);
+
+    ifnot (qualifier_exists ("just_digraphs"))
+      {
+      variable
+        ext = ["%", "*", "=", "^W"],
+        ext_help = ["cbuf|", "xsel|", "eval|", "Cword|"];
+
+      charar = [charar, ext];
+      help = [help, ext_help];
+      }
+
+    variable d = Rline.get_selection (charar, help, qualifier ("ptr");
+      format = 1, literal);
+
+    ifnot (strlen (d))
+      return 0;
+
+    variable idx = wherefirst (d == charar);
+    if (NULL == idx)
+      return 0;
+
+    if (idx < len)
+      return DIGRAPHS[idx];
+
+    variable reg;
+    if (idx == len + length (ext) - 1)
+      reg = char (0x17);
+    else
+      reg = ext[idx-len];
+
+    Ved.Reg.get (reg);
+    1;
+  end
+
   def __spell (argv) public proc
     variable buf = get_cur_buf (NULL);
     variable lines = Ved.Spell.spell (buf.lines);
@@ -2099,6 +2164,21 @@ class Ved
     Ved.Ed.Put (s);
   end
 
+  def __ins_digraph__ (s) proc
+    variable d = get_digraph (NULL);
+    ifnot (d)
+      return;
+
+    if (1 < d)
+      {
+      Ved.Ed.Put (s;buf = char (d));
+      return;
+      }
+
+    variable buf = ();
+    Ved.Ed.Put (s;buf = buf);
+  end
+
   def __newline__ (s) proc
     Ved.Ed.newline (s;;__qualifiers);
   end
@@ -2335,6 +2415,7 @@ class Ved
     VED_PAGER[string (Input->CTRL_a)]  = &__incr_nr__;
     VED_PAGER[string (Input->CTRL_b)]  = &__page_up__;
     VED_PAGER[string (Input->CTRL_f)]  = &__page_down__;
+    VED_PAGER[string (Input->CTRL_k)]  = &__ins_digraph__;
     VED_PAGER[string (Input->CTRL_l)]  = &__vreread;
     VED_PAGER[string (Input->CTRL_n)]  = &__newline__;
     VED_PAGER[string (Input->CTRL_p)]  = &__newline__;

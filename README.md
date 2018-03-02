@@ -750,21 +750,28 @@ As for the quality of the code, this is the result of a self educated
 animals, ... while he was building a home and pressed to obey the existing
 practices that he doesn't finds too much logic on them.
 
-# WARNING
-This system cannot be used for complex communications or specialized tasks,
-as hasn't been checked on (not so) corner cases. It is mainly serves
-(besides the author) as a prototype.
-
 This programming project, as and because, it includes so many sub projects 
 which are more than enough to keep someone busy (for as long he can (or has the
 desire) to code), its natural to say that this is the project of my life's ... and 
 for my lifetime.  
 And for this I'm grateful and I feel lucky.
 
+# WARNINGS
+This system cannot be used for complex communications or specialized tasks,
+as hasn't been checked on (not so) corner cases. It is mainly serves
+(besides the author) as a prototype.
+
+The editor is ignoring tabs by decision and this wont change³. I'm thinking
+seriously to use tab in Normal|Insert mode for completions. Anyway currently
+there is no way to insert tab and probably this wont change. 
+
+The editor hardcodes two languages, Hellenic and English (change with F10).
+
 p.s., ideal, nobody really wants to write any code to handle an exchangeable
 bad file format that doesn't obey conformation with established standards,
 but the last one can do is to notify the sender/creator to get attention,
 as every body deserves that treatment and so do i.
+
 
 ## THANKS
 Special thanks to John E. Davis who wrote S-Lang, but and to all (uncountable)  
@@ -774,4 +781,16 @@ fast code evolution, unbelievable for that short time that happened).
 
 ### FOOTNOTES
 ¹. Josh White - one meat ball  
-². git://github.com/CMB/edbrowse.git
+². git://github.com/CMB/edbrowse.git  
+³. https://github.com/hellerve/e.git today at 02 of Feb, i came across this
+project which is an ala vim editor inspired by kilo, of which is the source
+of a C project that I would like a lot to be integrated and I will try. 
+But first I'm gonna see this very nice code from "e". It has a similar warning at
+the end of its README.
+
+The author is super and he participates in Carp⁴, a modern Lisp dialect that is
+really amazing.
+
+⁴. <https://github.com/carp-lang/Carp.git> (it compiles in C and is written
+in Haskell but wants to be Rust :-) (no garbage collector, just references
+and borrowing (but not boring)), pretty amazing!!)
