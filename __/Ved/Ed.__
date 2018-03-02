@@ -104,7 +104,8 @@ subclass Ed
 
   def newline (s)
     variable
-      dir = s._chr == 'O' ? "prev" : "next",
+      is_control = any (s._chr == [Input->CTRL_n, Input->CTRL_p]),
+      dir = any (['O', Input->CTRL_p] == s._chr) ? "prev" : "next",
       prev_l,
       next_l,
       indent,
@@ -131,12 +132,20 @@ subclass Ed
 
     s._len++;
 
+    variable orig_sw = s._shiftwidth;
+    if (is_control)
+      s._shiftwidth = 0;
+
     if (0 == lnr && "prev" == dir)
-      s.lines = [Ved.newline_str (s, &indent, line), s.lines];
+      s.lines = [Ved.newline_str (s, &indent, line;indent = (0 == is_control)),
+          s.lines];
     else
       s.lines = [s.lines[[:"next" == dir ? lnr : lnr - 1]],
-        Ved.newline_str (s, &indent, line),
-        s.lines[["next" == dir ? lnr + 1 : lnr:]]];
+          Ved.newline_str (s, &indent, line;indent = (0 == is_control)),
+          s.lines[["next" == dir ? lnr + 1 : lnr:]]];
+
+    if (is_control)
+      s._shiftwidth = orig_sw;
 
     s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
 
@@ -151,6 +160,14 @@ subclass Ed
     s.ptr[1] = indent;
     s._index = indent;
     s._findex = s._indent;
+
+    if (is_control)
+      {
+      s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+      set_modified (s);
+      s.draw ();
+      return;
+      }
 
     s.draw (;dont_draw);
 

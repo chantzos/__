@@ -18,7 +18,9 @@ beg
   end
 
   def newline_str (s, indent, line)
-    s.autoindent (indent, line);
+    s.autoindent (indent, line;;__qualifiers);
+    ifnot (@indent)
+      return __get_null_str (0);
     repeat (" ", @indent);
   end
 

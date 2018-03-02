@@ -60,9 +60,9 @@ class Input
 
   let rmap = struct
     {
+    app_prev    = F1,
     app_rec     = F2,
     app_new     = F3,
-    app_prev    = F1,
     app_menu    = F4,
     windmenu    = [F5, 0x10076], % Esc_w
     windnext    = [F6],

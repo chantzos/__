@@ -92,7 +92,7 @@ The auto completion system is based on the following zsh line:
     zstyle ':completion:*' menu select=4 list-colors "=(#b) #([0-9]#)*=$color[cyan]=$color[red]"
 ```
 
-Its based on a readline implementation (code located at \_\_/Rline/__init__.\_\_),
+Its based on a readline implementation (code located at \_\_/Rline/\_\_init\_\_.\_\_),
 which its instance, offers support (autocompletion) for commands, history,
 arguments, filesystem access, ..., but also bindings to function references
 and even direct access to generic application logic.
@@ -107,11 +107,11 @@ called function behavior, or simply because S-Lang really helps on a stable
 interface, because of the function qualifiers, that permit to a function
 to develop logic without changing signature (like the argument number).
 
-In any case the inner code, which anyway has some dependencies to other  
-objects, can do in cases some direct calls, which are desired, especially  
-from code, like readline, that is good to know quickly, what will do with  
-the input. Of course this can be easily get out of control, but as long there  
-is a sync with the outer interface (good named symbols (functions and variables)  
+In any case the inner code, which anyway has some dependencies to other
+objects, can do in cases some direct calls, which are desired, especially
+from code, like readline, that is good to know quickly, what will do with
+the input. Of course this can be easily get out of control, but as long there
+is a sync with the outer interface (good named symbols (functions and variables)
 can help a bit), there is no harm enough to avoid them.
 
 ## Installation
@@ -119,18 +119,18 @@ can help a bit), there is no harm enough to avoid them.
 ### REQUIREMENTS
 Libraries and headers (usually these are the dev[el] packages):
  
-required: pam and openssl or libressl (works on void-linux)
-important: libcurl 
+*required: pam, pcre, openssl or libressl (works on void-linux)
+*important: libcurl, hunspell, 
+*optional: hunspell, TagLib
 
 Some common programs (most of them come by default on most
 distributions)
 
-required: sudo, git
-important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
+*required: sudo, git
+*important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
 umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,  
 dhcpcd, ping
-
-optional: mplayer, amixer, xinit, xauth, setxkbmap, xmodmap,
+*optional: mplayer, amixer, xinit, xauth, setxkbmap, xmodmap,
 mcookie, rxvt-unicode
 
 To install this distribution issue
@@ -687,7 +687,8 @@ In the latter case the following line should be placed in ~/.xinitrc
 
 ```bash
 # replace the ROOTDIR to the actual path
-		exec $ROOTDIR/bin/__xstart
+exec $ROOTDIR/bin/__
+xstart
 # and the following change to /usr/bin/startx
 
 enable_xauth0
@@ -698,14 +699,13 @@ as we do the xauth stuff in the code ourselves.
 
 ### As an Interpreter
 This code can execute (almost from everywhere :-) shell code and slang
-code. But, at the time of writing is ready to execute dynamically C code, so 
-it can safely be considered as the first editor that I know of that can do  
-this :-). This because of the tinycc C compiler, see:
+code. But, at the time of writing is ready to execute dynamically C code.
+This because of the tinycc C compiler, see:
 
-	 http://bellard.org/tcc/
+	 <http://bellard.org/tcc/>
 and upstream's repository at  
 
-  http://repo.or.cz/tinycc.git
+  <http://repo.or.cz/tinycc.git>
 
 I will integrate soon the code that is already written.
 
@@ -773,5 +773,5 @@ is the reason that produced this tremendous amount of code and this super
 fast code evolution, unbelievable for that short time that happened).
 
 ### FOOTNOTES
-¹. Josh White - one meat ball
+¹. Josh White - one meat ball  
 ². git://github.com/CMB/edbrowse.git

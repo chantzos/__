@@ -46,7 +46,7 @@ class Ved
   let EL_MAP  = [902, [904:906], 908, [910:929], [931:937], [945:974]];
   let EN_MAP  = [['a':'z'], ['A':'Z']];
   let MAPS    = [EL_MAP, EN_MAP];
-  let WCHARS  = array_map (String_Type, &char, [['0':'9'], EN_MAP, EL_MAP, '_']);
+  let WCHARS  = array_map (String_Type, &char, [10, ['0':'9'], EN_MAP, EL_MAP, '_']);
   let DEFINED_UPPER_CASE = ['+', ',', '}', ')', ':', '>'];
   let DEFINED_LOWER_CASE = ['-', '.', '{', '(', ';', '<'];
 
@@ -650,7 +650,7 @@ class Ved
     % else calculate the value as:
       @indent =  s._indent + (s._autoindent ? s._shiftwidth : 0);
     else
-      @indent = (@f) (s, line);
+      @indent = (@f) (s, line;;__qualifiers);
   end
 
   def lexicalhl (s, lines, vlines) proc
@@ -2314,35 +2314,37 @@ class Ved
 
   def init ()
     VED_PAGER[string (Input->F1)]      = &__app_rec__;
-    VED_PAGER[string (Input->F2)]      = &__app_new__;
-    VED_PAGER[string (Input->F3)]      = &__child_rec__;
+    VED_PAGER[string (Input->F2)]      = &__app_rec__;
+    VED_PAGER[string (Input->F3)]      = &__app_new__;
     VED_PAGER[string (Input->F4)]      = &__app_menu__;
     VED_PAGER[string (Input->F5)]      = &__wind_menu__;
     VED_PAGER[string (Input->F6)]      = &__vwind_next;
     VED_PAGER[string (Input->F8)]      = &__vwind_prev;
     VED_PAGER[string (Input->F12)]     = &paste_xsel;
-    VED_PAGER[string (Input->DETACH)]  = &__app_detach__;
-    VED_PAGER[string (',')]            = &__vhandle_comma;
-    VED_PAGER[string ('"')]            = &__register__;
-    VED_PAGER[string (Input->CTRL_a)]  = &__incr_nr__;
-    VED_PAGER[string (Input->CTRL_x)]  = &__decr_nr__;
-    VED_PAGER[string (Input->CTRL_l)]  = &__vreread;
     VED_PAGER[string (Input->UP)]      = &__up__;
     VED_PAGER[string (Input->DOWN)]    = &__down__;
-    VED_PAGER[string (033)]            = &__on_escape__;
     VED_PAGER[string (Input->HOME)]    = &__bof__;
     VED_PAGER[string (Input->NPAGE)]   = &__page_down__;
-    VED_PAGER[string (Input->CTRL_f)]  = &__page_down__;
-    VED_PAGER[string (Input->CTRL_b)]  = &__page_up__;
     VED_PAGER[string (Input->PPAGE)]   = &__page_up__;
     VED_PAGER[string (Input->RIGHT)]   = &__right__;
     VED_PAGER[string (Input->LEFT)]    = &__left__;
     VED_PAGER[string (Input->END)]     = &__eol__;
-    VED_PAGER[string (Input->CTRL_w)]  = &__vhandle_CTRL_w;
-    VED_PAGER[string (Input->CTRL_r)]  = &__redo__;
-    VED_PAGER[string (Input->CTRL_v)]  = &__visual__;
+    VED_PAGER[string (Input->DETACH)]  = &__app_detach__;
     VED_PAGER[string (Input->BSLASH)]  = &__search__;
     VED_PAGER[string (Input->QMARK)]   = &__search__;
+    VED_PAGER[string (Input->CTRL_a)]  = &__incr_nr__;
+    VED_PAGER[string (Input->CTRL_b)]  = &__page_up__;
+    VED_PAGER[string (Input->CTRL_f)]  = &__page_down__;
+    VED_PAGER[string (Input->CTRL_l)]  = &__vreread;
+    VED_PAGER[string (Input->CTRL_n)]  = &__newline__;
+    VED_PAGER[string (Input->CTRL_p)]  = &__newline__;
+    VED_PAGER[string (Input->CTRL_r)]  = &__redo__;
+    VED_PAGER[string (Input->CTRL_w)]  = &__vhandle_CTRL_w;
+    VED_PAGER[string (Input->CTRL_v)]  = &__visual__;
+    VED_PAGER[string (Input->CTRL_x)]  = &__decr_nr__;
+    VED_PAGER[string (033)]            = &__on_escape__;
+    VED_PAGER[string (',')]            = &__vhandle_comma;
+    VED_PAGER[string ('"')]            = &__register__;
     VED_PAGER[string ('#')]            = &__search_word__;
     VED_PAGER[string ('*')]            = &__search_word__;
     VED_PAGER[string ('n')]            = &__search_last__;

@@ -677,6 +677,9 @@ private define __clone__ (argv)
       as = t[1];
     }
 
+  if (length (argv) < 2)
+    return;
+
   variable rem_repo = argv[1];
   if (NULL == as)
     as = path_basename_sans_extname (rem_repo);

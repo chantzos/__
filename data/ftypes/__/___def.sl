@@ -24,11 +24,11 @@ define ___blocks (swi, col)
 define ___autoindent (s, line)
 {
   if (line == "}" || 0 == strlen (line) || line[0] == '%')
-    return s._indent;
+    return 0;
 
   variable linelen = strlen (line);
   variable txtlen = strlen (strtrim_beg (line));
-  variable indent = linelen - txtlen;
+  variable indent = qualifier ("indent", linelen - txtlen);
   variable lc = line[-1];
   variable txtline = substr (line, indent + 1, -1);
 
