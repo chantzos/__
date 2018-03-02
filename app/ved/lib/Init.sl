@@ -568,14 +568,30 @@ private define __app_reconnect (s)
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
+private define __app_prev (s)
+{
+  variable rline = Ved.get_cur_rline ();
+  I->app_reconnect (rline;previous);
+  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+}
+
+private define __app_menu (s)
+{
+  variable rline = Ved.get_cur_rline ();
+  App->app_menu (rline);
+  Smg.setrcdr (s.ptr[0], s.ptr[1]);
+}
+
 private define __detach__ (s)
 {
   App.detach ();
 }
 
 VED_PAGER[string (',')] = &__vhandle_comma;
-VED_PAGER[string (Input->F1)] = &__app_reconnect;
-VED_PAGER[string (Input->F2)] = &__app_new;
+VED_PAGER[string (Input->F1)] = &__app_prev;
+VED_PAGER[string (Input->F3)] = &__app_new;
+VED_PAGER[string (Input->F2)] = &__app_reconnect;
+VED_PAGER[string (Input->F4)] = &__app_menu;
 VED_PAGER[string (Input->CTRL_j)] = &__detach__;
 
 VED_CLINE["e"]   =      &_edit_other;
