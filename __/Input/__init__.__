@@ -187,9 +187,32 @@ class Input
 
     esc_pend = qualifier ("esc_pend", 2);
 
-    variable chr = (@getchar_lang) (;;__qualifiers ());
+    variable chr;
+    variable expr_keys = [CTRL_k];
+    ifnot (NULL == (chr = qualifier ("expr_key"), chr))
+      expr_keys = [expr_keys, chr];
+
+    chr = (@getchar_lang) (;;__qualifiers ());
     while (any ([-1, 0] == chr))
       chr = (@getchar_lang) (;;__qualifiers ());
+
+    variable callbackf, args;
+
+    if (any (expr_keys == chr))
+      ifnot (qualifier_exists ("disable_expr"))
+        ifnot (NULL == (callbackf = qualifier ("expr_fun"), callbackf))
+          {
+          args = qualifier ("expr_args");
+          if (NULL == args)
+            (@callbackf) (;disable_expr, expr_key = chr);
+          else
+            if (List_Type == typeof (args))
+              (@callbackf) (__push_list (args);disable_expr, expr_key = chr);
+            else
+              (@callbackf) (args;disable_expr, expr_key = chr);
+
+          return Input.getch (;;__qualifiers);
+          }
 
     if (any (rmap.changelang == chr))
       if (qualifier_exists ("disable_langchange"))
@@ -198,8 +221,8 @@ class Input
         {
         getchar_lang = toggle_map ();
 
-        variable callbackf = qualifier ("on_lang");
-        variable args = qualifier ("on_lang_args");
+        callbackf = qualifier ("on_lang");
+        args = qualifier ("on_lang_args");
 
         ifnot (NULL == callbackf)
           ifnot (NULL == args)
