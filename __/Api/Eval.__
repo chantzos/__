@@ -136,8 +136,8 @@ subclass Eval
 
     Smg.send_msg ("Type an expression" , 0);
 
-rl.history = history;
-rl.histfile = HIST_EVAL;
+    rl.history = history;
+    rl.histfile = HIST_EVAL;
     rl.argv = [""];
 
     variable
@@ -178,37 +178,6 @@ rl.histfile = HIST_EVAL;
         if (1 == Rline.historycompletion (rl))
           ifnot (realtime_evaluation mod 2)
             () = _evalstr_ (rl.argv[0];send_msg);
-
-%      if (any (Input->rmap.histup == rl._chr))
-%        {
-%        ifnot (length (history))
-%          continue;
-
-%        index++;
-%        if (index >= length (history))
-%          index = 0;
-
-%        rl.argv[0] = history[index];
-%        rl._col = strlen (rl.argv[0]) + 1;
-%        ifnot (realtime_evaluation mod 2)
-%          () = _evalstr_ (rl.argv[0];send_msg);
-%        continue;
-%        }
-
-%      if (any (Input->rmap.histdown == rl._chr))
-%        {
-%        ifnot (length (history))
-%          continue;
-
-%        index--;
-%        if (index < 0)
-%          index = length (history) - 1;
-%        rl.argv[0] = history[index];
-%        rl._col = strlen (rl.argv[0]) + 1;
-%        ifnot (realtime_evaluation mod 2)
-%          () = _evalstr_ (rl.argv[0];send_msg);
-%        continue;
-%        }
 
       if (rl._chr == 033)
         break;

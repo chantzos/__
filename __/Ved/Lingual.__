@@ -198,7 +198,8 @@ subclass Lingual
       end,
       col = s._index,
       line = __vline (s, '.'),
-      word = __vfind_word (s, line, col, &start, &end);
+      word = qualifier ("word",
+        __vfind_word (s, line, col, &start, &end));
 
     if (NULL == (pat = Re.compile (word), pat))
       return;

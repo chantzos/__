@@ -399,16 +399,35 @@ subclass Ed
       func = islower (what) ? &__vfind_word : &__vfind_Word,
       col = s._index,
       lnr = __vlnr (s, '.'),
-      line = __vline (s, '.');
+      line = __vline (s, '.'),
+      with_word = qualifier ("with_word");
 
     if (isblank (substr (line, col + 1, 1)))
       return;
 
     word = (@func) (s, line, col, &start, &end);
 
-    Ved.Reg.set (reg, word);
+    ifnot (NULL == with_word)
+      {
+      line = sprintf ("%s%s%s", substr (line, 1, start), with_word,
+        substr (line, end + 2, -1));
+
+      s.lins[s.ptr[0] - s.rows[0]] = line;
+      s.lines[lnr] = line;
+      s.ptr[1] = start;
+      s._index = start;
+
+      set_modified (s);
+      s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
+
+      waddline (s, __vgetlinestr (s, line, 1), 0, s.ptr[0]);
+      __vdraw_tail (s);
+      return;
+      }
 
     line = sprintf ("%s%s", substr (line, 1, start), substr (line, end + 2, -1));
+
+    Ved.Reg.set (reg, word);
 
     ifnot (lnr)
       prev_l = "";

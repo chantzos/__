@@ -1607,45 +1607,62 @@ class Ved
   subclass Visual from Ved
 
   beg
-    if (This.system."supports?"["hunspell"])
-      Class.load ("Spell");
-    else
+    ifnot (This.system."supports?"["hunspell"])
       public variable Spell = struct {Hunspell = struct
-        {new = fun (`loop (_NARGS) pop; NULL;`).__funcref}};
+        {new = funref (`loop (_NARGS) pop; NULL;`)}};
+    else
+      Class.load ("Spell");
   end
 
   subclass Lingual from Ved
 
   def __vhandle_word__ (s) proc
-    variable names = ["translate", "clipboard", "xa_clipboard"];
+    variable names = ["translate", "clipboard", "xa_clipboard", "spell"];
     variable help =  [
         "translate current word",
         "send word to xa_primary",
-        "send word to xa_clipboard"];
+        "send word to xa_clipboard",
+        "spell word"];
     variable action = Rline.get_selection (names, help, s.ptr);
 
     ifnot (strlen (action))
       return;
 
+    variable
+      start,
+      end,
+      col = s._index,
+      line = __vline (s, '.'),
+      word = (any (["translate", "spell"] == action))
+        ? __vfind_word (s, line, col, &start, &end)
+        : __vfind_Word (s, line, col, &start, &end);
+
+    ifnot (strlen (word))
+      return;
+
     switch (action)
       {
       case "translate":
-        Ved.Lingual.translate (s);
+        Ved.Lingual.translate (s;word = word);
 
         s.draw ();
       }
 
       {
-      case "clipboard" || case "xa_clipboard":
-        variable
-          start,
-          end,
-          col = s._index,
-          line = __vline (s, '.'),
-          word = __vfind_Word (s, line, col, &start, &end);
-
-        ifnot (strlen (word))
+      case "spell":
+        variable sp = Ved.Lingual.spell (word);
+        ifnot (length (sp))
           return;
+
+        sp = strjoin (sp[0], " ");
+        if (sp == word)
+          return;
+
+        Ved.Ed.change_word (s, 'w';with_word = sp);
+      }
+
+      {
+      case "clipboard" || case "xa_clipboard":
 
         if ("clipboard" == action)
           seltoX (word);
@@ -1928,7 +1945,7 @@ class Ved
 
   def __spell (argv) public proc
     variable buf = get_cur_buf (NULL);
-    variable lines = Ved.Spell.spell (buf.lines);
+    variable lines = Ved.Lingual.spell (buf.lines);
     variable len = length (lines);
 
     if (0 == len || len - 1 != buf._len)
