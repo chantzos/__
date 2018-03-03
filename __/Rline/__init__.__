@@ -623,7 +623,8 @@ class Rline
         }
       }
 
-    if (' ' < s._chr <= 126 || 902 <= s._chr <= 974)
+    % for now let it to do weird stuff
+    if (' ' < s._chr)
       insert_at (s;;__qualifiers);
   end
 
@@ -814,7 +815,7 @@ class Rline
       lines;
 
     ifnot (length (ar))
-      return Input.getch (;disable_langchange);
+      return Input.getch (;;struct {@__qualifiers, disable_langchange});
 
     if (format)
       {
@@ -853,7 +854,7 @@ class Rline
     ifnot (NULL == header)
       s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
 
-    chr = Input.getch (;disable_langchange);
+    chr = Input.getch (;;struct {@__qualifiers, disable_langchange});
 
     ifnot (len || any (['\t', [Input->rmap.right],
         [Input->UP:Input->LEFT], Input->PPAGE, Input->NPAGE] == chr))
@@ -908,7 +909,7 @@ class Rline
         ifnot (NULL == header)
           s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
 
-        chr = Input.getch (;disable_langchange);
+        chr = Input.getch (;;struct {@__qualifiers, disable_langchange});
         continue;
         }
 
@@ -1083,7 +1084,7 @@ class Rline
       ifnot (NULL == header)
         s.cmp_lnrs = [s.cmp_lnrs[0] - 1, s.cmp_lnrs];
 
-      chr = Input.getch (;disable_langchange);
+      chr = Input.getch (;;struct {@__qualifiers, disable_langchange});
       }
 
     chr;
@@ -2333,6 +2334,39 @@ class Rline
     rl.argv[0];
   end
 
+  def rl_get_expression (s) proc
+    variable f = __get_reference ("get_expression");
+    if (NULL == f)
+      return;
+
+    variable e = (@f) (;;__qualifiers);
+
+    ifnot (e)
+      return;
+
+    if (1 < e)
+      {
+      s._chr = e;
+      routine (NULL, s);
+      }
+    else
+      {
+      variable buf = ();
+      if (length (strtok (buf, "\n")) > 1)
+        return;
+      variable i;
+      % this will probably fail in multibyte chars     
+      _for i (0, strlen (buf) - 1)
+        {
+        s._chr = buf[i];
+        routine (NULL, s);
+        }
+      }
+
+    parse_args (NULL, s);
+    prompt (NULL, s, s._lin, s._col);
+  end
+
   def getline ()
     variable s = @Rline_Type;
 
@@ -2354,7 +2388,9 @@ class Rline
 
     forever
       {
-      s._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
+      s._chr = Input.getch (;
+        on_lang = s.on_lang, on_lang_args = s.on_lang_args,
+        expr_fun = &rl_get_expression, expr_args = s);
 
       if (033 == s._chr)
         {
@@ -2386,7 +2422,9 @@ class Rline
 
     forever
       {
-      s._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
+      s._chr = Input.getch (;
+        on_lang = s.on_lang, on_lang_args = s.on_lang_args,
+        expr_fun = &rl_get_expression, expr_args = s);
 
       if (any (Input->DETACH == s._chr))
         {

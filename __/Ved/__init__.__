@@ -157,7 +157,7 @@ class Ved
 
   decl public seltoX, seltoXClipboard
   decl public  __console, __vline, __vfind_word
-  decl get_cur_buf
+  decl get_cur_buf, __ins_digraph__
 
   def __topline (str, columns) public proc
     variable d = NULL == This.request.debug
@@ -625,7 +625,8 @@ class Ved
       {
       s = get_cur_buf (NULL);
       VEDCOUNT = -1;
-      s._chr = Input.getch (;disable_langchange);
+      s._chr = Input.getch (;
+        disable_langchange, expr_fun = &__ins_digraph__, expr_args = s);
 
       if ('1' <= s._chr <= '9')
         {
@@ -1898,8 +1899,8 @@ class Ved
       help = [help, ext_help];
       }
 
-    variable d = Rline.get_selection (charar, help, qualifier ("ptr");
-      format = 1, literal);
+    variable d = Rline.get_selection (charar, help, qualifier ("ptr");;
+      struct {@__qualifiers, format = 1, literal});
 
     ifnot (strlen (d))
       return 0;
@@ -1919,6 +1920,10 @@ class Ved
 
     Ved.Reg.get (reg);
     1;
+  end
+
+  def get_expression () public proc
+     Ved.get_digraph (;;__qualifiers);
   end
 
   def __spell (argv) public proc
@@ -2176,6 +2181,9 @@ class Ved
       }
 
     variable buf = ();
+    if (NULL == buf)
+      return;
+
     Ved.Ed.Put (s;buf = buf);
   end
 
@@ -2415,7 +2423,6 @@ class Ved
     VED_PAGER[string (Input->CTRL_a)]  = &__incr_nr__;
     VED_PAGER[string (Input->CTRL_b)]  = &__page_up__;
     VED_PAGER[string (Input->CTRL_f)]  = &__page_down__;
-    VED_PAGER[string (Input->CTRL_k)]  = &__ins_digraph__;
     VED_PAGER[string (Input->CTRL_l)]  = &__vreread;
     VED_PAGER[string (Input->CTRL_n)]  = &__newline__;
     VED_PAGER[string (Input->CTRL_p)]  = &__newline__;
