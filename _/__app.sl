@@ -1063,7 +1063,9 @@ public define __parse_argtype (s, arg, type, baselen)
     ? Ved.get_cur_wind ().bufnames
     : ["write", "delete", "eval", "system"];
 
-  variable action = Rline.get_selection (names, NULL, NULL);
+  variable action = Rline.get_selection (names, NULL, This.is.ved
+        ? Ved.get_cur_buf ().ptr
+        : s.ptr);
 
   if (strlen (action))
     {

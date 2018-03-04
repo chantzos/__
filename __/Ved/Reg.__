@@ -8,7 +8,7 @@ subclass Reg
   let REGS   = [['A':'Z'], ['a':'z'], '*', '"', '/', '%', 0x17];
 
   def get (reg)
-    ifnot (any ([REGS, '='] == reg[0]))
+    ifnot (any ([REGS, '=', '^'] == reg[0]))
       return "";
 
     if ("*" == reg)
@@ -17,7 +17,7 @@ subclass Reg
     if ("%" == reg)
       return Ved.get_cur_buf ()._abspath;
 
-    if (char (0x17) == reg) % CTRL-w
+    if (any (["^W", char (0x17)] == reg)) % CTRL-w
       {
       variable buf = Ved.get_cur_buf (),
                line = __vline (buf, '.'),

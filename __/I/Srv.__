@@ -122,12 +122,15 @@ subclass Srv
 
     variable retval, issu, app;
     variable apps = assoc_get_keys (App->APPS);
+    apps = apps[array_sort (apps)];
 
     ifnot (qualifier_exists ("no_menu"))
       {
       variable saved = Input->rmap.right;
       Input->rmap.right = [saved, Input->rmap.app_new];
-      app = Rline.get_selection (apps, NULL, NULL;accept_space_as_return);
+      app = Rline.get_selection (apps, NULL, This.is.ved
+          ? Ved.get_cur_buf ().ptr
+          : s.ptr);
       Input->rmap.right = saved;
       }
     else
@@ -203,10 +206,13 @@ subclass Srv
           }
 
     apps = get_connected_apps ()[[1:]];
+    apps = apps[array_sort (apps)];
 
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_prev, Input->rmap.app_rec];
-    app = Rline.get_selection (apps, NULL, NULL;accept_space_as_return);
+    app = Rline.get_selection (apps, NULL, This.is.ved
+        ? Ved.get_cur_buf ().ptr
+        : s.ptr);
     Input->rmap.right = saved;
 
     variable handl;
@@ -400,7 +406,7 @@ subclass Srv
       return;
       }
 
-    variable argv = [app, NULL, NULL,
+    variable argv = [app, NULL, NULL, NULL,
       __get_qualifier_as (AString_Type, qualifier ("argv"), String_Type[0])];
 
     if (This.request.profile)
@@ -408,6 +414,9 @@ subclass Srv
 
     if (This.request.debug)
       argv[2] = "--debug";
+
+    if (This.request.devel)
+      argv[2] = "--devel";
 
     variable clpid = App.Run.as.client (argv[wherenot (_isnull (argv))],
       SRV_FIFO, clfifo;;struct {@__qualifiers, bg});

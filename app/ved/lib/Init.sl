@@ -281,7 +281,11 @@ private define tabhook (s)
     }
 
   variable names = array_map (String_Type, &path_basename, bufnames);
-  variable buf = Rline.get_selection (names, NULL, NULL);
+  names = names[array_sort (names)];
+
+  variable buf = Rline.get_selection (names, NULL, This.is.ved
+        ? Ved.get_cur_buf ().ptr
+        : s.ptr);
 
   if (0 == strlen (buf) || NULL == (buf = wherefirst (buf == names), buf))
     return 0;

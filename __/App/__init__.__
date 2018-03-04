@@ -121,22 +121,23 @@ class App
     ifnot (NULL == This.is.child)
       return;
 
-    variable chs = assoc_get_keys (CHILDREN);
-    ifnot (length (chs))
+    variable pids = assoc_get_keys (CHILDREN);
+    ifnot (length (pids))
       return;
 
-    variable i, ar = String_Type[length (chs)];
-    _for i (0, length (chs) - 1)
-      ar[i] = chs[i] + "::" + strjoin (CHILDREN[chs[i]].argv, " ");
+    pids = pids[array_sort (pids)];
+
+    variable i, help = String_Type[length (pids)];
+    _for i (0, length (pids) - 1)
+      help[i] =  ":: " + strjoin (CHILDREN[pids[i]].argv, " ");
 
     variable buf = Ved.get_cur_buf ();
-    variable action = Rline.get_selection (ar, NULL,
-        This.is.ved ? buf.ptr : NULL;
-      accept_space_as_return, accept_one_len, accept_ws);
+    variable child = Rline.get_selection (pids, help,
+        This.is.ved ? buf.ptr : s.ptr);
 
-    if (strlen (action))
-      if ((i = wherefirst (ar == action), NULL != i))
-          App.Connect.to.child (chs[i]);
+    if (strlen (child))
+      if ((i = wherefirst (pids == child), NULL != i))
+          App.Connect.to.child (pids[i]);
 
     Rline.set (s);
     Rline.prompt (s, s._lin, s._col);
@@ -304,7 +305,7 @@ class App
         "wind_new",  "wind_del", "wind_next", "wind_prev",
         "wind_goto"];
       variable action = Rline.get_selection (commands, NULL,
-        This.is.ved ? buf.ptr : NULL;accept_space_as_return);
+        This.is.ved ? buf.ptr : s.ptr);
       Input->rmap.right = saved;
 
       ifnot (strlen (action))
@@ -448,7 +449,7 @@ class App
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_menu];
     variable action = Rline.get_selection (commands, NULL,
-        This.is.ved ? buf.ptr : NULL;accept_space_as_return);
+        This.is.ved ? buf.ptr : s.ptr);
     Input->rmap.right = saved;
 
     ifnot (strlen (action))

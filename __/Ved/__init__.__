@@ -1929,13 +1929,7 @@ class Ved
     if (idx < len)
       return DIGRAPHS[idx];
 
-    variable reg;
-    if (idx == len + length (ext) - 1)
-      reg = char (0x17);
-    else
-      reg = ext[idx-len];
-
-    Ved.Reg.get (reg);
+    Ved.Reg.get (ext[idx-len]);
     1;
   end
 

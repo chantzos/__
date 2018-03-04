@@ -25,10 +25,14 @@ subclass Client
 
   def appnew (s)
     variable apps = assoc_get_keys (App->APPS);
+    apps = apps[array_sort (apps)];
+
     variable app;
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_new];
-    app = Rline.get_selection (apps, NULL, NULL);
+    app = Rline.get_selection (apps, NULL, This.is.ved
+        ? Ved.get_cur_buf ().ptr
+        : s.ptr);
     Input->rmap.right = saved;
 
     ifnot (any (apps == app))
@@ -84,11 +88,14 @@ subclass Client
     variable me = sprintf ("%s::%d", This.is.my.name, Env->PID);
     apps[where (me == apps)] = NULL;
     apps = apps[wherenot (_isnull (apps))];
+    apps = apps[array_sort (apps)];
 
     variable app;
     variable saved = Input->rmap.right;
     Input->rmap.right = [saved, Input->rmap.app_prev, Input->rmap.app_rec];
-    app = Rline.get_selection (apps, NULL, NULL);
+    app = Rline.get_selection (apps, NULL, This.is.ved
+        ? Ved.get_cur_buf ().ptr
+        : s.ptr);
     Input->rmap.right = saved;
 
     ifnot (any (apps == app))
