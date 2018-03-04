@@ -78,8 +78,8 @@ the underline code (buffer and window structures) and the drawing/pointer
 position, it can't offer warranty that will do the right thing, since the
 floating view is never used, it cannot reveal the code mistakes.
 
-This application offers such an X window management (code derived from
-__dminiwm__ :  https://github.com/moetunes/dminiwm)
+This application offers such an X window management, code derived from
+__dminiwm__ :  (https://github.com/moetunes/dminiwm)
  
 Its a tiny (written as a S-Lang module) library, which also has floating
 windows support with a total control over the focused window with the
@@ -119,18 +119,22 @@ can help a bit), there is no harm enough to avoid them.
 ### REQUIREMENTS
 Libraries and headers (usually these are the dev[el] packages):
  
-*required: pam, pcre, openssl or libressl (works on void-linux)
-*important: libcurl, hunspell, 
-*optional: hunspell, TagLib
+-required: pam, pcre, openssl or libressl (works on void-linux)
+
+-important: libcurl, hunspell, tinycc
+
+-optional: hunspell, TagLib
 
 Some common programs (most of them come by default on most
 distributions)
 
-*required: sudo, git
-*important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
+-required: sudo, git
+
+-important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
 umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,  
 dhcpcd, ping
-*optional: mplayer, amixer, xinit, xauth, setxkbmap, xmodmap,
+
+-optional: mplayer, amixer, xinit, xauth, setxkbmap, xmodmap,
 mcookie, rxvt-unicode
 
 To install this distribution issue
@@ -206,7 +210,7 @@ $ROOTDIR/bin/__media
 # It can also show and manipulate the tags on audio files, by using
 # the S-Lang bindings (located at: $ROOTDIR/__/C/taglib-module.c)
 # to the taglib library: 
-# http://developer.kde.org/~wheeler/taglib.html
+# (http://developer.kde.org/~wheeler/taglib.html)
 
 # The application can also display lyrics, if the current song
 # match a file name minus the extension in the lyrics directory,
@@ -425,55 +429,59 @@ a compiler, the development tools, a posix shell, some sanity ...
 
 The user has to feel that has the control, its our human being desire.
 
-But Ved is intended to be the underlying system and it is.
-However, the system that works with a text buffer, is based on filetypes,
-which contribute a lot of code, and that code can change significantly
-the behavior (usually the Normal Mode (the pager in other words, which
-in all the other applications other than ved, quits with q, like a pager
-does)).
-In Normal mode all the function references associated with keypresses,
-can execute three function calls.
-From the returned value of the first function call (which by default is a
-stub function that returns zero), depends, if control will return to
-the caller (when -1), or continue by executing the default associated
-action with the key (when 0), or execute the third function (which by
-default does nothing).
-As an example the right key in Normal Mode, sets the pointer one cell
-to the right (if there is enough text). However, the media application
-sets in its playlist buffer structure a callback function, that when
-the right arrow key is pressed, it draws a box with information about
-what's currently playing. Then it returns -1, which is interpreted as
-return immediately and do not try to call the other functions. If the
-the returned value was zero, the default action for right key (move one
-cell to right) would be executed.
-On any other value, the function calls the last function, which usually
-is being used to clean up states or for refinement after the default
-action. For instance, again in media and while navigating in the playlist
-frame (reached with "l"), the down arrow key, first goes down to the
-next line (default action), and then in the last call, checks if the
-current filename/song, has embedded tags and if it does, it display
-them. The returned value of the third function is ignored.
+But Ved is intended to be the underlying system and it is.  
+However, the system that works with a text buffer, is based on filetypes,  
+which contribute a lot of code, and that code can change significantly  
+the behavior (usually the Normal Mode (the pager in other words, which  
+in all the other applications other than ved, quits with q, like a pager  
+does)). 
+ 
+In Normal mode all the function references associated with keypresses,  
+can execute three function calls.  
 
-The editor didn't ever have the intention to be a vim clone, but rather
-use the admitable geniously captured and implemented (in vim perfectly)
-model of modes - besides the intuitive interface which is based on
-mnemonic keys that are connected with actions and keywords, like
-[cd][i][Ww] for [cd]\(hange|delete\) [[i]nner] [Ww]ord.
+From the returned value of the first function call (which by default is a  
+stub function that returns zero), depends, if control will return to  
+the caller (when -1), or continue by executing the default associated  
+action with the key (when 0), or execute the third function (which by  
+default does nothing).  
 
-In this application this model (of modes), has been already extended.
+As an example the right key in Normal Mode, sets the pointer one cell  
+to the right (if there is enough text). However, the media application 
+sets in its playlist buffer structure a callback function, that when  
+the right arrow key is pressed, it draws a box with information about   
+what's currently playing. Then it returns -1, which is interpreted as  
+return immediately and do not try to call the other functions. If the  
+the returned value was zero, the default action for right key (move one  
+cell to right) would be executed.  
 
-The truth is however, that this editor is not and is never going to  
-handle satisfactory external data (at least not any kind of external  
-data), but rather to handle later the product that creates itself and  
-to this is very good now. That means it handles the usual workflow from  
-his author and when the author needs something, then it gives the tools  
-to do so.  
+On any other value, the function calls the last function, which usually  
+is being used to clean up states or for refinement after the default  
+action. For instance, again in media and while navigating in the playlist  
+frame (reached with "l"), the down arrow key, first goes down to the  
+next line (default action), and then in the last call, checks if the  
+current filename/song, has embedded tags and if it does, it display  
+them. The returned value of the third function is ignored.  
 
-Like in this case, in this warm February day, ved code introduces digraphs,  
-accessible (through a usual menu) with CTRL-k in insert mode. Here is a  
-note:  ♪  
-now: this is a first workable draft with more than enough digraphs to  
-use. But this can evolve later to handle other conditions and perhaps  
+The editor didn't ever have the intention to be a vim clone, but rather  
+use the admitable geniously captured and implemented (in vim perfectly)  
+model of modes - besides the intuitive interface which is based on  
+mnemonic keys that are connected with actions and keywords, like  
+[cd][i][Ww] for [cd]\(hange|delete\) [[i]nner] [Ww]ord.  
+
+In this application this model (of modes), has been already extended.  
+
+The truth is however, that this editor is not and is never going to
+handle satisfactory external data (at least not any kind of external
+data), but rather to handle later the product that creates itself and
+to this is very good now. That means it handles the usual workflow from
+his author and when the author needs something, then it gives the tools
+to do so.
+
+Like in this case, in this warm February day, ved code introduces digraphs,
+accessible (through a usual menu) with CTRL-k in insert mode. Here is a
+note:  ♪   
+now: this is a first workable draft with more than enough digraphs to
+use. But this can evolve later to handle other conditions and perhaps
 to end up as a library, which is very natural path in development.  
 If nothing change in this regard, this code will still work forever.  
 
@@ -535,7 +543,7 @@ wrong. But even if they are wrong, we will all be wrong together and this is at
 least relaxing.
 
 So, yes, I expect if C wants to stay, maps, lists and arrays, something like:  
-https://github.com/stevedonovan/llib
+(https://github.com/stevedonovan/llib)
 
 C might not be like rust, which it looks like joy, but is beautiful for what  
 it is, and its straight connection with the machine and is here to stay forever.  
@@ -646,17 +654,17 @@ Such nested levels can end up, quickly, in unreadable code.
 
 ### Invocation
 Every application can have its own command line switches, but there are
-share also some:
-  --profile    turn on profiler
-  --devel      turn on development features
-  --debug      turn on debuging
-  --basedir=   sets the base directory of the application
-  --datadir=   sets the data directory of the application
-  --tmpdir=    sets the temp directory of the application
-  --histfile=  sets the  history file  of the application
-  --command=   executes a command prior to main loop
-  --execute=   executes a string  prior to main loop
-  --execute-from-file=  executes a file prior to main loop
+share also some:  
+  --profile    turn on profiler  
+  --devel      turn on development features  
+  --debug      turn on debuging  
+  --basedir=   sets the base directory of the application  
+  --datadir=   sets the data directory of the application  
+  --tmpdir=    sets the temp directory of the application  
+  --histfile=  sets the  history file  of the application  
+  --command=   executes a command prior to main loop  
+  --execute=   executes a string  prior to main loop  
+  --execute-from-file=  executes a file prior to main loop  
 
        
 The development features are functions that either are new or  
@@ -674,24 +682,24 @@ But it can also display pdfs (using apvlv), images (using feh),
 edit files (using ved) and extract archives.  
 It can even play video and music and it understands for navigation  
 ~ or // (double slash, as / searchs the buffer), or right-left arrows  
-(i think the navigation within the filesystem is pretty fast), but
-the principal applies. If something is not being used, it can not
+(i think the navigation within the filesystem is pretty fast), but  
+the principal applies. If something is not being used, it can not  
 reveal code !correctness.  
 
 ### X Window Manager
 
 As it has been written, this application offers an X Window management.  
-It can be started from a virtual console with the command :Xstart  
+It can be started from a virtual console on any application,  with the   
+command :Xstart  
 or through a Linux console with startx.  
-In the latter case the following line should be placed in ~/.xinitrc
+But, in the latter case the following line should be placed in ~/.xinitrc
 
 ```bash
 # replace the ROOTDIR to the actual path
-exec $ROOTDIR/bin/__
-xstart
+exec $ROOTDIR/bin/__xstart
 # and the following change to /usr/bin/startx
 
-enable_xauth0
+enable_xauth=0
 
 # i cannot find a way (i think there is not) to disable this with the invocation,  
 as we do the xauth stuff in the code ourselves.  
@@ -702,17 +710,27 @@ This code can execute (almost from everywhere :-) shell code and slang
 code. But, at the time of writing is ready to execute dynamically C code.
 This because of the tinycc C compiler, see:
 
-	 <http://bellard.org/tcc/>
+	 (http://bellard.org/tcc/)
 and upstream's repository at  
 
-  <http://repo.or.cz/tinycc.git>
+(http://repo.or.cz/tinycc.git)
 
 I will integrate soon the code that is already written.
 
 ### As a spelling tool using hunspell
 
-Simply in Visual linewise mode press h (h for hunspell)
-or by using :__spell
+Simply in Visual linewise mode press h (h for hunspell)  
+or by using :__spell  
+or while the pointer in on this word that nees spelling, press W (W for word)  
+for a menu which, except this specific option, it offers and a couple of other  
+operations, like to send something to XA_PRIMARY, using the xsel without (i think)  
+a single change,
+
+(http://www.vergenet.net/~conrad/software/xsel/)
+
+just enough to pack it a slang module and just to make it work for the
+XA_PRIMARY, which it seems that is the only X selection mechanism that the   
+coders of chrome browser seems to be aware…
 
 ### Many other operations ...
 ... that left to be documented and documentation is much harder 
@@ -730,7 +748,7 @@ The user has the responsibility.
 
 Be brave (stolen from the git logs of the edbrowse² repository - a brave  
 man indeed - when he wrote blindly (i think they call it css :) something  
-that usually is written in js if IRC anyway), that thing in C).
+that usually is written in js if IRC anyway), that thing in C).  
 He is one of our today's super heroes and I bow my hat kindly.
 ...
 
@@ -781,16 +799,23 @@ fast code evolution, unbelievable for that short time that happened).
 
 ### FOOTNOTES
 ¹. Josh White - one meat ball  
+
 ². git://github.com/CMB/edbrowse.git  
-³. https://github.com/hellerve/e.git today at 02 of Feb, i came across this
-project which is an ala vim editor inspired by kilo, of which is the source
-of a C project that I would like a lot to be integrated and I will try. 
-But first I'm gonna see this very nice code from "e". It has a similar warning at
-the end of its README.
+
+³. https://github.com/hellerve/e.git
+(today at 02 of Feb, i came across this project (an ala vim editor but inspired  
+by kilo⁵, so it has a similar warning at the end of its README.)
 
 The author is super and he participates in Carp⁴, a modern Lisp dialect that is
 really amazing.
 
-⁴. <https://github.com/carp-lang/Carp.git> (it compiles in C and is written
+⁴. https://github.com/carp-lang/Carp.git (it compiles in C and is written
 in Haskell but wants to be Rust :-) (no garbage collector, just references
 and borrowing (but not boring)), pretty amazing!!)
+
+⁵. (https://github.com/antirez/kilo)
+He seems to inspired many. I've developed its 
+```C
+		int editorReadKey(int fd)
+```
+to cover more cases, but its a very naive cose, but I should publish it anyway.  
