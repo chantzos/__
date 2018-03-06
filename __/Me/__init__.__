@@ -40,4 +40,34 @@ class Me
     File.read (Env->SRC_PROTO_PATH + "/__.sl") +
     File.read (Env->SRC_PROTO_PATH + "/__gama.sl");
   end
+
+  def locate_class_dir (cl)
+    variable i, ii, cls, paths = [
+      Env->SRC_LOCAL_CLASS_PATH,
+      Env->SRC_CLASS_PATH,
+      Env->SRC_USER_CLASS_PATH];
+
+    _for i (0, 2)
+      {
+      cls = listdir (paths[i]);
+      _for ii (0, length (cls) - 1)
+        if (cl == cls[ii])
+          return paths[i] + "/" + cl;
+      }
+
+    NULL;
+  end
+
+  def locate_class (cl)
+    variable dir = locate_class_dir (NULL, cl);
+    if (NULL == dir)
+      return NULL;
+
+    variable init = dir + "/__init__.__";
+
+    if (-1 == access (init, F_OK|R_OK))
+      return NULL;
+
+    init;
+  end
 end

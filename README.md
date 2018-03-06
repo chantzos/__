@@ -25,6 +25,10 @@ is a way to formalize the logic and finally produce a much more compact document
 This is a personal weakness as the thoughts are too many to reduce them and avoid  
 the verbosity. 
 
+And since I've mentioned the README, it's more like a "read me, if you like",  
+though this README is more than a README with the common sense. Consider that  
+you've been warned.
+
 ## SYNOPSIS
 This application is an implementation of a concept of ideas
 of an ideal computer environment, that is, the user interface,
@@ -723,13 +727,13 @@ Simply in Visual linewise mode press h (h for hunspell)
 or by using :__spell  
 or while the pointer in on this word that nees spelling, press W (W for word)  
 for a menu which, except this specific option, it offers and a couple of other  
-operations, like to send something to XA_PRIMARY, using the xsel without (i think)  
+operations, like to send something to XA_CLIPBOARD, using the xsel without (i think)  
 a single change,
 
 (http://www.vergenet.net/~conrad/software/xsel/)
 
 just enough to pack it a slang module and just to make it work for the
-XA_PRIMARY, which it seems that is the only X selection mechanism that the   
+XA_CLIPBOARD, which it seems that is the only X selection mechanism that the   
 coders of chrome browser seems to be aware…
 
 ### Many other operations ...
@@ -752,6 +756,268 @@ that usually is written in js if IRC anyway), that thing in C).
 He is one of our today's super heroes and I bow my hat kindly.
 ...
 
+### For S-Lang programmers
+Any of the classes can be compiled from the \_\_\_\_ application with the 
+"--dont-remove" switch, which in that case a file with the same name with the 
+class, plus the ".sl" extension, is created to the same directory with the 
+class.  They are self explainable, except the variable at the very top.
+But generally very little things need to be done for adoption.  
+
+Most of the modules were written with little or no knowledge at all in C.  
+Most, with one or two exceptions, are functional, even if this function is 
+just one. They have been tested. (But didn't check with valgrind them all,
+though)
+
+The main scripts leave a copy of them in the tmp/ directory which is created 
+during installation. They are rather big but are self containable. Possibly 
+with no expectations, except realpath(3), which is an intrinsic function that 
+is declared at the inner interpreter or in \_\_-module.c
+
+### Qualifiers
+This is reserved for a small introduction to slang qualifiers.
+
+### For C programmers
+Likewise
+
+### Status
+It is in an endless development. As there is no responsibility to satisfy  
+some external needs, there is a freedom to experiment on the implementation.  
+
+However, there is tendency for dynamical expressionism, but controllable.
+
+That means:
+ 
+Yes to private environments and static abstraction.
+ 
+No mix-ins but (and) direct communication.
+
+No to dependencies, yes to expected functions.
+
+Yes to feel free inside my private environment, respect to the  
+outer environment and to the expectations from us.
+
+No to of: how to write this code, but how to declare and express my logic.
+
+### Style
+```C
+/* 
+	* indentation: two spaces
+ * 
+ *  Function definitions 
+ *  define name (args)
+ *  {
+ *    ...
+ *  }
+
+ *  function calls: always a space after the function name
+ *     func (...)
+ *  
+ *  clear separation of tokens except array indexing
+ *     ar[1:i1];
+ *
+ *  an empty line between blocks and in most other cases,
+ *  except when declaring variables
+ *
+ *  declaring multiply variables:
+ *  variable
+	*				vname= ...,
+ *    oname= ...; 
+
+ *  structs:
+ *  struct
+ *    {
+ *    m,
+ *    ...
+ *    }
+
+ *  unnecessary braces to conditional blocks is _strictly_ forbidden
+ *  if (expr)
+ *    if (other_expr)
+ *      statement;
+ *    else
+ *      statement;
+ *  else
+ *    statement;
+
+ *  but if necessary:
+ *  if (expr)
+ *    {
+ *    statement;
+ *    ...
+ *    }
+ *  else
+ *    ...
+ *    
+ *  ternary expression indentation
+ *		(expr)
+ *    ? (expr)
+ *      ? (expr)
+ *        ? do this
+ *        : do that
+ *      : use the second expression
+ *    : otherwise use the first conditional branch
+
+ *  same names for common variables; by doing that you can 
+ *  copy code blocks and understand the semantics
+ *  some of them:
+ *  st = stat_file)
+ *  ar []
+ *  a  = Assoc  % this came late, many arrays are named a
+ *  s  = struct
+ *  l  = list
+ *  fnane, dir, path 
+ *  i or ii for nested loops
+ *  or idx when the index is the important to notice
+
+ *  (generally) common names and code, and change only when
+ *  there is a subtly difference that makes it important to notice,
+ *  then use the appropriate naming, but not far from the usual
+
+ *  guilty: i dont type 
+	* 			return val;
+ *  when its the last statement, but simply
+ *    val;
+
+ *  idiom to avoid nested conditional blocks
+ *  loop (1) {
+ *  if (condition)
+ *    break;
+ * 
+ *  if (other_condition)
+ *    ...
+ *  }
+
+ *  this (almost C) idiom:
+ *  if (NULL == (var = expr, var)
+ *    ...
+	
+ *  No to:
+ *  		if (expession == NULL)
+ *  but to:
+ *  		if (NULL == expression)
+
+ *  I dont pollute the code with comments (for distraction reasons),   
+ *  unless is a historical story and a general comment about the code,  
+ *  and maybe have some fun.
+
+ *  "Try to read the code and understand the programmer intentions, is  
+ *  crusial for the minds and finally really helps in development"
+ 
+ * Generally its the semantics that matters like in the brace thing.  
+ * (you dont have to care if the compiler will be confused with code without  
+ * braces; because if you do then the mind lost its crusial mlsecond chance  
+ * while she is walking to the thought path, like a dog that follows a smell.  
+ * If you loose that tic then you have to go back.
+ 
+  The DO is not repeatable. After the expression is only accessible through  
+  emulation. But do not worry.
+  As this might be a new chance to produce new DO's, as the consience that  
+  is created when you make the travel to go back in time in a time that worthed  
+  the time, creates entirely new chains like spider strings, that by default  
+  will produce those new DO's that maybe you will be ready to live them on  
+  time.
+
+  That's why even our inner stupidity can be used artistically to create new  
+  complex environments.
+		As all of our "φάσμα" (the greek word for wide-ty) (if such word exists) can  
+  be used the same. We've been programmed to be like this way because this is   
+  the way that is producing something valuable. If we find what is this energy?
+  
+  Personally I believe is the energy that you're getting it when you are excited,  
+  or very close to that.  So if this is true then we've to find ways to produce  
+  more of this kind of energy, without resorting  to our stupidity or to our    
+  uncontrollable will, to find excuses to fight each other.  Then the life becomes  
+  art, like it never imagined that it will ever happened. But it happened.
+  
+  This is the DaDa.
+ 
+ * And last one thing about this brace story.
+
+ * Kudos to John Davis for his parser.  So much code, sometimes quite complex  
+ * conditional branches without even a single mistake i can remember.  
+ * And he is a _physician_ not a programmer.
+ * Its not that after (eight years now) of communication, sometimes you get that
+ * friendship feeling, which it feels strange and like a dream; (You never see  
+ * the other, you just stare typed lines in the screen and you assume is a human  
+ * being that wrote those bits) and for a moment you feel the other's soul and   
+ * this is magic)… 
+ * so, its not that i'm considering him like one of my friends, which is a honor  
+ * for me that he left his door open and gave me this right, because people fear.
+
+ * This is an expected (common for all beings) feeling.
+ 
+ * But if you live the door open, even just for a moment, maybe, i said maybe…
+ * But if you dont, you never know what you will loose - if my opinion matters:
+
+ * its like to live in a beautiful but lonely place, but you live alone ha!
+   or
+ * you are like zorba and you loose a party with full of wine and women  
+ 
+ * not a good thing in my humble opinion
+  
+ * in any case these moments, and there will be a time - in any human - that  
+ * for exactly those moments she will be very happy - for intangible (not sure  
+ * about the word here) reasons - but that time, you dont care about the damned  
+ * reasons - you just feel good about; and then its party[cipate] time …
+
+ * and because this became real emotional, no its not that.
+ * He deserves respect about the code he wrote.
+ * I know that because thats what I do, i read his code and i read a lot of code.
+
+ * But we are very lucky that live between us and talk to them sometimes, giants  
+ * (like our favorite coders (like Fabrice Bellard) or exceptional figures like
+ * Bruno Haible and Paul Eggert (the gnulib maintainers). I dont feel fear
+ * now. I know everything will go well, if not then at very least we can hold  
+ * our hands together and jump to the ocean of the eternity.
+
+ * We'll be in a good train. The only thing we can do until that, is to get  
+ * more of this essense of this life, like a food that you'll carry it in an  
+ * eternal travel. And there will be a time into a someone, can be anyone, in  
+ * a time with no time, that it will grow a will that will give shape in a world,
+ * similar to this, in an another edition, which will be free of bugs.
+
+ * so, its not that he is my friend. But he managed to make slang comparable  
+ * with big fat languages, without any serious help, like others have, or 
+ * who work full time to improve the product and mainly to advertize it.
+
+ * In wikipedia article about array implementations slang has a good share.
+ * And deserves more and it will take it, if you think that established  
+ * and respectful languages like Lua, hasn't been yet, after so many years,  
+ * settled for a stable table interface without confusion.
+
+ * I believe that slang's array manipulation is unparrarel and it would be  
+ * wise for others to copy the functionality.
+ 
+ * This is personal, but i couldn't live in other languages without slang arrays,
+
+ * so, and this is the reason, I wrote all this, because John just (yesterday
+ * night for us here) has released slang-2.3.2. I even wrote, with a terrible  
+ * mistake however, to the mailing list, after years (eight i think) of absense
+ * on mailing list discussions.
+ 
+ *  ### programming style
+ *  use arrays (where* and friends),
+ *  use qualifiers,
+ *  use ifnot,
+ *  use _for,
+ *  use forever
+ *  live forever (whoops! sorry)
+ * 
+ *  I can't think recursively (this is weakness) so I avoid functions 
+ *  that call themselves
+
+ *  on function development:
+ *  catch as soon as possible false conditions one by one, and if 
+ *  it's possible with a _single_ conditional branch
+ 
+ *  break the logic to single pieces
+
+ *  avoid function with more than one returned value
+ *  avoid switch except when it feels natural
+ ...
+
+```
+ 
 ## EPILOGUE
 As it has been said, still it can't built and maintain, that unix
 like environment. But this knowledge exists, developed by the 
@@ -783,13 +1049,22 @@ The editor is ignoring tabs by decision and this wont change³. I'm thinking
 seriously to use tab in Normal|Insert mode for completions. Anyway currently
 there is no way to insert tab and probably this wont change. 
 
-The editor hardcodes two languages, Hellenic and English (change with F10).
+The editor hardcodes two languages, Hellenic and English (that change with F10).  
+Its easy to initialize other keymaps, see: \_\_/Input/\_\_init\_\_.\_\_  
+and to init_keymap_el(). But the input doesn't depend on system mechanism  
+to change language mappings, see el_getch(), which map's the english  
+letters and combinations of them to corespond to hellenic letters.  That way  
+its possible to have support on other languages in any environment, without  
+dependency to the underlying system.
+
+And ... lack of fundamental knowledge, especially for low level stuff,  
+like fork's and select() (which still is not being used even once, chicken :-)  
+(what's wrong with chickens?).
 
 p.s., ideal, nobody really wants to write any code to handle an exchangeable
 bad file format that doesn't obey conformation with established standards,
 but the last one can do is to notify the sender/creator to get attention,
 as every body deserves that treatment and so do i.
-
 
 ## THANKS
 Special thanks to John E. Davis who wrote S-Lang, but and to all (uncountable)  
@@ -818,4 +1093,4 @@ He seems to inspired many. I've developed its
 ```C
 		int editorReadKey(int fd)
 ```
-to cover more cases, but its a very naive cose, but I should publish it anyway.  
+to cover more cases, but its a very naive code, but I should publish it anyway.  

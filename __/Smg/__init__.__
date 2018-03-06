@@ -221,6 +221,9 @@ class Smg
   end
 
   def restore (r, ptr, redraw)
+    ifnot (length (r))
+      return;
+
     variable
       imglen = length (IMG),
       rows = Integer_Type[imglen],
@@ -307,19 +310,24 @@ class Smg
       return @Array_Type[0];
       }
 
-    variable i;
-    variable lines = qualifier ("lines", lastrow - 2);
-    variable origlen = @len;
-    variable hlreg = qualifier ("hl_region");
-    variable lar = @len < lines ? @ar : ar[[:lines - 1]];
-    variable startrow = lastrow - (length (lar) > lines ? lines : length (lar));
-    variable header = qualifier ("header");
+    variable
+      header = qualifier ("header"),
+      mh = header != NULL,
+      ar_lines = qualifier ("lines", lastrow - 2 - (NULL != header)),
+      origlen = @len,
+      hlreg = qualifier ("hl_region"),
+      lar = @len < ar_lines ? @ar : ar[[:ar_lines - 1]],
+      startrow = lastrow - length (lar) - (NULL != header);
 
     ifnot (NULL == header)  lar = [header, lar];
 
-    @cmpl_lnrs = write_completion_routine (self, lar, startrow - (NULL == header ? 0 : 1)
+
+    @cmpl_lnrs = write_completion_routine (self, lar, startrow
+%    @cmpl_lnrs = write_completion_routine (self, lar, startrow -
+      %(NULL == header ? 0 : 1)
       ;;__qualifiers ());
 
+    variable i;
     ifnot (NULL == hlreg)
       if (Array_Type == typeof (hlreg))
         if (Integer_Type == _typeof (hlreg))
@@ -329,12 +337,12 @@ class Smg
             if (Integer_Type == _typeof (hlreg[i]))
               hlregion (self, hlreg[i][0], hlreg[i][1], hlreg[i][2], hlreg[i][3], hlreg[i][4]);
 
-    @len = @len >= lines;
+    @len = @len >= ar_lines;
 
     if (qualifier_exists ("refresh"))
       setrcdr (self, lastrow - 1, strlen (lar)[-1] + 1);
 
-    ar[[origlen >= lines ? lines - 1 : origlen:]];
+    ar[[origlen >= ar_lines ? ar_lines - 1 : origlen:]];
   end
 
   def printstrar (ar, lastrow, len, cmpl_lnrs)

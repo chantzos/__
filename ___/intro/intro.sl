@@ -6,8 +6,7 @@ This is the output of an introduction function, that is running at the
 shell application initialization.
 
 Normally, it runs once a day, but that depends if ` + Env->TMP_PATH + `
-is mounted under a tmpfs filesystem (which (kinda) is a prerequisite
-for the current code, as it doesn't any cleanup at exit)
+is mounted under a tmpfs filesystem
 
     EXAMPLE
 The underneath function searchs first for a file intro.slc, located at
@@ -89,8 +88,7 @@ define main ()
 {
   % this sets verbose mode on
   verboseon ();
-  % see the definitions at
-  ` + Env->SRC_PATH + `/tmp/__com.sl
+  % see the definitions at ` + Env->SRC_PATH + `/tmp/__com.sl
 
   variable
     dir,
@@ -115,8 +113,7 @@ define main ()
 
     if (NULL == bat)
       {
-      % IO structure located at
-      ` + Env->SRC_CLASS_PATH + `/IO/__init__.__
+      % IO structure located at  ` + Env->SRC_CLASS_PATH + `/IO/__init__.__
       IO.tostderr ("I didn't found any battery");
       exit_me (1);
       }

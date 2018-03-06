@@ -1,3 +1,14 @@
+/* slang bindings to hunspell library 
+ **************************************
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * Copyright (C) 2002-2017 Nmeth Lszl
+ ************************************** 
+ *
+ * originally written by Agathoklis D.E. Chatzimanikas
+ *
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <slang.h>

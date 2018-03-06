@@ -1,6 +1,9 @@
  /*
   * This is a S-Lang binding to TagLib an Audio meta-data library
   * http://developer.kde.org/~wheeler/taglib.html
+  * licensed with:
+  *      GNU LESSER GENERAL PUBLIC LICENSE
+  *           Version 2.1, February 1999
   *
   * Initial code written by Agathoklis D. Chatzimanikas
   * You may distribute this code under the terms of the

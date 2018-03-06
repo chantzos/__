@@ -1,5 +1,5 @@
  /*
- * This code was written by Agathoklis Chatzimanikas
+ * This code was originally written by Agathoklis Chatzimanikas
  * You may distribute it under the terms of the GNU General Public
  * License.
  */
@@ -34,6 +34,11 @@ static int input_pending_intrin (int *tsecs)
   return SLang_input_pending (*tsecs);
 }
 
+static void __define_key (char *key, int *code)
+{
+  SLkp_define_keysym (key, *code);
+}
+
 static void init_tty_intrin (int *abt_char, int *no_flow_control, int *opost)
 {
   if (TTY_Inited)
@@ -53,6 +58,7 @@ static void init_tty_intrin (int *abt_char, int *no_flow_control, int *opost)
   /*SLang_set_abort_signal (NULL);*/
 
   SLsig_unblock_signals ();
+
   TTY_Inited = 1;
 }
 
@@ -83,6 +89,7 @@ static SLang_Intrin_Fun_Type Getkey_Intrinsics [] =
   MAKE_INTRINSIC_0("flush_input", flush_input_intrin, SLANG_VOID_TYPE),
   MAKE_INTRINSIC_0("getkey", getkey_intrin, SLANG_INT_TYPE),
   MAKE_INTRINSIC_0("ungetkey", unget_key_intrin, SLANG_VOID_TYPE),
+  MAKE_INTRINSIC_2("define_key", __define_key, SLANG_VOID_TYPE, SLANG_STRING_TYPE, SLANG_INT_TYPE),
 
   SLANG_END_INTRIN_FUN_TABLE
 };

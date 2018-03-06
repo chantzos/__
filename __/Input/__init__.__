@@ -176,8 +176,17 @@ class Input
     TTY_INITED;
   end
 
+  def init_keymap_el ()
+    variable i, el =  [['Α': 'Ρ'], ['Σ':'Ω'], ['α':'ω'],
+      'ά','έ','ή','ί','ό','ύ','ώ','΄','Ά','Έ','Ό','Ί','Ώ','Ύ','Ή'];
+
+    _for i (0, length (el) - 1)
+      define_key (char (el[i]), el[i]);
+  end
+
   def init ()
     init_tty (-1, 0, 0);
+    init_keymap_el (NULL);
     TTY_INITED = @(__get_reference ("Input->TTY_Inited"));
   end
 

@@ -17,7 +17,7 @@
  *  Also, I'm really reluctant to introduce so much code because of XA_CLIPBOARD.
  *  The code however is functional.
  *  Basicallly is still xsel packed for slang, but one dependency less.
- *  In any case this is going to be called as an external process. as it forks
+ *  In any case this is going to be called as an external process, as it forks
  *  itself, and that is is what i do now when a broken application understands
  *  just XA_CLIPBOARD for inner communication
  */ 
