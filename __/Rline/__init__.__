@@ -809,13 +809,16 @@ class Rline
       index = 0,
       format = qualifier ("format", 1),
       header = qualifier ("header"),
-      max_len = length (ar)
+      arlen  = length (ar),
+      carlen,
+      clen,
+      max_len = arlen
         ? max (strlen (ar)) + ([2, 0][qualifier_exists ("literal")])
         : 0,
       fmt = sprintf ("%%-%ds", max_len),
       lines;
 
-    ifnot (length (ar))
+    ifnot (arlen)
       return Input.getch (;;struct {@__qualifiers, disable_langchange});
 
     if (format)
@@ -844,8 +847,8 @@ class Rline
     lines = lrow - 2 - (NULL != header);
 
     car = @bar;
-
-    irow = lrow - (length (car) > lines ? lines : length (car));
+    carlen = length (car);
+    irow = lrow - (carlen > lines ? lines : carlen);
 
     frow = irow - 1;
 
@@ -857,14 +860,15 @@ class Rline
 
     chr = Input.getch (;;struct {@__qualifiers, disable_langchange});
 
-    ifnot (len || any (['\t', [Input->rmap.right],
-        [Input->UP:Input->LEFT], Input->PPAGE, Input->NPAGE] == chr))
+    ifnot (len || any ([chr == '\t', [Input->rmap.right],
+        [Input->UP:Input->LEFT], Input->PPAGE, Input->NPAGE]))
       {
       restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
       return chr;
       }
 
-    while ( any (['\t', [Input->rmap.right], [Input->UP:Input->LEFT], Input->PPAGE, Input->NPAGE] == chr))
+    while (any (chr == ['\t', [Input->rmap.right], [Input->UP:Input->LEFT],
+        Input->PPAGE, Input->NPAGE]))
       {
       if ('\t' == chr)
         if (lines >= length (car) && page == 0)
@@ -895,8 +899,8 @@ class Rline
         @item = ar[index];
 
         car = @bar;
-
-        irow = lrow - (length (car) > lines ? lines : length (car));
+        carlen = length (car);
+        irow = lrow - (carlen > lines ? lines : carlen);
         icol = 0;
 
         if (length (bar) < lines)
@@ -914,48 +918,56 @@ class Rline
         continue;
         }
 
+      clen = length (strtok (strjoin (car, " ")));
+
       if (Input->UP == chr)
-        if ((0 == index || index < items) && 1 < length (car))
+        if ((0 == index || index < items) && 1 < carlen)
           {
           (irow, icol, index) =
             lrow - 1,
-            length (car) >= lines
-              ? items - 1 - (length (ar) mod items)
-              : length (car) mod items
-                ? (length (strtok (strjoin (car, " "))) mod items) - 1
+            carlen >= lines
+              ? items - 1 - (arlen mod items)
+              : carlen mod items
+                ? (clen mod items) - 1
                 : items - 1,
-            length (car) >= lines
+            carlen >= lines
               ? ((page) * (lines * items)) + ((lines - 1) * items) +
-                items - 1 - (length (ar) mod items)
-              : length (ar) - 1;
+                items - 1 - (arlen mod items)
+              : arlen - 1;
           }
         else
           {
           irow--;
           index -= items;
-          if (0 == irow || 1 == length (car))
+          if (0 == irow || 1 == carlen)
             (irow, icol, index) =
               lrow - 1,
-              length (car) >= lines
+              carlen >= lines
                 ? items - 1
-                : length (strtok (strjoin (car, " "))) mod items
-                  ? (length (strtok (strjoin (car, " "))) mod items) - 1
+                : clen mod items
+                  ? (clen mod items) - 1
                   : items - 1,
-              length (car) >= lines
-                ? ((page) * ((lines - 1) * items)) + ((lines - 1) * items) + items - 1
-                : length (ar) - 1;
+              carlen >= lines
+                ? ((page) * ((lines - 1) * items)) + ((lines - 1) * items) +
+                    items - 1
+                : arlen - 1;
           }
 
       if (any (Input->rmap.down == chr))
-        if (irow > lines || index + items > length (ar) - 1)
+        if (irow > lines + (NULL != header))
+          %||  index + (items - (length (strtok (strjoin (car, " "))) mod items))
+          % > arlen - 1)
           (irow, icol, index) =
-            lrow - (length (car) > lines ? lines : length (car)),
+            lrow - (carlen > lines + (NULL != header)
+              ? lines : carlen),
             0,
             page * ((lines - 1) * items);
         else
           {
           irow++;
-          index += items;
+          index += (index + items < arlen)
+            ? items
+            : (arlen - index - 1, icol = clen mod items - 1);
           }
 
       if (any (Input->rmap.left == chr))
@@ -963,24 +975,22 @@ class Rline
         icol--;
         index--;
         if (-1 == index)
-          if (length (car) < lines)
+          if (carlen < lines)
             (irow, icol, index) =
               lrow - 1,
-              length (strtok (strjoin (car, " "))) mod items
-                ? (length (strtok (strjoin (car, " "))) mod items) - 1
+              clen mod items
+                ? (clen mod items) - 1
                 : items - 1,
-                length (ar) - 1;
+                arlen - 1;
 
         if (-1 == icol)
           {
           irow--;
-          icol = length (car) mod items
-            ? (length (strtok (strjoin (car, " "))) mod items) - 1
-            : items - 1;
+          icol = items - 1;
           }
 
         ifnot (irow)
-          if (lines > length (car))
+          if (lines > carlen)
             {
             irow++;
             icol = 0;
@@ -994,13 +1004,13 @@ class Rline
         }
 
       if (any (Input->rmap.right == chr))
-        if (index + 1 > length (ar) - 1)
+        if (index + 1 > arlen - 1)
           (irow, icol, index) =
-            lrow - (length (car) > lines ? lines : length (car)),
+            lrow - (carlen > lines ? lines : carlen),
             0,
             (page) * ((lines - 1) * items);
         else if (icol + 1 == items)
-          ifnot (irow > lines)
+          ifnot (irow > lines + (NULL != header))
             {
             irow++;
             icol = 0;
@@ -1008,7 +1018,7 @@ class Rline
             }
           else
             (irow, icol, index) =
-              lrow - (length (car) > lines ? lines : length (car)),
+              lrow - (carlen > lines ? lines : carlen),
               0,
               (page) * ((lines - 1) * items);
         else
@@ -1022,7 +1032,7 @@ class Rline
         restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
         ifnot (page)
           {
-          if (length (car) > lines)
+          if (carlen > lines)
             page = 0;
 
           if (format)
@@ -1030,22 +1040,22 @@ class Rline
           else
             car = @ar;
 
-          len = length (car);
+          carlen = length (car);
 
-          while (len > lines)
+          while (carlen > lines)
             {
             page++;
             car = car[[lines - 1:]];
             bar = car;
-            len = length (car);
+            carlen = length (car);
             }
 
           (irow, icol, index) =
-            lrow - (length (car) > lines ? lines : length (car)),
+            lrow - (carlen > lines ? lines : carlen),
             0,
             (page) * ((lines - 1) * items);
 
-          if (length (car) < lines)
+          if (carlen < lines)
             restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
           }
         else
@@ -1057,15 +1067,14 @@ class Rline
             car = @ar;
 
           loop (page)
-            {
-            len = length (car);
             car = car[[lines - 1:]];
-            }
+
+          carlen = length (car);
 
           bar = car[[lines - 1:]];
 
           (irow, icol, index) =
-            lrow - (length (car) > lines ? lines : length (car)),
+            lrow - (carlen > lines ? lines : carlen),
             0,
             (page) * ((lines - 1) * items);
           }
