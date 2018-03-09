@@ -64,59 +64,61 @@ class Spell
             s.dic = DATA_DIR + "/" + dic_str;
         }
 
-      s.user_dic_fd = open (s.user_dic, O_RDWR|O_CREAT, File->PERM["_PRIVATE"]);
-      s.src_user_dic_fd = open (s.src_user_dic, O_RDWR|O_CREAT, File->PERM["_PRIVATE"]);
+      s.user_dic_fd = open (s.user_dic,
+        O_RDWR|O_CREAT|O_APPEND, File->PERM["_PRIVATE"]);
+      s.src_user_dic_fd = open (s.src_user_dic,
+        O_RDWR|O_CREAT|O_APPEND, File->PERM["_PRIVATE"]);
 
       s.hsp = hunspell_init (s.aff, s.dic);
 
-      s.spell = fun (`
+      s.spell = funref (`
           (s, str)
         if (NULL == s.hsp)
           return -1;
 
         hunspell_check (s.hsp, str);
-        `).__funcref;
+        `);
 
-      s.close = fun (`
+      s.close = funref (`
           (s)
         if (NULL == s.hsp)
           return;
 
         hunspell_close (s.hsp);
         s.hsp = NULL;
-        `).__funcref;
+        `);
 
-      s.suggest = fun (`
+      s.suggest = funref (`
           (s, str)
         if (NULL == s.hsp)
           return NULL;
 
         hunspell_suggest (s.hsp, str);
-        `).__funcref;
+        `);
 
-      s.add_word = fun (`
+      s.add_word = funref (`
           (s, str)
         if (NULL == s.hsp)
           return;
 
         hunspell_add_word (s.hsp, str);
-        `).__funcref;
+        `);
 
-      s.remove_word = fun (`
+      s.remove_word = funref (`
           (s, str)
         if (NULL == s.hsp)
           return;
 
         hunspell_remove_word (s.hsp, str);
-        `).__funcref;
+        `);
 
-      s.add_dic = fun (`
+      s.add_dic = funref (`
          (s, str)
         if (NULL == s.hsp)
           return;
 
         hunspell_add_dic (s.hsp, str);
-       `).__funcref;
+       `);
 
       s.add_dic (s.user_dic);
 

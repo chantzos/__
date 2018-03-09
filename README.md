@@ -7,11 +7,16 @@ The primary intention is not ever to be a public project with the common
 sense; eventually the code will be extracted to outer repositories in an   
 abstracted way that can be used as standalone, as now its closed integrated  
 to this system.
- 
+
 Moreover, I can't get the responsibility to expose others to operations that  
 are considered dangerous, as I do not have the required knowledge to cover the   
-possibilities and the corner cases.  
- 
+possibilities and the corner cases, and ...
+I do really want to feel free to experiment, as foremost this is intended as  
+an educational tool, to cover the absence of a formal education (and this is a  
+long trip with many mistakes on the road). Right now (the spring of 2018) this 
+is true for the C side of code, but for slang code, I don't have any excuse for 
+mistakes though.
+
 However, I believe the code can be adopted as it is, especially from slang coders.  
 
 But as this can be seen as a specification for a development environment, for 
@@ -19,15 +24,16 @@ people who like Unix and appreciate the power of a command line like interface,
 I believe has a value and that is the main reason for being public.  
 
 I would welcome ideas specific to the specification, though code contribution 
-of course is more than welcomed, but its not the intention, which is primary 
-to stabilize the concepts in my mind too, through writing this README, which 
-is a way to formalize the logic and finally produce a much more compact document.   
+of course is more than welcome, but its not the intention, which is primarily  
+to stabilize the concepts in my mind too, through writing this README, which  
+is a way to formalize the logic and finally produce a much more compact document.
 This is a personal weakness as the thoughts are too many to reduce them and avoid  
-the verbosity. 
+the verbosity (this battle has been already lost, as this document, it's (even now)  
+more like a written talk with a friend on programming which it's really getting  
+worse with time (consider yourself warned)), so compactness is an illusion, but a  
+document with just the specification is doable (but not a priority).
 
-And since I've mentioned the README, it's more like a "read me, if you like",  
-though this README is more than a README with the common sense. Consider that  
-you've been warned.
+And since I've mentioned the README, it's really more like a "read me, if you like".  
 
 ## SYNOPSIS
 This application is an implementation of a concept of ideas

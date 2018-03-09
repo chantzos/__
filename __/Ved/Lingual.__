@@ -8,9 +8,11 @@ subclass Lingual
   var __S = NULL;
 
   beg
-    variable __get_word = fun (`
+    variable get_word__ = funref (`
       envbeg
-        variable i, lstart, chars = [[0:'A' - 1], ['Z' + 1:'a' - 1], ['z' + 1:160]];
+        variable i, lstart,
+          chars = [[0:'\'' - 1], ['\'' + 1:'A' - 1],
+                   ['Z' + 1:'a' - 1], ['z' + 1:160]];
       envend
           (idx, buf, len, start)
         i = 0;
@@ -29,20 +31,15 @@ subclass Lingual
         while (i++, i < len &&
           all (0 == (chars == substr (buf, i + 1, 1)[0])));
 
-        @idx += i - (i + 1 == len && any (chars == substr (buf, i + 1, 1)[0])
-          ? 1
-          : 0);
-
+        @idx += i - 1;
         @start += lstart;
+
         substr (buf, lstart, i - lstart + 1);
      `);
 
-    variable __put_word = fun (`
+    variable put_word__ = funref (`
         (line, beg, len, word)
-      ifnot (beg)
-        substr (line, beg + 1, len - beg - 1) + word;
-      else
-        substr (line, beg, len - beg) + word;
+      substr (line, beg + 1, len - beg - 1) + word;
     `);
   end
 
@@ -73,7 +70,8 @@ subclass Lingual
       line = lines[i];
       len = strlen (line);
       ar[i] = "";
-      if (0 == len || len < 4)
+
+      if (len < 4)
         {
         ar[i] = line;
         continue;
@@ -83,25 +81,26 @@ subclass Lingual
         {
         beg = idx;
         end = idx;
-        word = __get_word.call (&idx, substr (line, idx + 1, -1),
+        word = (@get_word__) (&idx, substr (line, idx + 1, -1),
           len - idx, &end);
 
-        if (0 == strlen (word))
+        wlen = strlen (word);
+        ifnot (wlen)
           {
-          ar[i] += __put_word.call (line, beg + 1, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           continue;
           }
 
-        if (4 > strlen (word) || any (word == ACCEPTED))
+        if (4 > wlen || any (word == ACCEPTED))
           {
-          ar[i] += __put_word.call (line, beg, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           continue;
           }
 
         is_correct = __S.spell (word);
         if (is_correct)
           {
-          ar[i] += __put_word.call (line, beg, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           continue;
           }
 
@@ -110,7 +109,7 @@ subclass Lingual
 
         ifnot (suglen)
           {
-          ar[i] += __put_word.call (line, beg, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           continue;
           }
 
@@ -135,9 +134,9 @@ subclass Lingual
         if ('c' == retval)
           return String_Type[0];
 
-        if (any (['a', 'A'] == retval))
+        if (any (['a', 'A', ' '] == retval))
           {
-          ar[i] += __put_word.call (line, beg, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           __S.add_word (word);
 
           ACCEPTED = [ACCEPTED, word];
@@ -153,13 +152,13 @@ subclass Lingual
           {
           Smg.send_msg_dr ("mispelled word [" + word + "]", 0, NULL, NULL);
           word = Rline.getline (;char = "word: ");
-          ar[i] += __put_word.call (line, beg, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           continue;
           }
 
         if ('q' == retval)
           {
-          ar[i] += __put_word.call (line, beg, len, "");
+          ar[i] += (@put_word__)(line, beg, len + 1, "");
           break 2;
           }
 
@@ -167,14 +166,14 @@ subclass Lingual
 
         if (retval > suglen)
           {
-          ar[i] += __put_word.call (line, beg, end, word);
+          ar[i] += (@put_word__) (line, beg, end, word);
           continue;
           }
 
         retval--;
 
         word = sugs[retval];
-        ar[i] += __put_word.call (line, beg, end, word);
+        ar[i] += (@put_word__) (line, beg, end, word);
         }
       }
 

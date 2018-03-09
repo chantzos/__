@@ -1,12 +1,26 @@
-/* slang bindings to hunspell library 
+/* slang bindings to hunspell library
+ * https://github.com/hunspell/
+ *
  **************************************
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * Copyright (C) 2002-2017 Nmeth Lszl
  ************************************** 
  *
- * originally written by Agathoklis D.E. Chatzimanikas
- *
+ * Originally written by Agathoklis D.E. Chatzimanikas
+ * Last checked against hunspell ~revision a7be9d3
+ * 
+ * compiled with gcc (with debug flags):
+ gcc hunspell-module.c -I/usr/local/include -g -O2    \
+   -Wl,-R/usr/local/lib --shared -fPIC -lhunspell-1.6 \
+   -Wall -Wformat=2 -W -Wunused -Wundef -pedantic     \
+   -Wno-long-long -Winline -Wmissing-prototypes       \
+   -Wnested-externs -Wpointer-arith -Wcast-align      \
+   -Wshadow -Wstrict-prototypes -Wextra -Wc++-compat  \
+   -Wlogical-op -o hunspell-module.so
+
+ * all the operations checked with
+ * valgrind --leak-check=full
  */
 
 #include <stdlib.h>
@@ -57,6 +71,9 @@ static SLang_MMT_Type *allocate_hunspell_type (Hunhandle *handler)
 
 static int hunspell_spell_intrinsic (Hunspell_Type *hsp, char *str)
 {
+  if (NULL == hsp->handler)
+    return -1;
+
   return Hunspell_spell (hsp->handler, str);
 }
 
@@ -66,6 +83,9 @@ static void hunspell_suggest_intrinsic (Hunspell_Type *hsp, char *str)
  	char **lst = NULL;
   SLindex_Type idx;
   SLang_Array_Type *suggestions;
+
+  if (NULL == hsp->handler)
+    return;
 
 	 idx = Hunspell_suggest (hsp->handler, &lst, str);
 
@@ -96,11 +116,17 @@ end:
 
 static void hunspell_add_dic_intrinsic (Hunspell_Type *hsp, char *str)
 {
+  if (NULL == hsp->handler)
+    return;
+
   Hunspell_add_dic (hsp->handler, str);
 }
 
 static void hunspell_rm_word_intrinsic (Hunspell_Type *hsp, char *str)
 {
+  if (NULL == hsp->handler)
+    return;
+
   Hunspell_remove (hsp->handler, str);
 }
 
@@ -199,6 +225,12 @@ static int register_hunspell_type (void)
 
   return 0;
 }
+
+#undef DUMMY_HUNSPELL_TYPE
+#undef P
+#undef I
+#undef V
+#undef S
 
 int init_hunspell_module_ns (char *ns_name)
 {
