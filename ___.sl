@@ -1,3 +1,21 @@
+public variable INSTALLATION = 1;  % required
+
+private variable vers_str = _slang_version_string;
+private variable vers_int = _slang_version;
+private variable min_compat = 20301;
+private variable min_compat_str = "pre2.3.1-";
+private variable min_patchlevel = 85;
+private variable max_compat = 20302;
+private variable max_compat_str = "2.3.2";
+private variable max_patchlevel = 0;
+private variable prequis = [
+     "PREQUISITIES:",
+     "",
+     "  pcre libs and headers",
+     "  ssl libs and headers (can also be libressl, tested on Void Linux)",
+     "  curl libs and headers",
+     "  git"];
+
 if (any ("--help" == __argv or  "-h" == __argv))
   {
   () = array_map (Integer_Type, &fprintf, stderr, "%s\n",
@@ -11,43 +29,53 @@ if (any ("--help" == __argv or  "-h" == __argv))
      "  --compile=no   don't compile modules (usefull _only_ at later installations)",
      "  -W|--warnings  enable warnings (some checks for executables)",
      "",
-     "PREQUISITIES:",
-     "",
-     "  pcre libs and headers",
-     "  ssl libs and headers (can also be libressl, as that is what Void Linux uses)",
-     "  curl libs and headers",
-     "  git",
+     prequis,
      "",
      "NOTE:",
      "This application targets S-Lang development tree and uses its latest features",
      "  git://git.jedsoft.org/git/slang.git",
-     "because of that, there few chances to work with formal S-Lang releases"
+     "because of that, there few chances to work with formal S-Lang releases",
+     "",
+     "Last working minimum slang version: " + min_compat_str + string (min_patchlevel),
+     "Last working maximum slang version: " + max_compat_str + string (max_patchlevel)
     ]);
 
   exit (0);
   }
 
-public variable INSTALLATION = 1;  % required
+private variable slang_instr = `
+git clone git://git.jedsoft.org/git/slang.git && \
+cd slang                                      && \
+./configure && make && sudo make install      && \
+sudo ldconfig -v`;
 
-private variable vers_str = _slang_version_string;
-private variable vers_int = _slang_version;
-private variable is_enough = 20301 <= vers_int;
-
-ifnot (is_enough)
+ifnot (min_compat <= vers_int)
   {
-  () = fprintf (stderr, "S-Lang version is old and not compatible\n");
+  () = fprintf (stderr, "your slang version (%s) is old and not compatible\n%s\n\n%s\n%s\n",
+     _slang_version_string,
+     "slang atleast patchlevel " + min_compat_str + string (min_patchlevel) +" is required",
+     "to install slang issue:", slang_instr);
   exit (1);
   }
 
-is_enough = 20301 == vers_int;
-
-if (is_enough)
-  ifnot (strncmp (vers_str, "pre2.3.1-", 9))
-    if (atoi (vers_str[[9:]]) < 85)
+if (min_compat == vers_int)
+  ifnot (strncmp (vers_str, min_compat_str, strlen (min_compat_str)))
+    if (atoi (vers_str[[strlen (min_compat_str):]]) < min_patchlevel)
       {
-      () = fprintf (stderr, "S-Lang atleast patchlevel 2.3.1-85 is needed\n");
+      () = fprintf (stderr, "your slang version (%s) is old and not compatible\n%s\n\n%s\n%s\n",
+        _slang_version_string,
+        "S-Lang atleast patchlevel " + min_compat_str + string (min_patchlevel) + " is required",
+        "to install slang issue:", slang_instr);
       exit (1);
       }
+
+if (max_compat < vers_int)
+  {
+  () = fprintf (stderr, "your slang (%s) version is new and not compatible\n%s\n",
+     _slang_version_string,
+     "slang minimum version: " + max_compat_str + string (max_patchlevel));
+  exit (1);
+  }
 
 public variable DEBUG = any ("--debug" == __argv);
 

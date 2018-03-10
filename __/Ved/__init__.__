@@ -1097,13 +1097,29 @@ class Ved
       Ved.draw_wind ();
   end
 
+  def get_bufnames (w)
+    if (NULL == w)
+      w = get_cur_wind (NULL);
+
+    if (qualifier_exists ("dont_filter"))
+      return w.bufnames;
+
+    variable i, bnames = w.bufnames;
+    _for i (0, length (bnames) - 1)
+      if (any (bnames[i] == SPECIAL))
+        bnames[i] = NULL;
+
+    bnames[wherenot (_isnull (bnames))];
+  end
+
   def bufdelete (s, bufname, force) public proc
     if (any (bufname == UNDELETABLE))
       return;
 
     variable w = Ved.get_cur_wind ();
+    variable bnames = get_bufnames (NULL, w);
 
-    ifnot (any (bufname == w.bufnames))
+    ifnot (any (bufname == bnames))
       return;
 
     if (s._flags & VED_MODIFIED && force)
@@ -1129,10 +1145,8 @@ class Ved
 
     variable winds = assoc_get_keys (VED_WIND);
 
-    ifnot (length (w.bufnames))
-      if (1 == length (winds))
-        This.exit (0);
-      else
+    ifnot (length (bnames) - 1)
+      ifnot (1 == length (winds))
         {
         assoc_delete_key (VED_WIND, VED_CUR_WIND);
         winds = assoc_get_keys (VED_WIND);
