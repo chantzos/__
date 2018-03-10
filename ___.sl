@@ -1,6 +1,5 @@
 public variable INSTALLATION = 1;  % required
 
-private variable vers_str = _slang_version_string;
 private variable vers_int = _slang_version;
 private variable min_compat = 20301;
 private variable min_compat_str = "pre2.3.1-";
@@ -9,7 +8,7 @@ private variable max_compat = 20302;
 private variable max_compat_str = "2.3.2";
 private variable max_patchlevel = 0;
 private variable prequis = [
-     "PREQUISITIES:",
+     "PREQUISITIES: (usually the -devel packages)",
      "",
      "  pcre libs and headers",
      "  ssl libs and headers (can also be libressl, tested on Void Linux)",
@@ -34,7 +33,8 @@ if (any ("--help" == __argv or  "-h" == __argv))
      "NOTE:",
      "This application targets S-Lang development tree and uses its latest features",
      "  git://git.jedsoft.org/git/slang.git",
-     "because of that, there few chances to work with formal S-Lang releases",
+     "because of that, there few chances to work with formal S-Lang releases,",
+     "that might also lack fixes from slang development",
      "",
      "Last working minimum slang version: " + min_compat_str + string (min_patchlevel),
      "Last working maximum slang version: " + max_compat_str + string (max_patchlevel)
@@ -43,7 +43,9 @@ if (any ("--help" == __argv or  "-h" == __argv))
   exit (0);
   }
 
-private variable slang_instr = `
+private variable slang_instr =
+strjoin ("# " + prequis, "\n") + `
+
 git clone git://git.jedsoft.org/git/slang.git && \
 cd slang                                      && \
 ./configure && make && sudo make install      && \
@@ -59,8 +61,8 @@ ifnot (min_compat <= vers_int)
   }
 
 if (min_compat == vers_int)
-  ifnot (strncmp (vers_str, min_compat_str, strlen (min_compat_str)))
-    if (atoi (vers_str[[strlen (min_compat_str):]]) < min_patchlevel)
+  ifnot (strncmp (_slang_version_string, min_compat_str, strlen (min_compat_str)))
+    if (atoi (_slang_version_string[[strlen (min_compat_str):]]) < min_patchlevel)
       {
       () = fprintf (stderr, "your slang version (%s) is old and not compatible\n%s\n\n%s\n%s\n",
         _slang_version_string,
@@ -78,6 +80,9 @@ if (max_compat < vers_int)
   }
 
 public variable DEBUG = any ("--debug" == __argv);
+
+public variable OSNAME  = uname.sysname;
+public variable MACHINE = uname.machine;
 
 private variable SRC_PATH =
   (SRC_PATH = path_concat (getcwd (), path_dirname (__FILE__)),
@@ -222,7 +227,6 @@ define which (exec)
   length (ar) ? path[ar][0] : NULL;
 }
 
-variable MACHINE = uname.machine;
 variable OBJDUMP_BIN = which ("objdump");
 variable LD_LIBRARY_PATH = ["/usr/local/lib", "/lib", "/usr/lib", NULL, NULL];
 

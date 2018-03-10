@@ -695,7 +695,7 @@ public define init_ved ()
       if (-1 == File.write (fname, __stdin))
         This.exit (1);
 
-    Ved.init_ftype (ftype).ved (fname);
+    Ved.init_ftype (ftype).ved (fname;_autochdir = 0);
 
     This.exit (0);
     }

@@ -45,32 +45,60 @@ beg
     variable st = stat_file (file);
 
     if (Dir.__isdirectory (file, st))
-      self.err (file + ": File is a directory";;__return__ (-3));
+      {
+      self.err (file + ": File is a directory");
+      return -3;
+      }
 
     if (-1 == access (file, F_OK))
-      self.err (file + ": File doesn't exists";;__return__ (-1));
+      {
+      variable dir = path_dirname (file);
+      if ("." == dir || -1 == access (dir, F_OK|R_OK) ||
+          0 == Dir.isdirectory (dir))
+        {
+        self.err (file + ": doesn't exists and directory is not accesible");
+        return -6;
+        }
+
+      self.err (file + ": File doesn't exists");
+      return -1;
+      }
 
     if (NULL == st)
-      self.err (file + ": " + errno_string (errno);;__return__ (-4));
+      {
+      self.err (file + ": " + errno_string (errno));
+      return -4;
+      }
 
     if (-1 == access (file, R_OK))
-      self.err (file + ": File is not readable";;__return__ (-2));
+      {
+      self.err (file + ": File is not readable");
+      return -2;
+      }
 
     if (-1 == access (file, W_OK))
-      self.err (file + ": File is not writable";;__return__ (0));
+      {
+      self.err (file + ": File is not writable");
+      return 0;
+      }
 
     ifnot (st.st_size)
       return 1;
 
     variable fp = fopen (file, "r");
     if (NULL == fp)
-      self.err (file + ": " + errno_string (errno);;__return__ (-4));
+      {
+      self.err (file + ": " + errno_string (errno));
+      return -4;
+      }
 
     ifnot (File.Is.unix (file;fp = fp))
       ifnot (File.Is.dos (file;fp = fp))
         if (NULL == VED_OPTS.force)
-          self.err (file +
-            ": File is not a unix nor a dos file";;__return__ (-5));
+          {
+          self.err (file + ": File is not a unix nor a dos file");
+          return -5;
+          }
 
     1;
   end
