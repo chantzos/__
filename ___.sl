@@ -91,6 +91,8 @@ private variable SRC_PATH =
       : SRC_PATH);
 private variable
   SRC_C_PATH = SRC_PATH + "/C",
+  SRC_MODULE_PATH = SRC_C_PATH + "/slang-modules",
+  SRC_INTER_PATH  = SRC_C_PATH + "/interp",
   SRC_TMP_PATH = SRC_PATH + "/tmp",
   WARNINGS = any ("--warnings" == __argv or "-W" == __argv),
   VERBOSE = any ("--verbose" == __argv or "-v" == __argv),
@@ -116,7 +118,7 @@ private variable FLAGS = [
   "-lm -lpam", "", "-lssl", "-lcurl", "", "", "", "-lpcre", "", "", "",
   "-ltag_c", "", "-lhunspell-1.6", "-ltcc"];
 private variable DEF_FLAGS =
-  "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
+  "-I" + SRC_C_PATH + "/include -I../../include -I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 private variable DEB_FLAGS =
   "-Wall -Wformat=2 -W -Wunused -Wundef -pedantic -Wno-long-long\
  -Winline -Wmissing-prototypes -Wnested-externs -Wpointer-arith\
@@ -493,12 +495,13 @@ private define __build_module__ (i)
 {
   variable
     CC_COM = CC + " " +
-      SRC_C_PATH + "/" + MODULES[i] + "-module.c " +
+      SRC_MODULE_PATH + "/" +  MODULES[i] + "/" + MODULES[i] + "-module.c " +
       DEF_FLAGS + " " + (DEBUG ? DEB_FLAGS : "") + " -o " +
       SRC_TMP_PATH + "/" + MODULES[i] + "-module.so " + FLAGS[i];
 
   if (VERBOSE)
-    io.tostdout ("compiling " + SRC_C_PATH + "/" + MODULES[i] + "-module.c");
+    io.tostdout ("compiling " + SRC_MODULE_PATH + "/" + MODULES[i] + "/" +
+        MODULES[i] + "-module.c");
 
   if (system (CC_COM))
     ifnot (any (MODULES[i] == MODULES_THAT_DONT_EXIT_ON_ERR))
@@ -548,63 +551,84 @@ __WNsize ();
 
 SRC_PATH       = realpath (SRC_PATH);
 SRC_TMP_PATH   = realpath (SRC_TMP_PATH);
-SRC_C_PATH     = realpath (SRC_C_PATH);
 
-private variable ROOT_PATH      = realpath (SRC_PATH + "/..");
-private variable STD_PATH       = ROOT_PATH + "/std";
-private variable TMP_PATH       = ROOT_PATH + "/tmp";
-private variable BIN_PATH       = ROOT_PATH + "/bin";
-private variable USER_PATH      = ROOT_PATH + "/usr";
-private variable LOCAL_PATH     = ROOT_PATH + "/local";
+private variable
+  ROOT_PATH      = realpath (SRC_PATH + "/.."),
+  STD_PATH       = ROOT_PATH + "/std",
+  TMP_PATH       = ROOT_PATH + "/tmp",
+  BIN_PATH       = ROOT_PATH + "/bin",
+  USER_PATH      = ROOT_PATH + "/usr",
+  LOCAL_PATH     = ROOT_PATH + "/local";
 
-private variable STD_CLASS_PATH = STD_PATH + "/__";
-private variable STD_LIB_PATH   = STD_PATH + "/___";
-private variable STD_C_PATH     = STD_PATH + "/C";
-private variable STD_APP_PATH   = STD_PATH + "/app";
-private variable STD_COM_PATH   = STD_PATH + "/com";
-private variable STD_DATA_PATH  = STD_PATH + "/data";
+private variable
+  STD_CLASS_PATH = STD_PATH + "/__",
+  STD_LIB_PATH   = STD_PATH + "/___",
+  STD_C_PATH     = STD_PATH + "/C",
+  STD_CMACH_PATH = STD_C_PATH + "/" + MACHINE,
+  STD_MODULE_PATH= STD_CMACH_PATH + "/slang-modules",
+  STD_CLIB_PATH  = STD_CMACH_PATH + "/lib",
+  STD_CINC_PATH  = STD_CMACH_PATH + "/include",
+  STD_CSHARE_PATH= STD_CMACH_PATH + "/share",
+  STD_CBIN_PATH  = STD_CMACH_PATH + "/bin",
+  STD_APP_PATH   = STD_PATH + "/app",
+  STD_COM_PATH   = STD_PATH + "/com",
+  STD_DATA_PATH  = STD_PATH + "/data";
 
-private variable SRC_PROTO_PATH = SRC_PATH + "/_";
-private variable SRC_CLASS_PATH = SRC_PATH + "/__";
-private variable SRC_LIB_PATH   = SRC_PATH + "/___";
-private variable SRC_C_PATH     = SRC_PATH + "/C";
-private variable SRC_APP_PATH   = SRC_PATH + "/app";
-private variable SRC_COM_PATH   = SRC_PATH + "/com";
-private variable SRC_DATA_PATH  = SRC_PATH + "/data";
+private variable
+  SRC_PROTO_PATH = SRC_PATH + "/_",
+  SRC_CLASS_PATH = SRC_PATH + "/__",
+  SRC_LIB_PATH   = SRC_PATH + "/___",
+  SRC_C_PATH     = SRC_PATH + "/C",
+  SRC_APP_PATH   = SRC_PATH + "/app",
+  SRC_COM_PATH   = SRC_PATH + "/com",
+  SRC_DATA_PATH  = SRC_PATH + "/data";
 
-private variable USER_COM_PATH  = USER_PATH + "/com";
-private variable USER_APP_PATH  = USER_PATH + "/app";
-private variable USER_LIB_PATH  = USER_PATH + "/___";
-private variable USER_CLS_PATH  = USER_PATH + "/__";
-private variable USER_DATA_PATH = USER_PATH + "/data";
-private variable USER_C_PATH    = USER_PATH + "/C";
+private variable
+  USER_COM_PATH    = USER_PATH + "/com",
+  USER_APP_PATH    = USER_PATH + "/app",
+  USER_LIB_PATH    = USER_PATH + "/___",
+  USER_CLS_PATH    = USER_PATH + "/__",
+  USER_DATA_PATH   = USER_PATH + "/data",
+  USER_C_PATH      = USER_PATH + "/C",
+  USER_CMACH_PATH  = USER_C_PATH + "/" + MACHINE,
+  USER_CLIB_PATH   = USER_CMACH_PATH + "/lib",
+  USER_CBIN_PATH   = USER_CMACH_PATH + "/bin",
+  USER_CSHARE_PATH = USER_CMACH_PATH + "/share",
+  USER_CINC_PATH   = USER_CMACH_PATH + "/include",
+  USER_MODULE_PATH = USER_CMACH_PATH + "/slang-modules";
 
-private variable SRC_USER_PATH        = SRC_PATH + "/usr";
-private variable SRC_USER_COM_PATH    = SRC_USER_PATH + "/com";
-private variable SRC_USER_APP_PATH    = SRC_USER_PATH + "/app";
-private variable SRC_USER_LIB_PATH    = SRC_USER_PATH + "/___";
-private variable SRC_USER_CLASS_PATH  = SRC_USER_PATH + "/__";
-private variable SRC_USER_C_PATH      = SRC_USER_PATH + "/C";
-private variable SRC_USER_DATA_PATH   = SRC_USER_PATH + "/data";
+private variable
+  SRC_USER_PATH        = SRC_PATH + "/usr",
+  SRC_USER_COM_PATH    = SRC_USER_PATH + "/com",
+  SRC_USER_APP_PATH    = SRC_USER_PATH + "/app",
+  SRC_USER_LIB_PATH    = SRC_USER_PATH + "/___",
+  SRC_USER_CLASS_PATH  = SRC_USER_PATH + "/__",
+  SRC_USER_C_PATH      = SRC_USER_PATH + "/C",
+  SRC_USER_MODULE_PATH = SRC_USER_PATH + "/C/" + MACHINE + "/slang-modules",
+  SRC_USER_DATA_PATH   = SRC_USER_PATH + "/data";
 
-private variable LOCAL_COM_PATH       = LOCAL_PATH + "/com";
-private variable LOCAL_APP_PATH       = LOCAL_PATH + "/app";
-private variable LOCAL_CLASS_PATH     = LOCAL_PATH + "/__";
-private variable LOCAL_LIB_PATH       = LOCAL_PATH + "/___";
+private variable
+  LOCAL_COM_PATH       = LOCAL_PATH + "/com",
+  LOCAL_APP_PATH       = LOCAL_PATH + "/app",
+  LOCAL_CLASS_PATH     = LOCAL_PATH + "/__",
+  LOCAL_LIB_PATH       = LOCAL_PATH + "/___";
 
-private variable SRC_LOCAL_PATH       = SRC_PATH + "/local";
-private variable SRC_LOCAL_COM_PATH   = SRC_LOCAL_PATH + "/com";
-private variable SRC_LOCAL_APP_PATH   = SRC_LOCAL_PATH + "/app";
-private variable SRC_LOCAL_CLASS_PATH = SRC_LOCAL_PATH + "/__";
-private variable SRC_LOCAL_LIB_PATH   = SRC_LOCAL_PATH + "/___";
+private variable
+  SRC_LOCAL_PATH       = SRC_PATH + "/local",
+  SRC_LOCAL_COM_PATH   = SRC_LOCAL_PATH + "/com",
+  SRC_LOCAL_APP_PATH   = SRC_LOCAL_PATH + "/app",
+  SRC_LOCAL_CLASS_PATH = SRC_LOCAL_PATH + "/__",
+  SRC_LOCAL_LIB_PATH   = SRC_LOCAL_PATH + "/___";
 
 private variable INST_PATHS = [
-  ROOT_PATH, STD_PATH, TMP_PATH, BIN_PATH,
-  USER_PATH, USER_APP_PATH, USER_COM_PATH, USER_CLS_PATH,
-  USER_DATA_PATH, USER_C_PATH, USER_LIB_PATH,
-  LOCAL_PATH, LOCAL_COM_PATH, LOCAL_APP_PATH, LOCAL_CLASS_PATH, LOCAL_LIB_PATH,
-  STD_CLASS_PATH, STD_C_PATH, STD_DATA_PATH,
-  STD_APP_PATH, STD_COM_PATH, STD_LIB_PATH];
+  ROOT_PATH, STD_PATH, TMP_PATH, BIN_PATH, USER_PATH,
+  USER_APP_PATH, USER_COM_PATH, USER_CLS_PATH, USER_DATA_PATH, USER_LIB_PATH,
+  USER_C_PATH, USER_CMACH_PATH, USER_CLIB_PATH, USER_MODULE_PATH, USER_CINC_PATH,
+  USER_CSHARE_PATH, USER_CBIN_PATH,
+  STD_C_PATH, STD_CMACH_PATH, STD_MODULE_PATH, STD_CLIB_PATH, STD_CINC_PATH,
+  STD_CSHARE_PATH, STD_CBIN_PATH,
+  STD_CLASS_PATH, STD_DATA_PATH, STD_APP_PATH, STD_COM_PATH, STD_LIB_PATH,
+  LOCAL_PATH, LOCAL_COM_PATH, LOCAL_APP_PATH, LOCAL_CLASS_PATH, LOCAL_LIB_PATH];
 
 private define __eval__ (__buf__)
 {
@@ -626,7 +650,7 @@ private define __compile_slsh__ ()
 {
   variable
     CC_COM = CC + " -g -O2 "  + (DEBUG ? DEB_FLAGS : "") + " " +
-      SRC_C_PATH + "/__slsh.c -o " + SRC_TMP_PATH + "/__slsh -lslang -lm -lpam";
+      SRC_INTER_PATH + "/__slsh.c -o " + SRC_TMP_PATH + "/__slsh -lslang -lm -lpam";
 
   if (system (CC_COM))
     This.exit ("failed to compile " + SRC_TMP_PATH + "/__slsh.c", 1);
@@ -651,21 +675,29 @@ private define __read___ (this)
 $0 = realpath ((($0 = path_concat (getcwd (), path_dirname (__FILE__)),
     $0[[-2:]] == "/."
       ? substr ($0, 1, strlen ($0) - 2)
-      : $0)) + "/../..");` + "\n\n" +
-`private variable __SRC_CPATHS = [
+      : $0)) + "/../..");
+
+private variable __SRC_CPATHS = [
   $0 + "/__/__",
   $0 + "/__/local/__",
-  $0 + "/__/usr/__"];` + "\n\n" +
-`private variable __CPATHS = [
+  $0 + "/__/usr/__"];
+
+private variable __CPATHS = [
   $0 + "/std/__",
   $0 + "/local/__",
-  $0 + "/usr/__"];` + "\n\n" +
-`private variable __LPATHS = [
+  $0 + "/usr/__"];
+
+private variable __LPATHS = [
   $0 + "/std/___",
   $0 + "/local/___",
-  $0 + "/usr/___"];` + "\n\n" +
-`set_import_module_path ($0 + "/std/C:" + get_import_module_path);`
-   + "\n\n";
+  $0 + "/usr/___"];
+
+set_import_module_path (
+    $0 + "/usr/C/" + uname.machine + "/slang-modules:" +
+    $0 + "/std/C/" + uname.machine + "/slang-modules:" +
+    get_import_module_path);
+
+`;
 
   __buf__ += readfile (SRC_PROTO_PATH + "/__alfa.sl");
   __buf__ += readfile (SRC_PROTO_PATH + "/__slang.sl");
@@ -681,6 +713,7 @@ $0 = realpath ((($0 = path_concat (getcwd (), path_dirname (__FILE__)),
 private define __me__ ()
 {
   variable __buf__ = __read___ (THESE["__me__"]);
+
   () = chdir (SRC_CLASS_PATH);
   __eval__  (__buf__);
   () = chdir (SRC_PATH);
@@ -775,11 +808,11 @@ private define __install_modules__ ()
   variable i;
   _for i (0, length (MODULES) - 1)
     if (-1 == rename (SRC_TMP_PATH + "/" + MODULES[i] + "-module.so",
-        STD_C_PATH + "/" + MODULES[i] + "-module.so"))
+        STD_MODULE_PATH + "/" + MODULES[i] + "-module.so"))
       if (0 == any (MODULES[i] == MODULES_THAT_DONT_EXIT_ON_ERR) ||
           0 == any (MODULES[i] == MODULES_THAT_FAILED))
         This.exit ("failed to rename " + SRC_TMP_PATH + "/" + MODULES[i] + "-module.so to " +
-          STD_C_PATH + "\n" + errno_string (errno), 1);
+          STD_MODULE_PATH + "\n" + errno_string (errno), 1);
 }
 
 private define __install_bytecompiled__ ()
@@ -1001,18 +1034,17 @@ private define __bytecompile_classes__ ()
 private define __compile_user_module__ (module, st)
 {
   module = path_basename (module);
-  __compile_module__ (SRC_USER_C_PATH, module);
+  __compile_module__ (SRC_USER_MODULE_PATH, module);
 
   module = SRC_TMP_PATH + "/" + path_basename_sans_extname (module) + ".so";
 
-  if (-1 == rename (module, USER_C_PATH + "/" + path_basename (module)))
-    This.exit ("failed to rename " + module + " to " + SRC_USER_C_PATH, 1);
+  if (-1 == rename (module, USER_MODULE_PATH + "/" + path_basename (module)))
+    This.exit ("failed to rename " + module + " to " + USER_MODULE_PATH, 1);
 }
 
 private define __main__ ()
 {
   variable i;
-
   _for i (0, length (INST_PATHS) - 1)
     Dir.make (INST_PATHS[i], File->PERM["_PUBLIC"]);
 
@@ -1037,7 +1069,7 @@ private define __main__ ()
   __build__ ("__profile__");
 
   if (VERBOSE)
-    io.tostdout ("compiling " + SRC_C_PATH + "/__slsh.c");
+    io.tostdout ("compiling " + SRC_INTER_PATH + "/__slsh.c");
 
   __compile_slsh__;
 
@@ -1045,7 +1077,7 @@ private define __main__ ()
     __build_modules__;
 
   set_import_module_path (get_import_module_path + ":" + SRC_TMP_PATH +
-    ":" + STD_C_PATH);
+    ":" + STD_MODULE_PATH);
 
   Dir.walk (SRC_LIB_PATH, &lib_dir_callback, &file_callback_libs;
     dargs = {SRC_LIB_PATH, STD_LIB_PATH},
@@ -1056,7 +1088,7 @@ private define __main__ ()
   ifnot (DONT_COMPILE_MODULES)
     {
     if (VERBOSE)
-      io.tostdout ("installing modules to", STD_C_PATH);
+      io.tostdout ("installing modules to", STD_MODULE_PATH);
 
     __install_modules__;
     }

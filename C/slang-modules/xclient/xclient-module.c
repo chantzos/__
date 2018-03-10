@@ -19,8 +19,7 @@
 #include <X11/Xatom.h>
 #include <errno.h>
 #include <slang.h>
-
-#include "__00.h"
+#include <__00.h>
 
 SLANG_MODULE(xclient);
 

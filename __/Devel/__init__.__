@@ -6,7 +6,7 @@ class Devel
   beg
     ifnot (NULL == C_INCLUDE_PATH)
       C_INCLUDE_PATH = [
-        Env->SRC_C_PATH + "/inc", strtok (C_INCLUDE_PATH, ":"),
+        Env->SRC_C_PATH + "/include", strtok (C_INCLUDE_PATH, ":"),
         "/usr/local/include", "/usr/include"];
     else
       C_INCLUDE_PATH = [Env->SRC_C_PATH + "/inc",

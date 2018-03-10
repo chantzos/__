@@ -595,7 +595,7 @@ private define __module_compile__ (argv)
     largv = [Sys.which (Me->CC),
       (pabs
         ? mdl
-        : Env->SRC_C_PATH + "/" +  mdl + "-module.c"),
+        : Env->SRC_MODULE_PATH + "/" +  mdl + "/" + mdl + "-module.c"),
       strtok (flags),
       "-o", path_concat (install_to, mdlout)
       ];
@@ -609,11 +609,11 @@ private define __module_compile__ (argv)
     else
     % getkey segfaults
       if (NULL == dont_inst && "getkey" != mdl && 0 == pabs)
-        if (-1 == File.copy (largv[-1], Env->STD_C_PATH + "/" + mdlout))
+        if (-1 == File.copy (largv[-1], Env->STD_MODULE_PATH + "/" + mdlout))
           err = 1;
 
     if (NULL == dont_inst && "getkey" != mdl && err == 0 == pabs)
-      IO.tostderr (mdl + " was installed in " + Env->STD_C_PATH);
+      IO.tostderr (mdl + " was installed in " + Env->STD_MODULE_PATH);
     else
       ifnot (err)
         IO.tostderr (mdl + " was installed as " + largv[-1]);

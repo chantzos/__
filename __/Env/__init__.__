@@ -31,14 +31,19 @@ class Env
   let STD_COM_PATH     = STD_PATH + "/com";
   let STD_CLASS_PATH   = STD_PATH + "/__";
   let STD_LIB_PATH     = STD_PATH + "/___";
-  let STD_C_PATH       = STD_PATH + "/C";
+  let STD_MACHINE_PATH = STD_PATH + "/C/" + uname.machine;
+  let STD_MODULE_PATH  = STD_MACHINE_PATH + "/slang-modules";
+  let STD_CLIB_PATH    = STD_MACHINE_PATH + "/lib";
+  let STD_CBIN_PATH    = STD_MACHINE_PATH + "/bin";
+  let STD_CSHARE_PATH  = STD_MACHINE_PATH + "/share";
   let STD_DATA_PATH    = STD_PATH + "/data";
 
   let USER_APP_PATH    = USER_PATH + "/app";
   let USER_COM_PATH    = USER_PATH + "/com";
   let USER_CLASS_PATH  = USER_PATH + "/__";
   let USER_LIB_PATH    = USER_PATH + "/___";
-  let USER_C_PATH      = USER_PATH + "/C";
+  let USER_MODULE_PATH = USER_PATH + "/C/" + uname.machine + "/slang-modules";
+  let USER_CLIB_PATH   = USER_PATH + "/C/" + uname.machine + "/lib";
   let USER_DATA_PATH   = USER_PATH + "/data";
 
   let LOCAL_COM_PATH   = LOCAL_PATH + "/com";
@@ -49,6 +54,8 @@ class Env
   let SRC_PROTO_PATH   = SRC_PATH + "/_";
   let SRC_CLASS_PATH   = SRC_PATH + "/__";
   let SRC_C_PATH       = SRC_PATH + "/C";
+  let SRC_MODULE_PATH  = SRC_C_PATH + "/slang-modules";
+  let SRC_INTER_PATH   = SRC_C_PATH + "/interp";
   let SRC_APP_PATH     = SRC_PATH + "/app";
   let SRC_COM_PATH     = SRC_PATH + "/com";
   let SRC_USER_PATH    = SRC_PATH + "/usr";
@@ -58,7 +65,10 @@ class Env
 
   let SRC_USER_DATA_PATH   = SRC_USER_PATH + "/data";
   let SRC_USER_COM_PATH    = SRC_USER_PATH + "/com";
-  let SRC_USER_CLASS_PATH  = SRC_USER_PATH + "__";
+  let SRC_USER_CLASS_PATH  = SRC_USER_PATH + "/__";
+  let SRC_USER_C_PATH      = SRC_USER_PATH + "/C";
+  let SRC_USER_MODULE_PATH = SRC_USER_C_PATH + "/slang-modules";
+  let SRC_USER_INTER_PATH  = SRC_USER_C_PATH + "/interp";
 
   let SRC_LOCAL_PATH       = SRC_PATH + "/local";
   let SRC_LOCAL_COM_PATH   = SRC_LOCAL_PATH + "/com";

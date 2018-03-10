@@ -10,7 +10,7 @@ static variable FLAGS = [
   "-lX11", "-lX11 -lXtst", "-lX11", "-ltag_c", "", "-lhunspell-1.6", "-ltcc"];
 
 static variable DEF_FLAGS =
-  "-I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
+  "-I" + Env->SRC_C_PATH + "/include -I/usr/local/include -g -O2 -Wl,-R/usr/local/lib --shared -fPIC";
 
 static variable DEB_FLAGS =
   "-Wall -Wformat=2 -W -Wunused -Wundef -pedantic -Wno-long-long\

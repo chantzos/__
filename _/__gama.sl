@@ -28,7 +28,7 @@ Class.load ("Me");
 eval ("static define COLOR ();", "Smg");
 
 if (NULL == Env->LD_LIBRARY_PATH)
-  Env.let ("LD_LIBRARY_PATH", Env->STD_C_PATH +
+  Env.let ("LD_LIBRARY_PATH", Env->STD_CLIB_PATH +
     ":/usr/local/lib:/lib:/usr/lib");
 
 if (NULL == Env->TERM)

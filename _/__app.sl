@@ -99,7 +99,7 @@ Class.load ("I";force);
 
 This.request.X = frun (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
   `(nox)
-  [0 == access (Env->STD_C_PATH + "/xsrv-module.so", F_OK), 0][nox];
+  [0 == access (Env->STD_MODULE_PATH + "/xsrv-module.so", F_OK), 0][nox];
 `);
 
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
