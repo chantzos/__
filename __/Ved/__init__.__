@@ -1104,7 +1104,7 @@ class Ved
     if (qualifier_exists ("dont_filter"))
       return w.bufnames;
 
-    variable i, bnames = w.bufnames;
+    variable i, bnames = @w.bufnames;
     _for i (0, length (bnames) - 1)
       if (any (bnames[i] == SPECIAL))
         bnames[i] = NULL;
@@ -1139,9 +1139,7 @@ class Ved
     assoc_delete_key (w.buffers, bufname);
 
     variable i = wherefirst (bufname == w.bufnames);
-
-    w.bufnames[i] = NULL;
-    w.bufnames = w.bufnames[wherenot (_isnull (w.bufnames))];
+    Array.delete_at (&w.bufnames, i);
 
     variable winds = assoc_get_keys (VED_WIND);
 
@@ -1163,20 +1161,7 @@ class Ved
         Ved.del_frame (isatframe);
 
     if (iscur)
-      {
-      variable notfound = 1;
-
-      loop (length (w.bufnames))
-        {
-        i = i ? i - 1 : length (w.bufnames) - 1;
-        if (any (w.bufnames[i] == SPECIAL))
-          continue;
-
-        notfound--;
-        break;
-        }
-
-      if (notfound)
+      if (1 == length (bnames))
         {
         Smg.send_msg_dr ("There is no normal buffer loaded, press q to exit",
           1, NULL, NULL);
@@ -1185,11 +1170,12 @@ class Ved
           This.exit (0);
         }
 
-      Ved.setbuf (w.bufnames[i]);
+    i = i ? i - 1 : length (w.bufnames) - 1;
 
-      s = get_cur_buf (NULL);
-      s.draw ();
-      }
+    Ved.setbuf (w.bufnames[i]);
+
+    s = get_cur_buf (NULL);
+    s.draw ();
   end
 
   subclass Mark from Ved
