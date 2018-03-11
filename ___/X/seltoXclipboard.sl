@@ -1,5 +1,6 @@
 try
-  import (path_dirname (__FILE__) + "/../../C/xsel");
+  import (path_dirname (__FILE__) + "/../../C/" + uname.machine +
+    "/slang-modules/xsel");
 catch AnyError:
   exit (1);
 
