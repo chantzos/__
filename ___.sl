@@ -127,10 +127,10 @@ private variable DEB_FLAGS =
 private variable MODULES_THAT_DONT_EXIT_ON_ERR = ["taglib", "hunspell", "tcc"];
 private variable MODULES_THAT_FAILED = String_Type[0];
 private variable CLASSES = [
-  "Input",  "Smg",   "Rand",   "Crypt", "Os",     "Opt",
-  "String", "Rline", "Proc",   "Sock",  "Subst",  "Sync",
-  "Devel",  "Spell", "Ved",    "Api",   "Curl",   "Json",
-  "Time",   "Scm",   "App",    "Com",   "Hw",     "Net",
+  "Api",  "Input",  "Smg",   "Rand",  "Crypt", "Os",
+  "Opt",  "String", "Rline", "Proc",  "Sock",  "Subst",
+  "Sync", "Devel",  "Spell", "Ved",   "Curl",  "Json",
+  "Time", "Scm",    "App",   "Com",   "Hw",    "Net",
   "I"];
 
 if (X)
@@ -179,7 +179,7 @@ private define __sigint_handler__ (sig)
 
 signal (SIGINT, &__sigint_handler__);
 
-public variable APP_ERR, App;
+%public variable APP_ERR, App;
 
 public define send_msg_dr ();
 

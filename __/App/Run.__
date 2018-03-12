@@ -92,25 +92,25 @@ subclass Run
     s.fifo  = chfifo;
     s.fd    = chfifo_fd;
     s.pid   = chpid;
-    s.state = Api->CONNECTED;
+    s.state = App->CONNECTED;
     s.name  = child;
     s.argv = argv;
 
     variable retval = Sock.get_int (App->PARENT_FIFO_FD);
 
-    if (Api->GO_ATEXIT == retval)
+    if (App->GO_ATEXIT == retval)
       {
       () = waitpid (s.pid, 0);
       () = close (s.fd);
       () = remove (s.fifo);
       assoc_delete_key (App->CHILDREN, string (chpid));
       }
-    else if (Api->GO_IDLED == retval)
-      s.state |= Api->IDLED;
+    else if (App->GO_IDLED == retval)
+      s.state |= App->IDLED;
     else
       throw ClassError, "Run.as.child::unexpected retval from pipe";
 
-    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    App.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     ifnot (qualifier_exists ("goto_rline"))
       return;
@@ -154,14 +154,14 @@ subclass Run
         variable isgoingtoreset = 0;
         ifnot (This.has.screenactive)
           {
-          Api.restore_app ();
+          App.restore_app ();
           isgoingtoreset = 1;
           }
 
           passwd = Os.__getpasswd ();
 
           if (isgoingtoreset)
-            Api.reset_app ();
+            App.reset_app ();
 
           if (NULL == passwd)
             {
@@ -178,7 +178,7 @@ subclass Run
     variable status;
     variable bg = qualifier_exists ("bg") ? 1 : NULL;
 
-    Api.reset_app ();
+    App.reset_app ();
 
     if (NULL == bg && This.has.sigint)
       {
@@ -192,7 +192,7 @@ subclass Run
       status = p.execv (argv, bg);
 
     if (NULL == bg)
-      Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+      App.restore_app (;sigint = This.has.sigint ? handl : NULL);
 
     status;
   end

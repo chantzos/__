@@ -1,60 +1,7 @@
 class Api
-
-  let GO_ATEXIT  = 0x0C8;
-  let GO_IDLED   = 0x012c;
-  let RECONNECT  = 0x0190;
-  let APP_GET_ALL   = 0x2bc;
-  let APP_CON_NEW   = 0x1f4;
-  let APP_RECON_OTH = 0x258;
-  let APP_GET_CONNECTED = 0x320;
-  let RESUME = 0x384;
-  let CHILD_CON_NEW   = 0x3e8;
-  let CHILD_RECONNECT = 0x44c;
-  let CHILD_RECON_OTH = 0x4b0;
-  let CHILD_GET_CONNECTED = 0x514;
-  let APP_RECON_PREV = 0x578;
-  let CONNECTED = 0x1;
-  let IDLED = 0x2;
-
-  subclass Eval from Api
-  subclass Prev from Api
-
-  def reset_app ()
-    if (Input.is_inited ())
-      Input.at_exit ();
-
-    if (Smg.is_inited ())
-      if (qualifier_exists ("deinit"))
-        Smg.at_exit ();
-      else
-        ifnot (Smg.suspend_state ())
-          Smg.suspend ();
-
-    This.has.screenactive = 0;
-  end
-
-  def restore_app ()
-    ifnot (Input.is_inited ())
-      Input.init ();
-
-    ifnot (Smg.is_inited ())
-      Smg.init ();
-    else
-      if (Smg.suspend_state ())
-        Smg.resume ();
-
-    variable sigint_handl = qualifier ("sigint");
-    ifnot (NULL == sigint_handl)
-      if (Ref_Type == typeof (sigint_handl))
-        if (__is_callable (sigint_handl))
-          signal (SIGINT, sigint_handl);
-
-    variable f = This.on.reconnect;
-    ifnot (NULL == f)
-      if (Ref_Type == typeof (f))
-        if (__is_callable (f))
-          (@f)(;;__qualifiers);
-
-    This.has.screenactive = 1;
-  end
+  decl var public APP_ERR, I, X, App
+  decl __exit, __draw_wind, __draw_buf, __viewfile
+  decl __toscratch, __scratch, __console, __runcom
+  decl __messages, __system, __editor, __exec_rline
+  decl send_msg_dr, wind_mang
 end

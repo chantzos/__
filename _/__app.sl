@@ -2,7 +2,7 @@ __use_namespace ("_");
 
 sigprocmask (SIG_BLOCK, [SIGINT, SIGALRM, SIGWINCH]);
 
-public variable APP_ERR, I, App, X, Dir;
+Class.load ("Api");
 
 public define exit_me (x)
 {
@@ -90,7 +90,6 @@ Class.load ("Sock");
 Class.load ("String");
 Class.load ("Subst");
 Class.load ("Ved");
-Class.load ("Api");
 Class.load ("App");
 
 This.at_exit = &__exit;

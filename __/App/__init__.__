@@ -46,6 +46,22 @@ class App
 
   var static NOT_RUN_AS_SU = ["____"];
 
+  let GO_ATEXIT  = 0x0C8;
+  let GO_IDLED   = 0x012c;
+  let RECONNECT  = 0x0190;
+  let APP_GET_ALL   = 0x2bc;
+  let APP_CON_NEW   = 0x1f4;
+  let APP_RECON_OTH = 0x258;
+  let APP_GET_CONNECTED = 0x320;
+  let RESUME = 0x384;
+  let CHILD_CON_NEW   = 0x3e8;
+  let CHILD_RECONNECT = 0x44c;
+  let CHILD_RECON_OTH = 0x4b0;
+  let CHILD_GET_CONNECTED = 0x514;
+  let APP_RECON_PREV = 0x578;
+  let CONNECTED = 0x1;
+  let IDLED = 0x2;
+
   def build_table ()
     variable i;
     variable ii;
@@ -88,23 +104,55 @@ class App
       }
   end
 
+  def reset_app ()
+    if (Input.is_inited ())
+      Input.at_exit ();
+
+    if (Smg.is_inited ())
+      if (qualifier_exists ("deinit"))
+        Smg.at_exit ();
+      else
+        ifnot (Smg.suspend_state ())
+          Smg.suspend ();
+
+    This.has.screenactive = 0;
+  end
+
+  def restore_app ()
+    ifnot (Input.is_inited ())
+      Input.init ();
+
+    ifnot (Smg.is_inited ())
+      Smg.init ();
+    else
+      if (Smg.suspend_state ())
+        Smg.resume ();
+
+    variable sigint_handl = qualifier ("sigint");
+    ifnot (NULL == sigint_handl)
+      if (Ref_Type == typeof (sigint_handl))
+        if (__is_callable (sigint_handl))
+          signal (SIGINT, sigint_handl);
+
+    variable f = This.on.reconnect;
+    ifnot (NULL == f)
+      if (Ref_Type == typeof (f))
+        if (__is_callable (f))
+          (@f)(;;__qualifiers);
+
+    This.has.screenactive = 1;
+  end
+
   def detach ()
     if (This.is.me == "MASTER")
       return;
 
-%    ifnot (This.is.me == "MASTER")
-      Api.reset_app ();
+    reset_app (NULL);
 
     variable retval = (@__get_reference ("I->app_idle")) ();
 
     ifnot (retval)
-%      {
-%      ifnot (This.is.me == "MASTER")
-        Api.restore_app ();
-    return;
-%      }
-
-    exit_me (0);
+      restore_app (NULL);
   end
 
   def quit_me ()
@@ -116,6 +164,7 @@ class App
 
   subclass Run from App
   subclass Connect from App
+  subclass Eval from App
 
   def child_reconnect (s) static proc
     ifnot (NULL == This.is.child)
@@ -149,7 +198,7 @@ class App
     _for i (0, length (chs) - 1)
       {
       s = CHILDREN[chs[i]];
-      Sock.send_int (s.fd, Api->GO_ATEXIT);
+      Sock.send_int (s.fd, App->GO_ATEXIT);
       () = waitpid (s.pid, 0);
       }
   end
@@ -337,7 +386,7 @@ class App
   end
 
   def __console () public proc
-    Api.Eval.run (;;__qualifiers ());
+    App.Eval.run (;;__qualifiers ());
   end
 
   def __runcom  (argv, issu) public proc
@@ -413,7 +462,7 @@ class App
 
     signal (SIGINT, sigint_handl);
 
-    Api.reset_app ();
+    reset_app (NULL);
 
     _for i (0, len - 1)
       () = system_intr (strtrim_beg (lines[i], "!"));
@@ -432,7 +481,7 @@ class App
 
     IO.tostdout ("");
 
-    Api.restore_app ();
+    restore_app (NULL);
   end
 
   def __editor () public proc

@@ -83,7 +83,7 @@ subclass Srv
   end
 
   def __exit_rout__ (s, handl) proc
-    Api.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    App.restore_app (;sigint = This.has.sigint ? handl : NULL);
     signal (SIGWINCH, This.on.sigwinch);
     if (screen_size_changed)
       (@This.on.sigwinch) (SIGWINCH);
@@ -159,19 +159,19 @@ subclass Srv
       {
       __APP__ = CUR_APP;
       retval = self.mainloop (&issu);
-      if (Api->APP_RECON_OTH == retval)
+      if (App->APP_RECON_OTH == retval)
         {
         retval = self.reconnect_to_app (__APP__);
         if (1 == retval)
           break 2;
         }
-      else if (Api->APP_RECON_PREV == retval)
+      else if (App->APP_RECON_PREV == retval)
         {
         retval = self.reconnect_to_app (PREV_APP);
         if (1 == retval)
           break 2;
         }
-      else if (Api->APP_CON_NEW == retval)
+      else if (App->APP_CON_NEW == retval)
         {
         self.connect_to_app (__APP__;issu = issu);
         if (APP_ERR)
@@ -223,7 +223,7 @@ subclass Srv
       if (app == This.is.my.name + "::" + string (Env->PID))
         return;
 
-      Api.reset_app ();
+      App.reset_app ();
 
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
@@ -258,7 +258,7 @@ subclass Srv
       if (NULL == app)
         return;
 
-      Api.reset_app ();
+      App.reset_app ();
 
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
@@ -282,13 +282,13 @@ subclass Srv
       {
       __APP__ = CUR_APP;
       retval = self.mainloop (&issu);
-      if (Api->APP_RECON_OTH == retval)
+      if (App->APP_RECON_OTH == retval)
         {
         retval = self.reconnect_to_app (__APP__);
         if (1 == retval)
           break;
         }
-      else if (Api->APP_RECON_PREV == retval)
+      else if (App->APP_RECON_PREV == retval)
         {
         if (NULL == PREV_APP)
           break;
@@ -296,7 +296,7 @@ subclass Srv
         if (1 == retval)
           break;
         }
-      else if (Api->APP_CON_NEW == retval)
+      else if (App->APP_CON_NEW == retval)
         {
         self.connect_to_app (__APP__;issu = issu);
         if (APP_ERR)
@@ -322,41 +322,41 @@ subclass Srv
       {
       variable retval = Sock.get_int (SRV_FIFO_FD);
 
-      if (Api->GO_ATEXIT == retval)
+      if (App->GO_ATEXIT == retval)
         {
         self.app_at_exit (s);
         break;
         }
 
-      if (Api->GO_IDLED == retval)
+      if (App->GO_IDLED == retval)
         {
-        s.state |= Api->IDLED;
+        s.state |= App->IDLED;
         break;
         }
 
-      if (Api->APP_GET_CONNECTED == retval)
+      if (App->APP_GET_CONNECTED == retval)
         {
         Sock.send_str_ar (SRV_FIFO_FD, s.fd, get_connected_apps ());
         continue;
         }
 
-      if (Api->APP_RECON_OTH == retval)
+      if (App->APP_RECON_OTH == retval)
         {
-        s.state |= Api->IDLED;
+        s.state |= App->IDLED;
         Sock.send_int (s.fd, 1);
         __APP__ = Sock.get_str (SRV_FIFO_FD);
         return retval;
         }
 
-      if (Api->APP_RECON_PREV == retval)
+      if (App->APP_RECON_PREV == retval)
         {
-        s.state |= Api->IDLED;
+        s.state |= App->IDLED;
         return retval;
         }
 
-      if (Api->APP_CON_NEW == retval)
+      if (App->APP_CON_NEW == retval)
         {
-        s.state |= Api->IDLED;
+        s.state |= App->IDLED;
         Sock.send_int (s.fd, 1);
         __APP__ = Sock.get_str (SRV_FIFO_FD);
         Sock.send_int (s.fd, 1);
@@ -436,7 +436,7 @@ subclass Srv
     variable s = App->APPS[app][string (clpid)];
     s.fifo  = clfifo;
     s.pid   = clpid;
-    s.state = Api->CONNECTED;
+    s.state = App->CONNECTED;
     s.name  = app;
 
     SRV_FIFO_FD = open (SRV_FIFO, O_RDONLY);

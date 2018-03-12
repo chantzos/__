@@ -115,6 +115,11 @@ private define __bytecompile__ (argv)
       }
 
       {
+      case "data":
+        lib = Env->STD_DATA_PATH + "/" + strjoin (tok[[1:]], "/");
+      }
+
+      {
       IO.tostderr (lib, "still unhandled case");
       continue;
       }

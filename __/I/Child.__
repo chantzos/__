@@ -37,7 +37,7 @@ subclass Child
 
     signal (SIGWINCH, &__sigwinch_handler__);
 
-    Sock.send_int (PARENT_WRFIFO_FD, Api->GO_IDLED);
+    Sock.send_int (PARENT_WRFIFO_FD, App->GO_IDLED);
     variable retval = Sock.get_int (PARENT_RDFIFO_FD);
 
     if (This.has.sigint)

@@ -8,27 +8,27 @@ subclass Connect
     ifnot (assoc_key_exists (App->CHILDREN, chpid))
       return;
 
-    Api.reset_app ();
+    App.reset_app ();
 
     variable s = App->CHILDREN[chpid];
     Sock.send_int (s.fd, 0);
-    s.state = Api->CONNECTED;
+    s.state = App->CONNECTED;
 
     variable retval = Sock.get_int (App->PARENT_FIFO_FD);
 
-    if (Api->GO_ATEXIT == retval)
+    if (App->GO_ATEXIT == retval)
       {
       () = waitpid (s.pid, 0);
       () = close (s.fd);
       () = remove (s.fifo);
       assoc_delete_key (App->CHILDREN, string (chpid));
       }
-    else if (Api->GO_IDLED == retval)
-      s.state |= Api->IDLED;
+    else if (App->GO_IDLED == retval)
+      s.state |= App->IDLED;
     else
       throw ClassError, "Connect.to.child::unexpected retval from pipe";
 
-    Api.restore_app ();
+    App.restore_app ();
 
     ifnot (qualifier_exists ("goto_rline"))
       return;

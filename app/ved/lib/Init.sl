@@ -675,6 +675,9 @@ public define init_ved ()
   variable ftype = Opt.Arg.getlong_val ("ftype", NULL, &This.has.argv;del_arg);
   variable fname, files;
 
+  ifnot (NULL == Opt.Arg.exists ("--pager", &This.has.argv;del_arg))
+    VED_ISONLYPAGER = 1;
+
   ifnot (NULL == ftype)
     ifnot (any (ftype == assoc_get_keys (FTYPES)))
       ftype = NULL;

@@ -15,7 +15,7 @@ class I
   end
 
   def at_exit () static proc
-    Sock.send_int (IChild->PARENT_WRFIFO_FD, Api->GO_ATEXIT);
+    Sock.send_int (IChild->PARENT_WRFIFO_FD, App->GO_ATEXIT);
   end
 
   def init () static proc
@@ -39,7 +39,7 @@ class I
   end
 
   def at_exit () static proc
-    Sock.send_int (IClient->SESSION_WRFIFO_FD, Api->GO_ATEXIT);
+    Sock.send_int (IClient->SESSION_WRFIFO_FD, App->GO_ATEXIT);
   end
 
   def init () static proc
@@ -69,7 +69,7 @@ class I
       variable app = CONNECTED_APPS[i];
       variable pid = CONNECTED_PIDS[i];
       variable s = App->APPS[app][string (pid)];
-      Sock.send_int (s.fd, Api->GO_ATEXIT);
+      Sock.send_int (s.fd, App->GO_ATEXIT);
       }
   end
 
