@@ -137,11 +137,12 @@ subclass Ed
       s._shiftwidth = 0;
 
     if (0 == lnr && "prev" == dir)
-      s.lines = [Ved.newline_str (s, &indent, line;indent = (0 == is_control)),
+      s.lines = [Ved.newline_str (s, &indent, line;indent =
+      (is_control ? 0 : NULL)),
           s.lines];
     else
       s.lines = [s.lines[[:"next" == dir ? lnr : lnr - 1]],
-          Ved.newline_str (s, &indent, line;indent = (0 == is_control)),
+          Ved.newline_str (s, &indent, line;indent = (is_control ? 0 : NULL)),
           s.lines[["next" == dir ? lnr + 1 : lnr:]]];
 
     if (is_control)

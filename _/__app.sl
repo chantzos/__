@@ -734,10 +734,12 @@ private define __edit__ (argv)
     }
 
   Ved.preloop (s);
-  topline ("(pager)");
+  This.cur["mode"] = "pager";
+  topline;
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
   s.vedloop ();
-  topline ("(" + This.is.my.name + ")");
+  This.cur["mode"] = This.is.my.name;
+  topline;
 }
 
 private define __ved__ (argv)
@@ -1145,7 +1147,7 @@ static define mainloop ()
     {
     Rline.set (Ved.get_cur_rline ());
     Rline.readline (Ved.get_cur_rline ());
-    topline ("(" + This.is.my.name + ")");
+    topline;
     }
 }
 
@@ -1206,11 +1208,18 @@ public define __initrline ()
     on_page_up = &__up__,
     on_page_down = &__down__,
     on_space = &__down__,
-    on_lang = &toplinedr,
-    on_lang_args   = {"(" + This.is.my.name + ")"},
+    on_lang = funref (`
+      topline;
+      ifnot (any (This.cur["mode"] == ["insert"]))
+        Smg.setrcdr (PROMPTROW, Ved.get_cur_rline ()._col);
+      else
+        {
+        variable cb = Ved.get_cur_buf ();
+        Smg.setrcdr (cb.ptr[0], cb.ptr[1]);
+        }`),
     histfile = This.is.my.histfile,
     onnolength = &toplinedr,
-    onnolengthargs = {""},
+    onnolengthargs = {},
     );
 }
 
@@ -1301,6 +1310,8 @@ frun (Env->LOCAL_LIB_PATH + "/__app__", This.is.my.name,
   ifnot (access (path + "/" + app + ".sl", F_OK|R_OK))
     Load.file   (path + "/" + app + ".sl");
 `);
+
+This.cur["mode"] = [This.is.my.name, "pager"][This.is.ved];
 
 (@__get_reference ("__init_" + This.is.my.name));
 

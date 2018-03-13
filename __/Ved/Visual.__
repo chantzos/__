@@ -1107,10 +1107,11 @@ subclass Visual
   end
 
   def v_atexit (vs, s, draw) proc
+    This.cur["mode"] = This.prev["mode"];
     variable keep;
     if (draw)
       {
-      topline ("(pager)");
+      topline;
 
       keep = @s.ptr;
       s.ptr[1] = vs.ptr[1];
@@ -1140,7 +1141,7 @@ subclass Visual
       }
     else
       {
-      toplinedr ("(pager)");
+      toplinedr;
       vs.ptr = @s.ptr;
       vs._i = @s._i;
       }
@@ -1153,7 +1154,7 @@ subclass Visual
   end
 
   def v_init (s) proc
-    toplinedr ("(visual)");
+    toplinedr;
     variable lnr = __vlnr (s, '.');
     variable v = @vis;
 
@@ -1181,6 +1182,9 @@ subclass Visual
   end
 
   def mode (s)
+    This.prev["mode"] = This.cur["mode"];
+    This.cur["mode"]  = "visual";
+
     variable
       mode = ["bw", "lw", "cw"],
       vs = v_init (s);

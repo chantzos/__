@@ -159,7 +159,7 @@ class Ved
   decl public  __console, __vline, __vfind_word
   decl get_cur_buf, __ins_digraph__
 
-  def __topline (str, columns) public proc
+  def __topline (str) public proc
     variable d = NULL == This.request.debug
       ? ""
       : "depth [" + string (_stkdepth) + "] ";
@@ -168,16 +168,19 @@ class Ved
       d, getpid, This.is.me, VED_CUR_WIND,
         strftime ("%a %d %I:%M:%S"));
 
-    @str += repeat (" ", columns - strlen (@str) - strlen (t)) + t;
+    @str = "(" + This.cur["mode"] + ") " + @str;
+    @str += repeat (" ", COLUMNS - strlen (@str) - strlen (t)) + t;
   end
 
-  def topline (str) public proc
-    __topline (&str, COLUMNS);
+  def topline () public proc
+    variable str = qualifier ("str", "");
+    __topline (&str);
     Smg.atrcaddnstr (str, [2, 1][getuid () == 0], 0, 0, COLUMNS);
   end
 
-  def toplinedr (str) public proc
-    __topline (&str, COLUMNS);
+  def toplinedr () public proc
+    variable str = qualifier ("str", "");
+    __topline (&str);
     Smg.atrcaddnstrdr (str, [2, 1][getuid () == 0], 0, 0, qualifier ("row", PROMPTROW),
       qualifier ("col", Ved.get_cur_rline ()._col), COLUMNS);
   end
@@ -262,7 +265,7 @@ class Ved
 
     Ved.preloop (s);
 
-    toplinedr ("(pager)");
+    toplinedr;
 
     s.vedloop ();
   end
@@ -569,7 +572,8 @@ class Ved
   end
 
   def __cline__ (s) proc
-    topline ("(command)");
+    This.cur["mode"] = "command";
+    topline;
     variable rl = Ved.get_cur_rline ();
     Rline.set (rl);
     Rline.readline (rl;ved = s,
@@ -582,7 +586,9 @@ class Ved
       return -1;
       }
 
-    topline ("(pager)");
+    This.cur["mode"] = "pager";
+
+    topline;
     s = get_cur_buf (NULL);
 
     ifnot (NULL == Smg->__IMG)
@@ -683,8 +689,8 @@ class Ved
   def lexicalhl (s, lines, vlines) proc
   end
 
-  def _on_lang_change_ (mode, ptr) proc
-    topline ("(" + mode + ")");
+  def _on_lang_change_ (ptr) proc
+    topline;
     Smg.setrcdr (ptr[0], ptr[1]);
   end
 
@@ -974,7 +980,7 @@ class Ved
   end
 
   def on_wind_change (w) public proc
-    topline ("(" + This.is.my.name + ")");
+    topline;
     Ved.setbuf (w.frame_names[w.cur_frame]);
   end
 

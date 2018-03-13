@@ -22,21 +22,21 @@ COM_NO_SETREPO = Opt.Arg.compare ("--no-setrepo", &This.has.argv;del_arg);
 
 private variable clr = getuid () ? 2 : 1;
 
-public define toplinedr (str)
+public define toplinedr ()
 {
-  str += " REPO [" + CUR_REPO + "] ";
+  variable str = "REPO [" + CUR_REPO + "] ";
 
-  __topline (&str, COLUMNS);
+  __topline (&str);
 
   Smg.atrcaddnstrdr (str, clr, 0, 0, qualifier ("row", PROMPTROW),
      qualifier ("col", Ved.get_cur_rline ()._col), COLUMNS);
 }
 
-public define topline (str)
+public define topline ()
 {
-  str += " REPO [" + CUR_REPO + "] ";
+  variable str = "REPO [" + CUR_REPO + "] ";
 
-  __topline (&str, COLUMNS);
+  __topline (&str);
 
   Smg.atrcaddnstr (str, clr, 0, 0, COLUMNS);
 }
@@ -78,7 +78,7 @@ public define on_wind_change (w)
   else
     CUR_REPO == "NONE";
 
-  topline ("(" + This.is.my.name + ")");
+  topline;
 }
 
 public define on_wind_new (w)
@@ -113,7 +113,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = aved._fd;
 
-  topline ("(" + This.is.my.name + ")");
+  topline;
 
   (@__get_reference ("__initrline"));
 
@@ -202,6 +202,6 @@ public define init_git ()
     exit_me (1);
     }
 
-  topline ("(" + This.is.my.name + ")");
+  topline;
   mainloop ();
 }

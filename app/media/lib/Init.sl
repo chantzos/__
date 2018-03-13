@@ -176,8 +176,6 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = aved._fd;
 
-  topline ("(" + This.is.my.name + ")");
-
   (@__get_reference ("__initrline"));
 
   Ved.draw_wind ();

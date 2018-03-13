@@ -297,7 +297,9 @@ class App
 
     Ved.setbuf (s._abspath);
 
-    topline ("(pager) (" + type + " BUF) --";row =  s.ptr[0], col = s.ptr[1]);
+    variable str  = "(" + type + " BUF) --";
+    __topline (&str);
+    Smg.atrcaddnstr (str, [2, 1][getuid () == 0], s.ptr[0], s.ptr[1], COLUMNS);
 
     __draw_buf (s;;struct {@__qualifiers, pos = pos, _i = _i});
 

@@ -15,16 +15,16 @@ OUT_VED.opt_show_tilda = 0;
 OUT_VED.opt_show_status_line = 0;
 Ved.setbuf (This.is.std.out.fn);
 
-public define toplinedr (str)
+public define toplinedr ()
 {
-  str = "(NetM) (pid " + string (getpid) + ") " + strftime ("[%c]");
+  variable str = "(NetM) (pid " + string (getpid) + ") " + strftime ("[%c]");
   Smg.atrcaddnstrdr (str, 0, 0, 0, qualifier ("row", PROMPTROW),
      qualifier ("col", Ved.get_cur_rline ()._col), COLUMNS);
 }
 
-public define topline (str)
+public define topline ()
 {
-  str = "(NetM) (pid " + string (getpid) + ") " + strftime ("[%c]");
+  variable str = "(NetM) (pid " + string (getpid) + ") " + strftime ("[%c]");
   Smg.atrcaddnstr (str, 0, 0, 0, COLUMNS);
 }
 
@@ -34,7 +34,7 @@ private define mainloop ()
     {
     Rline.set (MY.Rline);
     Rline.readline (MY.Rline);
-    topline ("");
+    topline;
     }
 }
 
@@ -75,7 +75,7 @@ public define __init_netm ()
 
 public define init_netm ()
 {
-  topline ("");
+  topline;
   mainloop ();
 }
 

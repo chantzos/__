@@ -151,7 +151,7 @@ THESE["__COMMAND__"] = `public variable This = This->__INIT__ ("__COMMAND__";` +
     `shell = 0, smg = 0, ved = 0);`;
 
 THESE["__APP__"] =
-`public variable This = This->__INIT__ ("__APP__";setargv);
+`public variable This = __init_this;
 `;
 
 public variable io;

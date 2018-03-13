@@ -3,10 +3,9 @@ class Smg
 
   beg
     __WNsize ();
+    MSGROW = LINES - 1;;
+    PROMPTROW = MSGROW - 1;
   end
-
-  var public MSGROW = LINES - 1;;
-  var public PROMPTROW = MSGROW - 1;
 
   var static IMG = List_Type[LINES - 2];
   var static __IMG = NULL;
@@ -27,23 +26,23 @@ class Smg
 
   var __COLOR__ = struct
     {
-  normal = "white",
-  error = "brightred",
-  success = "brightgreen",
-  warn = "brightmagenta",
-  prompt = "yellow",
-  border = "brightred",
-  focus = "brightcyan",
-  hlchar = "blackonyellow",
-  hlregion = "white",
-  topline = "blackonbrown",
-  infofg = "blue",
-  infobg = "brown",
-  diffpl = "brown",
-  diffmn = "brightred",
-  visual = "blackonbrown",
-  comment = "brown",
-  };
+    normal = "white",
+    error = "brightred",
+    success = "brightgreen",
+    warn = "brightmagenta",
+    prompt = "yellow",
+    border = "brightred",
+    focus = "brightcyan",
+    hlchar = "blackonyellow",
+    hlregion = "white",
+    topline = "blackonbrown",
+    infofg = "blue",
+    infobg = "brown",
+    diffpl = "brown",
+    diffmn = "brightred",
+    visual = "blackonbrown",
+    comment = "brown",
+    };
 
   def set_basic_color (field, color) proc
     variable colors =

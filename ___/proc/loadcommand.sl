@@ -129,7 +129,7 @@ else
 if (any (_isnull ([This.is.std.out.fd, This.is.std.err.fd])))
   (@_exit_me_) (1;msg = errno_string (errno));
 
-Class.load ("Smg";as = "__tty_init__");
+Class.load ("Smg";__init__ = "__tty_init__", as = "SmgTTY");
 Class.load ("Proc");
 Class.load ("Sock");
 Class.load ("Opt";load_Parse, force);

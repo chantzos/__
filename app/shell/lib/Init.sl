@@ -1,6 +1,6 @@
 public define on_wind_change (w)
 {
-  topline ("(" + This.is.my.name + ")");
+  topline;
   Ved.setbuf (w.frame_names[w.cur_frame]);
   This.is.std.out.fd = Ved.get_cur_buf ()._fd;
 }
@@ -25,7 +25,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = oved._fd;
 
-  topline ("(" + This.is.my.name + ")");
+  topline;
 
   Com.post_header ();
 
@@ -188,7 +188,7 @@ public define init_shell ()
     () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
     }
 
-  topline ("(" + This.is.my.name + ")");
+  topline;
 
   __draw_buf (OUT_VED);
 

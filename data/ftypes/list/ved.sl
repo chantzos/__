@@ -29,7 +29,7 @@ public define list_ved (s, fname)
 
   Ved.preloop (s);
 
-  toplinedr ("(pager)");
+  toplinedr;
 
   s.vedloop ();
 }

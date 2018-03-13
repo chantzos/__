@@ -28,7 +28,11 @@ define ___autoindent (s, line)
 
   variable linelen = strlen (line);
   variable txtlen = strlen (strtrim_beg (line));
-  variable indent = qualifier ("indent", linelen - txtlen);
+  variable indent = qualifier ("indent");
+
+  if (NULL == indent)
+    indent = linelen - txtlen;
+
   variable lc = line[-1];
   variable txtline = substr (line, indent + 1, -1);
 

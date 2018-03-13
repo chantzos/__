@@ -9,19 +9,21 @@ private define _line_ (str)
   b;
 }
 
-public define topline (str)
+public define topline ()
 {
+  variable str = qualifier ("str", "");
   () = _line_ (&str);
 
-  __topline (&str, COLUMNS);
+  __topline (&str);
   Smg.atrcaddnstr (str, [16, 1][getuid () == 0], 0, 0, COLUMNS);
 }
 
-public define toplinedr (str)
+public define toplinedr ()
 {
+  variable str = qualifier ("str", "");
   variable b = _line_ (&str);
 
-  __topline (&str, COLUMNS);
+  __topline (&str);
   Smg.atrcaddnstrdr (str, [16, 1][getuid () == 0],  0, 0,
     b.ptr[0], b.ptr[1], COLUMNS);
 }
@@ -501,7 +503,7 @@ define __vmessages ()
   VED_ISONLYPAGER = 1;
   Ved.setbuf (s._abspath);
 
-  topline ("(pager) (MESSAGES BUF) --";row = s.ptr[0], col = s.ptr[1]);
+  topline (;str = "(MESSAGES BUF)");
 
   variable st = fstat (s._fd);
 

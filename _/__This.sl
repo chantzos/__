@@ -45,6 +45,8 @@ static define __INIT__ (role)
 {
   struct
     {
+    cur  = Assoc_Type[Any_Type],
+    prev = Assoc_Type[Any_Type],
     framesize,
     err_handler = __get_qualifier_as (
       Ref_Type, qualifier ("err_handler"), &__def_err_handler__),
@@ -147,3 +149,10 @@ static define __INIT__ (role)
     };
 }
 
+public define __init_this ()
+{
+  variable s = __INIT__ ("__APP__";setargv);
+  s.cur["mode"] = NULL;
+  s.prev["mode"] = NULL;
+  s;
+}

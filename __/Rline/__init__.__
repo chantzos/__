@@ -55,6 +55,10 @@ class Rline
     type,
   end
 
+  var static NotPrintable = [
+   [0x101:0x104], 0x10e, 0x10f, [0x110:0x113], [0x201:0x20c],
+   Input->PPAGE, Input->NPAGE, Input->HOME, Input->END];
+
   var __HISTORY__ = Assoc.new (Array_Type, ["PATTERN", "FNAME"],
     {String_Type[0], String_Type[0]});
 
@@ -623,9 +627,12 @@ class Rline
         }
       }
 
-    % for now let it to do weird stuff
+    % for now let it do weird stuff
+    % (ok it did for a while, now let it do less weird stuff)
     if (' ' < s._chr)
-      insert_at (s;;__qualifiers);
+      ifnot (any (NotPrintable == s._chr))
+        if (s._chr < 65535)
+          insert_at (s;;__qualifiers);
   end
 
   def write_completion_routine (s, ar) proc
@@ -1769,6 +1776,39 @@ class Rline
       }
   end
 
+  def rl_get_expression (s) proc
+    variable f = __get_reference ("get_expression");
+    if (NULL == f)
+      return;
+
+    variable e = (@f) (;;__qualifiers);
+
+    ifnot (e)
+      return;
+
+    if (1 < e)
+      {
+      s._chr = e;
+      routine (NULL, s);
+      }
+    else
+      {
+      variable buf = ();
+      if (length (strtok (buf, "\n")) > 1)
+        return;
+      variable i;
+      % this will probably fail in multibyte chars     
+      _for i (0, strlen (buf) - 1)
+        {
+        s._chr = buf[i];
+        routine (NULL, s);
+        }
+      }
+
+    parse_args (NULL, s);
+    prompt (NULL, s, s._lin, s._col);
+  end
+
   def getstring (s, pat) proc
     variable rl = Rline.init (&_null_);
 
@@ -1786,7 +1826,10 @@ class Rline
 
     forever
       {
-      rl._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
+      rl._chr = Input.getch (;
+      expr_fun = qualifier ("expr_fun", &rl_get_expression),
+      expr_args = qualifier ("expr_args", s),
+      on_lang = s.on_lang, on_lang_args = s.on_lang_args);
 
       if (1 == rl._col)
         Smg.atrcaddnstr (" ", 0, MSGROW, 0, s._columns);
@@ -1834,7 +1877,10 @@ class Rline
 
     forever
       {
-      rl._chr = Input.getch (;on_lang = s.on_lang, on_lang_args = s.on_lang_args);
+      rl._chr = Input.getch (;
+      expr_fun = qualifier ("expr_fun", &rl_get_expression),
+      expr_args = qualifier ("expr_args", rl),
+      on_lang = s.on_lang, on_lang_args = s.on_lang_args);
 
       if (1 == rl._col)
         Smg.atrcaddnstr (" ", 0, MSGROW, 0, s._columns);
@@ -1846,7 +1892,7 @@ class Rline
         break;
         }
 
-      if (any ([6535 + Input->UP, Input->UP] == rl._chr))
+      if (any ([65535 + Input->UP, Input->UP] == rl._chr))
         {
         variable i, h_ind;
 
@@ -1865,8 +1911,11 @@ class Rline
             rl._lin = rl.argv[0];
             rl._col = strlen (rl.argv[0]) + 1;
             Smg.atrcaddnstrdr (rl.argv[0], 7, prow, 0, prow, rl._col - 1, rl._columns);
-            while ((rl._chr = Input.getch (;on_lang = s.on_lang, on_lang_args =
-                s.on_lang_args), any ([Input->UP, 65535 + Input->UP] == rl._chr)))
+            while ((rl._chr = Input.getch (;
+                expr_fun = qualifier ("expr_fun", &rl_get_expression),
+                expr_args = qualifier ("expr_args", s),
+                on_lang = s.on_lang, on_lang_args = s.on_lang_args),
+                any ([Input->UP, 65535 + Input->UP] == rl._chr)))
               {
               if (i == l - 1)
                 i = 0;
@@ -2354,72 +2403,42 @@ class Rline
     rl.argv[0];
   end
 
-  def rl_get_expression (s) proc
-    variable f = __get_reference ("get_expression");
-    if (NULL == f)
-      return;
-
-    variable e = (@f) (;;__qualifiers);
-
-    ifnot (e)
-      return;
-
-    if (1 < e)
-      {
-      s._chr = e;
-      routine (NULL, s);
-      }
-    else
-      {
-      variable buf = ();
-      if (length (strtok (buf, "\n")) > 1)
-        return;
-      variable i;
-      % this will probably fail in multibyte chars     
-      _for i (0, strlen (buf) - 1)
-        {
-        s._chr = buf[i];
-        routine (NULL, s);
-        }
-      }
-
-    parse_args (NULL, s);
-    prompt (NULL, s, s._lin, s._col);
-  end
-
   def getline ()
-    variable s = @Rline_Type;
+    variable s = init (NULL, NULL;;struct
+      {
+      clr  = 0,
+      pchar = "",
+      @__qualifiers
+      }
+      );
 
-    s._pchar = qualifier ("pchar", "");;
-    s._prow = PROMPTROW;
-    s._pclr = qualifier ("clr", 0);
-    s.on_lang = &_Null;
-    s.on_lang_args = {};
-    s._lines = LINES;
-    s._columns = COLUMNS;
     s._row = s._prow;
-
     set (NULL, s;;__qualifiers ());
 
     if (strlen (s._lin))
       prompt (NULL, s, s._lin, s._col);
     else
-      Smg.atrcaddnstrdr (" ", 0, PROMPTROW, 0, PROMPTROW, 0, COLUMNS);
+      Smg.atrcaddnstrdr (s._pchar, 0, s._prow, 0,  s._prow, strlen (s._pchar),
+        s._columns);
 
     forever
       {
       s._chr = Input.getch (;
         on_lang = s.on_lang, on_lang_args = s.on_lang_args,
-        expr_fun = &rl_get_expression, expr_args = s);
+        expr_fun = qualifier ("expr_fun", &rl_get_expression),
+        expr_args = qualifier ("expr_args", s));
 
       if (033 == s._chr)
         {
-        restore (NULL, s.cmp_lnrs, s.ptr, 1, s._columns);
+        restore (NULL, s.lnrs, s.ptr, 1, s._columns);
         return "";
         }
 
       if ('\r' == s._chr)
+        {
+        restore (NULL, s.lnrs, s.ptr, 1, s._columns);
         return strjoin (s.argv);
+        }
 
       routine (NULL, s;insert_ws);
 

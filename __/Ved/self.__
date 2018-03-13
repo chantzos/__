@@ -486,7 +486,10 @@ beg
 
     s.rows = rows;
 
-    s.lines = NULL == lines ? Ved.getlines (s._abspath, s._indent, s.st_) : lines;
+    s.lines = NULL == lines
+      ? Ved.getlines (s._abspath, s._indent, s.st_)
+      : lines;
+
     s._flags = 0;
 
     s.ptr = Integer_Type[2];
@@ -548,7 +551,7 @@ beg
 
     (@__get_reference ("__draw_buf")) (cur;;q);
 
-    topline ("(" + This.is.my.name + ")");
+    topline;
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
       ifnot (Dir.are_same (getcwd (), cur._dir))
@@ -901,7 +904,7 @@ beg
       return;
 
     cur.draw ();
-    topline ("(" + This.is.my.name + ")");
+    topline;
 
     s = Ved.get_cur_rline ();
     if (NULL == s._lin || NULL == s._col)

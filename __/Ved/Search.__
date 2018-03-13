@@ -276,7 +276,7 @@ subclass Search
       {
       dothesearch = 0;
       chr = Input.getch (;
-        on_lang = &_on_lang_change_, on_lang_args = {"search", [PROMPTROW, s_col]});
+        on_lang = &_on_lang_change_, on_lang_args = {[PROMPTROW, s_col]});
 
       if (033 == chr)
         {
