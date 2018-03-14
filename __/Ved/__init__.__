@@ -53,6 +53,7 @@ class Ved
   var public DIGRAPHS = [
     167,   % paragraph §
     8220,  % “
+    8212,  % —
     8304,  % ⁰
     8230,  % …
     729,   % ˙ 
@@ -1622,11 +1623,14 @@ class Ved
   subclass Lingual from Ved
 
   def __vhandle_word__ (s) proc
-    variable names = ["translate", "clipboard", "xa_clipboard", "spell"];
+    variable names = ["translate", "clipboard", "xa_clipboard",
+      "register_word", "register_WORD", "spell"];
     variable help =  [
         "translate current word",
         "send word to xa_primary",
         "send word to xa_clipboard",
+        "put the word in the standard register",
+        "put the WORD in the standard register",
         "spell word"];
     variable action = Rline.get_selection (names, help, s.ptr);
 
@@ -1638,7 +1642,7 @@ class Ved
       end,
       col = s._index,
       line = __vline (s, '.'),
-      word = (any (["translate", "spell"] == action))
+      word = (any (["translate", "spell", "register_word"] == action))
         ? __vfind_word (s, line, col, &start, &end)
         : __vfind_Word (s, line, col, &start, &end);
 
@@ -1673,6 +1677,11 @@ class Ved
           seltoX (word);
         else
           seltoXClipboard (word);
+      }
+
+      {
+      case "register_word" || case "register_WORD":
+        Ved.Reg.set ("\"", word;msg = "yanked word and ");
       }
   end
 

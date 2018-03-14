@@ -25,7 +25,7 @@ public define on_wind_new (w)
 
   This.is.std.out.fd = oved._fd;
 
-  topline;
+%  topline;
 
   Com.post_header ();
 
@@ -182,15 +182,16 @@ public define __init_shell ()
 
 public define init_shell ()
 {
-  if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
-    {
-    __runcom  (["intro"], NULL);
-    () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
-    }
-
   topline;
+  if (assoc_key_exists (This.is.my.settings, "RUN_INTRO"))
+    if (atoi (This.is.my.settings["RUN_INTRO"]))
+      if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
+        {
+        __runcom  (["intro"], NULL);
+        () = File.write (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), "ok");
+        }
 
-  __draw_buf (OUT_VED);
+  __draw_buf (OUT_VED;dont_draw);
 
   mainloop ();
 }

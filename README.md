@@ -514,56 +514,55 @@ $ROOTDIR/usr
 so without changing the standard way to do things, someone can modify
 the code to bring the desired behavior without touching mainline code at
 all. Of course this needs basic programming but basic programming with
-intensive care on the concepts, as everybody knows, can be fast.
+intensive care on the concepts, as everybody knows, can be fast and  
+should be fast (if myths could be demystified quickly)
 
-But, what i'm trying to say is this: for instance, operations on C strings.
+But, this is not the case for C.
 
-Needless to say, that when famous coders disagree about a couple of lines of  
-code, do not wait from people who are self-educating in C at their fifties+ and    
-just use C as a glue to expose C libraries in slang, to even be sure about  
-best practices on str*() functions and how to use them with safety.  
+### C
+I do not have any control in my C, and I do not have any kind of futile thoughts 
+to ever have in its entirely. I also know that it's a long way to learn proper  
+and most importantly safe C.  
+Though the language is small, because of its nature (the close relationship with  
+the machine), it needs extensive studies to many levels and even then, it needs  
+to be in an endless care about ... almost every little detail, and yet even then,  
+it needs support from debugging tools, but even then, noone can be ever sure.
 
-I've seen, however, uncountable String.* implementations or safe versions  
-of malloc, in fact almost every codebase has its own malloc, which  
-is nearly identical, it just makes sure to allocate at least one byte, or  
-do some error handling. which is fine but isn't this a diversity? when supposedly    
-this is all about portability or rules like:   
-C must been written this way to be understandable by the readers. But which   
-is more understandable? the personal way or the standard way? and if such  
-interface will be created, and the compilers knows about it, wouldn't produce  
-faster code that will negligible the usage of the interface.  
+So at least, code productivity and development cycle, is probably the worst  
+against (almost) any language.
 
-Its pity to loose a powerful gun like C, because of the lack of expressionism.  
-Even tiny defines like say slang's ifnot, which beautifies the code and helps  
-the mind, are unacceptable in the C world and ignored as a blasphemy.  
-It's still C, people.  
-
-So, this higher interface is already invented by zillion codebases, yet such a  
-interface is not standardized.  If standards (like the respectful POSIX), represents  
-conscience (like the general consensus about C strings) then they should do  
-something about it. But speaking of POSIX:  
+However, is the most powerful tool and it will ever be. And yes, like everybody  
+else, I realized this warm feeling you get when you using it and that time  
+you just don't want anything else.
  
-I really understand and I respect the intentions. I believe standards and not  
-policy is the way to go. But a standard without an actual implementation leaves  
-room for criticism. It would also be beneficial, for people like me, to copy a  
-function with a very specified task to use it in my code, directly from the POSIX  
-document, so i will know that this function has been implemented by the world wide  
-programming community, and the best earth programmers, so they can not be  
-wrong. But even if they are wrong, we will all be wrong together and this is at  
-least relaxing.
-
-So, yes, I expect if C wants to stay, maps, lists and arrays, something like:  
+But why someone that starts programming today, will going to learn C that needs  
+a lifetime to master?  
+When today (at the spring of 2018), already there is one (safe) language (Rust), 
+that:
+  - is by its definition safe
+  - with a much less learning curve 
+  - with (almost) the same performance
+  - with a decent fast development process
+  - and most importantly is expressional
+  
+We are humans and humans have a need for expressionism.
+Not all programmers have to think about the implementation details, they just  
+to need to express thoughts and logic and construct algorithms, that is what   
+they make them happy and productive.  
+ 
+But C is flexible and it can even be quite expressive:
 (https://github.com/stevedonovan/llib)
 
-C might not be like rust, which it looks like joy, but is beautiful for what  
-it is, and its straight connection with the machine and is here to stay forever.  
-(i don't know more than basic C and i usually consult other sources even for very  
-common operations, but i realized this warm feeling you get when you using it and  
-that time you just don't want anything else. But we are humans and humans have  
-a need for expressionism.  
-
-Many operations (like the above mentioned) are depended on small menus,  
-that work with uniformity, as far it concerns:
+However, though there are so many interfaces, that hide implementation details,  
+so it can be safe, like (say) string operations.
+Though, there is nothing standardized.
+If standards (like say the respectful POSIX), represents conscience (like the  
+general consensus about C strings), then something should be done or Rust, it  
+will take the world, as everybody realized by now. Not even a chance for C.
+ 
+### Menus
+Many operations depend on small menus, that work with uniformity, as far it  
+concerns:
   - the drawing style  
   - the selection style (the space bar (for instance) (and very natural)  
     accepts a match on all those menus, the arrow keys can be used to  

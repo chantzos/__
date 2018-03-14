@@ -77,6 +77,7 @@ Load.module ("socket");
 Class.load ("Devel");
 
 This.system."supports?"["hunspell"] = (NULL != Devel.find_lib ("hunspell-1.6"));
+This.system."supports?"["tcc"] = (NULL != Devel.find_lib ("tcc"));
 
 Class.load ("Smg");
 Class.load ("Input");
@@ -448,7 +449,7 @@ private define __echo__ (argv)
     __scratch (NULL);
 }
 
-private variable __CHDIR__ = fun (`
+private variable __CHDIR__ = funref (`
   envbeg
     variable
       __CWD__    = "",
@@ -473,14 +474,17 @@ private variable __CHDIR__ = fun (`
     else
       __DIR__ = Dir.eval (argv[1]);
 
-  if (File.are_same (__CWD__, __DIR__))
+  if (Dir.are_same (__CWD__, __DIR__))
     {
     array_map (&__uninitialize, [&__CWD__, &__DIR__]);
     return;
     }
 
    ifnot (chdir (__tmp (__DIR__)))
+     {
      __PDIR__ = __tmp (__CWD__);
+     send_msg_dr ("cwd: " + getcwd);
+     }
    else
      {
      IO.tostderr (errno_string (errno));
@@ -490,7 +494,7 @@ private variable __CHDIR__ = fun (`
   Com.post_builtin ();
 `;ns = "__CHDIR__");
 
-private variable __TRACK__ = fun (`
+private variable __TRACK__ = funref (`
     (argv)
   variable devdo = Opt.Arg.exists ("--devel", &argv;del_arg);
   variable readme= Opt.Arg.exists ("--readme", &argv;del_arg);
@@ -546,6 +550,23 @@ private variable __TRACK__ = fun (`
 
 private define __search__ (argv)
 {
+  variable len = length (argv) - 1;
+
+  ifnot (len)
+    return;
+
+  variable p = Opt.Arg.getlong_val ("pat", NULL, &argv);
+
+  if (NULL == p)
+    argv[1] = "--pat=" + argv[1];
+
+  if (1 == len)
+    argv = [argv, "--maxdepth=0", "--recursive", getcwd];
+  else
+    if (2 == len)
+      ifnot (NULL == Opt.Arg.exists ("--recursive", &argv))
+        argv = [argv, getcwd];
+
   Com.execute (argv;open_scratch = 0,
     stdout_file = GREPFILE, stdout_flags = ">|", draw = 0);
 
@@ -555,7 +576,7 @@ private define __search__ (argv)
   Ved.draw_wind (;reread = 0);
 }
 
-private variable __WHICH__ = fun (`
+private variable __WHICH__ = funref (`
   envbeg
     variable __PATH__ = NULL, __MSG__ = NULL;
   envend
@@ -585,7 +606,7 @@ private variable __WHICH__ = fun (`
 private define __write__ (argv)
 {
   variable s;
-  variable bufname = Opt.Arg.getlong_val ("bufname", NULL, &argv;del_arg, ret_arg);
+  variable bufname = Opt.Arg.getlong_val ("bufname", NULL, &argv;del_arg);
 
   ifnot (NULL == bufname)
     {
@@ -957,17 +978,17 @@ private define __builtins__ (a)
   if (COM_OPTS.chdir)
     {
     a["cd"] = @Argvlist_Type;
-    a["cd"].func = __CHDIR__.__funcref;
+    a["cd"].func = __CHDIR__;
     }
 
   a["__track"] = @Argvlist_Type;
-  a["__track"].func = __TRACK__.__funcref;
+  a["__track"].func = __TRACK__;
   a["__track"].args = [
     "--devel void edit the main develpment file of the distribution",
     "--readme void edit README"];
 
   a["__which"] = @Argvlist_Type;
-  a["__which"].func = __WHICH__.__funcref;
+  a["__which"].func = __WHICH__;
 
   variable f = ["!", ""][This.is.shell] + "search";
   a[f] = @Argvlist_Type;
@@ -1070,7 +1091,7 @@ public define __parse_argtype (s, arg, type, baselen)
 
   if (strlen (action))
     {
-    s.argv[s._index] += action;
+    s.argv[s._ind] += action;
     s._col = baselen + strlen (s.argv[s._ind]) + 1;
     Rline.parse_args (s);
     Rline.prompt (s, s._lin, s._col);

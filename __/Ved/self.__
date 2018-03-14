@@ -553,6 +553,7 @@ beg
 
     topline;
     Smg.setrc (cur.ptr[0], cur.ptr[1]);
+
     if (cur._autochdir && 0 == VED_ISONLYPAGER)
       ifnot (Dir.are_same (getcwd (), cur._dir))
         () = chdir (cur._dir);

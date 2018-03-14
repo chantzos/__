@@ -103,7 +103,7 @@ class Devel
     if (NULL == shared)
       return -1;
 
-    variable pat = pcre_compile ("^lib" + lib + "\\.so\\.\\d?", 0);
+    variable pat = pcre_compile ("^lib" + lib + "\\.so\\.?\\d*", 0);
     variable i;
     _for i (0, length (shared) - 1)
       if (pcre_exec (pat, shared[i]))
@@ -115,7 +115,7 @@ class Devel
   def find_lib (lib)
     variable
       i, ii, ar, path,
-      pat = "/lib" + lib + "\\.so\\.\\d?";
+      pat = "/lib" + lib + "\\.so\\.?\\d*";
 
     _for i (0, length (LD_LIBRARY_PATH) - 1)
       {
