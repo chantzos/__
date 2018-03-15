@@ -1,8 +1,12 @@
 class Api
   decl var public APP_ERR, I, X, App
   decl var public MSGROW, PROMPTROW
-  decl __exit, __draw_wind, __draw_buf, __viewfile
-  decl __toscratch, __scratch, __console, __runcom
-  decl __messages, __system, __editor, __exec_rline
-  decl send_msg_dr, wind_mang
+
+  decl public __exit, __draw_wind, __draw_buf, __viewfile
+  decl public __toscratch, __scratch, __console, __runcom
+  decl public __messages, __system, __editor, __exec_rline
+  decl public send_msg_dr, wind_mang
+
+  decl public __vdel_frame, __vdef_ved, __vgetlinestr
+  decl public __vwind_next, __vwind_prev, __vwind_new
 end

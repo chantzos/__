@@ -394,11 +394,18 @@ private define __write_buffers__ ()
   abort;
 }
 
-private define cl_quit ()
+public define ved_quit ()
 {
   variable force = 0;
   variable retval = 0;
   variable com = qualifier ("argv0");
+
+  if (NULL == com)
+    ifnot (_NARGS)
+      % caller error
+      throw UsageError, _function_name + " called without arguments";
+    else
+      com = ();
 
   if (qualifier_exists ("force") || 'w' == com[0])
     force = 1;
@@ -406,11 +413,13 @@ private define cl_quit ()
   if (force)
     retval = __write_buffers__ (;force);
   else
-    ifnot ("q!" == com)
+    if (any (["q", "quit"] == com))
       retval = __write_buffers__ ();
 
   ifnot (retval)
     exit_me (0);
+
+  loop (_NARGS) pop;
 }
 
 private define write_quit ()
@@ -420,6 +429,8 @@ private define write_quit ()
   variable retval = __write_buffers__ (;force);
   ifnot (retval)
     exit_me (0);
+
+  loop (_NARGS) pop;
 }
 
 private define _read_ ()
@@ -610,9 +621,9 @@ VED_CLINE["bp"]  =      &_chbuf_;
 VED_CLINE["bn"]  =      &_chbuf_;
 VED_CLINE["r"]   =      &_read_;
 VED_CLINE["r!"]  =      &_read_;
-VED_CLINE["q"]   =      &cl_quit;
-VED_CLINE["Q"]   =      &cl_quit;
-VED_CLINE["q!"]  =      &cl_quit;
+VED_CLINE["q"]   =      &ved_quit;
+VED_CLINE["Q"]   =      &ved_quit;
+VED_CLINE["q!"]  =      &ved_quit;
 VED_CLINE["wq"]  =      &write_quit;
 VED_CLINE["Wq"]  =      &write_quit;
 VED_CLINE["messages"] = &__vmessages;

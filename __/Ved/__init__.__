@@ -8,6 +8,7 @@ class Ved
     vedloop, vedloopcallback,
     ved, set,
     draw, lexicalhl, autoindent, pairs,
+    is_pager,
     opt_show_tilda, opt_show_status_line,
     __NOR__,
     __VAR__,
@@ -656,7 +657,16 @@ class Ved
           }
         }
 
-      s.vedloopcallback (;;__qualifiers);
+      % here is an issue, if a callback function creates a nested loop 
+      % so try to avoid that, either with a control variable or in this
+      % case of 'q',
+      % try to minimize overhead which is unvoidable, by escaping quickly
+      % with the common condition
+      ifnot ('q' == s._chr)
+        s.vedloopcallback (;;__qualifiers);
+      else
+        if (qualifier_exists ("unhandled"))
+          s.vedloopcallback (;;__qualifiers);
 
       __check_msg__ (get_cur_buf (NULL));
 
@@ -664,15 +674,39 @@ class Ved
         if (__cline__ (s))
           continue;
 
-      if ('q' == s._chr && VED_ISONLYPAGER)
+      if ('q' == s._chr && (VED_ISONLYPAGER || s.is_pager))
         return 1;
       }
 
     0;
   end
 
+  def _handle_quit_ (s) proc
+    variable w = Ved.get_cur_wind ();
+    variable bnms = Ved.get_bufnames (w);
+
+    if (1 < w.frames && length (bnms))
+      {
+      __vdel_frame (s);
+      return;
+      }
+
+    variable ref = __get_reference ("ved_quit");
+
+    if (NULL == ref)
+      return;
+
+    (@ref) ("quit");
+    % user canselled decision (trouble)
+    % for now let it go, it might be handled,
+    % or it will quit if we've been out of a loop,
+    % in that case the cansellation is canseled
+  end
+
   def _vedloop_ (s) proc
-    () = _loop_ (s;;__qualifiers);
+    if (1 == _loop_ (s;;__qualifiers))
+      _handle_quit_ (s);
+
     ifnot (s.opt_show_status_line)
       __vunset_status_line_clr (s, 1);
   end

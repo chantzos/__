@@ -41,7 +41,7 @@ private define add (self, s, rows)
   c.ptr[0] = qualifier ("row", 1);
   c.ptr[1] = qualifier ("col", s.col - 1);
   c._index = c.ptr[1];
-
+  c.is_pager = 1;
   Ved.setbuf (c._abspath);
 
   0;

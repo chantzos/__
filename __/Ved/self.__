@@ -671,27 +671,38 @@ beg
     if (frame == w.frames || cur_fr > frame)
       w.cur_frame--;
 
-    variable i, s;
+    variable i, s, len = length (w.frame_names);
+
+    ifnot (len)
+      ifnot (length (w.buffers))
+        % fatal
+        throw ApplicationError, _function_name + " no buffer associated with frames";
+      else
+        {
+        w.frame_names = [w.bufnames[0]];
+        len++;
+        }
 
     _for i (0, w.frames - 1)
-      {
-      s = w.buffers[w.frame_names[i]];
-      s.rows = w.frame_rows[i];
-      __vinitrowsbuffvars__ (s);
+      if (i < len)
+        {
+        s = w.buffers[w.frame_names[i]];
+        s.rows = w.frame_rows[i];
+        __vinitrowsbuffvars__ (s);
 
-      s._i = s._ii;
+        s._i = s._ii;
 
-      if (i == w.cur_frame)
-        __vset_status_line_fg_clr (s, NULL);
-      else
-        __vset_status_line_bg_clr (s, NULL);
+        if (i == w.cur_frame)
+          __vset_status_line_fg_clr (s, NULL);
+        else
+          __vset_status_line_bg_clr (s, NULL);
 
-      s.ptr[0] = s.rows[0];
-      s.ptr[1] = s._indent;
+        s.ptr[0] = s.rows[0];
+        s.ptr[1] = s._indent;
 
-      s._findex = s._indent;
-      s._index = s._indent;
-      }
+        s._findex = s._indent;
+        s._index = s._indent;
+        }
 
     draw_wind (self);
   end
