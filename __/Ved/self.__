@@ -434,6 +434,9 @@ beg
 
     w.frame_names[frame] = bufname;
 
+    ifnot (qualifier_exists ("set_cur_frame"))
+      w.cur_frame = frame;
+
     if (s._autochdir && 0 == VED_ISONLYPAGER)
       () = chdir (s._dir);
 
@@ -470,7 +473,7 @@ beg
 
     s = __vaddbuf__ (s;;__qualifiers);
 
-    s._fd = open (s._abspath, O_RDWR);
+    s._fd = qualifier ("fd", open (s._abspath, O_RDWR));
 
     s.st_ = stat_file (s._abspath);
 
@@ -515,7 +518,7 @@ beg
   end
 
   def draw_wind ()
-    variable w = get_cur_wind (NULL);
+    variable w = qualifier ("wind", get_cur_wind (NULL));
     variable i;
     variable s;
     variable cur;

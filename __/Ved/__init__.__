@@ -256,7 +256,8 @@ class Ved
   end
 
   def __vdef_ved (s, fname) public proc
-    s.set (fname, VED_ROWS, NULL;;__qualifiers);
+    ifnot (qualifier_exists ("dont_set"))
+      s.set (fname, VED_ROWS, NULL;;__qualifiers);
 
     Ved.setbuf (s._abspath;;__qualifiers);
 
@@ -508,7 +509,7 @@ class Ved
       else
         s._abspath = s._fname;
 
-    variable w = Ved.get_cur_wind ();
+    variable w = qualifier ("wind", Ved.get_cur_wind ());
 
     if (any (s._abspath == w.bufnames))
       return w.buffers[s._abspath];
@@ -1069,7 +1070,7 @@ class Ved
   end
 
   def new_wind () proc
-    variable name = _NARGS ? () : NULL;
+    variable name = _NARGS ? () : qualifier ("wind_name");
     variable i;
     variable winds = assoc_get_keys (VED_WIND);
     variable frames = __get_qualifier_as (Integer_Type,

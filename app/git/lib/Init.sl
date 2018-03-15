@@ -107,7 +107,7 @@ public define on_wind_new (w)
     lexicalhl = &info_lexicalhl);
 
   Ved.setbuf (b;frame = 1);
-  Ved.setbuf (This.is.std.out.fn);
+  Ved.setbuf (This.is.std.out.fn;frame = 0);
 
   __vunset_status_line_clr (bved, NULL);
 

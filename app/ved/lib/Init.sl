@@ -751,8 +751,15 @@ public define init_ved ()
   variable lnr;
   (lnr, ) = Opt.Arg.compare ("+", &This.has.argv;del_arg, ret_arg);
 
-  files = This.has.argv[[1:]];
   variable fn;
+  files = This.has.argv[[1:]];
+
+  _for fn (0, length (files) - 1)
+    ifnot (strncmp (files[fn], "--opt=", 6))
+      files[fn] = NULL;
+
+  files = files[wherenot (_isnull (files))];
+
   _for fname (0, length (files) - 1)
     {
     fn = files[fname];
