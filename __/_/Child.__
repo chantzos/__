@@ -1,0 +1,47 @@
+class _
+  var PARENT_WRFIFO = getenv ("PARENT_WRFIFO");
+  var PARENT_RDFIFO = getenv ("PARENT_RDFIFO");
+  var PARENT_RDFIFO_FD = NULL;
+  var PARENT_WRFIFO_FD = NULL;
+
+  var screen_size_changed = 0;
+
+  def __sigwinch_handler__ (sig) proc
+    screen_size_changed = 1;
+  end
+
+  def app_idle () static proc
+    if (This.has.sigint)
+      {
+      variable handl;
+      signal (SIGINT, SIG_IGN, &handl);
+      }
+
+    signal (SIGWINCH, &__sigwinch_handler__);
+
+    Sock.send_int (PARENT_WRFIFO_FD, App->GO_IDLED);
+    variable retval = Sock.get_int (PARENT_RDFIFO_FD);
+
+    if (This.has.sigint)
+      signal (SIGINT, handl);
+
+    signal (SIGWINCH, This.on.sigwinch);
+
+    return retval;
+  end
+
+  def app_new (s) static proc
+  end
+
+  def app_reconnect (s) static proc
+  end
+
+  def at_exit () static proc
+    Sock.send_int (PARENT_WRFIFO_FD, App->GO_ATEXIT);
+  end
+
+  def init () static proc
+    PARENT_WRFIFO_FD = open (PARENT_WRFIFO, O_WRONLY);
+    PARENT_RDFIFO_FD = open (PARENT_RDFIFO, O_RDONLY);
+  end
+end

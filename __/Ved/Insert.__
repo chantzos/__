@@ -606,10 +606,6 @@ subclass Insert
 
       s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
       }
-
-    topline;
-
-    __vdraw_tail (s);
   end
 
   def ctrl_completion_rout (s, line, type) proc
@@ -1200,5 +1196,8 @@ subclass Insert
       __vunset_status_line_clr (s, 1;;__qualifiers);
 
     This.cur["mode"] = This.prev["mode"];
+    topline;
+
+    __vdraw_tail (s);
   end
 end

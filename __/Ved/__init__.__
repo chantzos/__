@@ -658,7 +658,8 @@ class Ved
         }
 
       % here is an issue, if a callback function creates a nested loop 
-      % so try to avoid that, either with a control variable or in this
+      %
+      % try to avoid that, either with a control variable or in this
       % case of 'q',
       % try to minimize overhead which is unvoidable, by escaping quickly
       % with the common condition
@@ -704,7 +705,7 @@ class Ved
   end
 
   def _vedloop_ (s) proc
-    if (1 == _loop_ (s;;__qualifiers))
+    if (_loop_ (s;;__qualifiers) == 1)
       _handle_quit_ (s);
 
     ifnot (s.opt_show_status_line)
@@ -2377,19 +2378,19 @@ class Ved
 
   def __app_new__ (s) proc
     if (s._chr == Input->F2)
-      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ()
+      (@__get_reference ("_->app_new")) (Ved.get_cur_rline ()
         ;;__qualifiers);
     else
-      (@__get_reference ("I->app_new")) (Ved.get_cur_rline ()
+      (@__get_reference ("_->app_new")) (Ved.get_cur_rline ()
         ;;struct {@__qualifiers, issu = 1});
   end
 
   def __app_rec__ (s) proc
     if (s._chr == Input->F1)
-      (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ()
+      (@__get_reference ("_->app_reconnect")) (Ved.get_cur_rline ()
         ;;struct {@__qualifiers, previous});
     else
-      (@__get_reference ("I->app_reconnect")) (Ved.get_cur_rline ()
+      (@__get_reference ("_->app_reconnect")) (Ved.get_cur_rline ()
         ;;__qualifiers);
   end
 

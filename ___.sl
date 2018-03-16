@@ -131,7 +131,7 @@ private variable CLASSES = [
   "Opt",  "String", "Rline", "Proc",  "Sock",  "Subst",
   "Sync", "Devel",  "Spell", "Ved",   "Curl",  "Json",
   "Time", "Scm",    "App",   "Com",   "Hw",    "Net",
-  "I"];
+  ];
 
 if (X)
   {

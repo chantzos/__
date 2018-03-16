@@ -1,21 +1,9 @@
-subclass Client
-  __init__
-    init
-    appnew
-    appreconnect
-    idle
-  end
-
-  let SESSION_PID = getenv ("SESSION_PID");
-  let SESSION_WRFIFO = getenv ("SESSION_WRFIFO");
-  let SESSION_RDFIFO = getenv ("SESSION_RDFIFO");
-  let SESSION_RDFIFO_FD = NULL;
-  let SESSION_WRFIFO_FD = NULL;
-
-  def init ()
-    __->__ ("IClient", "SESSION_WRFIFO_FD", open (SESSION_WRFIFO, O_WRONLY), "Class::vset");
-    __->__ ("IClient", "SESSION_RDFIFO_FD", open (SESSION_RDFIFO, O_RDONLY), "Class::vset");
-  end
+class _
+  var SESSION_PID = getenv ("SESSION_PID");
+  var SESSION_WRFIFO = getenv ("SESSION_WRFIFO");
+  var SESSION_RDFIFO = getenv ("SESSION_RDFIFO");
+  var SESSION_RDFIFO_FD = NULL;
+  var SESSION_WRFIFO_FD = NULL;
 
   var screen_size_changed = 0;
 
@@ -23,7 +11,7 @@ subclass Client
     screen_size_changed = 1;
   end
 
-  def appnew (s)
+  def app_new (s) static proc
     variable apps = assoc_get_keys (App->APPS);
     apps = apps[array_sort (apps)];
 
@@ -76,7 +64,7 @@ subclass Client
       }
   end
 
-  def appreconnect (s)
+  def app_reconnect (s) static proc
     variable request = [App->APP_RECON_OTH, App->APP_RECON_PREV]
       [qualifier_exists ("previous")];
 
@@ -143,7 +131,7 @@ subclass Client
       }
   end
 
-  def idle ()
+  def app_idle () static proc
     if (This.has.sigint)
       {
       variable handl;
@@ -165,4 +153,14 @@ subclass Client
 
     return retval;
   end
+
+  def at_exit () static proc
+    Sock.send_int (SESSION_WRFIFO_FD, App->GO_ATEXIT);
+  end
+
+  def init () static proc
+    SESSION_WRFIFO_FD = open (SESSION_WRFIFO, O_WRONLY);
+    SESSION_RDFIFO_FD = open (SESSION_RDFIFO, O_RDONLY);
+  end
+
 end

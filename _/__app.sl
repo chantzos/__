@@ -40,7 +40,7 @@ public define exit_me (x)
         () = rmdir (dirlist[i]);
      `);
 
-  variable f = __get_reference ("I->at_exit");
+  variable f = __get_reference ("_->at_exit");
   ifnot (NULL == f)
     (@f) ();
 
@@ -95,7 +95,14 @@ Class.load ("App");
 
 This.at_exit = &__exit;
 
-Class.load ("I";force);
+ifnot (NULL == This.is.child)
+  Class.load ("_"; __init__ = "Child", as = "Child");
+else
+  ifnot (NULL == This.is.at.session)
+    Class.load ("_"; __init__ = "Client", as = "Client");
+  else
+  if (This.is.child == NULL == This.is.at.session)
+    Class.load ("_"; __init__ = "Srv", as = "Srv");
 
 This.request.X = frun (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
   `(nox)
@@ -133,7 +140,7 @@ if (NULL == This.is.my.tmpdir)
 if (-1 == Dir.make_parents (This.is.my.tmpdir, File->PERM["PRIVATE"];strict))
   This.err_handler ("cannot create directory " + This.is.my.tmpdir);
 
-I->init ();
+_->init ();
 
 This.is.my.genconf = Env->USER_DATA_PATH + "/Generic/conf";
 This.is.my.conf    = This.is.my.datadir  + "/config/conf";
@@ -1216,8 +1223,8 @@ public define __initrline ()
 
   w.rline = rlineinit (;
     funclist = init_functions (),
-    app_new = __get_reference ("I->app_new"),
-    app_rec = __get_reference ("I->app_reconnect"),
+    app_new = __get_reference ("_->app_new"),
+    app_rec = __get_reference ("_->app_reconnect"),
     childrec = __get_reference ("App->child_reconnect"),
     wind_mang = __get_reference ("wind_mang"),
     parse_argtype = &__parse_argtype,
@@ -1365,7 +1372,7 @@ frun (`
       if ("____" == rl.argv[-1])
         rl.argv[-1] = "__";
 
-    I->app_new (rl;no_menu, argv = argv);
+    _->app_new (rl;no_menu, argv = argv);
     }
 
   while (

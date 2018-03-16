@@ -149,7 +149,7 @@ class App
 
     reset_app (NULL);
 
-    variable retval = (@__get_reference ("I->app_idle")) ();
+    variable retval = (@__get_reference ("_->app_idle")) ();
 
     ifnot (retval)
       restore_app (NULL);
@@ -159,7 +159,7 @@ class App
     ifnot (This.is.me == "MASTER")
       exit_me (0);
 
-    () = (@__get_reference ("I->app_idle")) ();
+    () = (@__get_reference ("_->app_idle")) ();
   end
 
   subclass Run from App

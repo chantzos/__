@@ -13,15 +13,13 @@ are considered dangerous, as I do not have the required knowledge to cover the
 possibilities and the corner cases, and ...
 I do really want to feel free to experiment, as foremost this is intended as  
 an educational tool, to cover the absence of a formal education (and this is a  
-long trip with many mistakes on the road). Right now (the spring of 2018) this 
-is true for the C side of code, but for slang code, I don't have any excuse for 
-mistakes though.
-
-However, I believe the code can be adopted as it is, especially from slang coders.  
+long trip with many mistakes on the road), especially if it is considered that  
+slowly this became quite complex environment with a huge codebase, which usually  
+can not be maintainable in an acceptable way by one person. 
 
 But as this can be seen as a specification for a development environment, for 
-people who like Unix and appreciate the power of a command line like interface, 
-I believe has a value and that is the main reason for being public.  
+people who like UNIX and appreciate the power of a command line like interface, 
+I believe has a value.  
 
 I would welcome ideas specific to the specification, though code contribution 
 of course is more than welcome, but its not the intention, which is primarily  
@@ -29,11 +27,12 @@ to stabilize the concepts in my mind too, through writing this README, which
 is a way to formalize the logic and finally produce a much more compact document.
 This is a personal weakness as the thoughts are too many to reduce them and avoid  
 the verbosity (this battle has been already lost, as this document, it's (even now)  
-more like a written talk with a friend on programming which it's really getting  
-worse with time (consider yourself warned)), so compactness is an illusion, but a  
-document with just the specification is doable (but not a priority).
+more like a written talk with a friend on programming, which it's really getting  
+worse with time, so compactness is an illusion, but a document with just the  
+specification is doable (but not a priority).
 
-And since I've mentioned the README, it's really more like a "read me, if you like".  
+And since I've mentioned the README, it's really more like a "read this, if you want  
+something to read".  
 
 ## SYNOPSIS
 This application is an implementation of a concept of ideas
@@ -89,7 +88,7 @@ position, it can't offer warranty that will do the right thing, since the
 floating view is never used, it cannot reveal the code mistakes.
 
 This application offers such an X window management, code derived from
-__dminiwm__ :  (https://github.com/moetunes/dminiwm)
+__dminiwm__ :  https://github.com/moetunes/dminiwm
  
 Its a tiny (written as a S-Lang module) library, which also has floating
 windows support with a total control over the focused window with the
@@ -166,7 +165,7 @@ load, based also in the name of the link, the necessary code.
 
 ## Usage
 
-```bash
+```sh
 # starts the shell application
  
 $ROOTDIR/bin/__shell
@@ -174,19 +173,21 @@ $ROOTDIR/bin/__shell
 
 # list directory
 $ROOTDIR/bin/__ls
+```
 
-# All the commands have a --help switch
+All the commands have a --help switch.
 
-# All the applications, on the command line mode, can run those
-# commands. In the shell application are all easily available
-# throw the tab key (results can be narrowed with some input),
-# as these are the default for the application.
-# On all the others applications, the same behavior is achieved
-# by using "!" as the first char on the command line, while the
-# tab key by default, auto completes commands that are specific
-# to the application.
+All the applications, on the command line mode, can run those commands.  
+In the shell application are all easily available through the tab key   
+(results can be narrowed with some input), because these are the defaults  
+for this application.
 
-# Below is a construction that can be used as a man pager.
+On all the others applications, the same behavior is achieved by using "!"  
+as the first char on the command line, while the tab key by default, auto  
+completes commands that are __specific__ to the application.
+
+Below is a construction that can be used as a man pager.
+```sh 
 # First build a database for fast operations on the generated
 # array of man pages (which it should run this periodically on
 # updates or new installations)
@@ -204,11 +205,15 @@ $ROOTDIR/bin/__shell --command=man::--search=fork --command=q
 # The --command=com::arg::arg1... command line switch, can run
 # any valid command, just a little bit before entering the main
 # loop.
+```
 
-# For the sake of (at early steps) development, a couple of common
-# applications were introduced, like a media player that uses 
-# the mplayer program (which communicates with a fifo) to play media
-# files.
+For the sake of (at early steps) development, a couple of common  
+applications were introduced, like a media player that uses the  
+mplayer program (which communicates with it with a fifo) to play media  
+files.
+
+```sh
+# if mplayer is installed, this application can be invoked:
 
 $ROOTDIR/bin/__media
 
@@ -216,11 +221,11 @@ $ROOTDIR/bin/__media
 # is a directory, will play all the audio files listed to that
 # directory (the order is random, unless the --no-random switch
 # is given).
-
 # It can also show and manipulate the tags on audio files, by using
 # the S-Lang bindings (located at: $ROOTDIR/__/C/taglib-module.c)
-# to the taglib library: 
-# (http://developer.kde.org/~wheeler/taglib.html)
+# to the taglib library:
+
+  http://developer.kde.org/~wheeler/taglib.html
 
 # The application can also display lyrics, if the current song
 # match a file name minus the extension in the lyrics directory,
@@ -248,21 +253,22 @@ $ROOTDIR/bin/____
 
 $ROOTDIR/bin/__shell --app=__ --app=git
 
-# This will also starts a git application, which is a simple
-# wrapper around git commands (hopefully will find time
-# this year to bind libgit2). This by default starts git
-# on the source directory off the distribution itself.
+# This will also starts a simple git application, created and
+# used mostly to administrate this distribution, and which is
+% a wrapper around git commands (hopefully i will find time 
+# this year to bind libgit2). This by default starts git on the
+# source directory off the distribution itself.
 
-# You can cycle through applications using F3 or F1 for
+# You can cycle through applications using F2 or F1 for
 # a next/prev motion.
 
 # On an empty command line, keys can be defined to trigger
-# a call to a function reference. Though the interface is
+# a call to function references. Though the interface is
 # not complete, practice stabilized some actions:
  
 # The "~" triggers auto completion for personal commands that
 # are located under: $ROOTDIR/__/local/com
-# those are accessible on all the applications and usually are
+# those are accessible on __all__ the applications and usually are
 # common used user scripts (hence the ~) 
 
 # The "__" and "@", which for now seems to overlap are usually
@@ -317,92 +323,86 @@ But, briefly the ideal concept in an ala list sentence:
   freedom (through knowledge and responsibility to get out of edges)  
   with an evaluation console executing strings  
 
-in a summary the absolute control over every bit (that is, ideally)
+in a summary the absolute control over every bit (that is, ideally).
  
-This system has implemented most of the specification (with
-notable exceptions that it can not be yet the init executable,
-it cannot be built as static, and its not that easy to fix the
-bug at runtime (though possible through eval).
+This system has implemented much of the specification, with notable exceptions  
+that it can not be yet the init executable, it cannot be built as static,  
+and its not that easy to fix runtime bugs (though possible if there is code  
+knowledge, by using eval).
 
-Particularly this application implements a vi(m) like
-user interface, though the interaction is based on tab
-completions much like the zsh shell does it. In fact,
-the application is an editable shell or an editor with
-a shell logic, because the machine that creates/draws
-windows and holds the structures, is the same that does
-editing. As a another fact, the underline code is exactly
-the same for all applications (usually only the relative
-readline code unit is changing and some times the pager
-bindings). The other difference is important (the role
-that every application carries at the invocation) and here
-is why:
+Particularly this application implements a vi(m) like user interface, though the   
+interaction is based on tab  completions much like the zsh shell does it.  
+ 
+In fact, the application is an editable shell or an editor with a shell logic,  
+because the machine that creates/draws windows and holds the structures, is the  
+same that does editing.
+As a another fact, the underline code is exactly the same for all applications  
+(usually only the relative readline code unit is changing and some times the pager  
+bindings). The other difference is important (the role that every application  
+carries at the invocation) and here is why:
 
-At the invocation an application checks the environment
-and if it's not derived from another instance then becomes
-the process leader. Any application can play that role.
-This application by default, can have independent images
-(windows) of themselves (like tabs), unless the application
-forbids it (like the simple network manager which is activated
-with the --devel command line switch and is called as __netm,
-which it makes sense to disable new instances). The F5 key
-can display a menu for window related actions.
+At the invocation an application checks the environment and if it's not derived  
+from another instance then becomes the process leader.
+Any application can play that role.
+Applications by default, can have independent images (windows) of themselves (like  
+tabs), unless the application forbids it (like the simple network manager which is  
+activated with the --devel command line switch and is called as __netm, but which   
+makes sense, as there can not be more than one).
 
-This master process by default can start, manage and close
-unlimited new applications, unless again is forbidden (like
-a very specialized task that needs to reduce the risks). The
-first four Fn keys are dedicated to those tasks, like the F1
-for instance, which is binded to bring in the foreground the
-previously focused application, or if there isn't one to start
-a default based on the settings.
+The F5 key can display a menu for window related actions.
 
-The applications can also have children of other applications
-but which they are tied only with them; those can be detached
-(using CTRL-j) and later can be re-attached, but only through the
-caller application.
+This master process can start, manage and close unlimited new applications, unless  
+again is forbidden (like a very specialized task that needs to reduce the risks).
+ 
+The first four Fn keys are dedicated to those tasks, like the F1 for instance, which   
+is binded to bring in the foreground the previously focused application, or if there  
+isn't one, to start a default based on the settings.
+
+Applications can also have children of other applications but which they are tied  
+only with their callers; those can be detached (using CTRL-j) and later can be  
+re-attached, but only through the caller application.
 
 ### The drawing interface
 
-The first (top) line is reserved to print generic information
-and is refreshed at a every command invocation or (usually) when
-changing mode, or when changing focus.
+The first (top) line is reserved to print generic information and is refreshed at a  
+every command invocation or (usually) when changing mode, or when changing focus.
 
-The window can be split in frames and every frame is associated
-with a buffer, which reserves the last line of the frame to print
-buffer related information. This last line can be hided, as it
-happens with applications other than ved, however when in insert
-mode the buffer status line should be visible.
+The window can be split in frames and every frame is associated with a buffer, which  
+reserves the last line of the frame to print buffer related information. This last  
+line can be hided, as it happens with applications other than ved, however when in  
+insert mode the buffer status line should be visible.
 
-The last line of the window is reserved for displaying messages
-which they should be disappear at the first keypress action.
+The last line of the window is reserved for displaying messages which they should be  
+disappear at the first keypress action.
 
-The previous line is reserved for the command line, but if the
-length from the entered text cannot fit, it grows to the top by
-borrowing upper lines.
+The second line from the bottom, is reserved for the command line, but if the  
+length from the entered text cannot fit, it grows to the top by borrowing upper  
+lines.
 
 #### Design and Interface
 
-This system, it can't also built and maintain yet, that unix
-like environment, but it comes with the most basic commands
-to administrate the system.
-They usually have the same name (prefixed with two underscores),
-with their counterparts and share many established behavior
-and command line switches. This has some unexpected gifts like
-argument completion;  the argument completion is triggered 
-when the pointer is at the second token (after the command
-name) and when "-" is typed and its either the first or second
-char of the token (that means a space before or another "-"
-respectively). As an example if you issue:
+This system, it can't also built and maintain yet, that unix like environment, but  
+it comes with the most basic commands to administrate a system.
+
+They usually have the same name (prefixed with two underscores), with their counterparts  
+and share many established behavior and command line switches.
+This has some unexpected gifts like argument completion.
+ 
+The argument completion is triggered when the pointer is at the second token (after  
+the command name) and when "-" is typed and its either the first or second char of  
+the token (that means a space before or another "-" respectively).
+ 
+As an example if you issue:
 
 ```bash
 $ROOTDIR/bin/__shell --command=\!ls
 # i had to do the escaping in my zsh shell
 ```
-this will execute the system ls, not our ls which is located
-at $ROOTDIR/__/com/ls at the source directory.
+this will execute the system ls, not our ls which is located at
+$ROOTDIR/\_\_/com/ls at the source directory.
 
-But since our cp (for instance) share switches with the system
-cp, then the autocompletion will work by mistaken (hopefully
-the user will not be mistaken).
+But since our cp (for instance) share switches with the system cp, then the  
+autocompletion will work by mistaken (hopefully the user will not be mistaken).
 
 The system calls are available when "!" is the first char of
 the command line in the __shell application. On the other
@@ -521,7 +521,7 @@ But, this is not the case for C.
 
 ### C
 I do not have any control in my C, and I do not have any kind of futile thoughts 
-to ever have in its entirely. I also know that it's a long way to learn proper  
+to ever have, in its entirely. I also know that it's a long way to learn proper  
 and most importantly safe C.  
 Though the language is small, because of its nature (the close relationship with  
 the machine), it needs extensive studies to many levels and even then, it needs  
@@ -547,15 +547,16 @@ that:
   
 We are humans and humans have a need for expressionism.
 Not all programmers have to think about the implementation details, they just  
-to need to express thoughts and logic and construct algorithms, that is what   
+need to express thoughts and logic and construct algorithms, that is what   
 they make them happy and productive.  
  
 But C is flexible and it can even be quite expressive:
-(https://github.com/stevedonovan/llib)
+https://github.com/stevedonovan/llib
 
-However, though there are so many interfaces, that hide implementation details,  
+However, there are so many interfaces, that hide implementation details,  
 so it can be safe, like (say) string operations.
-Though, there is nothing standardized.
+
+But there is nothing standardized.
 If standards (like say the respectful POSIX), represents conscience (like the  
 general consensus about C strings), then something should be done or Rust, it  
 will take the world, as everybody realized by now. Not even a chance for C.
@@ -718,13 +719,11 @@ as we do the xauth stuff in the code ourselves.
 This code can execute (almost from everywhere :-) shell code and slang
 code. But, at the time of writing is ready to execute dynamically C code.
 This because of the tinycc C compiler, see:
-
-	 (http://bellard.org/tcc/)
+	 http://bellard.org/tcc/
 and upstream's repository at  
+  http://repo.or.cz/tinycc.git
 
-(http://repo.or.cz/tinycc.git)
-
-I will integrate soon the code that is already written.
+I will try to integrate soon the code that is already written.
 
 ### As a spelling tool using hunspell
 
@@ -735,7 +734,7 @@ for a menu which, except this specific option, it offers and a couple of other
 operations, like to send something to XA_CLIPBOARD, using the xsel without (i think)  
 a single change,
 
-(http://www.vergenet.net/~conrad/software/xsel/)
+http://www.vergenet.net/~conrad/software/xsel/
 
 just enough to pack it a slang module and just to make it work for the
 XA_CLIPBOARD, which it seems that is the only X selection mechanism that the   
@@ -769,9 +768,9 @@ class.  They are self explainable, except the variable at the very top.
 But generally very little things need to be done for adoption.  
 
 Most of the modules were written with little or no knowledge at all in C.  
-Most, with one or two exceptions, are functional, even if this function is 
+But most, with one or two exceptions, are functional, even if this function is 
 just one. They have been tested. (But didn't check with valgrind them all,
-though)
+though).
 
 The main scripts leave a copy of them in the tmp/ directory which is created 
 during installation. They are rather big but are self containable. Possibly 
@@ -941,49 +940,6 @@ No to of: how to write this code, but how to declare and express my logic.
  * Kudos to John Davis for his parser.  So much code, sometimes quite complex  
  * conditional branches without even a single mistake i can remember.  
  * And he is a _physician_ not a programmer.
- * Its not that after (eight years now) of communication, sometimes you get that
- * friendship feeling, which it feels strange and like a dream; (You never see  
- * the other, you just stare typed lines in the screen and you assume is a human  
- * being that wrote those bits) and for a moment you feel the other's soul and   
- * this is magic)… 
- * so, its not that i'm considering him like one of my friends, which is a honor  
- * for me that he left his door open and gave me this right, because people fear.
-
- * This is an expected (common for all beings) feeling.
- 
- * But if you live the door open, even just for a moment, maybe, i said maybe…
- * But if you dont, you never know what you will loose - if my opinion matters:
-
- * its like to live in a beautiful but lonely place, but you live alone ha!
-   or
- * you are like zorba and you loose a party with full of wine and women  
- 
- * not a good thing in my humble opinion
-  
- * in any case these moments, and there will be a time - in any human - that  
- * for exactly those moments she will be very happy - for intangible (not sure  
- * about the word here) reasons - but that time, you dont care about the damned  
- * reasons - you just feel good about; and then its party[cipate] time …
-
- * and because this became real emotional, no its not that.
- * He deserves respect about the code he wrote.
- * I know that because thats what I do, i read his code and i read a lot of code.
-
- * But we are very lucky that live between us and talk to them sometimes, giants  
- * (like our favorite coders (like Fabrice Bellard) or exceptional figures like
- * Bruno Haible and Paul Eggert (the gnulib maintainers). I dont feel fear
- * now. I know everything will go well, if not then at very least we can hold  
- * our hands together and jump to the ocean of the eternity.
-
- * We'll be in a good train. The only thing we can do until that, is to get  
- * more of this essense of this life, like a food that you'll carry it in an  
- * eternal travel. And there will be a time into a someone, can be anyone, in  
- * a time with no time, that it will grow a will that will give shape in a world,
- * similar to this, in an another edition, which will be free of bugs.
-
- * so, its not that he is my friend. But he managed to make slang comparable  
- * with big fat languages, without any serious help, like others have, or 
- * who work full time to improve the product and mainly to advertize it.
 
  * In wikipedia article about array implementations slang has a good share.
  * And deserves more and it will take it, if you think that established  

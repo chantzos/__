@@ -148,6 +148,9 @@ private define _buffer_other_ ()
 
   ind = wherefirst (ar == cb);
 
+  if (NULL == ind)
+    return;
+
   ifnot (dir)
     if (-1 != w.prev_buf_ind && w.prev_buf_ind < length (w.bufnames) &&
         w.bufnames[w.prev_buf_ind] != ar[ind])
@@ -574,21 +577,21 @@ public define __vhandle_comma (s)
 private define __app_new (s)
 {
   variable rline = Ved.get_cur_rline ();
-  I->app_new (rline);
+  _->app_new (rline);
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
 private define __app_reconnect (s)
 {
   variable rline = Ved.get_cur_rline ();
-  I->app_reconnect (rline);
+  _->app_reconnect (rline);
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
 private define __app_prev (s)
 {
   variable rline = Ved.get_cur_rline ();
-  I->app_reconnect (rline;previous);
+  _->app_reconnect (rline;previous);
   Smg.setrcdr (s.ptr[0], s.ptr[1]);
 }
 
