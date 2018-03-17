@@ -2423,6 +2423,8 @@ class Rline
 
     variable retval = Rline.commandcmp (rl, ar;;qual);
 
+    clear_prompt (NULL, rl);
+
     if (on_escape && 033 == retval)
       return "";
 

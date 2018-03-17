@@ -500,8 +500,7 @@ private define __build_module__ (i)
       SRC_TMP_PATH + "/" + MODULES[i] + "-module.so " + FLAGS[i];
 
   if (VERBOSE)
-    io.tostdout ("compiling " + SRC_MODULE_PATH + "/" + MODULES[i] + "/" +
-        MODULES[i] + "-module.c");
+    io.tostdout ("compiling " + MODULES[i] + "-module.c");
 
   if (system (CC_COM))
     ifnot (any (MODULES[i] == MODULES_THAT_DONT_EXIT_ON_ERR))

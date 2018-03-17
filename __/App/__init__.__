@@ -104,7 +104,10 @@ class App
       }
   end
 
-  def reset_app ()
+  def reset ()
+    ifnot (NULL == This.is.std.err.orig_fd)
+      () = dup2_fd (This.is.std.err.orig_fd, 2);
+
     if (Input.is_inited ())
       Input.at_exit ();
 
@@ -118,7 +121,10 @@ class App
     This.has.screenactive = 0;
   end
 
-  def restore_app ()
+  def restore ()
+    ifnot (NULL == This.is.std.err.orig_fd)
+      () = dup2_fd (This.is.std.err.fd, 2);
+
     ifnot (Input.is_inited ())
       Input.init ();
 
@@ -147,12 +153,12 @@ class App
     if (This.is.me == "MASTER")
       return;
 
-    reset_app (NULL);
+    reset (NULL);
 
     variable retval = (@__get_reference ("_->app_idle")) ();
 
     ifnot (retval)
-      restore_app (NULL);
+      restore (NULL);
   end
 
   def quit_me ()
@@ -451,20 +457,19 @@ class App
     ifnot (len)
       return;
 
-    variable sigint_handl;
-    sigint_handl = fun (`
+    variable sigint_handl = fun (`
       envbeg private define my_sigint_handler (); envend
         (sig)
       IO.tostderr ("Process Interrupted by the user");
       signal (sig, &my_sigint_handler);
-      `;as = "my_sigint_handler").__funcref;
+      `;as = "my_sigint_handler");
 
     ifnot (This.has.sigint)
       sigprocmask (SIG_UNBLOCK, [SIGINT]);
 
-    signal (SIGINT, sigint_handl);
+    signal (SIGINT, sigint_handl.__funcref);
 
-    reset_app (NULL);
+    reset (NULL);
 
     _for i (0, len - 1)
       () = system_intr (strtrim_beg (lines[i], "!"));
@@ -483,7 +488,9 @@ class App
 
     IO.tostdout ("");
 
-    restore_app (NULL);
+    sigint_handl.__destroy ();
+
+    restore (NULL);
   end
 
   def __editor () public proc

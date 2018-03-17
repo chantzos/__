@@ -11,7 +11,7 @@ subclass Visual
     l_mode, l_down, l_up, l_page_up, l_page_down,
     l_keys = ['c', 'w', 's', 'y', 'Y', 'd', '>', '<', 'g', 'G', 'h',
       Input->DOWN, Input->UP, Input->PPAGE, Input->NPAGE, Input->CTRL_f,
-      Input->CTRL_b, Input->HOME, '!', '$', 'X'],
+      Input->CTRL_b, Input->HOME, '!', '$', 'X', 'C'],
     c_mode, c_left, c_right,
     c_keys = ['y', 'd', Input->DOWN, Input->RIGHT, Input->UP, Input->LEFT,
       '!', '$', 'X'],
@@ -363,14 +363,15 @@ subclass Visual
       if (033 == chr)
         {
         variable names = ["yank", "comment", "! system",
-          "$ eval", "hunspell", "xclipboard", "> shift out",
+          "$ eval", "C execute", "hunspell", "xclipboard", "> shift out",
           "< shift in", "substitute", "delete", "write", "global",
           ];
         variable help = [
           "yank visual lines",
           "comment visual lines",
           "send visual lines to system ()",
-          "evaluate visual lines",
+          "evaluate to slang",
+          "compile to C and execute string",
           "spell visual lines",
           "send visual lines to XA_PRIMARY",
           "shift rightwards",
@@ -394,6 +395,12 @@ subclass Visual
         Ved.Reg.set (reg, strjoin (vs.lines, "\n") + "\n";
           msg = "visual lines yanked and ");
         seltoX (strjoin (vs.lines, "\n") + "\n");
+        break;
+        }
+
+      if ('C' == chr)
+        {
+        __vCcompile (vs.lines);
         break;
         }
 
@@ -558,6 +565,7 @@ subclass Visual
           ind = length (argv) - 1);
 
         Rline.readline (rl);
+        Rline.clear_prompt (rl);
         break;
         }
       }

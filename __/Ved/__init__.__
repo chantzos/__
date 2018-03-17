@@ -1460,6 +1460,63 @@ class Ved
     Ved.writefile (s, NULL, s.ptr, NULL, NULL;send_msg);
   end
 
+  def __vCcompile (lines) public proc
+    ifnot (This.system."supports?"["tcc"])
+      return;
+
+    ifnot (length (lines))
+      return;
+
+    variable argv = String_Type[0];
+    ifnot (strncmp (lines[0], "argv:", 5))
+      {
+      variable argline = lines[0];
+      lines = lines[[1:]];
+      ifnot (length (lines))
+        return;
+
+      argv = strtok (substr (argline, 7, -1), "::");
+      argv = strtrim (argv);
+      % posibility is to evaluate arguments
+      }
+
+    lines = strjoin (lines, "\n");
+
+    variable sigint_handl;
+    sigint_handl = fun (`
+      envbeg private define my_sigint_handler (); envend
+        (sig)
+      IO.tostderr ("Process Interrupted by the user");
+      signal (sig, &my_sigint_handler);
+      `;as = "my_sigint_handler");
+
+    ifnot (This.has.sigint)
+      sigprocmask (SIG_UNBLOCK, [SIGINT]);
+
+    signal (SIGINT, sigint_handl.__funcref);
+
+    App.reset ();
+
+    variable tcc = Tcc.init ();
+    tcc.execute_string (lines, argv);
+    tcc.delete ();
+
+    ifnot (This.has.sigint)
+      sigprocmask (SIG_BLOCK, [SIGINT]);
+
+    ifnot (NULL == This.is.my.sigint_handler)
+      signal (SIGINT, This.is.my.sigint_handler);
+
+    IO.tostdout ("press any key to continue");
+    () = Input.getch ();
+
+    IO.tostdout ("");
+
+    sigint_handl.__destroy ();
+
+    App.restore ();
+  end
+
   def __vslang_load (lines) public proc
     variable ns = qualifier ("ns", "Global");
 

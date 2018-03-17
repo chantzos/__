@@ -110,7 +110,7 @@ subclass Run
     else
       throw ClassError, "Run.as.child::unexpected retval from pipe";
 
-    App.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    App.restore (;sigint = This.has.sigint ? handl : NULL);
 
     ifnot (qualifier_exists ("goto_rline"))
       return;
@@ -154,14 +154,14 @@ subclass Run
         variable isgoingtoreset = 0;
         ifnot (This.has.screenactive)
           {
-          App.restore_app ();
+          App.restore ();
           isgoingtoreset = 1;
           }
 
           passwd = Os.__getpasswd ();
 
           if (isgoingtoreset)
-            App.reset_app ();
+            App.reset ();
 
           if (NULL == passwd)
             {
@@ -178,7 +178,7 @@ subclass Run
     variable status;
     variable bg = qualifier_exists ("bg") ? 1 : NULL;
 
-    App.reset_app ();
+    App.reset ();
 
     if (NULL == bg && This.has.sigint)
       {
@@ -192,7 +192,7 @@ subclass Run
       status = p.execv (argv, bg);
 
     if (NULL == bg)
-      App.restore_app (;sigint = This.has.sigint ? handl : NULL);
+      App.restore (;sigint = This.has.sigint ? handl : NULL);
 
     status;
   end

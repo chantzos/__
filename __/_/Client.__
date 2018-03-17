@@ -26,7 +26,7 @@ class _
     ifnot (any (apps == app))
       return;
 
-    App.reset_app ();
+    App.reset ();
 
     if (This.has.sigint)
       {
@@ -50,7 +50,7 @@ class _
     if (retval == App->GO_ATEXIT)
       exit_me (0);
 
-    App.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    App.restore (;sigint = This.has.sigint ? handl : NULL);
 
     signal (SIGWINCH, This.on.sigwinch);
     if (screen_size_changed)
@@ -93,7 +93,7 @@ class _
       return;
     }
 
-    App.reset_app ();
+    App.reset ();
 
     if (This.has.sigint)
       {
@@ -117,7 +117,7 @@ class _
     if (retval == App->GO_ATEXIT)
       exit_me (0);
 
-    App.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    App.restore (;sigint = This.has.sigint ? handl : NULL);
 
     signal (SIGWINCH, This.on.sigwinch);
     if (screen_size_changed)

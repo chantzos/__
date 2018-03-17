@@ -79,6 +79,9 @@ Class.load ("Devel");
 This.system."supports?"["hunspell"] = (NULL != Devel.find_lib ("hunspell-1.6"));
 This.system."supports?"["tcc"] = (NULL != Devel.find_lib ("tcc"));
 
+if (This.system."supports?"["tcc"])
+  Class.load ("Tcc");
+
 Class.load ("Smg");
 Class.load ("Input");
 Class.load ("Rand");
@@ -463,8 +466,7 @@ private variable __CHDIR__ = funref (`
       __DIR__    = "",
       __PDIR__   = NULL;
   envend
-
-  (argv)
+    (argv)
   EXITSTATUS = 0;
   Com.pre_com ();
 
@@ -513,7 +515,6 @@ private variable __TRACK__ = funref (`
 
   if (readme)
     track_files = [track_files, Env->SRC_PATH + "/README.md"];
-
 
   ifnot (length (track_files))
     {
@@ -587,7 +588,7 @@ private variable __WHICH__ = funref (`
   envbeg
     variable __PATH__ = NULL, __MSG__ = NULL;
   envend
-      (argv)
+    (argv)
   Com.pre_builtin (argv);
 
   if (1 == length (argv))

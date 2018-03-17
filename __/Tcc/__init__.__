@@ -255,7 +255,12 @@ class Tcc
       ifnot (s.iscompiled)
         return -1;
 
-      tcc_run (s.tcc, argv);
+      if (NULL == argv || typeof (argv) != Array_Type ||
+          _typeof (argv) != String_Type)
+        tcc_run (s.tcc);
+      else
+        tcc_run (s.tcc, argv);
+
       s.itwasrun = 1;
       `);
 

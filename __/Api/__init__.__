@@ -1,6 +1,7 @@
 class Api
   decl var public APP_ERR, I, X, App
   decl var public MSGROW, PROMPTROW
+  decl var public Tcc
 
   decl public __exit, __draw_wind, __draw_buf, __viewfile
   decl public __toscratch, __scratch, __console, __runcom

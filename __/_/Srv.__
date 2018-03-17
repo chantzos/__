@@ -127,7 +127,7 @@ class _
   end
 
   def __exit_rout__ (s, handl) proc
-    App.restore_app (;sigint = This.has.sigint ? handl : NULL);
+    App.restore (;sigint = This.has.sigint ? handl : NULL);
     signal (SIGWINCH, This.on.sigwinch);
     if (screen_size_changed)
       (@This.on.sigwinch) (SIGWINCH);
@@ -337,7 +337,7 @@ class _
       if (app == This.is.my.name + "::" + string (Env->PID))
         return;
 
-      App.reset_app ();
+      App.reset ();
 
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
@@ -372,7 +372,7 @@ class _
       if (NULL == app)
         return;
 
-      App.reset_app ();
+      App.reset ();
 
       if (This.has.sigint)
         signal (SIGINT, SIG_IGN, &handl);
