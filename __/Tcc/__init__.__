@@ -183,11 +183,16 @@ class Tcc
         return -1;
 
       variable isexe = qualifier_exists ("create_exe");
+      variable output_file = qualifier ("output_file");
 
       if (isexe)
+        {
+        if (NULL == output_file)
+          return -1;
+
         if (-1 == s.set_output_type (TCC_OUTPUT_EXE))
           return -1;
-        else {}
+        }
       else
         if (-1 == s.set_output_type (TCC_OUTPUT_MEMORY))
           return -1;
@@ -199,12 +204,16 @@ class Tcc
         {
         s.set_opt ("-xn");
 
-        if (-1 == s.set_output_file (qualifier ("output_file");;
+        if (-1 == s.set_output_file (output_file;;
             __qualifiers))
           return -1;
         }
 
       s.iscompiled = (0 == isexe);
+
+      if (qualifier_exists ("verbose") && isexe)
+        IO.tostderr ("created executable:", output_file);
+
       0;`);
 
     s.compile_file = funref (`

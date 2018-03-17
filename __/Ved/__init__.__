@@ -9,6 +9,9 @@ class Ved
     ved, set,
     draw, lexicalhl, autoindent, pairs,
     is_pager,
+    on_escape_fun,
+    on_escape_help,
+    on_escape_commands,
     opt_show_tilda, opt_show_status_line,
     __NOR__,
     __VAR__,
@@ -1467,7 +1470,10 @@ class Ved
     ifnot (length (lines))
       return;
 
+    variable is_exe = qualifier_exists ("create_exe");
+
     variable argv = String_Type[0];
+    ifnot (is_exe)
     ifnot (strncmp (lines[0], "argv:", 5))
       {
       variable argline = lines[0];
@@ -1482,39 +1488,50 @@ class Ved
 
     lines = strjoin (lines, "\n");
 
-    variable sigint_handl;
-    sigint_handl = fun (`
-      envbeg private define my_sigint_handler (); envend
-        (sig)
-      IO.tostderr ("Process Interrupted by the user");
-      signal (sig, &my_sigint_handler);
-      `;as = "my_sigint_handler");
+    ifnot (is_exe)
+      {
+      variable sigint_handl;
+      sigint_handl = fun (`
+        envbeg private define my_sigint_handler (); envend
+          (sig)
+        IO.tostderr ("Process Interrupted by the user");
+        signal (sig, &my_sigint_handler);
+        `;as = "my_sigint_handler");
 
-    ifnot (This.has.sigint)
-      sigprocmask (SIG_UNBLOCK, [SIGINT]);
+      ifnot (This.has.sigint)
+        sigprocmask (SIG_UNBLOCK, [SIGINT]);
 
-    signal (SIGINT, sigint_handl.__funcref);
+      signal (SIGINT, sigint_handl.__funcref);
 
-    App.reset ();
+      App.reset ();
+      }
 
     variable tcc = Tcc.init ();
-    tcc.execute_string (lines, argv);
+
+    ifnot (is_exe)
+      tcc.execute_string (lines, argv);
+    else
+      tcc.compile_string (lines;;__qualifiers);
+
     tcc.delete ();
 
-    ifnot (This.has.sigint)
-      sigprocmask (SIG_BLOCK, [SIGINT]);
+    ifnot (is_exe)
+      {
+      ifnot (This.has.sigint)
+        sigprocmask (SIG_BLOCK, [SIGINT]);
 
-    ifnot (NULL == This.is.my.sigint_handler)
-      signal (SIGINT, This.is.my.sigint_handler);
+      ifnot (NULL == This.is.my.sigint_handler)
+        signal (SIGINT, This.is.my.sigint_handler);
 
-    IO.tostdout ("press any key to continue");
-    () = Input.getch ();
+      IO.tostdout ("press any key to continue");
+      () = Input.getch ();
 
-    IO.tostdout ("");
+      IO.tostdout ("");
 
-    sigint_handl.__destroy ();
+      sigint_handl.__destroy ();
 
-    App.restore ();
+      App.restore ();
+      }
   end
 
   def __vslang_load (lines) public proc
@@ -1555,6 +1572,18 @@ class Ved
         "evaluate current line",
         "send current line to system ()"];
 
+    ifnot (NULL == s.on_escape_fun)
+      {
+      if (NULL == s.on_escape_help || NULL == s.on_escape_commands)
+        return;
+
+      ifnot (length (s.on_escape_help) == length (s.on_escape_commands))
+        return;
+
+      names = [names, s.on_escape_commands];
+      help  = [help,  s.on_escape_help];
+      }
+
     variable action = Rline.get_selection (names, help, s.ptr);
 
     ifnot (strlen (action))
@@ -1592,6 +1621,10 @@ class Ved
           ind = length (argv) - 1);
 
         Rline.readline (rl);
+      }
+
+      {
+      s.on_escape_fun ();
       }
 
     s.draw ();
