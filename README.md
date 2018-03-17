@@ -10,21 +10,21 @@ to this system.
 
 Moreover, I can't get the responsibility to expose others to operations that  
 are considered dangerous, as I do not have the required knowledge to cover the   
-possibilities and the corner cases, and ...
+possibilities and the corner cases, and ...  
 I do really want to feel free to experiment, as foremost this is intended as  
 an educational tool, to cover the absence of a formal education (and this is a  
 long trip with many mistakes on the road), especially if it is considered that  
 slowly this became quite complex environment with a huge codebase, which usually  
 can not be maintainable in an acceptable way by one person. 
 
-But as this can be seen as a specification for a development environment, for 
-people who like UNIX and appreciate the power of a command line like interface, 
+But as this can be seen as a specification for a development environment, for  
+people who like UNIX and appreciate the power of a command line like interface,  
 I believe has a value.  
 
 I would welcome ideas specific to the specification, though code contribution 
 of course is more than welcome, but its not the intention, which is primarily  
 to stabilize the concepts in my mind too, through writing this README, which  
-is a way to formalize the logic and finally produce a much more compact document.
+is a way to formalize the logic and finally produce a much more compact document.  
 This is a personal weakness as the thoughts are too many to reduce them and avoid  
 the verbosity (this battle has been already lost, as this document, it's (even now)  
 more like a written talk with a friend on programming, which it's really getting  
@@ -35,24 +35,23 @@ And since I've mentioned the README, it's really more like a "read this, if you 
 something to read".  
 
 ## SYNOPSIS
-This application is an implementation of a concept of ideas
-of an ideal computer environment, that is, the user interface,
-the interaction with the computer but also the implementation
-itself.
+This application is an implementation of a concept of ideas of an ideal computer  
+environment, that is, the user interface, the interaction with the computer but also  
+the implementation itself.
  
 As this can also be seen as a specification, it's also a prototype.
 
 It was developed under a unix like system (linux with no systemd)  
 Void-Linux at void-linux.eu
 
-It was written in S-Lang, an excellent (with a C like syntax
+It was written in S-Lang, an excellent (with a C like syntax  
 and an unparalleled array implementation) programming language.
  
 ### Install S-Lang
 
-Note that, because this application follows continuously S-Lang
-development, some features might be not available in stable versions
-that are provided by the distributions versions.
+Note that, because this application follows continuously S-Lang development, some   
+features might be not available in stable versions that are provided by the distributions  
+versions.
 
 To install S-Lang issue:
 
@@ -101,26 +100,26 @@ The auto completion system is based on the following zsh line:
     zstyle ':completion:*' menu select=4 list-colors "=(#b) #([0-9]#)*=$color[cyan]=$color[red]"
 ```
 
-Its based on a readline implementation (code located at \_\_/Rline/\_\_init\_\_.\_\_),
-which its instance, offers support (autocompletion) for commands, history,
-arguments, filesystem access, ..., but also bindings to function references
+Its based on a readline implementation (code located at \_\_/Rline/\_\_init\_\_.\_\_),  
+which its instance, offers support (autocompletion) for commands, history,  
+arguments, filesystem access, ..., but also bindings to function references  
 and even direct access to generic application logic.
 
-Libraries are free to know some about their existing environment, and
-in some cases (for speed and efficiency) there is a direct communication
-and access, by disregarding the abstraction level (without abusing the
-interface).  This freedom comes from the fact, either (usually) because
-at some point before, a break point (a try statement in this case) has
-already been set, or because the caller can handle all the conditions of the
-called function behavior, or simply because S-Lang really helps on a stable
-interface, because of the function qualifiers, that permit to a function
+Libraries are free to know some about their existing environment, and  
+in some cases (for speed and efficiency) there is a direct communication  
+and access, by disregarding the abstraction level (without abusing the  
+interface).  This freedom comes from the fact, either (usually) because  
+at some point before, a break point (a try statement in this case) has  
+already been set, or because the caller can handle all the conditions of the  
+called function behavior, or simply because S-Lang really helps on a stable  
+interface, because of the function qualifiers, that permit to a function  
 to develop logic without changing signature (like the argument number).
 
-In any case the inner code, which anyway has some dependencies to other
-objects, can do in cases some direct calls, which are desired, especially
-from code, like readline, that is good to know quickly, what will do with
-the input. Of course this can be easily get out of control, but as long there
-is a sync with the outer interface (good named symbols (functions and variables)
+In any case the inner code, which anyway has some dependencies to other  
+objects, can do in cases some direct calls, which are desired, especially  
+from code, like readline, that is good to know quickly, what will do with  
+the input. Of course this can be easily get out of control, but as long there  
+is a sync with the outer interface (good named symbols (functions and variables)  
 can help a bit), there is no harm enough to avoid them.
 
 ## Installation
@@ -158,10 +157,10 @@ cd __                                        && \
 slsh ___.sl --verbose
 ```
 
-Applications and commands will be installed in
-$ROOTDIR/bin, all of them prefixed with two underscores.
-Those are actually symbolic links to references, which they
-load, based also in the name of the link, the necessary code.
+Applications and commands will be installed in $ROOTDIR/bin, all of them prefixed   
+with two underscores.
+Those are actually symbolic links to references, which they load, based also in  
+the name of the link, the necessary code.
 
 ## Usage
 
@@ -336,14 +335,14 @@ interaction is based on tab  completions much like the zsh shell does it.
 In fact, the application is an editable shell or an editor with a shell logic,  
 because the machine that creates/draws windows and holds the structures, is the  
 same that does editing.
-As a another fact, the underline code is exactly the same for all applications  
+As another fact, the underline code is exactly the same for all applications  
 (usually only the relative readline code unit is changing and some times the pager  
-bindings). The other difference is important (the role that every application  
+bindings). The other difference is important (the role that every application   
 carries at the invocation) and here is why:
 
 At the invocation an application checks the environment and if it's not derived  
-from another instance then becomes the process leader.
-Any application can play that role.
+from another instance then becomes the process leader.  
+Any application can play that role.  
 Applications by default, can have independent images (windows) of themselves (like  
 tabs), unless the application forbids it (like the simple network manager which is  
 activated with the --devel command line switch and is called as __netm, but which   
@@ -384,8 +383,8 @@ lines.
 This system, it can't also built and maintain yet, that unix like environment, but  
 it comes with the most basic commands to administrate a system.
 
-They usually have the same name (prefixed with two underscores), with their counterparts  
-and share many established behavior and command line switches.
+They usually have the same name (prefixed with two underscores), with their counterparts   
+and share many established behavior and command line switches.  
 This has some unexpected gifts like argument completion.
  
 The argument completion is triggered when the pointer is at the second token (after  
@@ -404,38 +403,33 @@ $ROOTDIR/\_\_/com/ls at the source directory.
 But since our cp (for instance) share switches with the system cp, then the  
 autocompletion will work by mistaken (hopefully the user will not be mistaken).
 
-The system calls are available when "!" is the first char of
-the command line in the __shell application. On the other
-applications it needs to be doubled. Why? Because on all the
-other applications except the shell, "!ls" will call our ls,
-as all the system commands are available on all applications
-and so is ved (the editor).
+The system calls are available when "!" is the first char of the command line in  
+the __shell application. On the other applications it needs to be doubled.  
+Why? Because on all the other applications except the shell, "!ls" will call our  
+ls, as all the system commands are available on all applications and so is ved (the   
+editor).
 
-The ved editor is a vi(m) tiny clone, with which most of this
-codebase was written. It's really the first prototype (written
-in a time with no internet for long, faced with challenges that
-needed design decisions (of which some though workable are
-not wise (some are explained in the source code))), which it
-rather happened to work very early enough good. But because of
-this, the machine is rather fragile and development is considering
-as careful exercise. But, though there are obvious weakness, like
-the undo operation or when editing lines longer than the screen
-columns, very seldom i lost work. But when and if it happens the
-inevitable, then usually the error message is enough descriptive,
-to guide you to fix the condition.
+The ved editor is a vi(m) tiny clone, with which most of this codebase was written.  
+It's really the first prototype (written in a time with no internet for long,   
+faced with challenges that needed design decisions (of which some though workable  
+are not wise (some are explained in the source code))), which it rather happened to  
+work very early enough good.  
+But because of this, the machine is rather fragile and development is considering  
+as careful exercise. But, though there are obvious weakness, like the undo operation  
+or when editing lines longer than the screen columns, very seldom I lost work.  
+But when and if it happens the inevitable, then usually the error message is enough   
+descriptive, to guide you to fix the condition.
 
-Actually a self developed and maintainable system, was (even if it
-was hidden somehow, at least at the beginning), one of the rationales
-that lead to this code. This might has to do with the complexity
-of the modern systems.
+Actually a self developed and maintainable system, was (even if it was hidden   
+somehow, at least at the beginning), one of the rationales that lead to this code.  
+This might has to do with the complexity of the modern systems.
 
-For quite too many, a unix environment with a shell and an editor are
-all they need (to be fully productive). They appreciate the peaceful,
-expected, sensible, tested, standardized, built-ed through experience,
-conscience and logic system, that ends to be very pleasant. At the worst
-of the cases is always a settler and should be easily accessible (as
-a gained standard) to any of the operating systems today. A C library,
-a compiler, the development tools, a posix shell, some sanity ...
+For quite too many, a unix environment with a shell and an editor are  all they  
+need (to be fully productive). They appreciate the peaceful, expected, sensible,   
+tested, standardized, built-ed through experience, conscience and logic system,   
+that ends to be very pleasant. At the worst of the cases is always a settler and  
+should be easily accessible (as a gained standard) to any of the operating systems   
+today. A C library, a compiler, the development tools, a posix shell, some sanity ...
 
 The user has to feel that has the control, its our human being desire.
 
@@ -456,7 +450,7 @@ action with the key (when 0), or execute the third function (which by
 default does nothing).  
 
 As an example the right key in Normal Mode, sets the pointer one cell  
-to the right (if there is enough text). However, the media application 
+to the right (if there is enough text). However, the media application  
 sets in its playlist buffer structure a callback function, that when  
 the right arrow key is pressed, it draws a box with information about   
 what's currently playing. Then it returns -1, which is interpreted as  
@@ -480,20 +474,20 @@ mnemonic keys that are connected with actions and keywords, like
 
 In this application this model (of modes), has been already extended.  
 
-The truth is however, that this editor is not and is never going to
-handle satisfactory external data (at least not any kind of external
-data), but rather to handle later the product that creates itself and
-to this is very good now. That means it handles the usual workflow from
-his author and when the author needs something, then it gives the tools
+The truth is however, that this editor is not and is never going to  
+handle satisfactory external data (at least not any kind of external  
+data), but rather to handle later the product that creates itself and  
+to this is very good now. That means it handles the usual workflow from   
+his author and when the author needs something, then it gives the tools  
 to do so.
 
-Like in this case, in this warm February day, ved code introduces digraphs,
-accessible (through a usual menu) with CTRL-k in insert mode. Here is a
+Like in this case, in this warm February day, ved code introduces digraphs,  
+accessible (through a usual menu) with CTRL-k in insert mode. Here is a  
 note:  ♪   
-now: this is a first workable draft with more than enough digraphs to
-use. But this can evolve later to handle other conditions and perhaps
-to end up as a library, which is very natural path in development.  
-If nothing change in this regard, this code will still work forever.  
+now: this is a first workable draft with more than enough digraphs to  
+use. But this can evolve later to handle other conditions and perhaps  
+to end up as a library, which is very natural path in development.   
+If nothing change in this regard, this code will still work forever.   
 
 But, this is a selfish!!! Exactly. This is all about. The interaction  
 with the computer is unique and the code should be prioritize that,  
@@ -511,16 +505,16 @@ $ROOTDIR/local
 $ROOTDIR/std
 $ROOTDIR/usr
 ```
-so without changing the standard way to do things, someone can modify
-the code to bring the desired behavior without touching mainline code at
-all. Of course this needs basic programming but basic programming with
-intensive care on the concepts, as everybody knows, can be fast and  
-should be fast (if myths could be demystified quickly)
+so without changing the standard way to do things, someone can modify  
+the code to bring the desired behavior without touching mainline code at  
+all. Of course this needs basic programming but basic programming with  
+intensive care on the concepts, as everybody knows, can be fast and   
+should be fast (if myths could be demystified quickly)  
 
 But, this is not the case for C.
 
 ### C
-I do not have any control in my C, and I do not have any kind of futile thoughts 
+I do not have any control in my C, and I do not have any kind of futile thoughts  
 to ever have, in its entirely. I also know that it's a long way to learn proper  
 and most importantly safe C.  
 Though the language is small, because of its nature (the close relationship with  
@@ -545,18 +539,18 @@ that:
   - with a decent fast development process
   - and most importantly is expressional
   
-We are humans and humans have a need for expressionism.
+We are humans and humans have a need for expressionism.  
 Not all programmers have to think about the implementation details, they just  
 need to express thoughts and logic and construct algorithms, that is what   
 they make them happy and productive.  
  
-But C is flexible and it can even be quite expressive:
+But C is flexible and it can even be quite expressive:  
 https://github.com/stevedonovan/llib
 
 However, there are so many interfaces, that hide implementation details,  
 so it can be safe, like (say) string operations.
 
-But there is nothing standardized.
+But there is nothing standardized.  
 If standards (like say the respectful POSIX), represents conscience (like the  
 general consensus about C strings), then something should be done or Rust, it  
 will take the world, as everybody realized by now. Not even a chance for C.
@@ -572,51 +566,132 @@ concerns:
     the command line)  
   - but also the underlying code which is trying to be consistent  
 
+### Editor Usage
+Now this is easy, because most of ved capabilities are vim compatible.
+
+And this is not because of the compatibility but because they make sense and  
+being used - except the hjkl keys, which are implemented but never being used,  
+as usually is much easier for me to use the arrow keys ... but these keys are  
+historical so there are present and this is the only exception to the "implement  
+what you use" essential rule.
+
+So it's sorter to describe the differences.
+
+First, the search mechanism is different.
+It doesn't jump to the first found match.  Instead  a message, with the line  
+number and the line itself, is displayed in the message line (the last one on  
+the screen). Enter accepts the match and then jump to that line. Ctrl-p|n can  
+be used to search forward or backwards, depending from the usage. For instance:
+When # pressed on a word, Ctrl-p will search downwards.
+
+substitution is a command
+
+Normal mode: 
+Ctrl-a|x acts like vim and in|decrements the number, but if a number is typed
+before someone can use then  * or / for multiplication or division.
+(also it works for letters when it make sense, so a becomes b with Ctrl-a)
+
+~ on a char acts like vim but it can also look in the code for a matching  
+pair, so : becomes ; and vice versa
+
+space is a "a [space] [escape]" sequence.
+
+W on a word, displays a menu for operations on current word.
+
+The expression register gets its input from the eval function.
+
+Ctrl-k, displays only the registered on the code digraphs.
+
+$ goes to end of the line, even if its beyond screen columns, and  
+- goes to the last cell (but generally do not use this editor to edit
+text longer than screen columns)
+ 
+F[1-8] are binded to specific to this application functions
+F[12] pastes X-selections
+F[10] changes the input language
+(those are generic bindings,they work in normal and insert mode)
+
+Backspace (and if it's allowed, e.g., when editing source code) removes any  
+trailing whitespace, even if it's in another column (doesn't change columns)
+
+escape displays a menu for operations on current line.
+
+Visual mode:
+On linewise mode almost the same operations with above can be done for the  
+selected lines.
+
+Command mode:
+  :e without arguments, ask for confirmation to reload current buffer, while
+  :e! does it unconditionally
+ 
+		:enew fname 
+opens the given filename in a new window.
+
+(windows (like tabs in vim) have their own associated buffers and don't interfere  
+with other windows buffers, it's like an independent instance, but without the
+need to fork another process)
+
+:w (without arguments acts like vim, but additionally, it can get another buffer  
+name to write  the contents, using the --bufname= switch (buffer auto completion  
+is possible)
+ 
+Insert mode:
+
+Ctrl-n searches for a word only in the current buffer
+
+Ctrl-x allows only for line and filename completions
+...
+and do not trust un|redo, rarely is working, the design doesn't allow
+reliable operations and since my workflow doesn't depend on this feature,  
+it's not a priority to fix it
+
+other than that is a v
+
 ### Inner Code
 
-Most of the libraries are written with such (inner) syntax, that needs
-pre-parsing and compiling to S-Lang. This is being used to create,
-either new or static instances, of either mini or more complex function
-environments (by adding a lot of boilerplate code). This is to
-create an abstraction level, a structure and an associated static
-namespace (with a group of functions and variables part of this
-same object), and an inaccessible private namespace with the
-implementation details. instantiation is done with the first loading.
+Most of the libraries are written with such (inner) syntax, that needs  
+pre-parsing and compiling to S-Lang. This is being used to create,  
+either new or static instances, of either mini or more complex function  
+environments (by adding a lot of boilerplate code). This is to  
+create an abstraction level, a structure and an associated static  
+namespace (with a group of functions and variables part of this  
+same object), and an inaccessible private namespace with the  
+implementation details. instantiation is done with the first loading.  
 
-Those structures allows for code consistency and organization.
-But the main reason is that every method of those structures, is
-actually running through an interpreted function, which catches
+Those structures allows for code consistency and organization.  
+But the main reason is that every method of those structures, is  
+actually running through an interpreted function, which catches  
 any error and calls an error handler.
 
-The default error handler it prints a detailed error and then gives
+The default error handler it prints a detailed error and then gives  
 control to the main application loop.
 
-It also allows profiling, by just changing the interpreted
-function. Any application accepts a "--profile" command line
-switch, which turns on profiling. It can also be enabled at
-runtime by issuing in the evaluation console (which it can
+It also allows profiling, by just changing the interpreted  
+function. Any application accepts a "--profile" command line  
+switch, which turns on profiling. It can also be enabled at  
+runtime by issuing in the evaluation console (which it can  
 be started by calling the __eval function):
 
 ```C
 _-> enable.profile (;set);
 ```
 
-For now, to see the results, is again possible through the eval
-console. By issuing Profile. (and hit tab) it will present a
-couple of options to select and see the results in the scratch
-buffer - the scratch buffer can be opened with the __scratch
-function, while the __messages function is opening the stderr
+For now, to see the results, is again possible through the eval  
+console. By issuing Profile. (and hit tab) it will present a  
+couple of options to select and see the results in the scratch  
+buffer - the scratch buffer can be opened with the __scratch  
+function, while the __messages function is opening the stderr  
 buffer.
 
-This syntax is not compatible with S-Lang. Files with an "__"
-extension are such objects that needs parsing. Most of these
-files are precompiled and then bytecompiled (as all of the
-file units ought to do), during initial installation or later
-on runtime.
-But some of those objects are actually compiled at the runtime.
-Some of them can contain an #if[not] directive, where depending
-of a condition, can load a subclass or specific version[s], of
-the __same__ (by name but also with the signature) method[s].
+This syntax is not compatible with S-Lang. Files with an "__"  
+extension are such objects that needs parsing. Most of these  
+files are precompiled and then bytecompiled (as all of the  
+file units ought to do), during initial installation or later  
+on runtime.  
+But some of those objects are actually compiled at the runtime.  
+Some of them can contain an #if[not] directive, where depending  
+of a condition, can load a subclass or specific version[s], of  
+the __same__ (by name but also with the signature) method[s].  
 
 #### Functional Code Interface
 Normally the following is not valid (because "if" is a statement):
@@ -629,7 +704,7 @@ But by using the function interface, we can get the desired result:
 ```C
   variable v = frun (cond, `(arg) if (arg) 1; else 0;`);
 ```
-The string inside the backquote characters is evaluated at runtime.
+The string inside the backquote characters is evaluated at runtime.  
 It's like an unnamed function syntax without the braces:
 
 ```C
@@ -641,29 +716,29 @@ It's like an unnamed function syntax without the braces:
     return 2;
 }
 ```
-This function can be stored in a variable and can be used it as a normal
-function reference. The code inside the body of those strings, can be
+This function can be stored in a variable and can be used it as a normal  
+function reference. The code inside the body of those strings, can be  
 regular S-Lang code.
 
-Functions can have environment, delimited by the "envbeg" and "envend"
-keywords.
-This fact alone, can make the things interesting, because that way such
-function can really control the environment. But, it can also create a
+Functions can have environment, delimited by the "envbeg" and "envend"  
+keywords.  
+This fact alone, can make the things interesting, because that way such  
+function can really control the environment. But, it can also create a  
 closure:
 ```C 
 variable counter = function (`envbeg variable _i = 0; envend _i++; _i;`);
 counter.call (); -> 1
 counter.call (); -> 2
 ``` 
-One such function can be the whole program and could be (almost) perfect,
-if it wasn't for the backquotes. Such multiline strings allows to write
-full compatible S-Lang code without further parsing, but the backquotes
-needs to be doubled, everytime there is a need; like when using a nested
-function, or simply when real multiline strings are needed in the code.
-Such nested levels can end up, quickly, in unreadable code.
+One such function can be the whole program and could be (almost) perfect,  
+if it wasn't for the backquotes. Such multiline strings allows to write  
+full compatible S-Lang code without further parsing, but the backquotes  
+needs to be doubled, everytime there is a need; like when using a nested  
+function, or simply when real multiline strings are needed in the code.  
+Such nested levels can end up, quickly, in unreadable code.  
 
 ### Invocation
-Every application can have its own command line switches, but there are
+Every application can have its own command line switches, but there are  
 share also some:  
   --profile    turn on profiler  
   --devel      turn on development features  
@@ -716,11 +791,11 @@ as we do the xauth stuff in the code ourselves.
 ```
 
 ### As an Interpreter
-This code can execute (almost from everywhere :-) shell code and slang
-code. But, at the time of writing is ready to execute dynamically C code.
-This because of the tinycc C compiler, see:
+This code can execute (almost from everywhere :-) shell code and slang  
+code. But, at the time of writing is ready to execute dynamically C code.  
+This because of the tinycc C compiler, see:  
 	 http://bellard.org/tcc/
-and upstream's repository at  
+and upstream's repository at   
   http://repo.or.cz/tinycc.git
 
 I will try to integrate soon the code that is already written.
@@ -736,16 +811,16 @@ a single change,
 
 http://www.vergenet.net/~conrad/software/xsel/
 
-just enough to pack it a slang module and just to make it work for the
+just enough to pack it a slang module and just to make it work for the  
 XA_CLIPBOARD, which it seems that is the only X selection mechanism that the   
 coders of chrome browser seems to be aware…
 
 ### Many other operations ...
-... that left to be documented and documentation is much harder 
-than the code itself. Its hard, hard, hard. (I would pay for it (<:),  
-who said that? A guy that doesn't own one! penny to buy a meat-ball¹.
-how sad, sad, sad, to be mad, mad, mad..., but we'r gonna have those
-balls (and they don't have to be meat), no need for pennies) and we'll  
+... that left to be documented and documentation is much harder   
+than the code itself. Its hard, hard, hard. (I would pay for it (<:),    
+who said that? A guy that doesn't own one! penny to buy a meat-ball¹.  
+how sad, sad, sad, to be mad, mad, mad..., but we'r gonna have those  
+balls (and they don't have to be meat), no need for pennies) and we'll    
 be glad, glad, glad, dad a dad a dad a...  
 
 ### Principals.
@@ -761,20 +836,20 @@ He is one of our today's super heroes and I bow my hat kindly.
 ...
 
 ### For S-Lang programmers
-Any of the classes can be compiled from the \_\_\_\_ application with the 
-"--dont-remove" switch, which in that case a file with the same name with the 
-class, plus the ".sl" extension, is created to the same directory with the 
-class.  They are self explainable, except the variable at the very top.
+Any of the classes can be compiled from the \_\_\_\_ application with the   
+"--dont-remove" switch, which in that case a file with the same name with the  
+class, plus the ".sl" extension, is created to the same directory with the  
+class.  They are self explainable, except the variable at the very top.  
 But generally very little things need to be done for adoption.  
 
 Most of the modules were written with little or no knowledge at all in C.  
-But most, with one or two exceptions, are functional, even if this function is 
-just one. They have been tested. (But didn't check with valgrind them all,
+But most, with one or two exceptions, are functional, even if this function is  
+just one. They have been tested. (But didn't check with valgrind them all,  
 though).
 
-The main scripts leave a copy of them in the tmp/ directory which is created 
-during installation. They are rather big but are self containable. Possibly 
-with no expectations, except realpath(3), which is an intrinsic function that 
+The main scripts leave a copy of them in the tmp/ directory which is created   
+during installation. They are rather big but are self containable. Possibly   
+with no expectations, except realpath(3), which is an intrinsic function that  
 is declared at the inner interpreter or in \_\_-module.c
 
 ### Qualifiers
@@ -922,7 +997,7 @@ No to of: how to write this code, but how to declare and express my logic.
   time.
 
   That's why even our inner stupidity can be used artistically to create new  
-  complex environments.
+  complex environments.  
 		As all of our "φάσμα" (the greek word for wide-ty) (if such word exists) can  
   be used the same. We've been programmed to be like this way because this is   
   the way that is producing something valuable. If we find what is this energy?
@@ -980,35 +1055,35 @@ No to of: how to write this code, but how to declare and express my logic.
 ```
  
 ## EPILOGUE
-As it has been said, still it can't built and maintain, that unix
-like environment. But this knowledge exists, developed by the 
-fellows at linuxfromscratch.org and it feels like as a duty (though
-a pleasant one) to re-initialize the code, but (right now):
+As it has been said, still it can't built and maintain, that unix  
+like environment. But this knowledge exists, developed by the   
+fellows at linuxfromscratch.org and it feels like as a duty (though  
+a pleasant one) to re-initialize the code, but (right now):  
 
-As I feel that I did the best I could, though I could do more and
-better, it looks that my mission is completed (at this point of time;
-anything that it will happen (even a single line of code) (declared
-at 30 of December at 2017) it would be considered as a gift.
+As I feel that I did the best I could, though I could do more and  
+better, it looks that my mission is completed (at this point of time;  
+anything that it will happen (even a single line of code) (declared  
+at 30 of December at 2017) it would be considered as a gift.  
 
-As for the quality of the code, this is the result of a self educated
-(at 40's) human being with zero educational background, with four kids,
-animals, ... while he was building a home and pressed to obey the existing
-practices that he doesn't finds too much logic on them.
+As for the quality of the code, this is the result of a self educated  
+(at 40's) human being with zero educational background, with four kids,  
+animals, ... while he was building a home and pressed to obey the existing  
+practices that he doesn't finds too much logic on them. 
 
-This programming project, as and because, it includes so many sub projects 
-which are more than enough to keep someone busy (for as long he can (or has the
-desire) to code), its natural to say that this is the project of my life's ... and 
+This programming project, as and because, it includes so many sub projects   
+which are more than enough to keep someone busy (for as long he can (or has the  
+desire) to code), its natural to say that this is the project of my life's ... and  
 for my lifetime.  
-And for this I'm grateful and I feel lucky.
+And for this I'm grateful and I feel lucky.  
 
 # WARNINGS
-This system cannot be used for complex communications or specialized tasks,
-as hasn't been checked on (not so) corner cases. It is mainly serves
-(besides the author) as a prototype.
+This system cannot be used for complex communications or specialized tasks,  
+as hasn't been checked on (not so) corner cases. It is mainly serves  
+(besides the author) as a prototype.  
 
-The editor is ignoring tabs by decision and this wont change³. I'm thinking
-seriously to use tab in Normal|Insert mode for completions. Anyway currently
-there is no way to insert tab and probably this wont change. 
+The editor is ignoring tabs by decision and this wont change³. I'm thinking  
+seriously to use tab in Normal|Insert mode for completions. Anyway currently  
+there is no way to insert tab and probably this wont change.   
 
 The editor hardcodes two languages, Hellenic and English (that change with F10).  
 Its easy to initialize other keymaps, see: \_\_/Input/\_\_init\_\_.\_\_  
@@ -1022,15 +1097,15 @@ And ... lack of fundamental knowledge, especially for low level stuff,
 like fork's and select() (which still is not being used even once, chicken :-)  
 (what's wrong with chickens?).
 
-p.s., ideal, nobody really wants to write any code to handle an exchangeable
-bad file format that doesn't obey conformation with established standards,
-but the last one can do is to notify the sender/creator to get attention,
-as every body deserves that treatment and so do i.
+p.s., ideal, nobody really wants to write any code to handle an exchangeable  
+bad file format that doesn't obey conformation with established standards,  
+but the last one can do is to notify the sender/creator to get attention,  
+as every body deserves that treatment and so do i.  
 
 ## THANKS
 Special thanks to John E. Davis who wrote S-Lang, but and to all (uncountable)  
-contributors around this enormous open source ecosystem (which this model
-is the reason that produced this tremendous amount of code and this super
+contributors around this enormous open source ecosystem (which this model  
+is the reason that produced this tremendous amount of code and this super  
 fast code evolution, unbelievable for that short time that happened).
 
 ### FOOTNOTES
@@ -1039,18 +1114,19 @@ fast code evolution, unbelievable for that short time that happened).
 ². git://github.com/CMB/edbrowse.git  
 
 ³. https://github.com/hellerve/e.git
+
 (today at 02 of Feb, i came across this project (an ala vim editor but inspired  
 by kilo⁵, so it has a similar warning at the end of its README.)
 
-The author is super and he participates in Carp⁴, a modern Lisp dialect that is
+The author is super and he participates in Carp⁴, a modern Lisp dialect that is 
 really amazing.
 
-⁴. https://github.com/carp-lang/Carp.git (it compiles in C and is written
-in Haskell but wants to be Rust :-) (no garbage collector, just references
-and borrowing (but not boring)), pretty amazing!!)
+⁴. https://github.com/carp-lang/Carp.git (it compiles in C and is written  
+in Haskell but wants to be Rust :-) (no garbage collector, just references  
+and borrowing (but not boring)), pretty amazing!!)  
 
 ⁵. (https://github.com/antirez/kilo)
-He seems to inspired many. I've developed its 
+He seems to inspired many. I've developed its   
 ```C
 		int editorReadKey(int fd)
 ```

@@ -404,6 +404,18 @@ class Rline
     Smg.aratrcaddnstrdr (ar, s._pclr, rows, 0, s._row, lcol, s._columns);
   end
 
+  def clear_prompt (s)
+    restore (NULL, s.lnrs, NULL, NULL, s._columns);
+
+    if (msgwritten)
+      {
+      Smg.atrcaddnstr (" ", 0, MSGROW, 0, s._columns);
+      msgwritten = 0;
+      }
+
+     Smg.atrcaddnstr (" ", 0, s._prow, 0, s._columns);
+  end
+
   def appendslash (file) proc
     if (('/' == file[-1]) == 0 == (path_basename (file) == "."))
       return Dir.isdirectory (file) ? "/" : "";
@@ -1546,15 +1558,22 @@ class Rline
         return 0;
         }
 
-      if (033 == chr && qualifier_exists ("return_on_esc"))
-        return chr;
+      if (033 == chr && qualifier ("return_on_escape", 0))
+        {
+        restore (NULL, s.cmp_lnrs,
+          qualifier ("ptr", '\r' == chr ? s.ptr : [s._row, s._col]),
+           1, s._columns);
+
+        return 033;
+        }
 
       if (any ([' ', '\r'] == chr) || 0 == ('!' <= chr <= 'z'))
         {
         restore (NULL, s.cmp_lnrs,
           qualifier ("ptr", '\r' == chr ? s.ptr : [s._row, s._col]),
            1, s._columns);
-        return '\r' == chr || qualifier_exists ("accept_space_as_return");
+        return '\r' == chr ||
+          (' ' == chr && qualifier_exists ("accept_space_as_return"));
         }
 
       restore (NULL, s.cmp_lnrs, [s._row, s._col], 1, s._columns);
@@ -2393,12 +2412,19 @@ class Rline
     Rline.set (rl);
     Rline.prompt (rl, rl._lin, rl._col);
 
-    () = Rline.commandcmp (rl, ar;;struct {
-      already_filtered, dont_sort,
-      no_prompt, ptr = ptr, refresh, format = (qualifier ("one_column", 1) == 0),
-      help = help,
+    variable on_escape = qualifier ("return_on_escape", 1);
+    variable qual = struct
+      {
+      already_filtered, dont_sort, no_prompt, ptr = ptr, refresh,
+      format = (qualifier ("one_column", 1) == 0), help = help,
+      return_on_escape = qualifier ("return_on_escape", 1),
       @__qualifiers,
-      });
+      };
+
+    variable retval = Rline.commandcmp (rl, ar;;qual);
+
+    if (on_escape && 033 == retval)
+      return "";
 
     rl.argv[0];
   end

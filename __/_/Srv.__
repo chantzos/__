@@ -162,8 +162,7 @@ class _
   def __mainloop__ (issu) proc
     if (NULL == __APP__)
       return 1;
-variable  fp=fopen ("/tmp/l", "a+");
-() = fprintf (fp, "%s\n", __APP__);
+
     variable tok = strtok (__APP__, "::");
     variable app = tok[0];
     variable pid = tok[1];
@@ -172,8 +171,7 @@ variable  fp=fopen ("/tmp/l", "a+");
     forever
       {
       variable retval = Sock.get_int (SRV_FIFO_FD);
-() = fprintf (fp, "ret 0x%x\n", retval);
-() = fflush (fp);
+
       if (App->GO_ATEXIT == retval)
         {
         app_at_exit (s);

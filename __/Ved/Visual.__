@@ -284,7 +284,7 @@ subclass Visual
   def v_l_loop (vs, s) proc
     variable chr, lines, i, size = s.st_.st_size, reg = "\"", reginit = 0;
 
-    while (chr = Input.getch (), any ([vs.l_keys, 't', ['0':'9'], '"']
+    while (chr = Input.getch (), any ([vs.l_keys, 't', ['0':'9'], '"', 033]
         == chr))
       {
       VEDCOUNT = 1;
@@ -302,7 +302,7 @@ subclass Visual
         VEDCOUNT = integer (VEDCOUNT);
         }
 
-      ifnot (any (chr == [vs.l_keys, 't', '"']))
+      ifnot (any (chr == [vs.l_keys, 't', '"', 033]))
         break;
 
       if ('"' == chr)
@@ -358,6 +358,35 @@ subclass Visual
         {
         vs.l_page_down (s;count = VEDCOUNT);
         continue;
+        }
+
+      if (033 == chr)
+        {
+        variable names = ["yank", "comment", "! system",
+          "$ eval", "hunspell", "xclipboard", "> shift out",
+          "< shift in", "substitute", "delete", "write", "global",
+          ];
+        variable help = [
+          "yank visual lines",
+          "comment visual lines",
+          "send visual lines to system ()",
+          "evaluate visual lines",
+          "spell visual lines",
+          "send visual lines to XA_PRIMARY",
+          "shift rightwards",
+          "shift leftwards",
+          "make substitutions to visual lines",
+          "delete visual lines",
+          "write visual lines",
+          "call the global command for visual lines",
+          ];
+
+        variable action = Rline.get_selection (names, help, s.ptr);
+
+        ifnot (strlen (action))
+          break;
+
+        chr = action[0];
         }
 
       if (any (['y', 't'] == chr)) % quite often I miss the y
@@ -430,8 +459,6 @@ subclass Visual
         s.st_.st_size = Array.String.__len (s.lines, s._len + 1);
         ifnot (size == s.st_.st_size)
           set_modified (s);
-        else
-          return;
 
         break;
         }
@@ -453,8 +480,6 @@ subclass Visual
 
         ifnot (size == s.st_.st_size)
           set_modified (s);
-        else
-          return;
 
         break;
         }
@@ -503,7 +528,8 @@ subclass Visual
           ind = length (argv) - 1);
 
         Rline.readline (rl);
-        return;
+        Rline.clear_prompt (rl);
+        break;
         }
 
       if ('g' == chr)
@@ -517,7 +543,8 @@ subclass Visual
           ind = length (argv) - 1);
 
         Rline.readline (rl);
-        return;
+        Rline.clear_prompt (rl);
+        break;
         }
 
       if ('w' == chr)

@@ -485,7 +485,7 @@ private define __compile_module__ (__dir__, __module__)
       SRC_TMP_PATH + "/" + path_basename_sans_extname (__module__) + ".so";
 
   if (VERBOSE)
-    io.tostdout ("compiling " + __dir__ + "/" + __module__);
+    io.tostdout ("compiling " + __module__);
 
   if (system (CC_COM))
     This.exit ("failed to compile " + __module__, 1);

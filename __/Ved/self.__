@@ -53,8 +53,7 @@ beg
     if (-1 == access (file, F_OK))
       {
       variable dir = path_dirname (file);
-      if ("." == dir || -1 == access (dir, F_OK|R_OK) ||
-          0 == Dir.isdirectory (dir))
+      if (-1 == access (dir, F_OK|R_OK) || 0 == Dir.isdirectory (dir))
         {
         self.err (file + ": doesn't exists and directory is not accesible");
         return -6;
@@ -792,7 +791,7 @@ beg
       _maxlen = COLUMNS,
       _autochdir = 1,
       _autoindent = 0,
-      comment_str = [char (127)],
+      comment_str = [""],
       comment_out_ref = funref (`(s, lines) s.comment_str[0] + lines;`),
       autoindent = &autoindent,
       draw = &_draw_,
