@@ -172,7 +172,10 @@ frun (String_Type[0], NULL, NULL,
     ifnot (2 == length (tok))
       This.is.my.settings[tok[0]] = "";
     else
-      This.is.my.settings[tok[0]] = tok[1];
+      if (Integer_Type == _slang_guess_type (tok[1]))
+        This.is.my.settings[tok[0]] = atoi (tok[1]);
+      else
+        This.is.my.settings[tok[0]] = tok[1];
     }
 `);
 
@@ -180,7 +183,7 @@ frun (`
   ifnot (assoc_key_exists (This.is.my.settings, "PASSWD_TIMEOUT"))
     return;
 
-  Os.set_passwd_timeout (atoi (This.is.my.settings["PASSWD_TIMEOUT"]));
+  Os.set_passwd_timeout (This.is.my.settings["PASSWD_TIMEOUT"]);
 `);
 
 This.is.std.out.type = "ashell";

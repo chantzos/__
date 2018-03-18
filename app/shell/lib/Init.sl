@@ -184,7 +184,7 @@ public define init_shell ()
 {
   topline;
   if (assoc_key_exists (This.is.my.settings, "RUN_INTRO"))
-    if (atoi (This.is.my.settings["RUN_INTRO"]))
+    if (This.is.my.settings["RUN_INTRO"])
       if (-1 == access (Env->TMP_PATH + "/shell/" + strftime ("%m_%d-intro"), F_OK))
         {
         __runcom  (["intro"], NULL);

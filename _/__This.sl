@@ -123,7 +123,7 @@ static define __INIT__ (role)
         datadir,
         histfile,
         profilefile,
-        settings = Assoc_Type[String_Type],
+        settings = Assoc_Type[Any_Type],
         genconf,
         conf,
         sigint_handler,

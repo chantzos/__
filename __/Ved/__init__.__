@@ -1147,7 +1147,8 @@ class Ved
     if (NULL == w)
       w = get_cur_wind (NULL);
 
-    if (qualifier_exists ("dont_filter"))
+    if (0 == qualifier_exists ("not_special") &&
+        qualifier_exists ("include_special"))
       return w.bufnames;
 
     variable i, bnames = @w.bufnames;
@@ -1222,6 +1223,48 @@ class Ved
 
     s = get_cur_buf (NULL);
     s.draw ();
+  end
+
+  def bufchange ()
+    variable ind, b, i;
+    variable
+      dir = qualifier ("dir", 1),
+      w   = qualifier ("wind", Ved.get_cur_wind ()),
+      cb  = Ved.get_cur_bufname (),
+      bnames = get_bufnames (NULL, w;;__qualifiers);
+
+    if (1 == length (bnames))
+      return;
+
+    ind = wherefirst (bnames == cb);
+
+    if (NULL == ind)
+      return;
+
+    if (-1 == dir)
+      if (-1 != w.prev_buf_ind && w.prev_buf_ind < length (w.bufnames) &&
+           w.bufnames[w.prev_buf_ind] != bnames[ind])
+        b = w.bufnames[w.prev_buf_ind];
+      else
+        if (0 == ind)
+          b = bnames[-1];
+        else
+          b = bnames[ind - 1];
+    else
+      if (ind == length (bnames) - 1)
+        b = bnames[0];
+      else
+        b = bnames[ind + 1];
+
+    ifnot (any (cb == SPECIAL))
+      w.prev_buf_ind = wherefirst (cb == w.bufnames);
+
+    b = w.buffers[b];
+    b._i = b._ii;
+
+    Ved.setbuf (b._abspath);
+    Ved.write_prompt (" ", 0);
+    b.draw (;dont_draw);
   end
 
   subclass Mark from Ved

@@ -124,62 +124,9 @@ private define _edit_other ()
       addfname (args[i];ftype = ft);
 }
 
-private define _buffer_other_ ()
-{
-  variable ind, b, i,
-    dir = qualifier ("argv0") == "bn",
-    w   = Ved.get_cur_wind (),
-    cb  = Ved.get_cur_bufname (),
-    ar  = String_Type[0];
-
-  _for i (0, length (w.bufnames) - 1)
-    {
-    b = w.bufnames[i];
-
-    if (qualifier_exists ("not_special"))
-      if (any (b == SPECIAL))
-        continue;
-
-    ar = [ar, b];
-    }
-
-  if (1 == length (ar))
-    return;
-
-  ind = wherefirst (ar == cb);
-
-  if (NULL == ind)
-    return;
-
-  ifnot (dir)
-    if (-1 != w.prev_buf_ind && w.prev_buf_ind < length (w.bufnames) &&
-        w.bufnames[w.prev_buf_ind] != ar[ind])
-      b = w.bufnames[w.prev_buf_ind];
-    else
-      if (0 == ind)
-        b = ar[-1];
-      else
-        b = ar[ind - 1];
-  else
-    if (ind == length (ar) - 1)
-      b = ar[0];
-    else
-      b = ar[ind + 1];
-
-  ifnot (any (cb == SPECIAL))
-    w.prev_buf_ind = wherefirst (cb == w.bufnames);
-
-  b = w.buffers[b];
-  b._i = b._ii;
-
-  Ved.setbuf (b._abspath);
-  Ved.write_prompt (" ", 0);
-  b.draw (;dont_draw);
-}
-
 private define _chbuf_ ()
 {
-  _buffer_other_ (;;struct {@__qualifiers, not_special});
+  Ved.bufchange (;;struct {dir = [-1, 1][qualifier ("argv0") == "bn"], not_special});
 }
 
 private define _bdelete ()
@@ -213,7 +160,7 @@ private define _bdelete ()
     Smg.send_msg_dr (" ", 0, NULL, NULL);
     }
 
-  bufdelete (s, s._abspath, force);
+  Ved.bufdelete (s, s._abspath, force);
 }
 
 private define my_commands ()
@@ -244,23 +191,6 @@ private define my_commands ()
   a;
 }
 
-private define _filter_bufs_ (v)
-{
-  variable ar = String_Type[0];
-  variable w = Ved.get_cur_wind ();
-  variable i;
-  variable b;
-
-  _for i (0, length (w.bufnames) - 1)
-    {
-    b = w.bufnames[i];
-    ifnot (any (b == [v._abspath, SPECIAL]))
-      Array.append (&ar, b);
-    }
-
-  ar[array_sort (ar)];
-}
-
 private define __parse_argtypes__ ()
 {
   __parse_argtype; % arguments are already on the stack
@@ -271,7 +201,12 @@ private define tabhook (s)
   ifnot (any (s.argv[0] == ["b", "bd", "bd!"]))
     return -1;
 
-  variable bufnames = _filter_bufs_ (qualifier ("ved"));
+  variable bufnames = Ved.get_bufnames (Ved.get_cur_wind ());
+  variable cb = Ved.get_cur_bufname ();
+  variable idx = wherefirst (cb == bufnames);
+  ifnot (NULL == idx)
+    Array.String.delete_at (&bufnames, idx);
+
   variable len = length (bufnames);
   ifnot (len)
     return 0;
@@ -286,7 +221,9 @@ private define tabhook (s)
     }
 
   variable names = array_map (String_Type, &path_basename, bufnames);
-  names = names[array_sort (names)];
+  variable sort = array_sort (names);
+  bufnames = bufnames[sort];
+  names = names[sort];
 
   variable buf = Rline.get_selection (names, NULL, This.is.ved
         ? Ved.get_cur_buf ().ptr
@@ -560,9 +497,9 @@ public define __vhandle_comma (s)
     return;
 
   if ('m' == chr)
-    _buffer_other_ (;not_special, argv0 = "bp");
+    Ved.bufchange (;dir = -1);
   else if ('n' == chr)
-    _buffer_other_ (;not_special, argv0 = "bn");
+    Ved.bufchange (;dir = 1);
   else if ('p' == chr)
     {
     refresh = 0;

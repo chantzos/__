@@ -303,7 +303,16 @@ subclass Pager
       s, __vlinlen (s, '.'), s._index, s._findex));
 
     if (-1 == retval)
+      {
+      if (This.is.ved)
+        if (This.is.my.settings["VED_LEFT_IS_BUF_PREV"])
+          {
+          Ved.bufchange (;dir = 1);
+          Smg.refresh ();
+          }
+
       return;
+      }
 
     variable lline;
     if (retval)

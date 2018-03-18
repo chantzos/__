@@ -114,6 +114,12 @@ class Array
       len
       __len
       unique
+      delete_at
+    end
+
+    def delete_at (ar, idx)
+      (@ar)[idx] = NULL;
+      @ar = (@ar)[wherenot (_isnull (@ar))];
     end
 
     def unique (ar)
