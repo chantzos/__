@@ -10,4 +10,5 @@ class Api
 
   decl public __vdel_frame, __vdef_ved, __vgetlinestr
   decl public __vwind_next, __vwind_prev, __vwind_new
+  decl public __vdeclare_topline_fun, __topline
 end

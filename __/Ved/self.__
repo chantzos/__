@@ -433,7 +433,7 @@ beg
 
     w.frame_names[frame] = bufname;
 
-    ifnot (qualifier_exists ("set_cur_frame"))
+    ifnot (qualifier_exists ("dont_set_cur_frame"))
       w.cur_frame = frame;
 
     if (s._autochdir && 0 == VED_ISONLYPAGER)

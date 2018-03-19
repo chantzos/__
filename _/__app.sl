@@ -107,11 +107,6 @@ else
   if (This.is.child == NULL == This.is.at.session)
     Class.load ("_"; __init__ = "Srv", as = "Srv");
 
-This.request.X = frun (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
-  `(nox)
-  [0 == access (Env->STD_MODULE_PATH + "/xsrv-module.so", F_OK), 0][nox];
-`);
-
 This.request.profile = Opt.Arg.exists ("--profile", &This.has.argv;del_arg);
 This.request.debug = Opt.Arg.exists ("--debug", &This.has.argv;del_arg);
 This.request.devel = Opt.Arg.exists ("--devel", &This.has.argv;del_arg);
@@ -120,6 +115,11 @@ This.is.my.basedir = Opt.Arg.getlong_val ("basedir", NULL, &This.has.argv;del_ar
 This.is.my.datadir = Opt.Arg.getlong_val ("datadir", NULL, &This.has.argv;del_arg);
 This.is.my.tmpdir  = Opt.Arg.getlong_val ("tmpdir",  NULL, &This.has.argv;del_arg);
 This.is.my.histfile= Opt.Arg.getlong_val ("histfile",NULL, &This.has.argv;del_arg);
+
+This.request.X = frun (NULL != Opt.Arg.exists ("--no-x", &This.has.argv;del_arg),
+  `(nox)
+  [0 == access (Env->STD_MODULE_PATH + "/xsrv-module.so", F_OK), 0][nox];
+`);
 
 ifnot (access (Env->USER_CLASS_PATH + "/__app.slc", F_OK))
   Load.file (Env->USER_CLASS_PATH + "/__app.slc");

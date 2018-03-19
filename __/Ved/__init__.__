@@ -1,17 +1,17 @@
 class Ved
   typedef Ftype
-    _i,_ii,_len,_chr,_type,_fname,_abspath,_fd,_flags,_maxlen,_indent,
-    _linlen,_avail_rows,_findex,_index,_shiftwidth,_expandtab,
-    _autoindent, _dir, _autochdir,
-    ptr, rows, cols, clrs, lins, lnrs, vlins, lines,
-    st_, comment_str, comment_out_ref,
-    vedloop, vedloopcallback,
-    ved, set,
-    draw, lexicalhl, autoindent, pairs,
+    _i, _ii, _len, _chr, _type, _fname, _abspath, _fd, _flags,
+    _maxlen, _indent, _linlen, _avail_rows, _findex, _index,
+    ptr,  rows, cols, clrs, lins, lnrs, vlins, lines, st_,
+    vedloop, vedloopcallback, ved, set, draw,
+    _shiftwidth,_expandtab,
+    _autoindent, autoindent,
+    lexicalhl,
+    _autochdir, _dir,
+    pairs,
+    comment_str, comment_out_ref,
     is_pager,
-    on_escape_fun,
-    on_escape_help,
-    on_escape_commands,
+    on_escape_fun, on_escape_help, on_escape_commands,
     opt_show_tilda, opt_show_status_line,
     __NOR__,
     __VAR__,
@@ -164,22 +164,46 @@ class Ved
   decl public  __console, __vline, __vfind_word
   decl get_cur_buf, __ins_digraph__
 
-  def __topline (str) public proc
-    variable d = NULL == This.request.debug
-      ? ""
-      : "depth [" + string (_stkdepth) + "] ";
+  var __topline__
 
-    variable t = sprintf ("%sPID[%d] [%s] (W %s) [%s]",
-      d, getpid, This.is.me, VED_CUR_WIND,
-        strftime ("%a %d %I:%M:%S"));
+  def __vdeclare_topline_fun () public proc
+    variable str;
 
-    @str = "(" + This.cur["mode"] + ") " + @str;
-    @str += repeat (" ", COLUMNS - strlen (@str) - strlen (t)) + t;
+    loop (1){
+    if (1 == _NARGS)
+      {
+      str = ();
+      break;
+      }
+
+    str = `envbeg
+      variable mypid = Env->PID;
+      variable buf;
+      ` +
+       (This.request.debug
+        ? `variable debug_str =  funref (``
+          "depth [" + string (_stkdepth) + "] ";``);`
+        : `variable debug_str = funref (``"";``);`)
+      + "\nenvend\n" + `
+          (str)
+        buf = (@debug_str);
+        buf = sprintf ("%sPID[%d] [%s] (W %s) [%s]",
+          buf, mypid, This.is.me, VED_CUR_WIND, strftime ("%a %d %I:%M:%S"));
+
+        @str = "(" + This.cur["mode"] + ") " + @str;
+        @str += repeat (" ", COLUMNS - strlen (@str) - strlen (buf)) + buf;
+      `;}
+
+    __topline__ = funref (str);
+  end
+
+  def __topline () public proc
+    (@__topline__);
   end
 
   def topline () public proc
     variable str = qualifier ("str", "");
-    __topline (&str);
+    (@__topline__) (&str);
     Smg.atrcaddnstr (str, [2, 1][getuid () == 0], 0, 0, COLUMNS);
   end
 
@@ -1601,6 +1625,11 @@ class Ved
     catch AnyError:
       {
       Exc.print (NULL);
+      Smg.__HLINE__ ();
+      IO.tostderr ("Evaluation String");
+      Smg.__HLINE__ ();
+      IO.tostderr (lines);
+      Smg.__HLINE__ ();
       (@__get_reference ("__messages"));
       }
   end
@@ -2595,6 +2624,8 @@ class Ved
   end
 
   def init ()
+    __vdeclare_topline_fun ();
+
     VED_PAGER[string (Input->F1)]      = &__app_rec__;
     VED_PAGER[string (Input->F2)]      = &__app_rec__;
     VED_PAGER[string (Input->F3)]      = &__app_new__;

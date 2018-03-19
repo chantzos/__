@@ -519,7 +519,4 @@ subclass Pager
       return;
       }
   end
-
-  def buffer_other (s) proc
-  end
 end
