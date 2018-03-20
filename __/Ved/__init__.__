@@ -1183,7 +1183,7 @@ class Ved
     bnames[wherenot (_isnull (bnames))];
   end
 
-  def bufdelete (s, bufname, force) public proc
+  def bufdelete (s, bufname, force)
     if (any (bufname == UNDELETABLE))
       return;
 

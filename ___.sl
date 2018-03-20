@@ -629,6 +629,9 @@ private variable INST_PATHS = [
   STD_CLASS_PATH, STD_DATA_PATH, STD_APP_PATH, STD_COM_PATH, STD_LIB_PATH,
   LOCAL_PATH, LOCAL_COM_PATH, LOCAL_APP_PATH, LOCAL_CLASS_PATH, LOCAL_LIB_PATH];
 
+private variable SLSH_BIN = BIN_PATH + "/__slsh_" + MACHINE;
+private variable SLSH_LNK = BIN_PATH + "/__slsh";
+
 private define __eval__ (__buf__)
 {
   try
@@ -1068,7 +1071,7 @@ private define __main__ ()
   __build__ ("__profile__");
 
   if (VERBOSE)
-    io.tostdout ("compiling " + SRC_INTER_PATH + "/__slsh.c");
+    io.tostdout ("compiling __slsh.c");
 
   __compile_slsh__;
 
@@ -1095,9 +1098,32 @@ private define __main__ ()
   if (VERBOSE)
     io.tostdout ("installing", SRC_TMP_PATH + "/__slsh to", BIN_PATH);
 
-  if (-1 == rename (SRC_TMP_PATH + "/__slsh", BIN_PATH + "/__slsh"))
+  if (-1 == rename (SRC_TMP_PATH + "/__slsh", SLSH_BIN))
     This.exit ("failed to rename " + SRC_TMP_PATH + "/__slsh to " + BIN_PATH +
       "\n" + errno_string (errno), 1);
+
+  () = chdir (BIN_PATH);
+
+  loop (1)
+  if (-1 == symlink (SLSH_BIN, SLSH_LNK))
+    ifnot (EEXIST == errno)
+      This.exit ("Couldn't create symbolic link " +  errno_string (errno), 1);
+    else
+      if (readlink (SLSH_LNK) == SLSH_BIN)
+        break;
+      else
+        if (-1 == remove (SLSH_LNK))
+          This.exit ("Couldn't remove link: " + SLSH_LNK + "\n" +
+             errno_string (errno), 1);
+        else
+          if (-1 == symlink (SLSH_BIN, SLSH_LNK))
+            This.exit ("Couldn't create symbolic link " +  errno_string (errno), 1);
+
+  if (-1 == chmod (BIN_PATH + "/__slsh", 0755))
+    This.exit ("cannot change mode to " + BIN_PATH + "/__slsh\n" +
+      errno_string (errno), 1);
+
+  () = chdir (SRC_PATH);
 
   if (VERBOSE)
     io.tostdout ("installing bytecompiled libraries");

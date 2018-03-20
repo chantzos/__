@@ -14,48 +14,244 @@ possibilities and the corner cases, and ...
 I do really want to feel free to experiment, as foremost this is intended as  
 an educational tool, to cover the absence of a formal education (and this is a  
 long trip with many mistakes on the road), especially if it is considered that  
-slowly this became quite complex environment with a huge codebase, which usually  
+slowly this became quite a complex environment with a huge codebase, which usually  
 can not be maintainable in an acceptable way by one person. 
 
-But as this can be seen as a specification for a development environment, for  
-people who like UNIX and appreciate the power of a command line like interface,  
-I believe has a value.  
-
-I would welcome ideas specific to the specification, though code contribution 
-of course is more than welcome, but its not the intention, which is primarily  
-to stabilize the concepts in my mind too, through writing this README, which  
-is a way to formalize the logic and finally produce a much more compact document.  
-This is a personal weakness as the thoughts are too many to reduce them and avoid  
-the verbosity (this battle has been already lost, as this document, it's (even now)  
-more like a written talk with a friend on programming, which it's really getting  
-worse with time, so compactness is an illusion, but a document with just the  
-specification is doable (but not a priority).
-
-And since I've mentioned the README, it's really more like a "read this, if you want  
-something to read".  
+But as this can be seen as a specification for a development environment, it  
+is believed that has a value.  
 
 ## SYNOPSIS
 This application is an implementation of a concept of ideas of an ideal computer  
-environment, that is, the user interface, the interaction with the computer but also  
-the implementation itself.
- 
-As this can also be seen as a specification, it's also a prototype.
+environment, that is, the user interface, the interaction with the computer but  
+also the implementation itself.
 
-It was developed under a unix like system (linux with no systemd)  
+The main components are:
+
+..- Common User Interface
+..- Self Healing
+..- System Administration
+..- Self Sufficient
+..- Cooperation
+..- System Environment
+..- Portability
+..- Code Implementation
+..- Prioritization
+..- UTF8
+..- Standards
+..- Email
+..- Network
+..- Keyboard and Screen
+..- Maintainable
+
+#### Common User Interface
+That means:
+..- common drawing
+..- common bindings
+..- (almost) common logic and expected behavior of different applications
+..- an (almost) replicated established environment
+
+###### Replicated Established environment
+This means one of the three major:
+..- Emacs
+..- Ed
+..- Vi(m)
+
+The implementation should avoid unneeded screen refreshes and generally respect  
+the human vision.  
+
+Ideally, the underline machine should have a way to forcibly destroy any attempt  
+for distracted pop ups.
+
+#### Self Healing
+That means that it should be given the ability to diagnose and repair any kind of  
+error at _runtime_, without to **loose data**, and with the minimum side effects  
+provided by the error.
+
+#### System Administration
+The implementation should offer a way to execute commands using the exec* family of  
+functions.
+ 
+It should be also offer a way to modify files with an editor, that replicates the  
+most basic functionality and the basic expectations of the above mentioned major  
+environments, but at the same time, with a total freedom to experiment beyond 
+those expectations.
+ 
+The set of commands should try religiously to mimic their established counterparts,  
+but if in doubt or a disagreement with the standards, it may as well choose the  
+freedom and do whatever thinks wiser.  
+
+#### Self Sufficient
+The system should have the ability to know about itself, so it can keep track  
+of changes to its codebase and to install or update itself.
+ 
+This also means that it should minimize to the minimum possible, external  
+dependencies and not be obvious lazy.
+ 
+#### Cooperation with the external Environment
+That means using existing project libraries from the pool of the Open Source  
+Ecosystem.
+
+This also means, packing as much possible inner code and contributing back.
+
+#### System Environment
+That simply means that the implementation should be developed in an Open  
+Sourced UNIX like system, which provides freedom, conscience, sensibility and  
+respect to standards.
+ 
+This also means that the system has installed a C library that conforms as  
+much as possibly to POSIX, a POSIX /bin/sh, an established Regexp Machine, 
+a C SSL library that provides the SSL established stack and an established 
+C network library. 
+ 
+It also means basic development tools:
+..- a C compiler that understands at least C99
+..- a linker
+..- a make
+..- a diff
+..- a patch
+..- a groff and a col
+..- a tar and compression format handlers
+
+It can also means a way to execute commands as the superuser.
+
+#### Portability
+That means that the system should work out of the box to the underline system,  
+with as few modifications possibly.
+
+This should be also means that is not obligated to obey the above means to  
+closed source operating systems.
+
+This also means that it can be carried in a usb stick and should work on any  
+such system, which provides easily the chance for an initialization.
+
+#### Code Implementation
+That simply means an implementation that treats the machine's processors  
+with respect.
+ 
+That could be also means respect to the memory reserved space and it does  
+mean it that way, and wishes for an inner realization by the implementors  
+about the importance of the memory, but the application between efficiency  
+and respect, should respect the efficiency and use it generously and pleasantly  
+without penalty.
+ 
+This also means at least two ways to express in code.  
+A dynamical and a static system level one with direct access to the memory.  
+The static is easy, should be C or should be Rust or both.  
+Dynamical means anything else than shell.
+
+But even the static language should provide means to just in time interpreting.
+
+It should also provide a way to declare __Constant Type Variables__.
+
+The code should also try hard not to resort on spawned processes that run on  
+the background, with easy excuses.
+
+And last but not least...
+This also means that whatever the code style is, it should be coded without  
+tabs.
+#### Prioritization
+The system should offer the minimum abstraction by giving priority to the  
+local namespace, then to the standard namespace and last to an external  
+namespace.
+
+#### UTF8
+The system should know how to deal with the sensible UTF8 implementation.
+
+This simply means that the system is not obligated to deal with ... lets say  
+Emojis.
+
+#### Standards
+The implementation should try to respect established gained standards, 
+but is not obligated to follow nonsense like the web madness.
+
+#### Email
+This means one, even the most primitive, way to send, receive and display  
+email messages.
+
+#### Network
+This means the lowest level network stack for wifi management.
+
+And a way to send a http request.
+
+#### Keyboard and Screen
+The application should be totally controlled with the keyboard.
+
+LINES and COLUMNS shouldn't be less than 24 and 78, or unless dictated from the  
+screen, but no less than 14.
+
+... and mouseless! (oh it has been said that already)
+
+#### Maintainable
+Ideally by the user.
+
+####  This
+The following is about _this_ specific implementation.
+
+This prototype was developed under a UNIX like system (Linux with __NO systemd__)  
 Void-Linux at void-linux.eu
 
-It was written in S-Lang, an excellent (with a C like syntax  
-and an unparalleled array implementation) programming language.
- 
-### Install S-Lang
+By using mostly S-Lang, a programming language with a C like syntax and with an  
+unparalleled array implementation.
 
-Note that, because this application follows continuously S-Lang development, some   
-features might be not available in stable versions that are provided by the distributions  
-versions.
+C was also used, mostly as a glue with slang, but with a tendency, as I'm getting  
+more comfortable, to give in C some more duties. 
+
+The Tinycc compiler is being used for just in time compilation.
+
+Libre SSL (that ships with Void), pcre, libcurl and sudo, have been used for the  
+essentials.
+ 
+The system /bin/sh is a symbolic link to dash.
+
+It continuously compile[ds] with gnu-cc, the linker from the gnu-binutils and  
+gnu-make.
+
+This system implements the basic system commands, which mimic their gnu-coreutils  
+counterparts with some extensions, but which are common to all these utils.
+ 
+This system implements a way to execute those commands by using a shell application.
+
+This system implements a Vi(m) like user interface with many influences from  
+the zsh shell and common terminal multiplexers like gnu-screen. 
+
+The drawing interface is common to all the applications and so is the workflow and  
+the logic and the keybindings.
+
+This system implements an X window fullscreen manager with support for floating  
+view mode, but with a total control over the unmanaged windows with the keyboard.
+
+This system offers an application to manage itself.
+ 
+This system also offers an extensible Vi(m) like editor (though with two main weak  
+points, but with some nice features for the author).
+
+This system tracks self development with inner code but also by using git commands  
+(though there is a wish to bind libgit2).
+
+This system tries hard to capture and print with a detailed message, system's  
+weakness, and offers generous ways to heal itself, as it can execute dynamically  
+slang but also C code. 
+ 
+This system implements a primitive high level network management by using common  
+network tools like wpa-supplicant, ip, iw and dhcpcd.
+ 
+It has also a quick way to access the filesystem with an ala file manager way  
+(but with few capabilities, because seldom is being used)
+  
+This system as a bonus offers an interesting way to listen music by using the  
+mplayer application.
+
+### Installation
+
+#### Install S-Lang
+
+Note that, because this application follows continuously S-Lang development, 
+some features might be not available in stable versions that are provided by  
+the distribution versions.
 
 To install S-Lang issue:
 
-```bash
+```sh
 git clone git://git.jedsoft.org/git/slang.git && \
 cd slang                                      && \
 ./configure && make && sudo make install      && \
@@ -66,6 +262,84 @@ This will install S-Lang into /usr/local namespace, so it won't (probably)
 clash with existing installations (if there are problems to load the right
 libraries, try to adjust and point to them by (at least in Linux) using
 LD_LIBRARY_PATH).
+
+#### Install tinycc
+It's stronly recommended - but not required for the moment - to built and  
+install the tinycc compiler.
+
+To install the tinycc compiler issue:
+```sh
+git clone http://repo.or.cz/tinycc.git && \
+cd tinycc                              && \
+./configure --disable-static           && \
+make && sudo make install
+```
+
+#### This installation
+ 
+##### Requirements
+Libraries and headers (usually these are the dev[el] packages):
+ 
+###### Required
+..- pam, pcre, libcurl, openssl or libressl (works on void-linux)
+
+###### Important
+..- hunspell
+
+###### Optional
+..- optional: TagLib
+
+Some common programs (most of them come by default on most distributions)
+
+###### Required
+..- sudo, git
+
+###### Important
+..- diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
+..- umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,  
+..- dhcpcd, ping, xauth, xinit, rxvt-unicode
+
+###### Optional
+..- mplayer, amixer, setxkbmap, xmodmap, mcookie
+
+To install this distribution issue
+(the ROOTDIR variable can be any name): 
+
+```sh
+ROOTDIR=$HOME/.__
+test -d $ROOTDIR || mkdir $ROOTDIR           && \
+cd $ROOTDIR                                  && \
+git clone https://github.com/chantzos/__.git && \
+cd __                                        && \
+slsh ___.sl --verbose
+```
+
+Applications and commands will be installed in $ROOTDIR/bin, all of them prefixed   
+with two underscores.
+Those are actually symbolic links to references, which they load, based also in  
+the name of the link, the necessary code.
+
+## THANKS
+Special thanks to John E. Davis who wrote S-Lang, to Bruce Dubbs and the folks from 
+the LFS* projects who maintain this precious document, to Bram Moolenaar who wrote  
+and still writes vim, but and to all (uncountable) contributors around this enormous
+open source ecosystem (which this model is the reason that produced this tremendous  
+amount of code and this super fast code evolution, unbelievable for that short time  
+that happened).
+
+#### About the author
+He likes to live in the forest, he likes kids (he has four of them), he participated  
+on some strange but (he thinks) interesting relations with various animals, he  
+thinks  that only __this__ present exists, he is uneducated, and ... probably (by 
+probably misinterpretation) he should be regarded as a prominent member of the DaDa.
+
+...
+
+The followings was used as a vehicle to reduce verbosity and impose compactness.
+  
+However it still serves as a reference to some kind of primitive help, untill some  
+basic __doc* functions will be written. It's pretty verbose and written like  
+a late afternoon programming discusion.
 
 ## Introduction
 The two units, human and the computer, share (at least), that both ask and
@@ -121,46 +395,6 @@ from code, like readline, that is good to know quickly, what will do with
 the input. Of course this can be easily get out of control, but as long there  
 is a sync with the outer interface (good named symbols (functions and variables)  
 can help a bit), there is no harm enough to avoid them.
-
-## Installation
-
-### REQUIREMENTS
-Libraries and headers (usually these are the dev[el] packages):
- 
--required: pam, pcre, openssl or libressl (works on void-linux)
-
--important: libcurl, hunspell, tinycc
-
--optional: hunspell, TagLib
-
-Some common programs (most of them come by default on most
-distributions)
-
--required: sudo, git
-
--important: diff, patch, cc, ps, ping, groff, col, file, tar, mount,  
-umount, findmnt, tar, unzip, xz, bzip2, gzip, ip, iw, wpa_supplicant,  
-dhcpcd, ping
-
--optional: mplayer, amixer, xinit, xauth, setxkbmap, xmodmap,
-mcookie, rxvt-unicode
-
-To install this distribution issue
-(the ROOTDIR variable can be any name): 
-
-```bash
-ROOTDIR=$HOME/.__
-test -d $ROOTDIR || mkdir $ROOTDIR           && \
-cd $ROOTDIR                                  && \
-git clone https://github.com/chantzos/__.git && \
-cd __                                        && \
-slsh ___.sl --verbose
-```
-
-Applications and commands will be installed in $ROOTDIR/bin, all of them prefixed   
-with two underscores.
-Those are actually symbolic links to references, which they load, based also in  
-the name of the link, the necessary code.
 
 ## Usage
 
@@ -936,6 +1170,15 @@ No to of: how to write this code, but how to declare and express my logic.
  *      : use the second expression
  *    : otherwise use the first conditional branch
 
+ *  avoid "else if" as it blinds the interpretion, but the best found is:
+ *  if (cond)
+ *    ...
+ *  else
+ *    if (cond)
+ *      ...
+ *    else
+ *      ...
+
  *  same names for common variables; by doing that you can 
  *  copy code blocks and understand the semantics
  *  some of them:
@@ -956,6 +1199,7 @@ No to of: how to write this code, but how to declare and express my logic.
 	* 			return val;
  *  when its the last statement, but simply
  *    val;
+ *  unless val comes as a result from deep function calls
 
  *  idiom to avoid nested conditional blocks
  *  loop (1) {
