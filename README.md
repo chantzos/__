@@ -1,8 +1,29 @@
+##### NOTE 
+This branch of development can be safely considered as unmaintainable.  
+
+The biggest change which will make it incompatible, is the introduction  
+of the tcc compiler as dependency.
+
+The other is that this project will be moved in its permanent place, that is:  
+
+https://github.com/agathoklisx/__
+
+The plan is to continue development from this last commit by preserving also  
+git history.
+
+However untill I can find time and especially will, to write a new README,  
+the following will continue to be relevant.
+
 ### Welcome
 This is an unnamed project - a published personal development environment -  
 produced by an uncontrollable will to control the way a human being interacts  
 with a computer.  
-  
+ 
+(but anyway) If a name should be given, that could reflect the purpose of
+this research (which simply is not possible), it could be something like:
+ 
+"easy to use, easy to do, personalized environments based on conscience"
+
 The primary intention is not ever to be a public project with the common  
 sense; eventually the code will be extracted to outer repositories in an   
 abstracted way that can be used as standalone, as now its closed integrated  
@@ -48,7 +69,7 @@ That means:
 ..- common drawing
 ..- common bindings
 ..- (almost) common logic and expected behavior of different applications
-..- an (almost) replicated established environment
+..- of an (almost) (replicated) established environment
 
 ###### Replicated Established environment
 This means one of the three major:
@@ -99,20 +120,50 @@ Sourced UNIX like system, which provides freedom, conscience, sensibility and
 respect to standards.
  
 This also means that the system has installed a C library that conforms as  
-much as possibly to POSIX, a POSIX /bin/sh, an established Regexp Machine, 
-a C SSL library that provides the SSL established stack and an established 
-C network library. 
+much as possibly to POSIX (imho musl is a winner here, but i use glibc (for now),  
+a POSIX /bin/sh (dash or mksh), an established Perl Compatible Regexp Machine,  
+a C SSL library that provides the SSL established stack (void linux uses libressl)  
+and an established C network library (i guess that is libcurl (though it introduced  
+a lot of dependencies lately))
  
 It also means basic development tools:
-..- a C compiler that understands at least C99
-..- a linker
+..- a C compiler that understands at least C99 (that possibly means gcc)
+..- a linker (that possibly means binutils ld)
+..- an objdump and related (again from binutils)
 ..- a make
-..- a diff
-..- a patch
+..- a diff (from diffutils, though libxdiff from git might be enough))
+..- a patch that provides unified diffs
 ..- a groff and a col
 ..- a tar and compression format handlers
+and ... 
+..- the zsh shell (updated to the latest version) 
+..- and the real editor (an up to date self compiled from the source tree) 
+..- a text browser (elinks looks fine)
+..- a mailer and related software
+..- wpa_supplicant and friends (iw, ip, dhcpcd)
 
 It can also means a way to execute commands as the superuser.
+
+and ...
+It means an expected init system that it provides established and expected  
+environment (void provides runit (it runs just fine, quietly and peacefully  
+doing the job that was designed to be)) ... and which provides mainly freedom.  
+So there are guys that believe that systemd is out (imho, completely out to  
+be precise) of these requirenments. It happens just to be one of them who think  
+that systems with systemd can not be considered UNIX like.
+ 
+It also means a vt100 compatible terminal (i personally use urxvt (this is  
+historical) but of course st, the terminal emulator from the guys from suckless).     
+I suppose xterm is acceptable just because of his author, who everyone appreciates  
+him for his dedication and his huge contributions to the open source ecosystem.
+
+That also means to provide a choise of an X window managment (i believe because  
+there are so cheap and many, nothing prevents from a system to provides as many  
+it can accept), but at least a fullscreen window manager implementation. This  
+system implements its own window manager, but musca is a great choise (in mho)
+(though I do not know if it still compiles). And the most customized of all that  
+can emulate every window manager and do all this crazy stuff, which at the same  
+time are so cheap: fvwm2
 
 #### Portability
 That means that the system should work out of the box to the underline system,  
@@ -149,6 +200,7 @@ the background, with easy excuses.
 And last but not least...
 This also means that whatever the code style is, it should be coded without  
 tabs.
+
 #### Prioritization
 The system should offer the minimum abstraction by giving priority to the  
 local namespace, then to the standard namespace and last to an external  

@@ -403,7 +403,11 @@ static void realpath_intrin (char *path)
 #endif
 
   if (NULL == (p = (char *)SLmalloc (path_max+1)))
+    {
+    SLerrno_set_errno (SL_Malloc_Error);
+    (void) SLang_push_null ();
     return;
+    }
 
   if (NULL != realpath (path, p))
     {
@@ -411,9 +415,9 @@ static void realpath_intrin (char *path)
     return;
     }
 
-   SLerrno_set_errno (errno);
-   SLfree (p);
-   (void) SLang_push_null ();
+  SLerrno_set_errno (errno);
+  SLfree (p);
+  (void) SLang_push_null ();
 }
 
 static int Lines;

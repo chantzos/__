@@ -117,7 +117,7 @@ class Os
     variable passwd = NULL;
     while (tries < max_tries)
      {
-     passwd = __getpasswd__ (self);
+     passwd = __getpasswd__ (self;;__qualifiers);
      ifnot (NULL == passwd)
        if (strlen (passwd))
          break;
